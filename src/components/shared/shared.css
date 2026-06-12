@@ -1,0 +1,2414 @@
+/* ── 1. LAYOUT ──────────────────────────────────────────────────────────────── */
+
+/*
+ * Two-column main grid — config panel left, preview/detail right.
+ * Replaces: emitter-content-grid, props-content-grid, wreckage-content-grid,
+ *           cpt-content-grid, rockerosion-content-grid, sgst-content-grid,
+ *           st-content-grid, pi-content-grid, scmap-content-grid
+ */
+.tab-grid {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   30px;
+  max-width:             1800px;
+  margin:                0 auto;
+}
+
+/* Help modal replica — preview column wider than config */
+.tab-grid--help { grid-template-columns: 1fr 1.5fr; }
+
+/*
+ * Left (config) column — flex stack of section cards.
+ * Replaces: emitter-config-column, props-config-column, wreckage-config-column,
+ *           cpt-config-column, rockerosion-left, sgst-config-column,
+ *           st-config-column, pi-config-column
+ */
+.tab-col-config,
+.tab-col-detail {
+  display:        flex;
+  flex-direction: column;
+  gap:            0;
+}
+
+
+/* ── 2. SECTION CARD ────────────────────────────────────────────────────────── */
+
+/*
+ * The standard content panel.
+ * Replaces: emitter-section-card, props-section-card, wreckage-section-card,
+ *           cpt-section-card, rockerosion-section-card, treemap-section-card,
+ *           skybox-section-card, st-section-card, pi-section-card, scmap-section-card
+ */
+.section-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(0,   0,   0,   0.20) 100%
+  );
+  border:          1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border-radius:   0;
+  padding:         40px 35px;
+  margin-bottom:   30px;
+  position:        relative;
+  z-index:         0;
+  overflow:        visible;
+  transition:      all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Top accent line — colour driven by --tab-color */
+.section-card::before {
+  content:    '';
+  position:   absolute;
+  top: 0; left: 0; right: 0;
+  height:     3px;
+  background: linear-gradient(
+    90deg,
+    transparent       0%,
+    var(--tab-color)  30%,
+    var(--tab-color)  70%,
+    transparent       100%
+  );
+  opacity:    0;
+  transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index:    10;
+}
+
+.section-card:hover::before {
+  opacity:    1;
+  box-shadow: 0 0 25px var(--tab-glow-strong);
+}
+
+.section-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform:    translateY(-3px) scale(1.005);
+  z-index:      1;
+  background:   linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(0,   0,   0,   0.25) 100%
+  );
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 50px var(--tab-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/*
+ * Section title inside a card.
+ * Replaces: emitter-section-title, props-section-title, wreckage-section-title,
+ *           cpt-section-title, treemap-section-title, st-section-title, etc.
+ */
+.section-title {
+  font-family:    'Space Grotesk', sans-serif;
+  font-size:      1.5rem;
+  font-weight:    600;
+  margin-bottom:  14px;
+  display:        flex;
+  align-items:    center;
+  gap:            14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+  position:       relative;
+}
+
+/*
+ * Icon inside a section title.
+ * Replaces: emitter-section-icon, props-section-icon, cpt-section-icon, etc.
+ */
+.section-icon {
+  font-size:  1.6rem;
+  color:      var(--tab-color);
+  filter:     drop-shadow(0 0 12px var(--tab-glow))
+              drop-shadow(0 0 25px var(--tab-glow));
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.section-card:hover .section-icon {
+  filter:    drop-shadow(0 0 18px var(--tab-glow-strong))
+             drop-shadow(0 0 35px var(--tab-glow-strong));
+  transform: scale(1.08);
+}
+
+/*
+ * Sub-section title with trailing rule line.
+ * Replaces: emitter-config-section-title, rockerosion-subsection-title, etc.
+ */
+.subsection-title {
+  font-size:      1rem;
+  font-weight:    700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--tab-color);
+  margin-top:     32px;
+  margin-bottom:  18px;
+  display:        flex;
+  align-items:    center;
+  gap:            14px;
+}
+
+.subsection-title::after {
+  content:    '';
+  flex:       1;
+  height:     1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--tab-color) 45%, transparent) 0%,
+    transparent 100%
+  );
+}
+
+
+
+
+/* ── 3. FORM ELEMENTS ───────────────────────────────────────────────────────── */
+
+/*
+ * Replaces: emitter-form-group, props-form-group, wreckage-form-group,
+ *           cpt-form-group, rockerosion-form-group, treemap-form-group,
+ *           sgst-form-group, st-form-group, pi-form-group, hist-form-group
+ */
+.form-group {
+  margin-bottom: 28px;
+}
+
+/* Last child inside a card details area needs no extra bottom margin */
+.item-card-details .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* btn-secondary that closes a form-group (e.g. "+ Add Category") gets
+   consistent spacing above it, and the form-group itself carries the gap below */
+.form-group > .btn-secondary:last-child,
+.form-group > .btn-library:last-child {
+  display:    block;
+  margin-top: 10px;
+  width:      100%;
+}
+
+/*
+ * Replaces: emitter-form-label (and all equivalents), props-form-label,
+ *           cpt-form-label, pi-form-label, hist-form-label, scmap-form-label
+ */
+.form-group label,
+.form-label {
+  display:        block;
+  margin-bottom:  10px;
+  font-size:      0.82rem;
+  font-weight:    500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:          var(--text-secondary);
+  transition:     color 0.3s ease;
+}
+
+/*
+ * Replaces: emitter-form-input, props-form-input, wreckage-form-input,
+ *           treemap-form-input, rockerosion-form-input, sgst-form-input,
+ *           st-form-input, pi-form-input (and all -small/-sm variants)
+ */
+.form-input,
+.form-input-sm {
+  width:         100%;
+  padding:       16px 20px;
+  background:    rgba(255, 255, 255, 0.04);
+  border:        1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  color:         var(--text-primary);
+  font-size:     0.95rem;
+  font-family:   'Poppins', sans-serif;
+  transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  box-sizing:    border-box;
+}
+
+.form-input-sm {
+  padding:   10px 14px;
+  font-size: 0.85rem;
+}
+
+.form-input:focus,
+.form-input-sm:focus {
+  outline:      none;
+  border-color: var(--tab-color);
+  background:   rgba(255, 255, 255, 0.06);
+  box-shadow:   0 0 0 1px var(--tab-color),
+                0 0 25px var(--tab-glow);
+  transform:    translateY(-1px);
+}
+
+.form-input:disabled,
+.form-input-sm:disabled {
+  opacity: 0.4;
+  cursor:  not-allowed;
+}
+
+/*
+ * Hint/help text beneath an input.
+ * Replaces: emitter-form-help and equivalents.
+ */
+.form-help {
+  font-size:   0.78rem;
+  color:       var(--text-muted);
+  margin-top:  10px;
+  font-style:  italic;
+  line-height: 1.5;
+}
+
+/*
+ * Input field + action button in one row (path inputs, blueprint rows).
+ * Replaces: emitter-input-with-button, treemap-input-with-button, etc.
+ */
+.input-row {
+  display:       flex;
+  align-items:   center;
+  gap:           10px;
+  margin-bottom: 12px;
+}
+
+.input-row .form-input,
+.input-row .form-input-sm {
+  flex:          1;
+  margin-bottom: 0;
+}
+
+/* Delete buttons inside any row are always fixed-size and vertically centred */
+.input-row .btn-delete,
+.input-row .btn-delete-sm,
+.input-row .btn-delete-sm-alt,
+.input-row .btn-delete-xs,
+.item-card-header .btn-delete,
+.item-card-header .btn-delete-sm,
+.item-card-header .btn-delete-sm-alt,
+.item-card-header .btn-delete-xs {
+  flex-shrink: 0;
+  width:       40px;
+  height:      40px;
+}
+
+
+/* ── 4. BUTTONS ─────────────────────────────────────────────────────────────── */
+
+/* ── 4a. Primary / Generate ─────────────────────────────────────────────────── */
+/*
+ * Replaces: emitter-btn-generate, props-btn-primary, wreckage-btn-primary,
+ *           treemap-btn-primary, cpt-btn-primary, rockerosion-btn-generate,
+ *           skybox-btn, st-btn-primary, pi-btn-primary, scmap-btn-primary
+ */
+.btn-primary {
+  background:     var(--tab-color);
+  color:          #000000;
+  border:         none;
+  padding:        18px 40px;
+  border-radius:  0;
+  font-weight:    600;
+  cursor:         pointer;
+  font-size:      0.92rem;
+  font-family:    'Poppins', sans-serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition:     all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  position:       relative;
+  overflow:       hidden;
+  box-shadow:     0 0 40px var(--tab-glow);
+}
+
+.btn-primary::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
+  transform:  translateX(-100%);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-primary:hover {
+  transform:  translateY(-4px);
+  box-shadow: 0 8px 30px var(--tab-glow-strong),
+              0 0 60px var(--tab-glow);
+}
+
+.btn-primary:hover::before { transform: translateX(100%); }
+.btn-primary:active         { transform: translateY(-2px); }
+
+.btn-primary:disabled {
+  opacity:    0.3;
+  cursor:     not-allowed;
+  transform:  none;
+  box-shadow: none;
+}
+
+/*
+ * Large full-width variant (bottom of config column).
+ * Replaces: .btn-large, *-btn-large modifiers
+ */
+.btn-primary.btn-lg {
+  width:     100%;
+  padding:   22px 50px;
+  font-size: 1.05rem;
+}
+
+/* ── 4b. Secondary ──────────────────────────────────────────────────────────── */
+/*
+ * Replaces: emitter-btn-secondary, props-btn-secondary, wreckage-btn-secondary,
+ *           treemap-btn-secondary, rockerosion-btn-secondary, skybox-btn-secondary, etc.
+ */
+.btn-secondary {
+  background:      transparent;
+  color:           var(--text-primary);
+  border:          1px solid rgba(255, 255, 255, 0.18);
+  padding:         14px 30px;
+  border-radius:   0;
+  cursor:          pointer;
+  font-size:       0.88rem;
+  font-family:     'Poppins', sans-serif;
+  font-weight:     500;
+  letter-spacing:  0.12em;
+  text-transform:  uppercase;
+  transition:      all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  position:        relative;
+  overflow:        hidden;
+  backdrop-filter: blur(8px);
+}
+
+.btn-secondary::before {
+  content:    '';
+  position:   absolute;
+  top: 0; left: 0;
+  width:      0%;
+  height:     100%;
+  background: linear-gradient(135deg, var(--tab-color), rgba(255, 255, 255, 0.8));
+  transition: width 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index:    -1;
+}
+
+.btn-secondary:hover {
+  border-color: var(--tab-color);
+  color:        var(--bg-primary);
+  box-shadow:   0 0 30px var(--tab-glow),
+                0 5px 20px rgba(0, 0, 0, 0.4);
+  transform:    translateY(-2px);
+}
+
+.btn-secondary:hover::before { width: 100%; }
+
+.btn-secondary:disabled {
+  opacity:    0.35;
+  cursor:     not-allowed;
+  transform:  none;
+  box-shadow: none;
+}
+
+/* ── 4c. Library (accent-coloured outline) ──────────────────────────────────── */
+/*
+ * Replaces: emitter-btn-library, props-btn-library, wreckage-btn-library,
+ *           treemap-btn-library
+ */
+.btn-library {
+  background:      transparent;
+  color:           var(--tab-color);
+  border:          1px solid var(--tab-color);
+  padding:         14px 30px;
+  border-radius:   0;
+  cursor:          pointer;
+  font-size:       0.88rem;
+  font-family:     'Poppins', sans-serif;
+  font-weight:     600;
+  letter-spacing:  0.12em;
+  text-transform:  uppercase;
+  transition:      all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  position:        relative;
+  overflow:        hidden;
+  backdrop-filter: blur(8px);
+  box-shadow:      0 0 15px var(--tab-glow);
+}
+
+.btn-library:hover {
+  background:  var(--tab-color);
+  color:       #000000;
+  box-shadow:  0 0 30px var(--tab-glow-strong),
+               0 5px 20px rgba(0, 0, 0, 0.4);
+  transform:   translateY(-2px);
+}
+
+/* ── 4d. Ghost (subtle tertiary) ────────────────────────────────────────────── */
+/*
+ * Replaces: st-btn-ghost, sgst-btn-ghost and similar small utility buttons.
+ */
+.btn-ghost {
+  background:     rgba(255, 255, 255, 0.04);
+  color:          var(--text-muted);
+  border:         1px solid rgba(255, 255, 255, 0.08);
+  padding:        9px 18px;
+  border-radius:  0;
+  cursor:         pointer;
+  font-family:    'Poppins', sans-serif;
+  font-size:      0.74rem;
+  font-weight:    500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:     all 0.3s ease;
+  white-space:    nowrap;
+}
+
+.btn-ghost:hover {
+  background:   rgba(255, 255, 255, 0.08);
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  box-shadow:   0 0 12px var(--tab-glow);
+  transform:    translateY(-1px);
+}
+
+.btn-ghost.active {
+  background:   color-mix(in srgb, var(--tab-color) 15%, transparent);
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  box-shadow:   0 0 16px var(--tab-glow);
+  font-weight:  700;
+}
+
+/* ── 4e. Delete buttons ─────────────────────────────────────────────────────── */
+
+/*
+ * Unified close/delete button — all sizes share the same base style.
+ * Replaces: .btn-delete, .btn-delete-sm, .btn-delete-sm.sm,
+ *           .btn-delete-sm-alt, .btn-delete-xs
+ * Symbol: × (U+00D7) — always, no exceptions.
+ */
+.btn-delete,
+.btn-delete-sm,
+.btn-delete-sm-alt,
+.btn-delete-xs {
+  background:      none;
+  border:          1px solid rgba(255, 255, 255, 0.1);
+  color:           rgba(255, 255, 255, 0.35);
+  width:           40px;
+  height:          40px;
+  font-size:       1.4rem;
+  cursor:          pointer;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  transition:      all 0.2s;
+  font-family:     'Poppins', sans-serif;
+  padding:         0;
+  border-radius:   0;
+}
+
+.btn-delete:hover,
+.btn-delete-sm:hover,
+.btn-delete-sm-alt:hover,
+.btn-delete-xs:hover {
+  border-color: rgba(255, 80, 80, 0.5);
+  color:        rgba(255, 80, 80, 0.8);
+  background:   rgba(255, 80, 80, 0.06);
+}
+
+.btn-delete:disabled,
+.btn-delete-sm:disabled,
+.btn-delete-xs:disabled {
+  opacity:    0.3;
+  cursor:     not-allowed;
+}
+
+/* Small variant — slightly reduced size */
+.btn-delete-sm.sm {
+  width:     34px;
+  height:    34px;
+  font-size: 1.2rem;
+}
+
+/*
+ * Text delete button — for labelled actions like "Delete Preview".
+ * Same visual style as btn-delete-* but auto-width with padding instead of fixed box.
+ */
+.btn-delete-text {
+  background:      none;
+  border:          1px solid rgba(255, 255, 255, 0.1);
+  color:           rgba(255, 255, 255, 0.35);
+  width:           auto;
+  height:          45px;
+  padding:         0 18px;
+  font-size:       0.82rem;
+  font-family:     'Poppins', sans-serif;
+  font-weight:     500;
+  letter-spacing:  0.1em;
+  text-transform:  uppercase;
+  cursor:          pointer;
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  white-space:     nowrap;
+  transition:      all 0.2s;
+  flex-shrink:     0;
+}
+
+.btn-delete-text:hover {
+  border-color: rgba(255, 80, 80, 0.5);
+  color:        rgba(255, 80, 80, 0.8);
+  background:   rgba(255, 80, 80, 0.06);
+}
+
+/* ── 4e. ITEM CARD (prop-card / unit-card / emitter-unit-card) ──────────────── */
+/*
+ * Unified card used inside the props/emitter/wreckage list panels.
+ * Replaces: .props-prop-card, .wreckage-unit-card, .emitter-unit-card
+ *
+ * Usage in JSX:
+ *   <div className={`item-card ${selected ? 'selected' : ''}`}>
+ *     <div className="item-card-header"> … </div>
+ *     <div className="item-card-content"> … </div>
+ *   </div>
+ */
+.item-card {
+  background:  rgba(255, 255, 255, 0.03);
+  border:      2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  padding:     20px;
+  transition:  all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor:      pointer;
+  position:    relative;
+  overflow:    hidden;
+}
+
+/* Left accent bar */
+.item-card::before {
+  content:    '';
+  position:   absolute;
+  left: 0; top: 0; bottom: 0;
+  width:      4px;
+  background: var(--tab-color);
+  opacity:    0;
+  transition: opacity 0.4s ease;
+}
+
+.item-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background:   rgba(255, 255, 255, 0.05);
+  transform:    translateX(3px);
+}
+
+.item-card.selected {
+  border-color: var(--tab-color);
+  background:   rgba(255, 255, 255, 0.05);
+  box-shadow:   0 0 30px var(--tab-glow);
+}
+
+.item-card.selected::before {
+  opacity: 1;
+}
+
+/* Header row: color dot + title + delete button */
+.item-card-header {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  margin-bottom:   15px;
+}
+
+.item-card-title {
+  font-size:      1rem;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+}
+
+/* Expanded details area below the header */
+.item-card-content {
+  margin-top: 15px;
+}
+
+.item-card-details {
+  margin-top:  20px;
+  padding-top: 20px;
+  border-top:  1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Color dot */
+.item-card-color-indicator {
+  width:         24px;
+  height:        24px;
+  border-radius: 50%;
+  border:        2px solid rgba(255, 255, 255, 0.3);
+  cursor:        pointer;
+  transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  flex-shrink:   0;
+}
+
+.item-card-color-indicator:hover {
+  transform:    scale(1.2);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow:   0 0 15px currentColor;
+}
+
+/* Color picker dropdown */
+.item-card-color-picker {
+  margin-top:      15px;
+  padding:         15px;
+  background:      rgba(0, 0, 0, 0.4);
+  border:          1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.item-card-color-grid {
+  display:               grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap:                   10px;
+}
+
+.item-card-color-option {
+  width:         35px;
+  height:        35px;
+  border-radius: 50%;
+  border:        2px solid rgba(255, 255, 255, 0.2);
+  cursor:        pointer;
+  transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.item-card-color-option:hover {
+  transform:    scale(1.15);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow:   0 0 20px currentColor;
+}
+
+/* "Add …" placeholder card */
+.item-card-add {
+  background:      transparent;
+  border:          3px dashed rgba(255, 255, 255, 0.15);
+  border-radius:   0;
+  padding:         40px 20px;
+  cursor:          pointer;
+  transition:      all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             15px;
+  min-height:      200px;
+  position:        relative;
+  overflow:        hidden;
+}
+
+.item-card-add::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: radial-gradient(circle at center, var(--tab-glow) 0%, transparent 70%);
+  opacity:    0;
+  transition: opacity 0.4s ease;
+}
+
+.item-card-add:hover {
+  border-color: var(--tab-color);
+  background:   color-mix(in srgb, var(--tab-color) 3%, transparent);
+  transform:    scale(1.02);
+}
+
+.item-card-add:hover::before { opacity: 0.3; }
+
+.item-card-add-icon {
+  color:      var(--text-muted);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.item-card-add:hover .item-card-add-icon {
+  color:      var(--tab-color);
+  transform:  scale(1.15);
+  filter:     drop-shadow(0 0 20px var(--tab-glow));
+}
+
+.item-card-add-text {
+  font-size:      0.9rem;
+  font-weight:    600;
+  letter-spacing: 0.1em;
+  color:          var(--text-secondary);
+  transition:     color 0.3s ease;
+}
+
+.item-card-add:hover .item-card-add-text {
+  color: var(--tab-color);
+}
+
+
+/* ── 4f. Toggle (category on/off pill) ──────────────────────────────────────── */
+/*
+ * Replaces: emitter-btn-toggle, wreckage-btn-toggle, treemap-btn-toggle
+ * Active state = tab color. Inactive = dimmed.
+ */
+.btn-toggle {
+  background:     var(--tab-color);
+  color:          #000000;
+  border:         none;
+  padding:        12px 20px;
+  border-radius:  0;
+  cursor:         pointer;
+  font-family:    'Poppins', sans-serif;
+  font-size:      0.85rem;
+  font-weight:    600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:     all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow:     0 0 20px var(--tab-glow);
+}
+
+.btn-toggle:hover {
+  box-shadow: 0 0 30px var(--tab-glow-strong);
+  transform:  translateY(-1px);
+}
+
+.btn-toggle.off {
+  background:  rgba(255, 255, 255, 0.07);
+  color:       var(--text-muted);
+  box-shadow:  none;
+  border:      1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-toggle.off:hover {
+  background:  rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform:   translateY(-1px);
+}
+
+
+/* ── 5. HELP BUTTON ─────────────────────────────────────────────────────────── */
+/*
+ * Fixed floating ? button, bottom-right.
+ * Replaces: emitter-help-button, props-help-btn, wreckage-help-button,
+ *           treemap-help-button, cpt-help-button, hist-help-btn
+ */
+.help-btn {
+  position:      fixed;
+  bottom:        30px;
+  right:         30px;
+  width:         60px;
+  height:        60px;
+  border-radius: 50%;
+  background:    linear-gradient(135deg, var(--tab-color) 0%, color-mix(in srgb, var(--tab-color) 85%, transparent) 100%);
+  border:        3px solid color-mix(in srgb, var(--tab-color) 40%, transparent);
+  color:         #000000;
+  font-size:     2rem;
+  font-weight:   700;
+  cursor:        pointer;
+  z-index:       10000;
+  box-shadow:    0 8px 30px color-mix(in srgb, var(--tab-color) 45%, transparent),
+                 0 0 60px   color-mix(in srgb, var(--tab-color) 25%, transparent);
+  transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  font-family:   'Space Grotesk', sans-serif;
+  user-select:   none;
+}
+
+.help-btn:hover {
+  transform:  scale(1.15) rotate(15deg);
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--tab-color) 65%, transparent),
+              0 0 80px    color-mix(in srgb, var(--tab-color) 45%, transparent);
+}
+
+@media (max-width: 900px) {
+  .help-btn { width: 50px; height: 50px; bottom: 20px; right: 20px; }
+}
+
+
+/* ── 6. LIBRARY OVERLAY SHELL ───────────────────────────────────────────────── */
+/*
+ * Shared chrome for all four library overlays (Emitter, Props, Skybox, Unit).
+ * Tab-specific sidebar categories, grid layouts etc. keep their own classes.
+ *
+ * Replaces:
+ *   el-backdrop/window/close-btn/reload-btn/footer/footer-btn
+ *   pl-backdrop/window/close-btn/reload-btn/footer/footer-btn
+ *   sl-backdrop/window/close-btn/reload-btn
+ *   ul-backdrop/window/close-btn/reload-btn
+ */
+.lib-backdrop {
+  position:   fixed;
+  inset:      0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index:    2000;
+  display:    flex;
+  align-items:     center;
+  justify-content: center;
+}
+
+.lib-window {
+  position:   relative;
+  background: #111111;
+  border:     1px solid rgba(255, 255, 255, 0.1);
+  display:    flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow:   hidden;
+}
+
+.lib-close-btn {
+  background:    transparent;
+  border:        1px solid rgba(255, 255, 255, 0.12);
+  color:         rgba(255, 255, 255, 0.5);
+  width:         30px;
+  height:        30px;
+  font-size:     1.1rem;
+  line-height:   1;
+  cursor:        pointer;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  flex-shrink:   0;
+  transition:    all 0.2s ease;
+  border-radius: 0;
+}
+
+.lib-close-btn:hover {
+  border-color: #FE1818;
+  color:        #FE1818;
+  background:   rgba(254, 24, 24, 0.08);
+}
+
+.lib-reload-btn {
+  background:    transparent;
+  border:        1px solid rgba(255, 255, 255, 0.1);
+  color:         rgba(255, 255, 255, 0.4);
+  padding:       6px 10px;
+  font-size:     0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor:        pointer;
+  transition:    all 0.2s ease;
+  font-family:   'Poppins', sans-serif;
+  border-radius: 0;
+}
+
+.lib-reload-btn:hover {
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  box-shadow:   0 0 10px var(--tab-glow);
+}
+
+.lib-footer {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  padding:         14px 20px;
+  border-top:      1px solid rgba(255, 255, 255, 0.07);
+  background:      rgba(0, 0, 0, 0.3);
+  flex-shrink:     0;
+  gap:             12px;
+}
+
+.lib-apply-btn {
+  background:     var(--tab-color);
+  color:          #000000;
+  border:         none;
+  padding:        11px 28px;
+  font-family:    'Poppins', sans-serif;
+  font-size:      0.82rem;
+  font-weight:    700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor:         pointer;
+  transition:     all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  border-radius:  0;
+  box-shadow:     0 0 20px var(--tab-glow);
+}
+
+.lib-apply-btn:hover {
+  transform:  translateY(-2px);
+  box-shadow: 0 6px 24px var(--tab-glow-strong),
+              0 0 40px var(--tab-glow);
+}
+
+.lib-apply-btn:disabled {
+  opacity:    0.3;
+  cursor:     not-allowed;
+  transform:  none;
+  box-shadow: none;
+}
+/* ── Checkbox — custom styled, uses --tab-color accent ───────────────────── */
+/*
+   Usage:
+     <label className="checkbox-label" onClick={() => setValue(!value)}>
+       <div className={`checkbox${value ? ' checked' : ''}`}>
+         {value && <span className="checkbox-check" />}
+       </div>
+       <span className="checkbox-text">Label text</span>
+     </label>
+*/
+.checkbox-label {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  cursor:      pointer;
+  user-select: none;
+}
+
+.checkbox {
+  width:        20px;
+  height:       20px;
+  flex-shrink:  0;
+  border:       2px solid rgba(255, 255, 255, 0.25);
+  background:   transparent;
+  position:     relative;
+  transition:   border-color 0.2s ease, background 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.checkbox.checked {
+  border-color: var(--tab-color);
+  background:   transparent;
+  box-shadow:   0 0 10px var(--tab-glow);
+}
+
+/* SVG checkmark drawn with CSS borders */
+.checkbox-check {
+  position:  absolute;
+  inset:     0;
+  display:   block;
+}
+
+.checkbox-check::before {
+  content:      '';
+  position:     absolute;
+  left:         3px;
+  top:          8px;
+  width:        5px;
+  height:       2px;
+  background:   var(--tab-color);
+  transform:    rotate(45deg);
+  transform-origin: right center;
+  box-shadow:   0 0 4px var(--tab-glow);
+}
+
+.checkbox-check::after {
+  content:      '';
+  position:     absolute;
+  left:         6px;
+  top:          4px;
+  width:        9px;
+  height:       2px;
+  background:   var(--tab-color);
+  transform:    rotate(-55deg);
+  transform-origin: left center;
+  box-shadow:   0 0 4px var(--tab-glow);
+}
+
+.checkbox-text {
+  font-size:   0.85rem;
+  font-weight: 500;
+  color:       rgba(255, 255, 255, 0.4);
+  transition:  color 0.2s ease;
+}
+
+.checkbox-label:has(.checkbox.checked) .checkbox-text {
+  color: var(--tab-color);
+}
+
+
+/* ── PREVIEW LEGEND ─────────────────────────────────────────────────────────── */
+/*
+ * Shared legend below the preview canvas.
+ * Replaces: treemap-legend*, re-legend*, and any future tab-specific legend classes.
+ *
+ * Usage:
+ *   <div className="preview-legend">
+ *     <div className="preview-legend-title">PROP LEGEND</div>
+ *     <div className="preview-legend-items">
+ *       <div className="preview-legend-item">
+ *         <div className="preview-legend-color" style={{ backgroundColor: item.color }} />
+ *         <span>Name</span>
+ *         <span className="preview-coord-count">42 pts</span>
+ *         // optional extra content (economy row etc.) goes here
+ *       </div>
+ *     </div>
+ *   </div>
+ */
+
+.preview-legend {
+  margin-top:      0;
+  padding:         25px;
+  background:      rgba(0, 0, 0, 0.4);
+  border:          1px solid color-mix(in srgb, var(--tab-color) 8%, transparent);
+  border-top:      none;
+  backdrop-filter: blur(12px);
+}
+
+.preview-legend-title {
+  font-size:      0.95rem;
+  font-weight:    600;
+  margin-bottom:  18px;
+  color:          var(--text-primary);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family:    'Space Grotesk', sans-serif;
+}
+
+.preview-legend-items {
+  display:        flex;
+  flex-direction: column;
+  gap:            12px;
+}
+
+.preview-legend-item {
+  display:     flex;
+  align-items: center;
+  gap:         14px;
+  font-size:   0.88rem;
+  cursor:      pointer;
+  padding:     10px 12px;
+  transition:  all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  background:  rgba(255, 255, 255, 0.03);
+  border:      1px solid transparent;
+}
+
+.preview-legend-item:hover {
+  background:   rgba(255, 255, 255, 0.08);
+  border-color: color-mix(in srgb, var(--tab-color) 15%, transparent);
+  transform:    translateX(5px);
+}
+
+.preview-legend-color {
+  width:       26px;
+  height:      26px;
+  border-radius: 50%;
+  border:      2px solid rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+  transition:  all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.preview-legend-item:hover .preview-legend-color {
+  transform:   scale(1.15);
+  box-shadow:  0 0 20px currentColor;
+  border-width: 3px;
+}
+
+.preview-legend-item > span {
+  color:       var(--text-secondary);
+  flex-grow:   1;
+  font-weight: 400;
+}
+
+.preview-coord-count {
+  color:       var(--text-muted);
+  font-size:   0.8rem;
+  font-family: monospace;
+  background:  rgba(255, 255, 255, 0.05);
+  padding:     4px 10px;
+}
+
+/* Total row (used by tabs with economy data, e.g. RockErosion) */
+.preview-legend-total {
+  margin-top:  10px;
+  padding-top: 10px;
+  border-top:  1px solid color-mix(in srgb, var(--tab-color) 20%, transparent);
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  font-size:   0.8rem;
+  color:       #d0d0d0;
+}
+
+/* Economy stat pill (icon + number) — used by RockErosion */
+.preview-economy-row {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  margin-left: auto;
+}
+
+.preview-economy-stat {
+  display:     flex;
+  align-items: center;
+  gap:         4px;
+  font-size:   0.78rem;
+  color:       #b0b0b0;
+}
+
+.preview-economy-stat img {
+  width:  12px;
+  height: 12px;
+}
+
+/* Hint box below the legend */
+.preview-hint-box {
+  background:  color-mix(in srgb, var(--tab-color) 6%, transparent);
+  border:      1px solid color-mix(in srgb, var(--tab-color) 20%, transparent);
+  padding:     16px 22px;
+  color:       var(--tab-color);
+  font-size:   0.88rem;
+  line-height: 1.7;
+  margin-top:  16px;
+  position:    relative;
+  overflow:    hidden;
+}
+
+.preview-hint-box::before {
+  content:    '';
+  position:   absolute;
+  top: 0; left: 0; right: 0;
+  height:     1px;
+  background: linear-gradient(90deg, transparent, var(--tab-color), transparent);
+  opacity:    0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   SHARED HELP MODAL — tab-agnostic, theme via --tab-color / --tab-glow
+   Usage: wrap entire tab in a div that sets --tab-color, --tab-glow,
+          --tab-glow-strong. All .help-modal-* classes adapt automatically.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.help-modal-overlay {
+  position:        fixed;
+  top: 0; left: 0;
+  width:           100vw;
+  height:          100vh;
+  background:      rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index:         9998;
+  animation:       helpModalOverlayFadeIn 0.3s ease;
+}
+
+@keyframes helpModalOverlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Modal frame ── */
+.help-modal {
+  position:       fixed;
+  top:            50%;
+  left:           50%;
+  transform:      translate(-50%, -50%);
+  width:          97%;
+  max-width:      2500px;
+  height:         90vh;
+  min-height:     0;
+  background:     linear-gradient(
+    135deg,
+    rgba(15, 15, 15, 0.98) 0%,
+    rgba(8,  8,  8,  0.98) 100%
+  );
+  border:         2px solid color-mix(in srgb, var(--tab-color) 25%, transparent);
+  border-radius:  0;
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.95),
+    0 0 100px var(--tab-glow),
+    inset 0 1px 0 color-mix(in srgb, var(--tab-color) 15%, transparent);
+  z-index:        9999;
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden;
+  animation:      helpModalSlideIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes helpModalSlideIn {
+  from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1);    }
+}
+
+/* Top accent bar */
+.help-modal::before {
+  content:  '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height:   4px;
+  background: linear-gradient(
+    90deg,
+    transparent       0%,
+    var(--tab-color)  30%,
+    var(--tab-color)  70%,
+    transparent       100%
+  );
+  box-shadow: 0 0 30px var(--tab-glow-strong);
+  z-index:    1;
+}
+
+/* ── Header ── */
+.help-modal-header {
+  padding:         30px 40px 20px;
+  border-bottom:   1px solid rgba(255, 255, 255, 0.07);
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  background:      color-mix(in srgb, var(--tab-color) 2%, transparent);
+  flex-shrink:     0;
+}
+
+.help-modal-title {
+  font-family:    'Space Grotesk', 'Poppins', sans-serif;
+  font-size:      1.8rem;
+  font-weight:    700;
+  letter-spacing: 0.12em;
+  color:          #ffffff;
+  text-transform: uppercase;
+  text-shadow:    0 0 20px var(--tab-glow);
+  margin:         0;
+}
+
+/* ── Close button ── */
+.help-modal-close {
+  background:    rgba(255, 255, 255, 0.05);
+  border:        1px solid rgba(255, 255, 255, 0.2);
+  color:         rgba(255, 255, 255, 0.7);
+  padding:       8px 16px;
+  cursor:        pointer;
+  font-size:     0.9rem;
+  font-weight:   500;
+  font-family:   'Poppins', sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition:    all 0.2s ease;
+  border-radius: 0;
+}
+
+.help-modal-close:hover {
+  background:  rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  color:       #fff;
+  box-shadow:  inset 0 0 50px color-mix(in srgb, var(--tab-color) 40%, transparent);
+}
+
+/* ── Tab bar ── */
+.help-modal-tabs {
+  display:      flex;
+  padding:      0 40px;
+  background:   rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  gap:          4px;
+  flex-shrink:  0;
+}
+
+.help-modal-tab {
+  padding:        16px 24px;
+  background:     transparent;
+  border:         none;
+  color:          rgba(255, 255, 255, 0.5);
+  font-family:    'Poppins', sans-serif;
+  font-size:      0.85rem;
+  font-weight:    600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor:         pointer;
+  transition:     all 0.3s ease;
+  border-bottom:  3px solid transparent;
+  white-space:    nowrap;
+}
+
+.help-modal-tab:hover {
+  color:      rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.help-modal-tab.active {
+  color:               var(--tab-color);
+  border-bottom-color: var(--tab-color);
+  background:          color-mix(in srgb, var(--tab-color) 5%, transparent);
+  text-shadow:         0 0 15px var(--tab-glow);
+}
+
+/* ── Scrollable content area ── */
+.help-modal-content {
+  flex:       1;
+  overflow-y: auto;
+  padding:    40px;
+}
+
+.help-modal-content::-webkit-scrollbar { width: 6px; }
+.help-modal-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); }
+.help-modal-content::-webkit-scrollbar-thumb {
+  background:    linear-gradient(180deg, var(--tab-color), color-mix(in srgb, var(--tab-color) 40%, transparent));
+  border-radius: 3px;
+}
+.help-modal-content::-webkit-scrollbar-thumb:hover { background: var(--tab-color); }
+
+/* ── Shared advanced guide layout ── */
+.help-adv-layout {
+  max-width:      1600px;
+  margin:         0 auto;
+  display:        flex;
+  flex-direction: column;
+  gap:            60px;
+}
+
+/* Reset bottom margins on section blocks — gap handles spacing uniformly */
+.help-adv-layout .help-adv-hero,
+.help-adv-layout .help-adv-technical,
+.help-adv-layout .help-adv-process,
+.help-adv-layout .help-adv-structure,
+.help-adv-layout .help-adv-bp-section,
+.help-adv-layout .help-adv-ts-grid,
+.help-adv-layout .help-adv-timeline,
+.help-adv-layout .help-adv-card-grid,
+.help-adv-layout .help-adv-practice-grid,
+.help-adv-layout .help-adv-note {
+  margin-bottom: 0;
+}
+
+/* Hero banner */
+.help-adv-hero {
+  display:       grid;
+  grid-template-columns: 1fr 400px;
+  gap:           50px;
+  align-items:   center;
+  margin-bottom: 60px;
+  padding:       50px 40px;
+  background:    linear-gradient(135deg,
+    color-mix(in srgb, var(--tab-color) 6%, transparent) 0%,
+    rgba(255,255,255,0.02) 50%,
+    rgba(0,0,0,0.25) 100%
+  );
+  border:    1px solid color-mix(in srgb, var(--tab-color) 15%, transparent);
+  position:  relative;
+  overflow:  hidden;
+}
+
+.help-adv-hero::before {
+  content:  '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height:   3px;
+  background: linear-gradient(
+    90deg,
+    transparent       0%,
+    var(--tab-color)  30%,
+    var(--tab-color)  70%,
+    transparent       100%
+  );
+  box-shadow: 0 0 25px var(--tab-glow-strong);
+}
+
+.help-adv-hero-content { padding-right: 20px; }
+
+.help-adv-hero-title {
+  font-family:    'Space Grotesk', 'Poppins', sans-serif;
+  font-size:      2rem;
+  font-weight:    700;
+  margin:         0 0 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+}
+
+.help-adv-hero-desc {
+  color:       var(--text-secondary);
+  font-size:   1rem;
+  line-height: 1.8;
+  font-weight: 300;
+  margin:      0;
+}
+
+.help-adv-button-showcase {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            20px;
+  padding:        30px;
+  background:     rgba(0, 0, 0, 0.4);
+  border:         2px solid color-mix(in srgb, var(--tab-color) 20%, transparent);
+}
+
+.help-adv-fake-button {
+  padding:        20px 48px;
+  font-weight:    700;
+  font-size:      1rem;
+  font-family:    'Poppins', sans-serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor:         default;
+  animation:      helpAdvButtonPulse 3s ease-in-out infinite;
+}
+
+@keyframes helpAdvButtonPulse {
+  0%,100% { box-shadow: 0 0 40px var(--tab-glow),        0 8px 30px rgba(0,0,0,0.6); }
+  50%     { box-shadow: 0 0 80px var(--tab-glow-strong), 0 12px 40px rgba(0,0,0,0.7); }
+}
+
+.help-adv-button-hint {
+  font-size:      0.85rem;
+  color:          var(--text-muted);
+  text-align:     center;
+  font-style:     italic;
+  letter-spacing: 0.05em;
+}
+
+/* Section header — numbered */
+.help-adv-section-header {
+  font-family:    'Space Grotesk', 'Poppins', sans-serif;
+  font-size:      1.5rem;
+  font-weight:    600;
+  margin:         0 0 30px;
+  display:        flex;
+  align-items:    center;
+  gap:            20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+  padding-bottom: 20px;
+  border-bottom:  2px solid rgba(255, 255, 255, 0.12);
+}
+
+.help-adv-section-num {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  width:           46px;
+  height:          46px;
+  background:      linear-gradient(135deg, var(--tab-color), color-mix(in srgb, var(--tab-color) 70%, transparent));
+  color:           #000;
+  font-weight:     700;
+  font-size:       1.2rem;
+  box-shadow:      0 0 25px var(--tab-glow);
+  flex-shrink:     0;
+}
+
+/* Sub-tab pill bar */
+.help-adv-subtabs {
+  display:       flex;
+  gap:           8px;
+  margin-bottom: 36px;
+  flex-wrap:     wrap;
+  padding:       8px;
+  background:    rgba(255, 255, 255, 0.03);
+  border-radius: 0;
+  border:        1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-adv-subtab {
+  flex:           1 1 auto;
+  padding:        11px 14px;
+  border-radius:  0;
+  cursor:         pointer;
+  font-size:      0.8rem;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition:     all 0.2s ease;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  font-family:    'Poppins', sans-serif;
+  background:     rgba(255, 255, 255, 0.05);
+  color:          rgba(255, 255, 255, 0.6);
+  border:         2px solid transparent;
+}
+
+.help-adv-subtab.active {
+  background: linear-gradient(135deg, var(--tab-color) 0%, color-mix(in srgb, var(--tab-color) 80%, transparent) 100%);
+  color:      #000;
+  border-color: var(--tab-color);
+  box-shadow: 0 0 20px var(--tab-glow);
+}
+
+.help-adv-subtab:not(.active):hover {
+  background: rgba(255, 255, 255, 0.08);
+  color:      rgba(255, 255, 255, 0.85);
+}
+
+/* Step timeline — horizontal */
+.help-adv-timeline {
+  display:    flex;
+  align-items: stretch;
+  gap:        20px;
+  margin-top: 24px;
+  padding:    40px 30px;
+  background: rgba(0, 0, 0, 0.3);
+  border:     1px solid rgba(255, 255, 255, 0.08);
+  overflow-x: auto;
+  margin-bottom: 60px;
+}
+
+.help-adv-step {
+  flex:       1;
+  min-width:  220px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  border:     1px solid rgba(255, 255, 255, 0.1);
+  padding:    25px 20px;
+  position:   relative;
+  transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+
+.help-adv-step:hover {
+  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 6%, transparent) 0%, rgba(255,255,255,0.02) 100%);
+  border-color: color-mix(in srgb, var(--tab-color) 30%, transparent);
+  transform:    translateY(-5px);
+  box-shadow:   0 10px 30px rgba(0,0,0,0.5), 0 0 30px var(--tab-glow);
+}
+
+.help-adv-step-num {
+  position:        absolute;
+  top:             -14px;
+  left:            18px;
+  width:           32px;
+  height:          32px;
+  background:      var(--tab-color);
+  color:           #000;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-weight:     700;
+  font-size:       1rem;
+  box-shadow:      0 0 18px var(--tab-glow);
+}
+
+.help-adv-step-content h4 {
+  font-size:      0.95rem;
+  font-weight:    600;
+  margin:         10px 0 12px;
+  color:          var(--text-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.help-adv-step-content p {
+  color:       var(--text-secondary);
+  font-size:   0.88rem;
+  line-height: 1.6;
+  margin:      0 0 10px;
+}
+
+.help-adv-step-content ul {
+  margin:      0;
+  padding-left: 14px;
+  display:     flex;
+  flex-direction: column;
+  gap:         4px;
+}
+
+.help-adv-step-content li {
+  color:       rgba(255,255,255,0.35);
+  font-size:   0.78rem;
+  line-height: 1.6;
+}
+
+/* Technical cards grid */
+.help-adv-card-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap:                   24px;
+  margin-top:            24px;
+  margin-bottom:         60px;
+}
+
+.help-adv-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border:     1px solid rgba(255, 255, 255, 0.1);
+  overflow:   hidden;
+  transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+
+.help-adv-card:hover {
+  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 5%, transparent) 0%, rgba(255,255,255,0.01) 100%);
+  border-color: color-mix(in srgb, var(--tab-color) 25%, transparent);
+  transform:    translateY(-4px);
+  box-shadow:   0 10px 30px rgba(0,0,0,0.5), 0 0 30px var(--tab-glow);
+}
+
+.help-adv-card-header {
+  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 7%, transparent) 0%, rgba(255,255,255,0.03) 100%);
+  padding:      18px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display:      flex;
+  align-items:  center;
+  gap:          14px;
+}
+
+.help-adv-card-icon {
+  font-size: 1.6rem;
+  filter:    drop-shadow(0 0 8px var(--tab-glow));
+}
+
+.help-adv-card-header h4 {
+  font-size:      1.05rem;
+  font-weight:    600;
+  margin:         0;
+  color:          var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.help-adv-card-body { padding: 22px; }
+
+.help-adv-card-desc {
+  color:       var(--text-secondary);
+  font-size:   0.9rem;
+  line-height: 1.7;
+  margin:      0 0 16px;
+}
+
+.help-adv-card-features {
+  list-style: none;
+  padding:    0;
+  margin:     16px 0 0;
+}
+
+.help-adv-card-features li {
+  padding:     8px 0 8px 22px;
+  margin:      6px 0;
+  position:    relative;
+  color:       var(--text-secondary);
+  font-size:   0.88rem;
+  line-height: 1.6;
+  border-left: 2px solid transparent;
+  transition:  all 0.3s ease;
+}
+
+.help-adv-card-features li::before {
+  content:     '▸';
+  position:    absolute;
+  left:        0;
+  color:       var(--tab-color);
+  font-weight: 700;
+}
+
+.help-adv-card-features li:hover {
+  border-left-color: var(--tab-color);
+  padding-left:      28px;
+  color:             var(--text-primary);
+}
+
+.help-adv-card-features strong {
+  color:       var(--tab-color);
+  font-weight: 600;
+}
+
+/* Troubleshooting items */
+.help-adv-ts-grid { margin-bottom: 60px; }
+
+.help-adv-ts-item {
+  background:    linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+  border:        1px solid rgba(255, 255, 255, 0.08);
+  overflow:      hidden;
+  transition:    all 0.4s cubic-bezier(0.23,1,0.32,1);
+  margin-bottom: 16px;
+}
+
+.help-adv-ts-item:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:   0 6px 20px rgba(0,0,0,0.4);
+}
+
+.help-adv-ts-q {
+  display:     flex;
+  align-items: center;
+  gap:         14px;
+  padding:     18px 22px;
+  background:  color-mix(in srgb, var(--tab-color) 4%, transparent);
+  border-left: 3px solid var(--tab-color);
+}
+
+.help-adv-ts-icon {
+  font-size:   0.9rem;
+  width:       16px;
+  height:      16px;
+  border-radius: 50%;
+  background:  var(--tab-glow);
+  flex-shrink: 0;
+}
+
+.help-adv-ts-q strong {
+  color:       var(--tab-color);
+  font-size:   0.95rem;
+  font-weight: 600;
+}
+
+.help-adv-ts-a {
+  padding:     16px 22px 16px 55px;
+  color:       var(--text-secondary);
+  font-size:   0.9rem;
+  line-height: 1.7;
+}
+
+.help-adv-ts-a p { margin: 0; }
+
+/* Best practices grid */
+.help-adv-practice-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap:                   18px;
+  margin-top:            28px;
+  margin-bottom:         60px;
+}
+
+.help-adv-practice-card {
+  padding:     22px;
+  background:  linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border:      1px solid rgba(255, 255, 255, 0.1);
+  border-top:  3px solid var(--tab-color);
+  transition:  all 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+
+.help-adv-practice-card:hover {
+  background:       linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 5%, transparent) 0%, rgba(255,255,255,0.01) 100%);
+  border-top-width: 4px;
+  transform:        translateY(-4px);
+  box-shadow:       0 8px 25px rgba(0,0,0,0.5), 0 0 30px var(--tab-glow);
+}
+
+.help-adv-practice-icon {
+  font-size:     2.2rem;
+  display:       block;
+  margin-bottom: 12px;
+  filter:        drop-shadow(0 0 10px var(--tab-glow));
+}
+
+.help-adv-practice-card h4 {
+  font-size:      1rem;
+  font-weight:    600;
+  margin:         0 0 10px;
+  color:          var(--text-primary);
+  letter-spacing: 0.04em;
+}
+
+.help-adv-practice-card p {
+  color:       var(--text-secondary);
+  font-size:   0.88rem;
+  line-height: 1.7;
+  margin:      0;
+}
+
+/* Note / tip box */
+.help-adv-note {
+  background:  color-mix(in srgb, var(--tab-color) 4%, transparent);
+  border-left: 3px solid var(--tab-color);
+  padding:     12px 16px;
+  margin-top:  16px;
+  font-size:   0.88rem;
+  color:       var(--text-secondary);
+  line-height: 1.6;
+}
+
+.help-adv-note strong { color: var(--tab-color); font-weight: 600; }
+
+/* Code block */
+.help-adv-code-block {
+  background: rgba(0, 0, 0, 0.5);
+  border:     1px solid rgba(255, 255, 255, 0.1);
+  padding:    10px 14px;
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.help-adv-code-block code {
+  font-family: 'Courier New', monospace;
+  font-size:   0.78rem;
+  color:       rgba(255, 255, 255, 0.85);
+}
+
+/* File tree */
+.help-adv-file-tree {
+  background:    rgba(0, 0, 0, 0.3);
+  border:        1px solid color-mix(in srgb, var(--tab-color) 12%, transparent);
+  padding:       16px 20px;
+  margin-bottom: 20px;
+  font-family:   monospace;
+}
+
+.help-adv-file-tree-header {
+  font-size:     0.82rem;
+  color:         color-mix(in srgb, var(--tab-color) 50%, transparent);
+  margin-bottom: 8px;
+  font-weight:   600;
+}
+
+.help-adv-file-item {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+  padding:     4px 0;
+  font-size:   0.79rem;
+}
+
+.help-adv-file-item.file   { color: rgba(255, 255, 255, 0.55); }
+.help-adv-file-item.folder { color: color-mix(in srgb, var(--tab-color) 40%, transparent); }
+.help-adv-file-item.highlight { color: var(--tab-color); font-weight: 600; }
+
+.help-adv-file-badge {
+  margin-left: auto;
+  font-size:   0.68rem;
+  padding:     2px 8px;
+  background:  color-mix(in srgb, var(--tab-color) 7%, transparent);
+  border:      1px solid color-mix(in srgb, var(--tab-color) 22%, transparent);
+  color:       color-mix(in srgb, var(--tab-color) 60%, transparent);
+}
+
+.help-adv-file-size {
+  margin-left: auto;
+  font-size:   0.68rem;
+  color:       rgba(255, 255, 255, 0.22);
+}
+
+/* Code sample (inline in technical cards) */
+.help-adv-code-sample {
+  background: rgba(0, 0, 0, 0.45);
+  border:     1px solid color-mix(in srgb, var(--tab-color) 12%, transparent);
+  margin-top: 14px;
+  overflow:   hidden;
+}
+
+.help-adv-code-label {
+  padding:        7px 14px;
+  background:     color-mix(in srgb, var(--tab-color) 5%, transparent);
+  border-bottom:  1px solid color-mix(in srgb, var(--tab-color) 10%, transparent);
+  font-size:      0.72rem;
+  color:          color-mix(in srgb, var(--tab-color) 50%, transparent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.help-adv-code-sample pre {
+  margin:      0;
+  padding:     14px 18px;
+  overflow-x:  auto;
+  font-size:   0.76rem;
+  line-height: 1.65;
+  color:       color-mix(in srgb, var(--tab-color) 75%, transparent);
+  white-space: pre;
+}
+
+/* Element info panel (right side of emittertab replica) */
+.help-info-panel { padding: 0; }
+
+.help-info-hero {
+  margin-bottom: 32px;
+  grid-template-columns: 1fr;
+}
+
+.help-info-title {
+  font-family:    'Space Grotesk', 'Poppins', sans-serif;
+  font-size:      1.8rem;
+  font-weight:    700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color:          #ffffff;
+  margin:         0 0 12px;
+  text-shadow:    0 0 20px var(--tab-glow);
+}
+
+.help-info-desc {
+  color:       var(--text-secondary);
+  font-size:   0.95rem;
+  line-height: 1.8;
+  margin:      0;
+}
+
+.help-info-details-box {
+  background: rgba(255,255,255,0.02);
+  border:     1px solid rgba(255,255,255,0.08);
+  padding:    24px 28px;
+  margin-bottom: 24px;
+}
+
+.help-info-details-list {
+  list-style: none;
+  margin:     0;
+  padding:    0;
+  display:    flex;
+  flex-direction: column;
+  gap:        14px;
+}
+
+.help-info-details-list li {
+  display:     flex;
+  gap:         16px;
+  font-size:   0.9rem;
+  line-height: 1.6;
+}
+
+.help-info-details-list li strong {
+  color:      var(--tab-color);
+  min-width:  160px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.help-info-details-list li span {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.help-info-note {
+  background:  color-mix(in srgb, var(--tab-color) 4%, transparent);
+  border-left: 3px solid var(--tab-color);
+  padding:     12px 16px;
+  margin-top:  16px;
+  font-size:   0.88rem;
+  color:       var(--text-secondary);
+  line-height: 1.6;
+}
+
+.help-info-note strong { color: var(--tab-color); font-weight: 600; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   SHARED TAB COMPONENTS
+   Generic layout blocks reused across Emitter, Wreckage, Props, etc.
+   All colours driven by --tab-color / --tab-glow / --tab-glow-strong
+   which each tab sets on its root element (.emitter-tab, .wreckage-tab, …)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Input + delete button row ─────────────────────────────────────────────── */
+.input-with-button {
+  display:       flex;
+  gap:           10px;
+  margin-bottom: 12px;
+  align-items:   center;
+}
+
+.input-with-button .form-input {
+  flex:          1;
+  width:         0;
+  min-width:     0;
+  margin-bottom: 0;
+}
+
+/* ── Units / cards grid ─────────────────────────────────────────────────────── */
+.units-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap:                   20px;
+  margin-top:            25px;
+}
+
+/* ── Selectable item card ───────────────────────────────────────────────────── */
+.unit-card {
+  background:    rgba(255, 255, 255, 0.03);
+  border:        2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  padding:       20px;
+  transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor:        pointer;
+  position:      relative;
+  overflow:      hidden;
+}
+
+.unit-card::before {
+  content:    '';
+  position:   absolute;
+  left: 0; top: 0; bottom: 0;
+  width:      4px;
+  background: var(--tab-color);
+  opacity:    0;
+  transition: opacity 0.4s ease;
+}
+
+.unit-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background:   rgba(255, 255, 255, 0.05);
+  transform:    translateX(3px);
+}
+
+.unit-card.selected {
+  border-color: var(--tab-color);
+  background:   rgba(255, 255, 255, 0.05);
+  box-shadow:   0 0 30px var(--tab-glow);
+}
+
+.unit-card.selected::before { opacity: 1; }
+
+.unit-card-header {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  margin-bottom:   15px;
+}
+
+.unit-card-title {
+  font-size:      1rem;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+}
+
+.unit-card-content { margin-top: 15px; }
+
+/* ── Add-card placeholder ───────────────────────────────────────────────────── */
+.add-unit-card {
+  background:      transparent;
+  border:          3px dashed rgba(255, 255, 255, 0.15);
+  border-radius:   0;
+  padding:         40px 20px;
+  cursor:          pointer;
+  transition:      all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             15px;
+  min-height:      200px;
+  position:        relative;
+  overflow:        hidden;
+}
+
+.add-unit-card::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: radial-gradient(circle at center, var(--tab-glow) 0%, transparent 70%);
+  opacity:    0;
+  transition: opacity 0.4s ease;
+}
+
+.add-unit-card:hover {
+  border-color: var(--tab-color);
+  background:   rgba(255, 255, 255, 0.03);
+  transform:    scale(1.02);
+}
+
+.add-unit-card:hover::before { opacity: 0.3; }
+
+.add-unit-icon {
+  color:      var(--text-muted);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.add-unit-card:hover .add-unit-icon {
+  color:      var(--tab-color);
+  transform:  scale(1.15);
+  filter:     drop-shadow(0 0 20px var(--tab-glow));
+}
+
+.add-unit-text {
+  font-size:      0.9rem;
+  font-weight:    600;
+  letter-spacing: 0.1em;
+  color:          var(--text-secondary);
+  transition:     color 0.3s ease;
+}
+
+.add-unit-card:hover .add-unit-text { color: var(--tab-color); }
+
+/* ── Upload area ────────────────────────────────────────────────────────────── */
+.upload-area {
+  border:        2px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 0;
+  padding:       50px 35px;
+  text-align:    center;
+  cursor:        pointer;
+  margin-bottom: 25px;
+  transition:    all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  background:    rgba(255, 255, 255, 0.03);
+  position:      relative;
+  overflow:      hidden;
+}
+
+.upload-area::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: radial-gradient(circle at center, var(--tab-glow) 0%, transparent 70%);
+  opacity:    0;
+  transition: opacity 0.5s ease;
+}
+
+.upload-area:hover {
+  border-color: var(--tab-color);
+  background:   rgba(255, 255, 255, 0.06);
+  transform:    translateY(-3px);
+  box-shadow:   0 8px 30px rgba(0, 0, 0, 0.4), 0 0 40px var(--tab-glow);
+}
+
+.upload-area:hover::before { opacity: 0.4; }
+
+.upload-icon {
+  font-size:     3rem;
+  display:       block;
+  margin-bottom: 18px;
+  color:         var(--text-muted);
+  transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.upload-area:hover .upload-icon {
+  color:     var(--tab-color);
+  transform: scale(1.15);
+}
+
+/* ── Hint / info box ────────────────────────────────────────────────────────── */
+.hint-box {
+  background:    rgba(255, 255, 255, 0.08);
+  border:        1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0;
+  padding:       18px 24px;
+  color:         var(--tab-color);
+  font-size:     0.92rem;
+  margin-top:    25px;
+  line-height:   1.7;
+  font-weight:   400;
+  position:      relative;
+  overflow:      hidden;
+}
+
+.hint-box::before {
+  content:    '';
+  position:   absolute;
+  top: 0; left: 0; right: 0;
+  height:     2px;
+  background: linear-gradient(90deg, transparent 0%, var(--tab-color) 50%, transparent 100%);
+  opacity:    0.6;
+}
+
+/* ── Preview column header ──────────────────────────────────────────────────── */
+.preview-header {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  margin-bottom:   28px;
+}
+
+/* ── Canvas container ───────────────────────────────────────────────────────── */
+.canvas-container {
+  width:      100%;
+  aspect-ratio: 1 / 1;
+  position:   relative;
+  overflow:   hidden;
+  cursor:     crosshair;
+}
+
+.canvas-placeholder {
+  position:       absolute;
+  top:            50%;
+  left:           50%;
+  transform:      translate(-50%, -50%);
+  color:          var(--text-muted);
+  font-size:      1.15rem;
+  pointer-events: none;
+  font-weight:    300;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Legend ─────────────────────────────────────────────────────────────────── */
+.legend {
+  margin-top:      35px;
+  padding:         25px;
+  background:      rgba(0, 0, 0, 0.4);
+  border-radius:   0;
+  border:          1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.legend-title {
+  font-size:      0.95rem;
+  font-weight:    600;
+  margin-bottom:  18px;
+  color:          var(--text-primary);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family:    'Space Grotesk', sans-serif;
+}
+
+.legend-items {
+  display:        flex;
+  flex-direction: column;
+  gap:            12px;
+}
+
+.legend-item {
+  display:       flex;
+  align-items:   center;
+  gap:           14px;
+  font-size:     0.88rem;
+  cursor:        pointer;
+  padding:       10px 12px;
+  border-radius: 0;
+  transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  background:    rgba(255, 255, 255, 0.03);
+  border:        1px solid transparent;
+}
+
+.legend-item:hover {
+  background:   rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform:    translateX(5px);
+}
+
+.legend-item.active {
+  border-color: var(--tab-color);
+  background:   rgba(255, 255, 255, 0.05);
+  box-shadow:   0 0 15px var(--tab-glow);
+}
+
+.legend-color {
+  width:         26px;
+  height:        26px;
+  border-radius: 50%;
+  border:        2px solid rgba(255, 255, 255, 0.35);
+  flex-shrink:   0;
+  transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.legend-item:hover .legend-color {
+  transform:    scale(1.15);
+  box-shadow:   0 0 20px currentColor;
+  border-width: 3px;
+}
+
+.legend-item span {
+  color:       var(--text-secondary);
+  flex-grow:   1;
+  font-weight: 400;
+}
+
+.legend-coord-count {
+  color:       var(--text-muted);
+  font-size:   0.8rem;
+  margin-left: auto;
+}
+
+/* ── Color indicator dot (canvas legend / card header) ──────────────────────── */
+.color-indicator {
+  width:         24px;
+  height:        24px;
+  border-radius: 50%;
+  border:        2px solid rgba(255, 255, 255, 0.3);
+  cursor:        pointer;
+  transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  flex-shrink:   0;
+}
+
+.color-indicator:hover {
+  transform:    scale(1.2);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow:   0 0 15px currentColor;
+}
+
+/* ── Color picker dropdown ──────────────────────────────────────────────────── */
+.color-picker-dropdown {
+  margin-top:      15px;
+  padding:         15px;
+  background:      rgba(0, 0, 0, 0.4);
+  border:          1px solid rgba(255, 255, 255, 0.1);
+  border-radius:   0;
+  backdrop-filter: blur(12px);
+}
+
+.color-grid {
+  display:               grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:                   10px;
+}
+
+.color-option {
+  width:         35px;
+  height:        35px;
+  border-radius: 50%;
+  border:        2px solid rgba(255, 255, 255, 0.2);
+  cursor:        pointer;
+  transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.color-option:hover {
+  transform:    scale(1.15);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow:   0 0 20px currentColor;
+}
+
+/* ── Coordinate entry card ──────────────────────────────────────────────────── */
+.coordinate-entry {
+  background:    rgba(0, 0, 0, 0.35);
+  border:        1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  padding:       18px;
+  margin-bottom: 18px;
+  transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  position:      relative;
+  overflow:      hidden;
+}
+
+.coordinate-entry::before {
+  content:    '';
+  position:   absolute;
+  left: 0; top: 0; bottom: 0;
+  width:      3px;
+  background: var(--tab-color);
+  opacity:    0;
+  transition: opacity 0.4s ease;
+}
+
+.coordinate-entry:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background:   rgba(0, 0, 0, 0.45);
+  box-shadow:   0 4px 20px rgba(0, 0, 0, 0.3);
+  transform:    translateX(3px);
+}
+
+.coordinate-entry:hover::before {
+  opacity:    1;
+  box-shadow: 0 0 15px var(--tab-glow);
+}
+
+.coord-grid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   14px;
+}
+
+.coord-field {
+  display:        flex;
+  flex-direction: column;
+}
+
+.coord-field label {
+  font-size:      0.75rem;
+  color:          var(--text-muted);
+  margin-bottom:  8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight:    500;
+}
+
+/* ── Tab scrollbar (scoped to any .X-tab root) ──────────────────────────────── */
+.tab-scrollbar ::-webkit-scrollbar       { width: 10px; height: 10px; }
+.tab-scrollbar ::-webkit-scrollbar-track { background: var(--bg-primary); border-left: 1px solid rgba(255,255,255,0.05); }
+.tab-scrollbar ::-webkit-scrollbar-thumb {
+  background:  linear-gradient(180deg, var(--tab-color), color-mix(in srgb, var(--tab-color) 60%, transparent));
+  border-left: 2px solid color-mix(in srgb, var(--tab-color) 25%, transparent);
+}
+.tab-scrollbar ::-webkit-scrollbar-thumb:hover {
+  background: var(--tab-color);
+  box-shadow: 0 0 20px var(--tab-glow);
+}
+.tab-scrollbar * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tab-color) var(--bg-primary);
+}
+
+/* ── Tab focus / selection colours ─────────────────────────────────────────── */
+.tab-root a:focus-visible,
+.tab-root button:focus-visible,
+.tab-root input:focus-visible {
+  outline:        2px solid var(--tab-color);
+  outline-offset: 5px;
+}
+
+.tab-root ::selection {
+  background: var(--tab-color);
+  color:      var(--bg-primary);
+}
+
+/* ── Select / dropdown arrow ────────────────────────────────────────────────── */
+select.form-input {
+  appearance:          none;
+  -webkit-appearance:  none;
+  background-image:    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255%2C255%2C255%2C0.45)' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:   no-repeat;
+  background-position: right 16px center;
+  background-size:     12px 8px;
+  padding-right:       42px;
+  cursor:              pointer;
+}
+
+select.form-input:focus {
+  outline:          none;
+  border-color:     var(--tab-color);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow:       0 0 0 1px var(--tab-color), 0 0 25px var(--tab-glow);
+}
+
+select.form-input option {
+  background: #0d1117;
+  color:      var(--text-primary);
+  padding:    10px 16px;
+}

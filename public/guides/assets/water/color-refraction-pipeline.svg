@@ -1,0 +1,58 @@
+<svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="200" fill="#0e0e10"/>
+
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">REFRACTION PIPELINE — HighFidelityPS</text>
+
+  <!-- Step 1 -->
+  <rect x="24" y="44" width="130" height="44" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <rect x="24" y="44" width="3" height="44" fill="rgba(200,111,255,0.4)"/>
+  <text x="36" y="60" fill="#888" font-size="7.5" font-weight="700" letter-spacing="0.07em">SCREEN POS</text>
+  <text x="36" y="73" fill="#555" font-size="7">screenPos (UV)</text>
+  <text x="36" y="83" fill="#555" font-size="7">undistorted</text>
+
+  <line x1="154" y1="66" x2="190" y2="66" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <polygon points="188,62 196,66 188,70" fill="rgba(255,255,255,0.08)"/>
+
+  <!-- Step 2 -->
+  <rect x="196" y="44" width="148" height="44" fill="rgba(200,111,255,0.04)" stroke="rgba(200,111,255,0.18)" stroke-width="1"/>
+  <rect x="196" y="44" width="3" height="44" fill="#C86FFF" opacity="0.6"/>
+  <text x="208" y="60" fill="#C86FFF" font-size="7.5" font-weight="700" letter-spacing="0.07em">DISTORT UV</text>
+  <text x="208" y="73" fill="#666" font-size="7">pos -= sqrt(depth)</text>
+  <text x="208" y="83" fill="#666" font-size="7">× refractionScale × N.xz</text>
+
+  <line x1="344" y1="66" x2="380" y2="66" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <polygon points="378,62 386,66 378,70" fill="rgba(255,255,255,0.08)"/>
+
+  <!-- Step 3 -->
+  <rect x="386" y="44" width="130" height="44" fill="rgba(100,180,255,0.04)" stroke="rgba(100,180,255,0.15)" stroke-width="1"/>
+  <rect x="386" y="44" width="3" height="44" fill="rgba(100,180,255,0.5)"/>
+  <text x="398" y="60" fill="rgba(150,200,255,0.8)" font-size="7.5" font-weight="700" letter-spacing="0.07em">SAMPLE</text>
+  <text x="398" y="73" fill="#555" font-size="7">tex2D(RefractionSampler,</text>
+  <text x="398" y="83" fill="#555" font-size="7">  refractionPos)</text>
+
+  <line x1="516" y1="66" x2="552" y2="66" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <polygon points="550,62 558,66 550,70" fill="rgba(255,255,255,0.08)"/>
+
+  <!-- Step 4 -->
+  <rect x="558" y="44" width="98" height="44" fill="rgba(255,140,0,0.04)" stroke="rgba(255,140,0,0.18)" stroke-width="1"/>
+  <rect x="558" y="44" width="3" height="44" fill="#ff8c00" opacity="0.6"/>
+  <text x="570" y="60" fill="#ff8c00" font-size="7.5" font-weight="700" letter-spacing="0.07em">COLOR LERP</text>
+  <text x="570" y="73" fill="#555" font-size="7">lerp(refracted,</text>
+  <text x="570" y="83" fill="#555" font-size="7">  waterColor, depth)</text>
+
+  <!-- Annotation: sqrt behavior -->
+  <line x1="270" y1="88" x2="270" y2="120" stroke="rgba(200,111,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <rect x="148" y="120" width="248" height="32" fill="rgba(200,111,255,0.03)" stroke="rgba(200,111,255,0.12)" stroke-width="1"/>
+  <text x="272" y="135" text-anchor="middle" fill="#C86FFF" font-size="7.5" font-weight="600" letter-spacing="0.06em">sqrt(waterDepth)</text>
+  <text x="272" y="147" text-anchor="middle" fill="#555" font-size="7">shallow → near-zero distortion · deep → stronger distortion</text>
+
+  <!-- Annotation: wave normal -->
+  <line x1="270" y1="44" x2="270" y2="28" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="272" y="22" text-anchor="middle" fill="#383838" font-size="7.5">N.xz from wave layer normals — distortion follows wave direction</text>
+
+  <!-- Low/Med fidelity note -->
+  <rect x="24" y="166" width="632" height="22" fill="rgba(255,140,0,0.03)" stroke="rgba(255,140,0,0.1)" stroke-width="1"/>
+  <text x="36" y="178" fill="#ff8c00" font-size="7.5" font-weight="700" letter-spacing="0.06em">LOW / MEDIUM FIDELITY:</text>
+  <text x="36" y="181" fill="#444" font-size="7">  </text>
+  <text x="148" y="181" fill="#444" font-size="7">SurfaceColor has NO effect. Low uses hardcoded blue (0.1, 0.5, 2.0). Medium uses a shader constant. Refraction is skipped entirely.</text>
+</svg>

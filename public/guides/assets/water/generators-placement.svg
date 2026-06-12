@@ -1,0 +1,65 @@
+<svg viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="210" fill="#0e0e10"/>
+
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">SHORELINE PLACEMENT — OVERLAPPING GENERATORS</text>
+
+  <!-- Terrain shape (top = land) -->
+  <polygon points="0,60 680,60 680,90 560,85 480,88 400,82 320,86 240,80 160,87 80,83 0,88" fill="#1a1a1c"/>
+  <text x="340" y="50" text-anchor="middle" fill="#2e2e2e" font-size="7.5" letter-spacing="0.08em">LAND</text>
+
+  <!-- Waterline -->
+  <line x1="0" y1="88" x2="680" y2="88" stroke="rgba(200,111,255,0.2)" stroke-width="1" stroke-dasharray="none"/>
+
+  <!-- Water body -->
+  <rect x="0" y="88" width="680" height="122" fill="rgba(30,60,120,0.12)"/>
+  <text x="340" y="135" text-anchor="middle" fill="#1e2e50" font-size="7.5" letter-spacing="0.08em">WATER</text>
+
+  <!-- Generator positions along shore -->
+  <!-- Generator 1 -->
+  <g opacity="0.9">
+    <ellipse cx="100" cy="92" rx="70" ry="22" fill="rgba(200,111,255,0.06)" stroke="rgba(200,111,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+    <circle cx="100" cy="92" r="4" fill="#C86FFF" opacity="0.8"/>
+    <line x1="100" y1="92" x2="100" y2="118" stroke="rgba(200,111,255,0.4)" stroke-width="1.5" marker-end="url(#arr)"/>
+    <text x="100" y="128" text-anchor="middle" fill="#C86FFF" font-size="7" letter-spacing="0.05em">GEN 1</text>
+    <text x="100" y="138" text-anchor="middle" fill="#444" font-size="6.5">velocity →</text>
+  </g>
+
+  <!-- Generator 2 -->
+  <g opacity="0.85">
+    <ellipse cx="240" cy="90" rx="70" ry="22" fill="rgba(200,111,255,0.05)" stroke="rgba(200,111,255,0.18)" stroke-width="1" stroke-dasharray="3,3"/>
+    <circle cx="240" cy="90" r="4" fill="#C86FFF" opacity="0.75"/>
+    <line x1="240" y1="90" x2="240" y2="116" stroke="rgba(200,111,255,0.4)" stroke-width="1.5"/>
+    <text x="240" y="128" text-anchor="middle" fill="#C86FFF" font-size="7" letter-spacing="0.05em">GEN 2</text>
+    <text x="240" y="138" text-anchor="middle" fill="#444" font-size="6.5">velocity →</text>
+  </g>
+
+  <!-- Generator 3 -->
+  <g opacity="0.8">
+    <ellipse cx="380" cy="91" rx="70" ry="22" fill="rgba(200,111,255,0.05)" stroke="rgba(200,111,255,0.16)" stroke-width="1" stroke-dasharray="3,3"/>
+    <circle cx="380" cy="91" r="4" fill="#C86FFF" opacity="0.7"/>
+    <line x1="380" y1="91" x2="380" y2="117" stroke="rgba(200,111,255,0.35)" stroke-width="1.5"/>
+    <text x="380" y="128" text-anchor="middle" fill="#C86FFF" font-size="7" letter-spacing="0.05em">GEN 3</text>
+    <text x="380" y="138" text-anchor="middle" fill="#444" font-size="6.5">velocity →</text>
+  </g>
+
+  <!-- Generator 4 -->
+  <g opacity="0.75">
+    <ellipse cx="520" cy="89" rx="70" ry="22" fill="rgba(200,111,255,0.04)" stroke="rgba(200,111,255,0.14)" stroke-width="1" stroke-dasharray="3,3"/>
+    <circle cx="520" cy="89" r="4" fill="#C86FFF" opacity="0.65"/>
+    <line x1="520" y1="89" x2="520" y2="115" stroke="rgba(200,111,255,0.3)" stroke-width="1.5"/>
+    <text x="520" y="128" text-anchor="middle" fill="#C86FFF" font-size="7" letter-spacing="0.05em">GEN 4</text>
+    <text x="520" y="138" text-anchor="middle" fill="#444" font-size="6.5">velocity →</text>
+  </g>
+
+  <!-- Overlap callout -->
+  <line x1="170" y1="88" x2="170" y2="68" stroke="rgba(255,140,0,0.3)" stroke-width="1" stroke-dasharray="2,3"/>
+  <line x1="310" y1="88" x2="310" y2="68" stroke="rgba(255,140,0,0.3)" stroke-width="1" stroke-dasharray="2,3"/>
+  <rect x="148" y="55" width="184" height="14" fill="rgba(255,140,0,0.04)" stroke="rgba(255,140,0,0.18)" stroke-width="0.5"/>
+  <text x="240" y="65" text-anchor="middle" fill="#ff8c00" font-size="7" letter-spacing="0.06em">coverage overlap — no gaps</text>
+
+  <!-- Tips -->
+  <rect x="24" y="155" width="632" height="42" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <text x="36" y="170" fill="#555" font-size="7.5" font-weight="700" letter-spacing="0.08em">TIPS</text>
+  <text x="36" y="183" fill="#444" font-size="7.5">Rotate each generator perpendicular to the waterline (facing into shore).  Overlap coverage by ~30%.  Keep velocity pointing away from land.</text>
+  <text x="36" y="193" fill="#383838" font-size="7">Calm shore: LifetimeFirst 3s / LifetimeSecond 6s · long period · large scale.    Rough surf: short lifetime · fast period · varied scale.</text>
+</svg>

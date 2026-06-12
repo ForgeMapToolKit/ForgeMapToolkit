@@ -1,0 +1,292 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   MAP RESIZER TAB
+   Color token: var(--tab-color)  (Hot Pink / Neon Rose)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Root — inject tab color token ────────────────────────────────────────── */
+.map-resizer-tab {
+  --tab-color:        #00E5CC;
+  --tab-glow:         rgba(0, 229, 204, 0.20);
+  --tab-glow-strong:  rgba(0, 229, 204, 0.45);
+  --tab-glow-intense: rgba(0, 229, 204, 0.85);
+
+  /* shared.css theming aliases */
+  --theme-accent:       #00E5CC;
+  --theme-glow:         rgba(0, 229, 204, 0.20);
+  --theme-glow-strong:  rgba(0, 229, 204, 0.45);
+
+  color:       var(--text-primary);
+  font-family: 'Poppins', sans-serif;
+  background:  var(--bg-primary);
+  min-height:  100vh;
+  padding:     40px 20px;
+  animation:   mrTabFadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes mrTabFadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── 2. Map info badge ───────────────────────────────────────────────────────── */
+.mr-map-badge {
+  display:       flex;
+  align-items:   center;
+  gap:           10px;
+  padding:       12px 18px;
+  font-size:     0.88rem;
+  font-weight:   500;
+  margin-top:    4px;
+  border:        1px solid;
+  animation:     mrFadeIn 0.3s ease;
+}
+
+@keyframes mrFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.mr-map-badge.ok {
+  background:   rgba(0, 229, 204, 0.06);
+  border-color: rgba(0, 229, 204, 0.30);
+  color:        var(--tab-color);
+}
+
+.mr-map-badge.error {
+  background:   rgba(255, 80, 80, 0.06);
+  border-color: rgba(255, 80, 80, 0.28);
+  color:        rgba(255, 100, 100, 0.9);
+}
+
+.mr-map-badge-icon {
+  font-weight: 700;
+  font-size:   1rem;
+  flex-shrink: 0;
+}
+
+.mr-map-badge-km {
+  color:       var(--tab-glow-strong);
+  font-weight: 400;
+}
+
+/* ── 3. Size preview (current → target) ─────────────────────────────────────── */
+.mr-size-preview {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             24px;
+  padding:         24px 20px;
+  margin-bottom:   24px;
+  background:      rgba(0, 0, 0, 0.25);
+  border:          1px solid rgba(255, 255, 255, 0.07);
+}
+
+.mr-size-preview-side {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            4px;
+  min-width:      80px;
+}
+
+.mr-size-preview-label {
+  font-size:      0.7rem;
+  font-weight:    600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+.mr-size-preview-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size:   2rem;
+  font-weight: 700;
+  color:       var(--text-primary);
+  line-height: 1;
+}
+
+.mr-size-preview-km {
+  font-size:   0.78rem;
+  color:       var(--text-muted);
+  font-weight: 400;
+}
+
+/* Scale arrow */
+.mr-scale-arrow {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            4px;
+  flex-shrink:    0;
+}
+
+.mr-scale-factor {
+  font-size:      0.72rem;
+  font-weight:    700;
+  letter-spacing: 0.08em;
+}
+
+.mr-scale-arrow--up    svg,
+.mr-scale-arrow--up    .mr-scale-factor { color: var(--tab-color); }
+.mr-scale-arrow--down  svg,
+.mr-scale-arrow--down  .mr-scale-factor { color: rgba(255, 160, 80, 0.85); }
+.mr-scale-arrow--neutral svg,
+.mr-scale-arrow--neutral .mr-scale-factor { color: rgba(255, 255, 255, 0.2); }
+
+/* ── 4. Size button grid ─────────────────────────────────────────────────────── */
+.mr-size-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   10px;
+}
+
+.mr-size-btn {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  padding:        14px 10px;
+  background:     rgba(255, 255, 255, 0.03);
+  border:         1px solid rgba(255, 255, 255, 0.1);
+  color:          var(--text-secondary);
+  cursor:         pointer;
+  font-family:    'Poppins', sans-serif;
+  transition:     all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  position:       relative;
+  overflow:       hidden;
+}
+
+.mr-size-btn::before {
+  content:    '';
+  position:   absolute;
+  bottom: 0; left: 0; right: 0;
+  height:     2px;
+  background: var(--tab-color);
+  transform:  scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.mr-size-btn:hover:not(.disabled) {
+  background:   rgba(0, 229, 204, 0.06);
+  border-color: rgba(0, 229, 204, 0.38);
+  color:        var(--tab-color);
+  transform:    translateY(-2px);
+  box-shadow:   0 4px 20px rgba(0, 229, 204, 0.14);
+}
+
+.mr-size-btn:hover:not(.disabled)::before { transform: scaleX(1); }
+
+.mr-size-btn.selected {
+  background:   rgba(0, 229, 204, 0.10);
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  box-shadow:   0 0 20px rgba(0, 229, 204, 0.20), inset 0 0 20px rgba(0, 229, 204, 0.05);
+}
+
+.mr-size-btn.selected::before { transform: scaleX(1); }
+
+.mr-size-btn.current {
+  border-color: rgba(255, 255, 255, 0.2);
+  color:        rgba(255, 255, 255, 0.3);
+}
+
+.mr-size-btn.disabled {
+  opacity: 0.35;
+  cursor:  not-allowed;
+}
+
+.mr-size-value {
+  font-family:   'Space Grotesk', sans-serif;
+  font-size:     1.35rem;
+  font-weight:   700;
+  line-height:   1;
+  margin-bottom: 3px;
+}
+
+.mr-size-km {
+  font-size:   0.72rem;
+  font-weight: 500;
+  opacity:     0.7;
+}
+
+.mr-size-desc {
+  font-size:      0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top:     3px;
+  opacity:        0.55;
+}
+
+/* ── 5. Same-size warning ────────────────────────────────────────────────────── */
+.mr-same-size-warning {
+  margin-top:  14px;
+  padding:     10px 16px;
+  background:  rgba(255, 200, 80, 0.06);
+  border:      1px solid rgba(255, 200, 80, 0.22);
+  border-left: 3px solid rgba(255, 200, 80, 0.6);
+  color:       rgba(255, 200, 80, 0.8);
+  font-size:   0.82rem;
+  line-height: 1.5;
+}
+
+/* ── 6. Scale options stack ──────────────────────────────────────────────────── */
+.mr-options-stack {
+  display:        flex;
+  flex-direction: column;
+  gap:            16px;
+  margin-bottom:  8px;
+}
+
+/* ── 7. Help modal step list ─────────────────────────────────────────────────── */
+.mr-help-step {
+  display:       flex;
+  align-items:   flex-start;
+  gap:           18px;
+  padding:       18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mr-help-step:last-child { border-bottom: none; }
+
+.mr-help-step-num {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           32px;
+  height:          32px;
+  flex-shrink:     0;
+  background:      linear-gradient(135deg, var(--tab-color), rgba(0, 229, 204, 0.5));
+  color:           #fff;
+  font-weight:     700;
+  font-size:       0.9rem;
+  box-shadow:      0 0 16px var(--tab-glow);
+}
+
+.mr-help-step-title {
+  font-weight:    600;
+  font-size:      0.95rem;
+  color:          var(--text-primary);
+  margin-bottom:  4px;
+  letter-spacing: 0.03em;
+}
+
+.mr-help-step-desc {
+  font-size:   0.85rem;
+  color:       var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ── 8. Accessibility ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .map-resizer-tab *,
+  .map-resizer-tab *::before,
+  .map-resizer-tab *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+  }
+}
+
+/* ── 9. Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .mr-size-grid { grid-template-columns: repeat(2, 1fr); }
+}

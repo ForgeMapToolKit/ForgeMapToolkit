@@ -1,0 +1,907 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TRACE HOME SCREEN — HomeScreen.css
+   Three-register architectural layout. The screen is an instrument:
+   a projection surface written by a plotter, operated from a rail.
+
+   The physical model:
+   - PEN:      the 1px trace at the designation baseline
+   - GANTRY:   a vertical carriage hairline crossing the stage; pen,
+               carriage and every clip edge share one duration, one
+               easing, one delay — they are the same machine
+   - PHOSPHOR: slat ticks ignite instantly and decay slowly; scrubbing
+               leaves a cooling trail — the rail has memory
+   - POWER:    engaging a projection briefly dims the stage (draw),
+               recovering as the type prints
+   - BOOT:     one power-on sequence at launch (wordmark prints bright
+               and recedes; rail runs a lamp-test cascade), then total
+               stillness except the standby cursor
+   - SHUTTER:  commit wipes the stage to darkness behind a hairline of
+               the tool's hue; navigation cuts while the stage is dark
+
+   Restraint contract:
+   - exactly two colored elements at full intensity at once
+   - no idle motion except the block cursor (the machine is on)
+   - decoration budget: hairlines, one grain layer, one moving line
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Root ─────────────────────────────────────────────────────────── */
+
+.hs-root {
+  /* fast-out mechanical — hard launch, decelerated landing */
+  --hs-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* phosphor decay — drops fast, lingers in the tail */
+  --hs-decay: cubic-bezier(0.2, 0.55, 0.35, 1);
+  /* heavy actuation — initial resistance, firm travel, damped stop */
+  --hs-rise: cubic-bezier(0.55, 0, 0.15, 1);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #070708;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 28px 28px;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Film grain — the instrument's surface, above everything ─────── */
+
+.hs-grain {
+  position: absolute;
+  inset: -100%;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0"/></filter><rect width="320" height="320" filter="url(%23g)"/></svg>');
+  animation: hs-grain-shift 0.9s steps(2) infinite;
+}
+
+@keyframes hs-grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-1.2%, 0.8%); }
+  50%  { transform: translate(0.6%, -1.1%); }
+  75%  { transform: translate(-0.8%, -0.5%); }
+  100% { transform: translate(0, 0); }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   REGISTER 1 — HEADER
+   ══════════════════════════════════════════════════════════════════ */
+
+.hs-header-register {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 44px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  z-index: 10;
+}
+
+/* Console caption — identity lives in the banner above; this register
+   only reports state */
+.hs-header-console {
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.13);
+  user-select: none;
+}
+
+/* Status strip — pipe-separated, right-aligned */
+.hs-header-status {
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.hs-status-part {
+  font-size: 0.56rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.17);
+  padding: 0 10px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.hs-status-part:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.hs-status-part--ok {
+  color: rgba(0,200,100,0.42);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   REGISTER 2 — PROJECTION STAGE
+   ══════════════════════════════════════════════════════════════════ */
+
+.hs-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Architectural light — the rail is a lit console edge casting a
+   faint floor glow upward. Static. */
+.hs-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% 115%, rgba(255,255,255,0.028), transparent 60%),
+    linear-gradient(0deg, rgba(255,255,255,0.014), transparent 26%);
+}
+
+/* Cards fill the stage. Content is composed into the UPPER field —
+   the stage is a projection wall, not a footer. The lower span is a
+   deliberate gulf of darkness separating the wall from the control
+   surface operating it below. */
+.hs-stage-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 72px max(80px, 18vh);
+  pointer-events: none;
+}
+
+/* ── Standby card — the machine at rest, dials lit ───────────────── */
+
+.hs-standby {
+  opacity: 1;
+  transition: opacity 0.24s linear; /* stand-down resolve */
+}
+
+.hs-standby.hs-standby--hidden {
+  opacity: 0;
+  transition-duration: 0.15s; /* exit is faster than return */
+}
+
+/* Boot: prints bright behind the boot line, then recedes into the
+   architecture. Runs once on mount; afterwards the ghost is permanent. */
+.hs-standby-designation {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.4rem, 5vw, 5rem);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.045);
+  line-height: 1;
+  user-select: none;
+  margin-bottom: 22px;
+  animation:
+    hs-print 0.8s var(--hs-out) 0.25s both,
+    hs-boot-settle 1.4s linear 1.1s both;
+}
+
+@keyframes hs-boot-settle {
+  from { color: rgba(255,255,255,0.4); }
+  to   { color: rgba(255,255,255,0.045); }
+}
+
+/* Boot line — draws full width with the wordmark, then yields */
+.hs-standby-bootline {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.3);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: hs-bootline 1.8s var(--hs-out) 0.25s forwards;
+}
+
+@keyframes hs-bootline {
+  0%   { transform: scaleX(0); opacity: 1; }
+  40%  { transform: scaleX(1); opacity: 1; }
+  70%  { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* Resident rule — surfaces as the boot line fades, same y */
+.hs-standby-rule {
+  width: 28px;
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin-top: -1px;
+  margin-bottom: 16px;
+  animation: hs-fade-in 0.6s linear 1.6s both;
+}
+
+@keyframes hs-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.hs-standby-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.12);
+  animation: hs-print 0.5s var(--hs-out) 0.9s both;
+}
+
+.hs-meta-item {
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.hs-meta-item:last-child {
+  border-right: none;
+}
+
+/* Block cursor — the one thing that moves at idle. The machine is on. */
+.hs-standby-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 11px;
+  background: rgba(255,255,255,0.28);
+  animation: hs-cursor-blink 1.2s step-end infinite;
+}
+
+@keyframes hs-cursor-blink {
+  50% { opacity: 0; }
+}
+
+/* ── Tool projection — printed by the carriage pass ──────────────
+   The card is keyed in React: each engage/switch remounts it, so the
+   pass restarts from zero in the new tool's hue.
+
+   Sync model: carriage (translateX over content width), pen (scaleX
+   over content width) and every clip edge (inset over each block's
+   width) share duration, easing and delay — at every frame they sit
+   at the same x. The type is printed at the carriage edge.          */
+
+@keyframes hs-print {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes hs-unprint {
+  from { clip-path: inset(0 0 0 0); }
+  to   { clip-path: inset(0 100% 0 0); }
+}
+
+@keyframes hs-trace-print {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes hs-trace-unprint {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* Power draw — the room dims as the projector fires, recovers as the
+   type prints. Runs once per pass (keyed remount). */
+.hs-proj-dimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #000;
+  opacity: 0;
+  animation: hs-power-draw 0.5s linear forwards;
+}
+
+@keyframes hs-power-draw {
+  0%   { opacity: 0.16; }
+  100% { opacity: 0; }
+}
+
+/* Ambient wash — the projection's light filling the room. Centered on
+   the upper field where the designation lives; the tool's hue at
+   ambient intensity, never decoration. Blooms in after the power dip
+   recovers. */
+.hs-proj-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    70% 55% at 30% 40%,
+    color-mix(in srgb, var(--proj-color) 6%, transparent),
+    transparent 72%
+  );
+  opacity: 0;
+  animation: hs-wash-in 0.7s linear 0.15s forwards;
+}
+
+@keyframes hs-wash-in {
+  to { opacity: 1; }
+}
+
+/* The gantry — spans exactly the content column (stage minus the
+   72px card padding) so its head tracks every clip edge precisely. */
+.hs-proj-carriage {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 72px;
+  right: 72px;
+  z-index: 2;
+  pointer-events: none;
+  transform: translateX(-100%);
+  animation:
+    hs-carriage-pass 0.32s var(--hs-out) 0.08s both,
+    hs-carriage-lift 0.28s linear 0.48s forwards;
+}
+
+@keyframes hs-carriage-pass {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes hs-carriage-lift {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Carriage head — full-height scanning filament at the print edge */
+.hs-carriage-head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  background: var(--proj-color);
+  opacity: 0.65;
+  box-shadow: 0 0 12px 0 var(--proj-glow), 0 0 3px var(--proj-color);
+}
+
+/* Freshly printed surface, still warm — trails the head */
+.hs-carriage-veil {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--proj-color) 8%, transparent));
+}
+
+/* Mono index — resolves first */
+.hs-proj-index {
+  position: relative;
+  z-index: 1;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.16);
+  margin-bottom: 14px;
+  user-select: none;
+  clip-path: inset(0 100% 0 0);
+  animation: hs-print 0.2s var(--hs-out) 0.06s forwards;
+}
+
+/* Monumental designation — printed at the carriage edge */
+.hs-proj-designation {
+  position: relative;
+  z-index: 1;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(4rem, 10.5vw, 11rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.93);
+  user-select: none;
+  clip-path: inset(0 100% 0 0);
+  animation: hs-print 0.32s var(--hs-out) 0.08s forwards;
+}
+
+/* ── TRACE — the filament. The signature of the screen. ──────────
+   Three layers riding one sweep: bloom (energy field), line (resident
+   1px core), hot (white-hot overlay that cools to the hue). The sweep
+   burns bright while traversing, then settles — a machine signal
+   crossing a surface, not an interface underline. */
+.trace-line-container {
+  position: relative;
+  z-index: 1;
+  height: 1px;
+  width: 100%;
+  margin: 26px 0 30px;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+/* Energy field — pre-blurred band hugging the line. Burns at 0.85
+   during the sweep, settles to a resident 0.4 glow. */
+.trace-bloom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  bottom: -4px;
+  background: var(--proj-color);
+  filter: blur(7px);
+  opacity: 0.4;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation:
+    hs-trace-print 0.32s var(--hs-out) 0.08s both,
+    hs-bloom-settle 1.2s linear 0.08s both;
+}
+
+@keyframes hs-bloom-settle {
+  0%   { opacity: 0.85; }
+  35%  { opacity: 0.85; }
+  100% { opacity: 0.4; }
+}
+
+/* Resident core — the line that remains */
+.trace-line {
+  position: absolute;
+  inset: 0;
+  background: var(--proj-color);
+  box-shadow: 0 0 6px 0 var(--proj-glow);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: hs-trace-print 0.32s var(--hs-out) 0.08s forwards;
+}
+
+/* White-hot overlay — rides the sweep at full heat, then cools into
+   the hue over ~0.9s. The filament losing temperature. */
+.trace-hot {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.95);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation:
+    hs-trace-print 0.32s var(--hs-out) 0.08s both,
+    hs-trace-cool 0.9s linear 0.42s both;
+}
+
+@keyframes hs-trace-cool {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Descriptor — one single stagger, +100ms behind the designation */
+.hs-proj-descriptor {
+  position: relative;
+  z-index: 1;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.65;
+  max-width: 600px;
+  user-select: none;
+  clip-path: inset(0 100% 0 0);
+  animation: hs-print 0.26s var(--hs-out) 0.18s forwards;
+}
+
+/* Data line — trails the descriptor */
+.hs-proj-data {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  font-size: 0.56rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.11);
+  display: flex;
+  align-items: center;
+  clip-path: inset(0 100% 0 0);
+  animation: hs-print 0.26s var(--hs-out) 0.22s forwards;
+}
+
+.hs-proj-data-item {
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.hs-proj-data-item:last-child {
+  border-right: none;
+}
+
+.hs-proj-soon {
+  color: rgba(200,111,255,0.5);
+}
+
+/* ── Unprint — the carriage returns, the surface is erased ── */
+.hs-projection.hs-projection--unprint .hs-proj-index,
+.hs-projection.hs-projection--unprint .hs-proj-designation,
+.hs-projection.hs-projection--unprint .hs-proj-descriptor,
+.hs-projection.hs-projection--unprint .hs-proj-data {
+  animation: hs-unprint 0.24s var(--hs-out) forwards;
+}
+
+.hs-projection.hs-projection--unprint .trace-line,
+.hs-projection.hs-projection--unprint .trace-bloom,
+.hs-projection.hs-projection--unprint .trace-hot {
+  animation: hs-trace-unprint 0.24s var(--hs-out) forwards;
+}
+
+.hs-projection.hs-projection--unprint .hs-proj-wash {
+  animation: hs-wash-out 0.24s linear forwards;
+}
+
+@keyframes hs-wash-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.hs-projection.hs-projection--unprint .hs-proj-carriage {
+  animation: hs-carriage-return 0.24s var(--hs-out) both;
+}
+
+@keyframes hs-carriage-return {
+  from { transform: translateX(0);     opacity: 1; }
+  to   { transform: translateX(-100%); opacity: 1; }
+}
+
+.hs-projection.hs-projection--unprint .hs-proj-dimmer {
+  animation: none;
+}
+
+/* ── Commit shutter — darkness led by the tool's hue ──────────────
+   The stage closes left → right behind a hairline; navigation cuts
+   while the surface is dark. */
+.hs-commit-track {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  transform: translateX(-100%);
+  animation: hs-shutter 0.36s var(--hs-out) forwards;
+}
+
+@keyframes hs-shutter {
+  to { transform: translateX(0); }
+}
+
+.hs-commit-curtain {
+  position: absolute;
+  inset: 0;
+  background: #070708;
+}
+
+.hs-commit-veil {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 200px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--commit-color) 12%, transparent));
+}
+
+.hs-commit-head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  background: var(--commit-color);
+  box-shadow: 0 0 14px 0 var(--commit-glow), 0 0 3px var(--commit-color);
+}
+
+/* The console yields while the shutter closes */
+.hs-root--commit .hs-rail {
+  opacity: 0.55;
+  transition: opacity 0.3s linear;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   REGISTER 3 — TOOL RAIL
+   A machine bed holding rigid column blocks. Each column rests
+   recessed below the rail's top edge; engaging one raises it as a
+   single body toward the hairline — a control pillar unlocking
+   upward. The bed and all neighbors stay grounded. The luminance
+   physics are phosphor: instant ignite, slow decay — scrubbing
+   leaves a cooling trail behind the cursor.
+   ══════════════════════════════════════════════════════════════════ */
+
+.hs-rail {
+  --rail-recess: 34px; /* headroom above resting column tops */
+  --rail-rise:   30px; /* engaged column travel */
+
+  flex-shrink: 0;
+  height: 184px;
+  border-top: 1px solid rgba(255,255,255,0.09);
+  /* darker band at the top — the recess reads as depth, not padding */
+  background: linear-gradient(
+    180deg,
+    rgba(2,2,3,0.85) 0,
+    rgba(4,4,5,0.62) var(--rail-recess),
+    rgba(4,4,5,0.62) 100%
+  );
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+}
+
+.hs-rail::-webkit-scrollbar { display: none; }
+
+/* Top hairline */
+.hs-rail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.13) 20%, rgba(255,255,255,0.13) 80%, transparent 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Category group — micro-caption floats above the slats */
+.hs-rail-group {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.055);
+  position: relative;
+}
+
+.hs-rail-group:last-child {
+  border-right: none;
+}
+
+.hs-rail-group-label {
+  position: absolute;
+  top: 9px;
+  left: 16px;
+  font-size: 0.46rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.08);
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 4; /* above risen columns — captions are etched on the bed */
+  transition: color 0.5s var(--hs-decay);
+}
+
+.hs-rail-group:hover .hs-rail-group-label {
+  color: rgba(255,255,255,0.2);
+  transition-duration: 0.1s;
+}
+
+.hs-rail-slats {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+
+/* ── ToolSlat — socket + column ──────────────────────────────────── */
+
+/* The socket: full rail height, fixed geometry. It never moves, so
+   the hit target is stable under the cursor while the column rises. */
+.hs-slat {
+  position: relative;
+  min-width: 122px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.hs-slat:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+}
+
+.hs-slat-soon {
+  cursor: default;
+  opacity: 0.26;
+  pointer-events: none;
+}
+
+/* The column: one rigid machined block — face, top edge, tick, text.
+   Rests recessed in the bed; rises as a single body on engage.
+   Engage is heavy actuation (~260ms, damped stop); release is a slow
+   hydraulic settle (~550ms). No scaling, no bounce, ever. */
+.hs-slat-column {
+  position: relative;
+  width: 100%;
+  height: calc(100% - var(--rail-recess, 34px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0 18px 18px;
+  /* machined face — lit faintly from above */
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.028) 0%,
+    rgba(255,255,255,0.009) 45%,
+    rgba(255,255,255,0.004) 100%
+  );
+  border-top: 1px solid rgba(255,255,255,0.07);
+  border-right: 1px solid rgba(255,255,255,0.04);
+  transform: translateY(0);
+  box-shadow: none;
+  transition:
+    transform 0.55s var(--hs-decay),
+    background 0.6s var(--hs-decay),
+    border-color 0.6s var(--hs-decay),
+    box-shadow 0.6s var(--hs-decay),
+    opacity 0.45s var(--hs-decay);
+  will-change: transform;
+}
+
+/* Focus isolation — while one station is engaged, its neighbors
+   recede a step into the dark. The bed itself never moves. */
+.hs-rail:has(.hs-slat:not(.hs-slat-soon):hover) .hs-slat:not(:hover) .hs-slat-column {
+  opacity: 0.45;
+}
+
+.hs-slat:last-child .hs-slat-column {
+  border-right: none;
+}
+
+/* Engaged: the column rises and the tick becomes a light source —
+   its hue washes down the machined face and tints the top edge (the
+   app's color-mix border grammar). Electrically alive, not painted. */
+.hs-slat:not(.hs-slat-soon):hover .hs-slat-column,
+.hs-slat-active .hs-slat-column {
+  transform: translateY(calc(-1 * var(--rail-rise, 30px)));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--slat-color) 14%, transparent) 0%,
+    color-mix(in srgb, var(--slat-color) 4%, transparent) 38%,
+    rgba(255,255,255,0.012) 70%,
+    rgba(255,255,255,0.006) 100%
+  );
+  border-top-color: color-mix(in srgb, var(--slat-color) 45%, rgba(255,255,255,0.16));
+  /* the risen block clears the bed — it casts back into the recess */
+  box-shadow:
+    0 14px 24px -12px rgba(0,0,0,0.85),
+    0 0 32px -6px color-mix(in srgb, var(--slat-color) 14%, transparent);
+  transition:
+    transform 0.26s var(--hs-rise),
+    background 0.08s linear,
+    border-color 0.08s linear,
+    box-shadow 0.26s var(--hs-rise);
+}
+
+/* Accent tick — sits on the column's top edge. Ignite is electrical
+   (~60ms linear, a relay closing); decay is phosphor (~900ms,
+   lingering tail). The lamp-test animation runs once at boot,
+   cascading by index. */
+.hs-slat-tick {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--slat-color, var(--accent-primary, #ff8c00));
+  opacity: 0.35;
+  transform: scaleX(0.22);
+  transform-origin: left center;
+  transition:
+    opacity 0.9s var(--hs-decay),
+    transform 0.9s var(--hs-decay),
+    box-shadow 0.9s var(--hs-decay);
+  z-index: 3;
+  animation: hs-lamp-test 0.55s linear both;
+  animation-delay: calc(300ms + var(--lamp-delay, 0ms));
+}
+
+@keyframes hs-lamp-test {
+  0%   { opacity: 0.35; transform: scaleX(0.22); }
+  30%  { opacity: 1;    transform: scaleX(1); }
+  45%  { opacity: 1;    transform: scaleX(1); }
+  100% { opacity: 0.35; transform: scaleX(0.22); }
+}
+
+.hs-slat:not(.hs-slat-soon):hover .hs-slat-tick,
+.hs-slat-active .hs-slat-tick {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow:
+    0 0 14px 0 var(--slat-glow, rgba(255,140,0,0.4)),
+    0 0 4px var(--slat-color, #ff8c00),
+    0 3px 18px -2px var(--slat-glow, rgba(255,140,0,0.4));
+  transition-duration: 0.06s; /* ignite */
+}
+
+/* Text block — static within the column; it travels only because the
+   column does. Never animated independently. */
+.hs-slat-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.hs-slat-index {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: rgba(255,255,255,0.14);
+  user-select: none;
+  transition: color 0.45s var(--hs-decay);
+}
+
+/* Label: muted at rest → primary on hover, one beat after the tick
+   (ka-chunk). Never accent — color belongs to tick and trace only. */
+.hs-slat-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1.2;
+  transition:
+    color 0.45s var(--hs-decay),
+    letter-spacing 0.45s var(--hs-decay);
+}
+
+/* The mono index takes the hue on engage — a small electrical detail
+   inside the station's own light; the label itself stays primary. */
+.hs-slat:not(.hs-slat-soon):hover .hs-slat-index,
+.hs-slat-active .hs-slat-index {
+  color: color-mix(in srgb, var(--slat-color) 80%, white);
+  transition: color 0.08s linear 0.04s;
+}
+
+.hs-slat:not(.hs-slat-soon):hover .hs-slat-label,
+.hs-slat-active .hs-slat-label {
+  color: rgba(255,255,255,0.93);
+  letter-spacing: 0.16em;
+  transition:
+    color 0.08s linear 0.04s,
+    letter-spacing 0.26s var(--hs-rise);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-root *,
+  .hs-root *::before,
+  .hs-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hs-grain,
+  .hs-standby-cursor {
+    animation: none !important;
+  }
+}

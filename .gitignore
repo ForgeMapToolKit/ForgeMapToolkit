@@ -1,55 +1,87 @@
-# Dependencies
+# ── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
-package-lock.json
+.pnp
+.pnp.js
 
-# Build outputs
+# ── Build outputs ─────────────────────────────────────────────────────────────
 dist/
 dist-electron/
 build/
 out/
+release/
+.webpack/
 
-# Development
-.vscode/
-.idea/
+# ── Vite ──────────────────────────────────────────────────────────────────────
+.vite/
+.cache/
+
+# ── Electron Builder ──────────────────────────────────────────────────────────
+app-builds/
+
+# ── Auth & secrets (CRITICAL — never commit) ──────────────────────────────────
+contrib_auth.json
+contrib_auth_meta.json
+contrib_auth_token.bin
+contrib_token.bin
+contrib_token.json
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+.env
+.env.*
+!.env.example
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+electron-builder.log
+forge-*.log
 
-# OS files
+# ── OS files ──────────────────────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
-*.swp
-*.swo
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Temporary files
-*.tmp
-*.temp
-~*
-*.bak
-
-# Editor directories and files
-.idea
-.vscode/*
+# ── Editors ───────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
 !.vscode/extensions.json
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*.iml
 
-# Testing
+# Windows shortcuts (accidentally committed)
+*.lnk
+
+# ── Temporary / backup files ──────────────────────────────────────────────────
+*.tmp
+*.temp
+*.bak
+*.orig
+~*
+
+# ── Test coverage ─────────────────────────────────────────────────────────────
 coverage/
 .nyc_output/
 
-# Electron
-.webpack/
-.cache/
+# ── Package manager lock files (optional — remove line if you want to commit) ──
+# package-lock.json
+# yarn.lock
+
+# ── Rust launcher build ───────────────────────────────────────────────────────
+launcher/target/

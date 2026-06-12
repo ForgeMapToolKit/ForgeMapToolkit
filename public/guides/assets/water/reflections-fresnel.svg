@@ -1,0 +1,54 @@
+<svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="220" fill="#0e0e10"/>
+
+  <!-- Title -->
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">FRESNEL EFFECT — ANGLE VS REFLECTIVITY</text>
+
+  <!-- Water surface -->
+  <line x1="24" y1="140" x2="656" y2="140" stroke="rgba(200,111,255,0.25)" stroke-width="1.5"/>
+  <text x="30" y="153" fill="#383838" font-size="7.5" letter-spacing="0.07em">WATER SURFACE</text>
+
+  <!-- Slight shimmer fill -->
+  <rect x="24" y="140" width="632" height="18" fill="rgba(100,160,255,0.05)"/>
+
+  <!-- Scenario A: steep angle (looking straight down) -->
+  <!-- Eye -->
+  <circle cx="140" cy="60" r="5" fill="none" stroke="#C86FFF" stroke-width="1.2"/>
+  <line x1="140" y1="65" x2="140" y2="140" stroke="rgba(200,111,255,0.4)" stroke-width="1" stroke-dasharray="4,3"/>
+  <!-- Refracted ray going down (see-through) -->
+  <line x1="140" y1="140" x2="140" y2="195" stroke="rgba(100,180,255,0.35)" stroke-width="1" stroke-dasharray="3,4"/>
+  <!-- Reflection ray (weak) -->
+  <line x1="140" y1="140" x2="100" y2="60" stroke="rgba(200,111,255,0.15)" stroke-width="1"/>
+
+  <text x="140" y="48" text-anchor="middle" fill="#C86FFF" font-size="8" font-weight="700" letter-spacing="0.06em">STEEP ANGLE</text>
+  <text x="140" y="174" text-anchor="middle" fill="rgba(100,180,255,0.6)" font-size="7.5">sees through</text>
+  <text x="140" y="185" text-anchor="middle" fill="rgba(100,180,255,0.6)" font-size="7.5">terrain below</text>
+
+  <!-- Low reflectivity indicator -->
+  <rect x="60" y="78" width="68" height="16" fill="rgba(200,111,255,0.04)" stroke="rgba(200,111,255,0.15)" stroke-width="1"/>
+  <text x="94" y="89" text-anchor="middle" fill="rgba(200,111,255,0.45)" font-size="7" letter-spacing="0.05em">LOW REFLECT</text>
+
+  <!-- Divider -->
+  <line x1="340" y1="30" x2="340" y2="200" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Scenario B: shallow angle (horizon) -->
+  <!-- Eye -->
+  <circle cx="530" cy="130" r="5" fill="none" stroke="#C86FFF" stroke-width="1.2"/>
+  <line x1="535" y1="130" x2="620" y2="140" stroke="rgba(200,111,255,0.4)" stroke-width="1" stroke-dasharray="4,3"/>
+  <!-- Reflection ray (strong) -->
+  <line x1="620" y1="140" x2="656" y2="120" stroke="#C86FFF" stroke-width="1.5" opacity="0.6"/>
+  <!-- Refracted ray (weak) -->
+  <line x1="620" y1="140" x2="640" y2="195" stroke="rgba(100,180,255,0.12)" stroke-width="1" stroke-dasharray="2,5"/>
+
+  <text x="530" y="116" text-anchor="middle" fill="#C86FFF" font-size="8" font-weight="700" letter-spacing="0.06em">SHALLOW ANGLE</text>
+  <text x="655" y="110" text-anchor="end" fill="#C86FFF" font-size="7.5">mirror-like</text>
+  <text x="655" y="121" text-anchor="end" fill="#C86FFF" font-size="7.5">sky reflected</text>
+
+  <!-- High reflectivity indicator -->
+  <rect x="548" y="60" width="90" height="16" fill="rgba(200,111,255,0.07)" stroke="rgba(200,111,255,0.3)" stroke-width="1"/>
+  <text x="593" y="71" text-anchor="middle" fill="#C86FFF" font-size="7" letter-spacing="0.05em">HIGH REFLECT</text>
+
+  <!-- Formula bar -->
+  <rect x="24" y="195" width="632" height="18" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <text x="340" y="207" text-anchor="middle" fill="#444" font-size="7.5" letter-spacing="0.05em">fresnel = F0 + (1 − F0) × (1 − cosθ)⁵    ·    F0 = 0.08 (hardcoded)    ·    SkyReflection multiplies the result</text>
+</svg>

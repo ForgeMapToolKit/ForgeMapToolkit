@@ -1,45 +1,73 @@
 {
-  "name": "map-tool-suite",
-  "version": "1.0.0",
-  "description": "Professional Map Creation Toolkit - Desktop Edition",
+  "name": "ForgeMapToolkit",
+  "version": "0.1.0-beta.1",
+  "description": "Advanced Mapping Toolkit",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node utils/generate-csp-hashes.js",
     "build": "vite build",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "npm run build && electron-builder",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "release:beta": "standard-version --prerelease beta",
+    "release": "standard-version"
   },
   "dependencies": {
+    "@uiw/react-color": "^2.9.6",
+    "adm-zip": "^0.5.16",
+    "highlight.js": "^11.11.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.24",
     "concurrently": "^8.2.2",
     "electron": "^40.4.0",
-    "electron-builder": "^26.7.0",
+    "electron-builder": "^26.8.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "vite": "^7.3.1",
-    "wait-on": "^7.2.0"
+    "wait-on": "^9.0.10"
   },
   "build": {
-    "appId": "com.maptoolsuite.app",
-    "productName": "Map Tool Suite",
+    "appId": "com.ForgeMapToolkit.app",
+    "productName": "ForgeMapToolkit",
+    "forceCodeSigning": false,
     "files": [
       "dist/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      "public/**/*",
+      "data/**/*",
+      "utils/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/sharp/**/*",
+      "node_modules/@img/**/*"
     ],
     "directories": {
       "buildResources": "assets"
     },
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+      "signtoolOptions": {
+        "sign": "./build/skip-sign.js"
+      },
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/assets/icons/App/icon.ico"
     },
     "mac": {
       "target": "dmg",
@@ -47,7 +75,7 @@
     },
     "linux": {
       "target": "AppImage",
-      "icon": "assets/icon.png"
+      "icon": "public/assets/icons/App/icon.png"
     }
   }
 }

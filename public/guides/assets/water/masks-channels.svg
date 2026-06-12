@@ -1,0 +1,62 @@
+<svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="220" fill="#0e0e10"/>
+
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">UtilityTextureC (waterMap.dds) — FOUR CHANNELS</text>
+
+  <!-- File box -->
+  <rect x="24" y="40" width="140" height="130" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="94" y="58" text-anchor="middle" fill="#555" font-size="8" letter-spacing="0.06em">waterMap.dds</text>
+  <!-- RGBA bands inside -->
+  <rect x="34"  y="66" width="120" height="22" fill="rgba(255,80,80,0.18)" stroke="rgba(255,80,80,0.25)" stroke-width="0.5"/>
+  <text x="94"  y="81" text-anchor="middle" fill="rgba(255,120,120,0.9)" font-size="8" font-weight="700" letter-spacing="0.06em">R</text>
+  <rect x="34"  y="90" width="120" height="22" fill="rgba(80,200,80,0.14)" stroke="rgba(80,200,80,0.22)" stroke-width="0.5"/>
+  <text x="94"  y="105" text-anchor="middle" fill="rgba(120,220,120,0.9)" font-size="8" font-weight="700" letter-spacing="0.06em">G</text>
+  <rect x="34"  y="114" width="120" height="22" fill="rgba(80,120,255,0.16)" stroke="rgba(100,140,255,0.22)" stroke-width="0.5"/>
+  <text x="94"  y="129" text-anchor="middle" fill="rgba(130,160,255,0.9)" font-size="8" font-weight="700" letter-spacing="0.06em">B</text>
+  <rect x="34"  y="138" width="120" height="22" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
+  <text x="94"  y="153" text-anchor="middle" fill="rgba(220,220,220,0.7)" font-size="8" font-weight="700" letter-spacing="0.06em">A</text>
+
+  <!-- Arrows and boxes -->
+  <!-- R -->
+  <line x1="164" y1="77" x2="206" y2="77" stroke="rgba(255,100,100,0.3)" stroke-width="1"/>
+  <polygon points="204,73 212,77 204,81" fill="rgba(255,100,100,0.3)"/>
+  <rect x="212" y="58" width="200" height="38" fill="rgba(255,80,80,0.05)" stroke="rgba(255,80,80,0.2)" stroke-width="1"/>
+  <rect x="212" y="58" width="3" height="38" fill="rgba(255,80,80,0.6)"/>
+  <text x="224" y="73" fill="rgba(255,130,130,0.9)" font-size="8" font-weight="700" letter-spacing="0.07em">SHADOW MASK</text>
+  <text x="224" y="86" fill="#555" font-size="7">1.0=lit · 0.0=shadowed sun specular</text>
+
+  <!-- G -->
+  <line x1="164" y1="101" x2="206" y2="101" stroke="rgba(80,200,80,0.3)" stroke-width="1"/>
+  <polygon points="204,97 212,101 204,105" fill="rgba(80,200,80,0.3)"/>
+  <rect x="212" y="84" width="200" height="38" fill="rgba(80,200,80,0.04)" stroke="rgba(80,200,80,0.18)" stroke-width="1"/>
+  <rect x="212" y="84" width="3" height="38" fill="rgba(80,200,80,0.55)"/>
+  <text x="224" y="99" fill="rgba(120,220,120,0.9)" font-size="8" font-weight="700" letter-spacing="0.07em">WATER DEPTH</text>
+  <text x="224" y="112" fill="#555" font-size="7">auto-generated · drives ColorLerp blend</text>
+
+  <!-- B -->
+  <line x1="164" y1="125" x2="206" y2="125" stroke="rgba(80,120,255,0.3)" stroke-width="1"/>
+  <polygon points="204,121 212,125 204,129" fill="rgba(80,120,255,0.3)"/>
+  <rect x="212" y="110" width="200" height="38" fill="rgba(80,120,255,0.04)" stroke="rgba(80,120,255,0.18)" stroke-width="1"/>
+  <rect x="212" y="110" width="3" height="38" fill="rgba(80,120,255,0.55)"/>
+  <text x="224" y="125" fill="rgba(130,160,255,0.9)" font-size="8" font-weight="700" letter-spacing="0.07em">SHORELINE MASK</text>
+  <text x="224" y="138" fill="#555" font-size="7">auto-generated · water-to-land edge fade</text>
+
+  <!-- A -->
+  <line x1="164" y1="149" x2="206" y2="149" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <polygon points="204,145 212,149 204,153" fill="rgba(255,255,255,0.15)"/>
+  <rect x="212" y="136" width="200" height="38" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <rect x="212" y="136" width="3" height="38" fill="rgba(255,255,255,0.35)"/>
+  <text x="224" y="151" fill="rgba(200,200,200,0.8)" font-size="8" font-weight="700" letter-spacing="0.07em">FOAM REDUCTION</text>
+  <text x="224" y="164" fill="#555" font-size="7">1.0=no foam · 0.0=full foam allowed</text>
+
+  <!-- Usage note -->
+  <rect x="428" y="58" width="228" height="116" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <text x="440" y="75" fill="#383838" font-size="8" font-weight="700" letter-spacing="0.09em">EDIT STATUS</text>
+  <text x="440" y="92"  fill="rgba(255,130,130,0.7)" font-size="7.5">R  — paint manually for shadows</text>
+  <text x="440" y="108" fill="rgba(120,220,120,0.6)" font-size="7.5">G  — auto-generated, rarely edited</text>
+  <text x="440" y="124" fill="rgba(130,160,255,0.6)" font-size="7.5">B  — auto-generated, rarely edited</text>
+  <text x="440" y="140" fill="rgba(200,200,200,0.6)" font-size="7.5">A  — paint to control foam zones</text>
+  <line x1="440" y1="148" x2="644" y2="148" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <text x="440" y="161" fill="#2e2e2e" font-size="7">If shoreline looks wrong: check B</text>
+  <text x="440" y="172" fill="#2e2e2e" font-size="7">If foam is in wrong places: check A</text>
+</svg>

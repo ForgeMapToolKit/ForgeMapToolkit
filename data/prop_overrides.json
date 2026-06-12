@@ -1,0 +1,28 @@
+{
+  "_comment": "Prop preview overrides. Place this file next to main.js. Keys are always the full gamePath (/env/Biome/Props/Type/File_prop.bp) — this avoids conflicts between same-named props in different biomes.",
+
+  "albedo_overrides": {
+    "_comment": "gamePath -> exact PNG filename in your GitHub /props/ folder",
+
+    "/env/DevTest/Rock01_prop.bp": "Rock02_albedo.png",
+    "/env/DevTest/Rock02_prop.bp": "Rock02_albedo.png",
+    "/env/Evergreen/Props/Rocks/Rock02_prop.bp": "Rock01_albedo.png",
+    "/env/Evergreen/Props/Trees/Oak01_s1_prop.bp": "Oak01_s1_albedo.png",
+    "/env/Evergreen/Props/Trees/Oak01_s2_prop.bp": "Oak01_s1_albedo.png",
+    "/env/Evergreen/Props/Trees/Oak01_s3_prop.bp": "Oak01_s1_albedo.png",
+    "/env/Evergreen/Props/Trees/Groups/Oak01_Group1_prop.bp": "Oak01_s1_albedo.png",
+    "/env/Evergreen/Props/Trees/Groups/Oak01_Group2_prop.bp": "Oak01_s1_albedo.png",
+    "/env/Lava/Props/Trees/xDead01_s2_prop.bp": "XDead01_s1_albedo.png",
+    "/env/Lava/Props/Trees/xDead01_s3_prop.bp": "XDead01_s1_albedo.png",
+    "/env/RedRocks/Props/Boulder01_prop.bp": "Rock_SM01_albedo.png",
+    "/env/RedRocks/Props/Boulder02_prop.bp": "Rock_SM01_albedo.png",
+    "/env/RedRocks/Props/Boulder03_prop.bp": "Rock_SM01_albedo.png",
+    "/env/RedRocks/Props/Boulder04_prop.bp": "Rock_SM01_albedo.png",
+    "/env/RedRocks/Props/Boulder05_prop.bp": "Rock_SM01_albedo.png",
+    "/env/RedRocks/Props/Boulder06_prop.bp": "Rock_SM01_albedo.png",
+    "/env/Swamp/Props/Rocks/boulder01_prop.bp": "swamp_boulder01_albedo.png",
+    "/env/Swamp/Props/Rocks/boulder02_prop.bp": "swamp_boulder01_albedo.png",
+    "/env/Swamp/Props/Rocks/boulder03_prop.bp": "swamp_boulder01_albedo.png"
+}, 
+  "no_preview": []
+}

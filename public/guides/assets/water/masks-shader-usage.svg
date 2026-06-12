@@ -1,0 +1,60 @@
+<svg viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="210" fill="#0e0e10"/>
+
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">CHANNEL USAGE IN HighFidelityPS</text>
+
+  <!-- Texture source -->
+  <rect x="24" y="40" width="110" height="120" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <text x="79" y="58" text-anchor="middle" fill="#555" font-size="7.5" letter-spacing="0.06em">UtilityTextureC</text>
+  <rect x="34" y="66" width="90" height="18" fill="rgba(255,80,80,0.15)" stroke="rgba(255,80,80,0.2)" stroke-width="0.5"/>
+  <text x="79" y="79" text-anchor="middle" fill="rgba(255,130,130,0.9)" font-size="7.5" font-weight="700">.r</text>
+  <rect x="34" y="87" width="90" height="18" fill="rgba(80,200,80,0.12)" stroke="rgba(80,200,80,0.18)" stroke-width="0.5"/>
+  <text x="79" y="100" text-anchor="middle" fill="rgba(120,220,120,0.9)" font-size="7.5" font-weight="700">.g</text>
+  <rect x="34" y="108" width="90" height="18" fill="rgba(80,120,255,0.12)" stroke="rgba(100,140,255,0.18)" stroke-width="0.5"/>
+  <text x="79" y="121" text-anchor="middle" fill="rgba(130,160,255,0.9)" font-size="7.5" font-weight="700">.b</text>
+  <rect x="34" y="129" width="90" height="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+  <text x="79" y="142" text-anchor="middle" fill="rgba(200,200,200,0.7)" font-size="7.5" font-weight="700">.a</text>
+
+  <!-- Lines from channels to usage boxes -->
+  <!-- .r → sun shadow -->
+  <line x1="134" y1="75"  x2="184" y2="75"  stroke="rgba(255,100,100,0.3)" stroke-width="1"/>
+  <polygon points="182,71 190,75 182,79" fill="rgba(255,100,100,0.3)"/>
+  <rect x="190" y="58" width="220" height="34" fill="rgba(255,80,80,0.04)" stroke="rgba(255,80,80,0.18)" stroke-width="1"/>
+  <rect x="190" y="58" width="3" height="34" fill="rgba(255,80,80,0.55)"/>
+  <text x="202" y="72" fill="rgba(255,130,130,0.9)" font-size="7.5" font-weight="700" letter-spacing="0.06em">SUN SHADOW MASK</text>
+  <text x="202" y="83" fill="#555" font-size="7">sunReflection *= waterTexture.r</text>
+
+  <!-- .g → depth (used in two places) -->
+  <line x1="134" y1="96"  x2="184" y2="96"  stroke="rgba(80,200,80,0.3)" stroke-width="1"/>
+  <polygon points="182,92 190,96 182,100" fill="rgba(80,200,80,0.3)"/>
+  <rect x="190" y="96" width="220" height="34" fill="rgba(80,200,80,0.03)" stroke="rgba(80,200,80,0.15)" stroke-width="1"/>
+  <rect x="190" y="96" width="3" height="34" fill="rgba(80,200,80,0.5)"/>
+  <text x="202" y="110" fill="rgba(120,220,120,0.9)" font-size="7.5" font-weight="700" letter-spacing="0.06em">WATER DEPTH</text>
+  <text x="202" y="121" fill="#555" font-size="7">waterDepth = waterTexture.g  →  lerp + refraction</text>
+
+  <!-- .b → foam suppression -->
+  <line x1="134" y1="117" x2="184" y2="117" stroke="rgba(80,120,255,0.3)" stroke-width="1"/>
+  <polygon points="182,113 190,117 182,121" fill="rgba(80,120,255,0.3)"/>
+  <rect x="190" y="134" width="220" height="34" fill="rgba(80,120,255,0.03)" stroke="rgba(80,120,255,0.15)" stroke-width="1"/>
+  <rect x="190" y="134" width="3" height="34" fill="rgba(80,120,255,0.5)"/>
+  <line x1="300" y1="117" x2="300" y2="134" stroke="rgba(80,120,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="202" y="148" fill="rgba(130,160,255,0.9)" font-size="7.5" font-weight="700" letter-spacing="0.06em">FOAM SUPPRESSION (B)</text>
+  <text x="202" y="159" fill="#555" font-size="7">foam × (1 − waterTexture.b)</text>
+
+  <!-- .a → foam suppression -->
+  <line x1="134" y1="138" x2="184" y2="138" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <polygon points="182,134 190,138 182,142" fill="rgba(255,255,255,0.15)"/>
+  <rect x="190" y="172" width="220" height="34" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <rect x="190" y="172" width="3" height="34" fill="rgba(255,255,255,0.3)"/>
+  <line x1="300" y1="138" x2="300" y2="172" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="202" y="186" fill="rgba(200,200,200,0.8)" font-size="7.5" font-weight="700" letter-spacing="0.06em">FOAM SUPPRESSION (A)</text>
+  <text x="202" y="197" fill="#555" font-size="7">foam × (1 − waterTexture.a)    white=no foam · black=foam</text>
+
+  <!-- Combined foam formula -->
+  <rect x="426" y="134" width="230" height="72" fill="rgba(200,111,255,0.03)" stroke="rgba(200,111,255,0.12)" stroke-width="1"/>
+  <rect x="426" y="134" width="3" height="72" fill="#C86FFF" opacity="0.4"/>
+  <text x="438" y="152" fill="#C86FFF" font-size="7.5" font-weight="700" letter-spacing="0.08em">FOAM FINAL</text>
+  <text x="438" y="167" fill="#666" font-size="7.5">lerp(water, crestColor,</text>
+  <text x="438" y="180" fill="#666" font-size="7.5">  (1−a) × (1−b) × waveCrest)</text>
+  <text x="438" y="198" fill="#383838" font-size="7">both channels multiply foam weight</text>
+</svg>

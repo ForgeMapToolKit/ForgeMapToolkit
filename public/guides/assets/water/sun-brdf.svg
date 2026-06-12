@@ -1,0 +1,49 @@
+<svg viewBox="0 0 680 195" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="195" fill="#0e0e10"/>
+
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">COOK-TORRANCE BRDF — TERMS</text>
+
+  <!-- Formula bar -->
+  <rect x="24" y="38" width="632" height="26" fill="rgba(200,111,255,0.04)" stroke="rgba(200,111,255,0.15)" stroke-width="1"/>
+  <text x="340" y="55" text-anchor="middle" fill="#ccc" font-size="10" letter-spacing="0.04em">specular  =  (NDF · G · F) / (4 · NdotV · NdotL)  ×  SunColor  ×  NdotL</text>
+
+  <!-- NDF box -->
+  <rect x="24" y="80" width="148" height="68" fill="rgba(200,111,255,0.04)" stroke="rgba(200,111,255,0.2)" stroke-width="1"/>
+  <rect x="24" y="80" width="3" height="68" fill="#C86FFF" opacity="0.7"/>
+  <text x="36" y="97" fill="#C86FFF" font-size="8" font-weight="700" letter-spacing="0.07em">NDF (GGX)</text>
+  <text x="36" y="110" fill="#777" font-size="7.5">Normal Distribution</text>
+  <text x="36" y="122" fill="#777" font-size="7.5">Function</text>
+  <text x="36" y="137" fill="#555" font-size="7">How many microfacets</text>
+  <text x="36" y="147" fill="#555" font-size="7">align with half-vector H</text>
+
+  <!-- G box -->
+  <rect x="188" y="80" width="148" height="68" fill="rgba(200,111,255,0.03)" stroke="rgba(200,111,255,0.15)" stroke-width="1"/>
+  <rect x="188" y="80" width="3" height="68" fill="rgba(200,111,255,0.5)"/>
+  <text x="200" y="97" fill="rgba(200,111,255,0.8)" font-size="8" font-weight="700" letter-spacing="0.07em">G (Smith)</text>
+  <text x="200" y="110" fill="#777" font-size="7.5">Geometry / Shadowing</text>
+  <text x="200" y="122" fill="#777" font-size="7.5">Masking term</text>
+  <text x="200" y="137" fill="#555" font-size="7">Microfacets blocking</text>
+  <text x="200" y="147" fill="#555" font-size="7">each other (self-shadow)</text>
+
+  <!-- F box -->
+  <rect x="352" y="80" width="148" height="68" fill="rgba(200,111,255,0.02)" stroke="rgba(200,111,255,0.1)" stroke-width="1"/>
+  <rect x="352" y="80" width="3" height="68" fill="rgba(200,111,255,0.35)"/>
+  <text x="364" y="97" fill="rgba(200,111,255,0.6)" font-size="8" font-weight="700" letter-spacing="0.07em">F (Schlick)</text>
+  <text x="364" y="110" fill="#777" font-size="7.5">Fresnel term</text>
+  <text x="364" y="122" fill="#777" font-size="7.5">F0 = 0.08</text>
+  <text x="364" y="137" fill="#555" font-size="7">Reflectance at normal</text>
+  <text x="364" y="147" fill="#555" font-size="7">incidence (water ≈ 0.08)</text>
+
+  <!-- Roughness box -->
+  <rect x="516" y="80" width="140" height="68" fill="rgba(255,140,0,0.03)" stroke="rgba(255,140,0,0.15)" stroke-width="1"/>
+  <rect x="516" y="80" width="3" height="68" fill="#ff8c00" opacity="0.6"/>
+  <text x="528" y="97" fill="#ff8c00" font-size="8" font-weight="700" letter-spacing="0.07em">ROUGHNESS</text>
+  <text x="528" y="110" fill="#777" font-size="7.5">drives NDF + G</text>
+  <text x="528" y="122" fill="#777" font-size="7.5">= 1 − Shininess/200</text>
+  <text x="528" y="137" fill="#555" font-size="7">The only map-controlled</text>
+  <text x="528" y="147" fill="#555" font-size="7">input to the BRDF</text>
+
+  <!-- Shadow mask note -->
+  <rect x="24" y="163" width="632" height="22" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <text x="340" y="178" text-anchor="middle" fill="#444" font-size="7.5" letter-spacing="0.04em">sunReflection  ×=  UtilityTextureC.red  (shadow mask)  ×  (1 − unitAlpha)  (suppressed under units)  then added to water</text>
+</svg>

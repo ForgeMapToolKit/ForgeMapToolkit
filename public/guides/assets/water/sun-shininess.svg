@@ -1,0 +1,51 @@
+<svg viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="210" fill="#0e0e10"/>
+
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">SUNSHININESS — SPECULAR HIGHLIGHT SIZE</text>
+
+  <!-- Water base bar -->
+  <rect x="24" y="100" width="632" height="30" fill="rgba(100,140,200,0.08)" stroke="rgba(100,140,200,0.12)" stroke-width="1"/>
+  <text x="30" y="155" fill="#383838" font-size="7.5" letter-spacing="0.07em">WATER SURFACE</text>
+
+  <!-- Low shininess (10-20): wide diffuse highlight -->
+  <defs>
+    <radialGradient id="specLow" cx="50%" cy="100%" r="60%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <radialGradient id="specMid" cx="50%" cy="100%" r="30%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.45)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <radialGradient id="specHigh" cx="50%" cy="100%" r="12%">
+      <stop offset="0%"   stop-color="rgba(255,255,240,0.9)"/>
+      <stop offset="60%"  stop-color="rgba(255,255,200,0.2)"/>
+      <stop offset="100%" stop-color="rgba(255,255,200,0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Low -->
+  <ellipse cx="130" cy="100" rx="90" ry="20" fill="url(#specLow)"/>
+  <text x="130" y="50" text-anchor="middle" fill="#C86FFF" font-size="8" font-weight="700" letter-spacing="0.06em">SHININESS 15</text>
+  <text x="130" y="63" text-anchor="middle" fill="#777" font-size="7.5">roughness 0.925</text>
+  <text x="130" y="76" text-anchor="middle" fill="#555" font-size="7">wide · soft · overcast</text>
+  <line x1="130" y1="80" x2="130" y2="98" stroke="rgba(200,111,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Mid -->
+  <ellipse cx="340" cy="100" rx="48" ry="14" fill="url(#specMid)"/>
+  <text x="340" y="50" text-anchor="middle" fill="#C86FFF" font-size="8" font-weight="700" letter-spacing="0.06em">SHININESS 80</text>
+  <text x="340" y="63" text-anchor="middle" fill="#777" font-size="7.5">roughness 0.60</text>
+  <text x="340" y="76" text-anchor="middle" fill="#555" font-size="7">moderate · standard ocean</text>
+  <line x1="340" y1="80" x2="340" y2="98" stroke="rgba(200,111,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- High -->
+  <ellipse cx="560" cy="100" rx="16" ry="7" fill="url(#specHigh)"/>
+  <text x="560" y="50" text-anchor="middle" fill="#C86FFF" font-size="8" font-weight="700" letter-spacing="0.06em">SHININESS 180</text>
+  <text x="560" y="63" text-anchor="middle" fill="#777" font-size="7.5">roughness 0.10</text>
+  <text x="560" y="76" text-anchor="middle" fill="#555" font-size="7">tight · sharp · glassy calm</text>
+  <line x1="560" y1="80" x2="560" y2="98" stroke="rgba(200,111,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Formula -->
+  <rect x="24" y="170" width="632" height="22" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <text x="340" y="185" text-anchor="middle" fill="#444" font-size="7.5" letter-spacing="0.05em">roughness = max(1 − SunShininess / 200, 0.01)   ·   effective ceiling: SunShininess = 200 → roughness 0.01</text>
+</svg>

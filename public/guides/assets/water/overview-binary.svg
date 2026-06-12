@@ -1,0 +1,99 @@
+<svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="320" fill="#0e0e10"/>
+
+  <!-- Title -->
+  <text x="24" y="28" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">BINARY READ ORDER — .scmap WATER BLOCK</text>
+
+  <!-- Column headers -->
+  <text x="24"  y="52" fill="#383838" font-size="7.5" letter-spacing="0.09em">OFFSET</text>
+  <text x="100" y="52" fill="#383838" font-size="7.5" letter-spacing="0.09em">FIELD</text>
+  <text x="310" y="52" fill="#383838" font-size="7.5" letter-spacing="0.09em">TYPE</text>
+  <text x="430" y="52" fill="#383838" font-size="7.5" letter-spacing="0.09em">NOTE</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="58" x2="656" y2="58" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+  <!-- Rows -->
+  <!-- Row data: [y, offset, field, type, note, accent?] -->
+
+  <!-- HasWater -->
+  <rect x="24" y="64" width="3" height="18" fill="#C86FFF" opacity="0.7"/>
+  <text x="36"  y="76" fill="#555" font-size="8" letter-spacing="0.04em">+0</text>
+  <text x="100" y="76" fill="#ccc" font-size="8.5" letter-spacing="0.03em">HasWater</text>
+  <text x="310" y="76" fill="#888" font-size="8" letter-spacing="0.04em">byte</text>
+  <text x="430" y="76" fill="#555" font-size="8" letter-spacing="0.03em">0 = no water, 1 = has water</text>
+
+  <!-- Elevation -->
+  <rect x="24" y="86" width="3" height="18" fill="rgba(200,111,255,0.35)"/>
+  <text x="36"  y="98" fill="#555" font-size="8">+1</text>
+  <text x="100" y="98" fill="#ccc" font-size="8.5">Elevation</text>
+  <text x="310" y="98" fill="#888" font-size="8">float32</text>
+  <text x="430" y="98" fill="#555" font-size="8">water surface height</text>
+
+  <!-- ElevationDeep -->
+  <rect x="24" y="106" width="3" height="18" fill="rgba(200,111,255,0.35)"/>
+  <text x="36"  y="118" fill="#555" font-size="8">+5</text>
+  <text x="100" y="118" fill="#ccc" font-size="8.5">ElevationDeep</text>
+  <text x="310" y="118" fill="#888" font-size="8">float32</text>
+  <text x="430" y="118" fill="#555" font-size="8">deep zone threshold</text>
+
+  <!-- ElevationAbyss -->
+  <rect x="24" y="126" width="3" height="18" fill="rgba(200,111,255,0.35)"/>
+  <text x="36"  y="138" fill="#555" font-size="8">+9</text>
+  <text x="100" y="138" fill="#ccc" font-size="8.5">ElevationAbyss</text>
+  <text x="310" y="138" fill="#888" font-size="8">float32</text>
+  <text x="430" y="138" fill="#555" font-size="8">abyss zone threshold</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="148" x2="656" y2="148" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+  <!-- SurfaceColor -->
+  <rect x="24" y="152" width="3" height="18" fill="rgba(255,140,0,0.5)"/>
+  <text x="36"  y="164" fill="#555" font-size="8">+13</text>
+  <text x="100" y="164" fill="#ccc" font-size="8.5">SurfaceColor</text>
+  <text x="310" y="164" fill="#888" font-size="8">Vector3 (3× float32)</text>
+  <text x="430" y="164" fill="#555" font-size="8">RGB water tint</text>
+
+  <!-- ColorLerp -->
+  <rect x="24" y="172" width="3" height="18" fill="rgba(255,140,0,0.5)"/>
+  <text x="36"  y="184" fill="#555" font-size="8">+25</text>
+  <text x="100" y="184" fill="#ccc" font-size="8.5">ColorLerp</text>
+  <text x="310" y="184" fill="#888" font-size="8">Vector2 (2× float32)</text>
+  <text x="430" y="184" fill="#555" font-size="8">depth blend range</text>
+
+  <!-- FresnelBias / FresnelPower -->
+  <rect x="24" y="192" width="3" height="18" fill="rgba(100,100,100,0.3)"/>
+  <text x="36"  y="204" fill="#2e2e2e" font-size="8">+41</text>
+  <text x="100" y="204" fill="#444" font-size="8.5" font-style="italic">FresnelBias / FresnelPower</text>
+  <text x="310" y="204" fill="#333" font-size="8">2× float32</text>
+  <text x="430" y="204" fill="#ff8c00" font-size="8">⚠ unused by shader</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="214" x2="656" y2="214" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+  <!-- NormalRepeat -->
+  <rect x="24" y="218" width="3" height="18" fill="rgba(100,200,255,0.4)"/>
+  <text x="36"  y="230" fill="#555" font-size="8">…</text>
+  <text x="100" y="230" fill="#ccc" font-size="8.5">NormalRepeat[0..3]</text>
+  <text x="310" y="230" fill="#888" font-size="8">4× float32 (block)</text>
+  <text x="430" y="230" fill="#555" font-size="8">all 4 read first, before textures</text>
+
+  <!-- WaveTexture -->
+  <rect x="24" y="238" width="3" height="18" fill="rgba(100,200,255,0.4)"/>
+  <text x="36"  y="250" fill="#555" font-size="8">…</text>
+  <text x="100" y="250" fill="#ccc" font-size="8.5">WaveTexture[0..3]</text>
+  <text x="310" y="250" fill="#888" font-size="8">4× WaveTexture structs</text>
+  <text x="430" y="250" fill="#555" font-size="8">NormalMovement + TexPath per entry</text>
+
+  <!-- Legend -->
+  <rect x="24" y="278" width="8" height="8" fill="#C86FFF" opacity="0.7"/>
+  <text x="38" y="285" fill="#555" font-size="7.5" letter-spacing="0.07em">CONTROL FLAG</text>
+  <rect x="140" y="278" width="8" height="8" fill="rgba(200,111,255,0.35)"/>
+  <text x="154" y="285" fill="#555" font-size="7.5" letter-spacing="0.07em">ELEVATION</text>
+  <rect x="240" y="278" width="8" height="8" fill="rgba(255,140,0,0.5)"/>
+  <text x="254" y="285" fill="#555" font-size="7.5" letter-spacing="0.07em">COLOR / REFRACTION</text>
+  <rect x="390" y="278" width="8" height="8" fill="rgba(100,200,255,0.4)"/>
+  <text x="404" y="285" fill="#555" font-size="7.5" letter-spacing="0.07em">WAVE DATA</text>
+  <rect x="480" y="278" width="8" height="8" fill="rgba(100,100,100,0.3)"/>
+  <text x="494" y="285" fill="#555" font-size="7.5" letter-spacing="0.07em">UNUSED LEGACY</text>
+</svg>

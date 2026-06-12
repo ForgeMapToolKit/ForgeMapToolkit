@@ -1,0 +1,344 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BANNER — Banner.css
+   The monumental identity register. One register above the TRACE
+   home screen, cut from the same plate:
+
+   - surface:  #070708 + 28px dot grid + film grain (hs-root grammar)
+   - column:   72px content register — designation, trace and data
+               line sit on the same x as the projection stage below
+   - type:     monumental Space Grotesk, white at stepped opacities;
+               MAP is the single accent word of the wordmark
+   - trace:    the filament signature under the designation — bloom,
+               resident core, white-hot sweep that cools into the hue
+   - boot:     one print pass at launch (eyebrow → designation →
+               trace → data line), then total stillness
+   - theme:    trace, logo aura and register re-tint as tools engage;
+               nothing else moves
+   ═══════════════════════════════════════════════════════════════════ */
+
+.bnr-root {
+  /* fast-out mechanical — same easing family as the home screen */
+  --bnr-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  position: relative;
+  flex-shrink: 0;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  background: #070708;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 28px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  overflow: hidden;
+  z-index: 5;
+}
+
+/* Architectural light — a faint wash from the top edge; the plate is
+   lit from above, not decorated */
+.bnr-root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(255,255,255,0.03), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.012), transparent 30%);
+}
+
+/* ── Film grain — the instrument's surface, above everything ─────── */
+
+.bnr-grain {
+  position: absolute;
+  inset: -100%;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0"/></filter><rect width="320" height="320" filter="url(%23g)"/></svg>');
+  animation: bnr-grain-shift 0.9s steps(2) infinite;
+}
+
+@keyframes bnr-grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-1.2%, 0.8%); }
+  50%  { transform: translate(0.6%, -1.1%); }
+  75%  { transform: translate(-0.8%, -0.5%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ── Print primitives — same machine as the projection stage ─────── */
+
+@keyframes bnr-print {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes bnr-trace-print {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ── Content column — the 72px register ──────────────────────────── */
+
+.bnr-stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  padding: 0 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Eyebrow — mono index line, resolves first */
+.bnr-eyebrow {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.16);
+  margin-bottom: 16px;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  animation: bnr-print 0.2s var(--bnr-out) 0.15s forwards;
+}
+
+/* Monumental designation — the suite's name in stage type.
+   Elegance through weight contrast: FORGE stands light, MAP carries
+   the accent at medium weight, TOOLKIT recedes as a ghost. Wide
+   tracking gives the letterforms room to breathe. */
+.bnr-designation {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  font-size: clamp(2.5rem, 5.2vw, 4.4rem);
+  font-weight: 300;
+  letter-spacing: 0.07em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  animation: bnr-print 0.4s var(--bnr-out) 0.2s forwards;
+}
+
+.bnr-wm-forge {
+  color: rgba(255,255,255,0.92);
+  font-weight: 300;
+}
+
+.bnr-wm-map {
+  color: var(--current-accent);
+  font-weight: 600;
+  margin-left: 0.1em;
+  text-shadow: 0 0 26px var(--current-glow);
+  transition: color 0.6s ease, text-shadow 0.6s ease;
+}
+
+.bnr-wm-toolkit {
+  color: rgba(255,255,255,0.15);
+  font-weight: 300;
+  margin-left: 0.22em;
+}
+
+/* ── The trace — a quiet rule under the designation ──────────────
+   Restrained: a hairline in the active hue that fades out to the
+   right, resting at low intensity. The boot sweep passes once with a
+   faint warm overlay, then the line settles into the architecture —
+   it underscores the name, it does not compete with it. */
+
+.bnr-trace {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  margin: 22px 0 18px;
+  overflow: visible;
+}
+
+.bnr-trace-bloom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -3px;
+  bottom: -3px;
+  background: linear-gradient(90deg, var(--current-accent), transparent 70%);
+  filter: blur(6px);
+  opacity: 0.1;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation:
+    bnr-trace-print 0.5s var(--bnr-out) 0.3s both,
+    bnr-bloom-settle 1.4s linear 0.3s both;
+  transition: background 0.6s ease;
+}
+
+@keyframes bnr-bloom-settle {
+  0%   { opacity: 0.3; }
+  35%  { opacity: 0.3; }
+  100% { opacity: 0.1; }
+}
+
+.bnr-trace-line {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--current-accent), transparent 78%);
+  opacity: 0.38;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: bnr-trace-print 0.5s var(--bnr-out) 0.3s forwards;
+  transition: background 0.6s ease;
+}
+
+.bnr-trace-hot {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.5), transparent 70%);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation:
+    bnr-trace-print 0.5s var(--bnr-out) 0.3s both,
+    bnr-trace-cool 1s linear 0.75s both;
+}
+
+@keyframes bnr-trace-cool {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── Data line — caption left, active-tool register right ────────── */
+
+.bnr-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  clip-path: inset(0 100% 0 0);
+  animation: bnr-print 0.26s var(--bnr-out) 0.5s forwards;
+}
+
+.bnr-caption {
+  font-size: 0.56rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.15);
+  white-space: nowrap;
+}
+
+/* Register — prints in the tool's hue on engage (keyed remount) */
+.bnr-register {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  clip-path: inset(0 0 0 100%);
+  animation: bnr-reg-print 0.32s var(--bnr-out) 0.05s forwards;
+}
+
+@keyframes bnr-reg-print {
+  from { clip-path: inset(0 0 0 100%); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+.bnr-reg-index {
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.16);
+}
+
+.bnr-reg-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--current-accent);
+  text-shadow: 0 0 18px var(--current-glow);
+  transition: color 0.6s ease, text-shadow 0.6s ease;
+}
+
+/* ── The mark — the seal in the right field ───────────────────────
+   Large, still, lit by the active hue. Its aura is the projection's
+   light filling the corner of the room — ambient, never decoration. */
+
+.bnr-mark {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 240px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bnr-mark-aura {
+  position: absolute;
+  inset: -40%;
+  pointer-events: none;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    color-mix(in srgb, var(--current-accent) 7%, transparent),
+    transparent 70%
+  );
+  transition: background 0.6s ease;
+}
+
+.bnr-logo {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  object-fit: contain;
+  display: block;
+  filter:
+    drop-shadow(0 0 16px var(--current-glow))
+    drop-shadow(0 0 48px var(--current-glow));
+  transition: filter 0.6s ease;
+  animation: bnr-mark-in 0.9s var(--bnr-out) 0.35s both;
+}
+
+@keyframes bnr-mark-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .bnr-mark { width: 180px; }
+  .bnr-logo { width: 104px; height: 104px; }
+}
+
+@media (max-width: 900px) {
+  .bnr-root  { height: 200px; }
+  .bnr-stage { padding: 0 40px; }
+  .bnr-mark  { width: 140px; }
+  .bnr-logo  { width: 84px; height: 84px; }
+}
+
+@media (max-width: 640px) {
+  .bnr-root    { height: 168px; }
+  .bnr-stage   { padding: 0 24px; }
+  .bnr-mark    { display: none; }
+  .bnr-eyebrow { display: none; }
+  .bnr-caption { letter-spacing: 0.18em; }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .bnr-root *,
+  .bnr-root *::before,
+  .bnr-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .bnr-grain {
+    animation: none !important;
+  }
+}

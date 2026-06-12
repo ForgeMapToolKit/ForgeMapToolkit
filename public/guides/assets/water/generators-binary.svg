@@ -1,0 +1,78 @@
+<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="'Poppins',sans-serif">
+  <rect width="680" height="300" fill="#0e0e10"/>
+
+  <text x="24" y="26" fill="#C86FFF" font-size="8.5" font-weight="700" letter-spacing="0.12em">WAVE GENERATOR — BINARY LAYOUT PER ENTRY</text>
+
+  <!-- Header: count prefix -->
+  <rect x="24" y="38" width="632" height="20" fill="rgba(255,140,0,0.05)" stroke="rgba(255,140,0,0.2)" stroke-width="1"/>
+  <rect x="24" y="38" width="3"   height="20" fill="#ff8c00" opacity="0.7"/>
+  <text x="36"  y="52" fill="#ff8c00" font-size="8" font-weight="700" letter-spacing="0.07em">COUNT PREFIX</text>
+  <text x="160" y="52" fill="#666" font-size="7.5">uint32  —  number of WaveGenerator entries that follow. Must stay in sync.</text>
+
+  <!-- Variable section -->
+  <text x="24" y="75" fill="#383838" font-size="7.5" letter-spacing="0.09em">PER ENTRY — variable length prefix</text>
+  <rect x="24" y="80" width="308" height="20" fill="rgba(200,111,255,0.05)" stroke="rgba(200,111,255,0.2)" stroke-width="1"/>
+  <rect x="24" y="80" width="3"   height="20" fill="#C86FFF" opacity="0.7"/>
+  <text x="36"  y="94" fill="#C86FFF" font-size="7.5" font-weight="700">TextureName</text>
+  <text x="130" y="94" fill="#666" font-size="7.5">null-terminated string  (variable length)</text>
+
+  <rect x="24" y="102" width="308" height="20" fill="rgba(200,111,255,0.04)" stroke="rgba(200,111,255,0.15)" stroke-width="1"/>
+  <rect x="24" y="102" width="3"   height="20" fill="rgba(200,111,255,0.5)"/>
+  <text x="36"  y="116" fill="rgba(200,111,255,0.8)" font-size="7.5" font-weight="700">RampName</text>
+  <text x="130" y="116" fill="#666" font-size="7.5">null-terminated string  (variable length)</text>
+
+  <!-- Fixed 68-byte block -->
+  <text x="24" y="138" fill="#383838" font-size="7.5" letter-spacing="0.09em">FIXED BLOCK — 68 bytes (17 × float32)</text>
+
+  <!-- Row data -->
+  <!-- Position -->
+  <rect x="24" y="144" width="632" height="18" fill="rgba(100,180,255,0.04)" stroke="rgba(100,180,255,0.12)" stroke-width="0.5"/>
+  <rect x="24" y="144" width="3" height="18" fill="rgba(100,180,255,0.5)"/>
+  <text x="36"  y="156" fill="rgba(130,200,255,0.8)" font-size="7.5" font-weight="700">Position</text>
+  <text x="130" y="156" fill="#555" font-size="7.5">Vector3  (3× float32)   X, Y, Z world position · Y ≈ water surface elevation</text>
+  <text x="580" y="156" fill="#383838" font-size="7">12 B</text>
+
+  <!-- Rotation -->
+  <rect x="24" y="163" width="632" height="18" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+  <rect x="24" y="163" width="3" height="18" fill="rgba(255,255,255,0.2)"/>
+  <text x="36"  y="175" fill="#888" font-size="7.5" font-weight="700">Rotation</text>
+  <text x="130" y="175" fill="#555" font-size="7.5">float32   degrees · emitter world orientation</text>
+  <text x="580" y="175" fill="#383838" font-size="7">4 B</text>
+
+  <!-- Velocity -->
+  <rect x="24" y="182" width="632" height="18" fill="rgba(100,180,255,0.03)" stroke="rgba(100,180,255,0.08)" stroke-width="0.5"/>
+  <rect x="24" y="182" width="3" height="18" fill="rgba(100,180,255,0.35)"/>
+  <text x="36"  y="194" fill="rgba(130,200,255,0.7)" font-size="7.5" font-weight="700">Velocity</text>
+  <text x="130" y="194" fill="#555" font-size="7.5">Vector3  (3× float32)   world-space drift direction and speed</text>
+  <text x="580" y="194" fill="#383838" font-size="7">12 B</text>
+
+  <!-- Lifetime/Period/Scale pairs -->
+  <rect x="24" y="201" width="632" height="18" fill="rgba(255,140,0,0.03)" stroke="rgba(255,140,0,0.08)" stroke-width="0.5"/>
+  <rect x="24" y="201" width="3" height="18" fill="#ff8c00" opacity="0.4"/>
+  <text x="36"  y="213" fill="#ff8c00" font-size="7.5" font-weight="700">LifetimeFirst / LifetimeSecond</text>
+  <text x="230" y="213" fill="#555" font-size="7.5">2× float32   random sprite lifetime range (seconds)</text>
+  <text x="580" y="213" fill="#383838" font-size="7">8 B</text>
+
+  <rect x="24" y="220" width="632" height="18" fill="rgba(255,140,0,0.02)" stroke="rgba(255,140,0,0.06)" stroke-width="0.5"/>
+  <rect x="24" y="220" width="3" height="18" fill="#ff8c00" opacity="0.3"/>
+  <text x="36"  y="232" fill="rgba(255,140,0,0.7)" font-size="7.5" font-weight="700">PeriodFirst / PeriodSecond</text>
+  <text x="230" y="232" fill="#555" font-size="7.5">2× float32   random emission interval range (seconds)</text>
+  <text x="580" y="232" fill="#383838" font-size="7">8 B</text>
+
+  <rect x="24" y="239" width="632" height="18" fill="rgba(255,140,0,0.02)" stroke="rgba(255,140,0,0.05)" stroke-width="0.5"/>
+  <rect x="24" y="239" width="3" height="18" fill="#ff8c00" opacity="0.25)"/>
+  <text x="36"  y="251" fill="rgba(255,140,0,0.6)" font-size="7.5" font-weight="700">ScaleFirst / ScaleSecond</text>
+  <text x="230" y="251" fill="#555" font-size="7.5">2× float32   random sprite size range</text>
+  <text x="580" y="251" fill="#383838" font-size="7">8 B</text>
+
+  <!-- Frame fields -->
+  <rect x="24" y="258" width="632" height="18" fill="rgba(200,111,255,0.03)" stroke="rgba(200,111,255,0.1)" stroke-width="0.5"/>
+  <rect x="24" y="258" width="3" height="18" fill="rgba(200,111,255,0.35)"/>
+  <text x="36"  y="270" fill="rgba(200,111,255,0.7)" font-size="7.5" font-weight="700">FrameCount / FrameRateFirst / FrameRateSecond / StripCount</text>
+  <text x="380" y="270" fill="#555" font-size="7.5">4× float32   ⚠ stored as float, not int</text>
+  <text x="580" y="270" fill="#383838" font-size="7">16 B</text>
+
+  <!-- Total -->
+  <rect x="24" y="280" width="632" height="14" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="340" y="290" text-anchor="middle" fill="#444" font-size="7.5" letter-spacing="0.06em">Fixed block total: 68 bytes  ·  Stream.BaseStream.Position += 68 in Skip()</text>
+</svg>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ForgeMapToolkit</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0a;
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden; user-select: none;
+      -webkit-app-region: drag;
+      position: relative;
+    }
+    .dot-grid {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+    .dot-grid::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, #0a0a0a 100%);
+    }
+    .glow-bg {
+      position: absolute; width: 900px; height: 900px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,140,0,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+    @keyframes glowPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.6; } }
+    .content { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+    .logo-wrap {
+      position: relative; width: 280px; height: 280px;
+      margin-bottom: 72px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ring {
+      position: absolute; inset: -22px; border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: #ff8c00;
+      border-right-color: rgba(255,140,0,0.3);
+      animation: spin 1.4s linear infinite;
+    }
+    .ring-outer {
+      position: absolute; inset: -38px; border-radius: 50%;
+      border: 2px solid transparent;
+      border-bottom-color: rgba(255,140,0,0.2);
+      border-left-color: rgba(255,140,0,0.1);
+      animation: spinReverse 3.5s linear infinite;
+    }
+    .ring-outer::before, .ring-outer::after {
+      content: ''; position: absolute;
+      width: 8px; height: 2px; background: rgba(255,140,0,0.5);
+      border-radius: 1px; top: 50%; left: -8px; transform: translateY(-50%);
+    }
+    .ring-outer::after { left: auto; right: -8px; }
+    @keyframes spin        { to { transform: rotate(360deg);  } }
+    @keyframes spinReverse { to { transform: rotate(-360deg); } }
+    .logo-img {
+      width: 210px; height: 210px; object-fit: contain;
+      opacity: 0; animation: fadeIn 0.5s ease 0.1s forwards;
+      position: relative; z-index: 2;
+    }
+    .title {
+      font-size: 3rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: #ffffff; opacity: 0;
+      animation: fadeUp 0.5s ease 0.2s forwards;
+    }
+    .title span { color: #ff8c00; }
+    .subtitle {
+      font-size: 1.1rem; font-weight: 400;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); margin-top: 10px;
+      opacity: 0; animation: fadeUp 0.5s ease 0.3s forwards;
+    }
+    .status-line {
+      margin-top: 64px; font-size: 0.85rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(255,140,0,0.55); font-family: 'Courier New', monospace;
+      min-width: 400px; text-align: center; height: 22px;
+      opacity: 0; animation: fadeIn 0.4s ease 0.5s forwards;
+    }
+    .bar-wrap {
+      margin-top: 18px; width: 560px; height: 2px;
+      background: rgba(255,255,255,0.06);
+      position: relative; overflow: visible;
+      opacity: 0; animation: fadeIn 0.4s ease 0.55s forwards;
+    }
+    .bar {
+      position: absolute; left: 0; top: 0; height: 2px; width: 0%;
+      background: #ff8c00;
+      box-shadow: 0 0 10px rgba(255,140,0,0.8), 0 0 22px rgba(255,140,0,0.4);
+      animation: loadBar 2.2s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+    }
+    .bar::after {
+      content: ''; position: absolute; right: -1px; top: -4px;
+      width: 5px; height: 10px; background: #fff; border-radius: 2px; opacity: 0.9;
+    }
+    .corner { position: absolute; width: 28px; height: 28px; opacity: 0; animation: fadeIn 0.5s ease 0.4s forwards; }
+    .corner-tl { top: 28px;    left: 36px;  border-top: 1px solid rgba(255,140,0,0.4); border-left: 1px solid rgba(255,140,0,0.4); }
+    .corner-tr { top: 28px;    right: 36px; border-top: 1px solid rgba(255,140,0,0.4); border-right: 1px solid rgba(255,140,0,0.4); }
+    .corner-bl { bottom: 28px; left: 36px;  border-bottom: 1px solid rgba(255,140,0,0.4); border-left: 1px solid rgba(255,140,0,0.4); }
+    .corner-br { bottom: 28px; right: 36px; border-bottom: 1px solid rgba(255,140,0,0.4); border-right: 1px solid rgba(255,140,0,0.4); }
+    .version {
+      position: absolute; bottom: 32px; right: 44px;
+      font-size: 0.75rem; letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.15); font-family: 'Courier New', monospace;
+      opacity: 0; animation: fadeIn 0.4s ease 0.7s forwards;
+    }
+    @keyframes fadeIn  { to { opacity: 1; } }
+    @keyframes fadeUp  { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes loadBar { 0% { width: 0%; } 40% { width: 55%; } 70% { width: 78%; } 90% { width: 91%; } 100% { width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="dot-grid"></div>
+  <div class="glow-bg"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="content">
+    <div class="logo-wrap">
+      <div class="ring-outer"></div>
+      <div class="ring"></div>
+      <img class="logo-img" src="../public/assets/icons/App/icon.png" alt="" />
+    </div>
+    <div class="title">Forge<span>Map</span>Toolkit</div>
+    <div class="subtitle">Supreme Commander · Forged Alliance</div>
+    <div class="status-line" id="status">INITIALIZING</div>
+    <div class="bar-wrap"><div class="bar"></div></div>
+  </div>
+  <div class="version">v1.0.0</div>
+  <script>
+    const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_·';
+    const MESSAGES = ['INITIALIZING SYSTEMS','LOADING ASSET PIPELINE','MOUNTING RENDERER','READY'];
+    function scramble(target, duration, cb) {
+      const el = document.getElementById('status');
+      const len = target.length;
+      let frame = 0;
+      const total = Math.round(duration / 30);
+      const iv = setInterval(() => {
+        const p = frame / total;
+        let out = '';
+        for (let i = 0; i < len; i++) {
+          out += i < Math.floor(p * len) ? target[i] : CHARS[Math.floor(Math.random() * CHARS.length)];
+        }
+        el.textContent = out;
+        if (++frame > total) { clearInterval(iv); el.textContent = target; if (cb) cb(); }
+      }, 30);
+    }
+    setTimeout(() => scramble(MESSAGES[1], 500, () => {
+      setTimeout(() => scramble(MESSAGES[2], 500, () => {
+        setTimeout(() => scramble(MESSAGES[3], 400), 800);
+      }), 600);
+    }), 700);
+  </script>
+</body>
+</html>

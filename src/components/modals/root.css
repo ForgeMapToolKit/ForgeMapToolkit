@@ -1,0 +1,153 @@
+:root {
+  /* ── Shared Backgrounds ─────────────────────────── */
+  --bg-primary:   #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary:  #1a1a1a;
+  --bg-card:      #141414;
+  --bg-hover:     #1f1f1f;
+
+  /* ── Shared Text ────────────────────────────────── */
+  --text-primary:   #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted:     #666666;
+
+  /* ── Shared Borders ─────────────────────────────── */
+  --border-color: #2a2a2a;
+  --border-light: #333333;
+
+  /* ── App Brand Accent (default/homepage) ────────── */
+  --accent-primary:      #ff8c00;
+  --accent-light:        #ffa533;
+  --accent-dark:         #cc7000;
+  --accent-glow:         rgba(255, 140, 0, 0.35);
+  --accent-glow-strong:  rgba(255, 140, 0, 0.60);
+
+  /* ══════════════════════════════════════════════════
+     TAB ACCENT COLORS
+     Each tab needs: -color / -glow / -glow-strong / -glow-intense
+     ForgeMapToolkit reads these via var(--<id>-color) etc.
+     To add a new tab: add its block here — no other file needs touching.
+     ══════════════════════════════════════════════════ */
+
+  /* ── Emitter — Cyan ─────────────────────────────── */
+  --emitter-color:              #00DDFF;
+  --emitter-glow:               rgba(0, 221, 255, 0.35);
+  --emitter-glow-strong:        rgba(0, 221, 255, 0.60);
+  --emitter-glow-intense:       rgba(0, 221, 255, 0.80);
+  /* aliases used inside Emitter.css */
+  --emitter-accent:             var(--emitter-color);
+  --emitter-accent-glow:        var(--emitter-glow);
+  --emitter-accent-glow-strong: var(--emitter-glow-strong);
+  --emitter-accent-glow-intense:var(--emitter-glow-intense);
+
+  /* ── Wreckages — Rot ────────────────────────────── */
+  --wreckages-color:        #FE1818;
+  --wreckages-glow:         rgba(254, 24, 24, 0.35);
+  --wreckages-glow-strong:  rgba(254, 24, 24, 0.60);
+  --wreckages-glow-intense: rgba(254, 24, 24, 0.80);
+
+  /* ── Props — Dunkelgrün ─────────────────────────── */
+  --props-color:        #538A33;
+  --props-glow:         rgba(83, 138, 51, 0.35);
+  --props-glow-strong:  rgba(83, 138, 51, 0.60);
+  --props-glow-intense: rgba(83, 138, 51, 0.80);
+
+  /* ── Custom Props — Teal ────────────────────────── */
+  --customprops-color:        #3EA387;
+  --customprops-glow:         rgba(62, 163, 135, 0.35);
+  --customprops-glow-strong:  rgba(62, 163, 135, 0.60);
+  --customprops-glow-intense: rgba(62, 163, 135, 0.80);
+
+  /* ── TreeMap — Grün ─────────────────────────────── */
+  --treemap-color:        #18C748;
+  --treemap-glow:         rgba(24, 199, 72, 0.35);
+  --treemap-glow-strong:  rgba(24, 199, 72, 0.60);
+  --treemap-glow-intense: rgba(24, 199, 72, 0.80);
+
+  /* ── Rock Erosion — Orange-Gold ─────────────────── */
+  --rockerosion-color:              #FFAF00;
+  --rockerosion-glow:               rgba(255, 175, 0, 0.35);
+  --rockerosion-glow-strong:        rgba(255, 175, 0, 0.60);
+  --rockerosion-glow-intense:       rgba(255, 175, 0, 0.80);
+  /* aliases used inside RockErosion.css */
+  --rockerosion-accent:             var(--rockerosion-color);
+  --rockerosion-accent-glow:        var(--rockerosion-glow);
+  --rockerosion-accent-glow-strong: var(--rockerosion-glow-strong);
+  --rockerosion-accent-glow-intense:var(--rockerosion-glow-intense);
+
+  /* ── Stars — Lila ───────────────────────────────── */
+  --stars-color:        #8A12BD;
+  --stars-glow:         rgba(138, 18, 189, 0.35);
+  --stars-glow-strong:  rgba(138, 18, 189, 0.60);
+  --stars-glow-intense: rgba(138, 18, 189, 0.80);
+  /* aliases used inside Stars.css */
+  --st-accent:             var(--stars-color);
+  --st-accent-light:       #b040e8;
+  --st-accent-glow:        var(--stars-glow);
+  --st-accent-glow-strong: var(--stars-glow-strong);
+
+  /* ── Skybox Generator — Blau ────────────────────── */
+  --skybox-generator-color:        #3B76FF;
+  --skybox-generator-glow:         rgba(59, 118, 255, 0.35);
+  --skybox-generator-glow-strong:  rgba(59, 118, 255, 0.60);
+  --skybox-generator-glow-intense: rgba(59, 118, 255, 0.80);
+
+  /* ── SCMAP Tool — Gelb ──────────────────────────── */
+  --scmaptool-color:        #FFFA00;
+  --scmaptool-glow:         rgba(255, 250, 0, 0.35);
+  --scmaptool-glow-strong:  rgba(255, 250, 0, 0.60);
+  --scmaptool-glow-intense: rgba(255, 250, 0, 0.80);
+
+  /* ── Adaptive Map Helper — Orange ───────────────── */
+  --adaptivemaphelper-color:        #ff8c00;
+  --adaptivemaphelper-glow:         rgba(255, 140, 0, 0.35);
+  --adaptivemaphelper-glow-strong:  rgba(255, 140, 0, 0.60);
+  --adaptivemaphelper-glow-intense: rgba(255, 140, 0, 0.80);
+
+  /* ── History — Pink ─────────────────────────────── */
+  --history-color:        #FF8AFF;
+  --history-glow:         rgba(255, 138, 255, 0.35);
+  --history-glow-strong:  rgba(255, 138, 255, 0.60);
+  --history-glow-intense: rgba(255, 138, 255, 0.80);
+
+  /* ── Map Resizer — Türkis ───────────────────────── */
+  --mapresizer-color:        #00E5CC;
+  --mapresizer-glow:         rgba(0, 229, 204, 0.20);
+  --mapresizer-glow-strong:  rgba(0, 229, 204, 0.45);
+  --mapresizer-glow-intense: rgba(0, 229, 204, 0.75);
+
+  /* ── Economy Map — Mintgrün ─────────────────────── */
+  --economymap-color:        #00C896;
+  --economymap-glow:         rgba(0, 200, 150, 0.25);
+  --economymap-glow-strong:  rgba(0, 200, 150, 0.50);
+  --economymap-glow-intense: rgba(0, 200, 150, 0.75);
+
+  /* ── Preview Image — Pink ──────────────────────── */
+  --previewimage-color:        #FF007A;
+  --previewimage-glow:         rgba(255, 0, 122, 0.25);
+  --previewimage-glow-strong:  rgba(255, 0, 122, 0.55);
+  --previewimage-glow-intense: rgba(255, 0, 122, 0.85);
+  /* aliases used inside PreviewImage.css */
+  --preview-color:             #FF007A;
+  --preview-glow:              rgba(255, 0, 122, 0.25);
+  --preview-glow-strong:       rgba(255, 0, 122, 0.55);
+
+  /* ── Contributions — Gelbgrün ───────────────────── */
+  --contributions-color:        #A5E801;
+  --contributions-glow:         rgba(165, 232, 1, 0.35);
+  --contributions-glow-strong:  rgba(165, 232, 1, 0.60);
+  --contributions-glow-intense: rgba(165, 232, 1, 0.80);
+
+  /* ── Settings — Weiß ────────────────────────────── */
+  --settings-color:        #FFFFFF;
+  --settings-glow:         rgba(255, 255, 255, 0.15);
+  --settings-glow-strong:  rgba(255, 255, 255, 0.30);
+  --settings-glow-intense: rgba(255, 255, 255, 0.50);
+
+  /* ── Civilians — Gelb (legacy) ──────────────────── */
+  --civilians-color:        #FFFA00;
+  --civilians-glow:         rgba(255, 250, 0, 0.35);
+  --civilians-glow-strong:  rgba(255, 250, 0, 0.60);
+  --civilians-glow-intense: rgba(255, 250, 0, 0.80);
+
+}

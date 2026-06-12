@@ -1,8 +1,9 @@
+// App.jsx
 import React from 'react';
-import MapToolSuite from './components/MapToolSuite';
+import ForgeMapToolkit from './components/core/ForgeMapToolkit';
 
 function App() {
-  return <MapToolSuite />;
+  return <ForgeMapToolkit />;
 }
 
 export default App;
