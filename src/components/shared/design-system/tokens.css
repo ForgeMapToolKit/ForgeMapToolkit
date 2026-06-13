@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — tokens.css
+   The single source of truth for every reusable value: spacing,
+   typography, surfaces, ink, hairlines, accent, glow, motion, depth.
+
+   This file declares tokens ONLY (no selectors with visual rules).
+   Primitives (primitives.css) and the layout shell (layout.css)
+   consume these — never hardcoded px / hex / easings.
+
+   The Wreckage tab is the gold-standard reference implementation.
+   A new tab inherits the entire language by importing
+   design-system/index.css and setting ONE thing: --tab-color.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Motion — easings ───────────────────────────────────────────── */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);    /* settle / reveal     */
+  --ease-rise:  cubic-bezier(0.55, 0, 0.15, 1);   /* mechanical actuate  */
+  --ease-decay: cubic-bezier(0.2, 0.55, 0.35, 1); /* phosphor ignite→cool*/
+
+  /* ── Motion — durations ─────────────────────────────────────────── */
+  --dur-instant: 0.06s;  /* ignite — tick lights the instant you touch  */
+  --dur-fast:    0.18s;
+  --dur-base:    0.25s;
+  --dur-slow:    0.45s;
+  --dur-decay:   0.9s;   /* phosphor cool — long, never instant         */
+
+  /* ── Spacing scale ──────────────────────────────────────────────── */
+  --space-3xs: 3px;
+  --space-2xs: 4px;
+  --space-xs:  8px;
+  --space-sm:  12px;
+  --space-md:  16px;
+  --space-lg:  20px;
+  --space-xl:  28px;
+  --space-2xl: 36px;
+  --space-3xl: 64px;
+  --space-4xl: 72px;
+
+  /* ── Typography — families ──────────────────────────────────────── */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
+
+  /* ── Typography — size scale ────────────────────────────────────── */
+  --text-3xs: 0.54rem;  /* eyebrows, captions                          */
+  --text-2xs: 0.56rem;
+  --text-xs:  0.62rem;
+  --text-sm:  0.68rem;
+  --text-md:  0.72rem;
+  --text-lg:  0.8rem;
+  --text-input: 11px;   /* control text (inputs/buttons)               */
+
+  /* ── Typography — weights ───────────────────────────────────────── */
+  --weight-light:   300;
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semi:    600;
+  --weight-bold:    700;
+
+  /* ── Typography — letter-spacing (tracking) ─────────────────────── */
+  --track-tight:   0.02em;
+  --track-snug:    0.06em;
+  --track-base:    0.1em;
+  --track-wide:    0.16em;
+  --track-wider:   0.22em;
+  --track-eyebrow: 0.3em;   /* register lines / eyebrows               */
+
+  /* ── Surface ladder — warm near-black, no blue cast, opaque ─────── */
+  --surface-bed-a:      #050507;  /* bed — recessed top band            */
+  --surface-bed-b:      #0b0b0e;  /* bed — floor                        */
+  --surface-face-a:     #18181c;  /* card face — lit top edge           */
+  --surface-face-b:     #101013;  /* card face — shaded foot            */
+  --surface-face-hover: #1d1d22;  /* card face on engage (pre-hue)      */
+  --surface-sunk:       #0a0807;  /* recessed channel (inputs, wells)   */
+  --surface-sunk-focus: #100c0b;  /* channel, focused                   */
+  --surface-rail:       #0d0d10;  /* secondary panels / rows            */
+  --surface-canvas:     #060404;  /* the deepest plate (workspace root) */
+
+  /* ── Ink — text on dark, expressed as white alphas ──────────────── */
+  --ink-100: rgba(255,255,255,0.93);  /* titles                        */
+  --ink-72:  rgba(255,255,255,0.72);  /* primary body                  */
+  --ink-55:  rgba(255,255,255,0.55);  /* default body                  */
+  --ink-38:  rgba(255,255,255,0.38);  /* muted                         */
+  --ink-28:  rgba(255,255,255,0.28);  /* faint                         */
+  --ink-22:  rgba(255,255,255,0.22);  /* labels at rest                */
+  --ink-16:  rgba(255,255,255,0.16);  /* captions / ghost-bright       */
+
+  /* ── Hairlines — structural borders ─────────────────────────────── */
+  --line-soft:   rgba(255,255,255,0.05);
+  --line-medium: rgba(255,255,255,0.07);
+  --line-strong: rgba(255,255,255,0.14);
+
+  /* ── Accent — the ONLY per-tab variable ─────────────────────────────
+     A tab sets --tab-color / --tab-glow / --tab-glow-strong on its root
+     (inline style or its own CSS); the values below are just fallbacks.
+     The whole design system references var(--tab-color) DIRECTLY — never
+     via a :root-level alias, because a custom property whose value is
+     `var(--tab-color)` is resolved where it is DECLARED. Declared at
+     :root it would bake the white fallback and inherit that everywhere,
+     ignoring a tab's later override. Direct var(--tab-color) is a
+     normally-inherited property, so a tab root's red flows down intact. */
+  --tab-color:       rgba(255,255,255,0.6);          /* fallback        */
+  --tab-glow:        rgba(255,255,255,0.2);
+  --tab-glow-strong: rgba(255,255,255,0.35);
+
+  /* ── Status colors ──────────────────────────────────────────────── */
+  --status-ok:   rgba(0,200,100,0.6);
+  --status-warn: #ff8c00;
+  --status-err:  rgba(255,80,80,0.85);
+
+  /* ── Shadow (accent-free; accent glows are inlined at use sites) ──── */
+  --shadow-card:  0 2px 6px -3px rgba(0,0,0,0.7);
+
+  /* ── Z-index scale ──────────────────────────────────────────────── */
+  --z-base:    1;
+  --z-rail:    10;
+  --z-grain:   40;
+  --z-overlay: 1000;
+}

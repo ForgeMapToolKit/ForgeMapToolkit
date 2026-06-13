@@ -1,0 +1,614 @@
+﻿/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — primitives.css
+   Reusable controls in the boxless TRACE language. The traceline IS
+   the affordance — nothing carries a box; ignition, baseline and lift
+   do the signalling. Every value flows from tokens.css; the only
+   per-tab variable is --tab-color (+ --tab-glow, --tab-glow-strong),
+   referenced directly so a tab root's color inherits down intact.
+
+   Contents:
+     · ticks + filaments      (the phosphor grammar)
+     · action-button          (filament-stub secondary action)
+     · button-solid           (machined filled CTA)
+     · commit-button          (primary three-layer TraceLine commit)
+     · delete-button          (boxless glyph)
+     · field-input / -select  (boxless, baseline ignites)
+     · field-label / -hint    (form typography)
+     · form-group             (label + control rhythm)
+     · chip / switch / check-row  (toggles)
+     · station + option-row   (liftable selection tiles)
+     · status-badge           (state pills)
+     · divider / subsection-head
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Ticks — phosphor: ignites instantly, decays slowly ───────────── */
+
+.tick {
+  width: 2px;
+  height: 14px;
+  background: var(--ink-16);
+  transform: scaleY(0.4);
+  transform-origin: center;
+  flex-shrink: 0;
+  transition:
+    background var(--dur-decay) var(--ease-decay),
+    box-shadow var(--dur-decay) var(--ease-decay),
+    transform  var(--dur-decay) var(--ease-decay);
+}
+.tick--lg { height: 20px; }
+.tick.lit {
+  background: var(--tab-color);
+  box-shadow: 0 0 10px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transform: scaleY(1);
+  transition-duration: var(--dur-instant);
+}
+
+/* ── Filament — a three-layer printed line (bloom + core + hot) ───── */
+
+.filament { position: relative; height: 1px; overflow: visible; }
+.filament-bloom {
+  position: absolute; inset: 0; top: -4px; bottom: -4px;
+  background: var(--tab-color);
+  filter: blur(7px);
+  opacity: 0.4;
+}
+.filament-core {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--tab-color), transparent 78%);
+  opacity: 0.38;
+}
+.filament-hot {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.95);
+  opacity: 0;
+}
+
+/* ── action-button — secondary action, auto-growing filament stub ─── */
+
+.action-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px var(--space-3xs);
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--ink-38);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--dur-base) linear, letter-spacing var(--dur-base) var(--ease-out);
+}
+/* the stub — short at rest, grows to full width on hover */
+.action-button::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 2px;
+  height: 1px;
+  width: 16px;
+  background: var(--tab-color);
+  opacity: 0.45;
+  box-shadow: 0 0 6px var(--tab-glow);
+  transition: width var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.action-button:hover {
+  color: var(--ink-100);
+  letter-spacing: 0.19em;
+}
+.action-button:hover::after { width: 100%; opacity: 1; }
+.action-button:disabled { opacity: 0.35; cursor: default; }
+.action-button:disabled::after { width: 16px; opacity: 0.2; }
+
+.action-button--full { width: 100%; justify-content: flex-start; }
+
+/* danger hue — destructive actions, same mechanic */
+.action-button--danger { color: rgba(255,80,80,0.55); }
+.action-button--danger::after {
+  background: #ff5050;
+  box-shadow: 0 0 6px rgba(255,80,80,0.4);
+}
+.action-button--danger:hover { color: #ff6060; }
+
+/* ── button-solid — machined filled CTA (the boxed primary) ───────── */
+
+.button-solid {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 32px;
+  background: linear-gradient(180deg, var(--surface-face-a), var(--surface-face-b));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 2px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background   var(--dur-base) linear,
+    border-color var(--dur-base) linear,
+    box-shadow   var(--dur-base) var(--ease-out),
+    transform    var(--dur-base) var(--ease-out);
+}
+.button-solid:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--surface-face-hover), var(--surface-face-a));
+  border-color: rgba(255,255,255,0.40);
+  box-shadow: 0 0 24px rgba(255,255,255,0.08), 0 6px 22px -6px rgba(0,0,0,0.7);
+  transform: translateY(-1px);
+}
+.button-solid:active:not(:disabled) { transform: translateY(0); }
+.button-solid:disabled { opacity: 0.3; cursor: not-allowed; }
+.button-solid--full { width: 100%; justify-content: center; }
+.button-solid--accent {
+  border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.18));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 20%, var(--surface-face-a)),
+    color-mix(in srgb, var(--tab-color) 7%, var(--surface-face-b)));
+}
+.button-solid--accent:hover:not(:disabled) {
+  border-color: var(--tab-color);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 32%, var(--surface-face-hover)),
+    color-mix(in srgb, var(--tab-color) 12%, var(--surface-face-a)));
+  box-shadow: 0 0 26px var(--tab-glow-strong), 0 6px 22px -6px rgba(0,0,0,0.65);
+}
+
+/* ── commit-button — the signature primary action ────────────────────
+   No filled box: a label over a dormant baseline that ignites the full
+   three-layer TraceLine on hover and sweeps once on commit. State lives
+   in the mono readout (Ready / Not Ready), never in a fill colour. */
+
+.commit-button {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  width: 100%;
+  margin-top: 30px;
+  padding: var(--space-md) var(--space-2xs) 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  user-select: none;
+}
+.commit-button:disabled { cursor: default; }
+.commit-button-label {
+  font-size: 0.92rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-55);
+  transition: color var(--dur-slow) var(--ease-decay), letter-spacing var(--dur-slow) var(--ease-decay);
+}
+.commit-button:disabled .commit-button-label { color: var(--ink-28); }
+.commit-button-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--status-ok);
+  white-space: nowrap;
+}
+.commit-button:disabled .commit-button-status { color: rgba(255,140,0,0.6); }
+/* Dormant baseline */
+.commit-button::after {
+  content: '';
+  position: absolute;
+  left: var(--space-2xs); right: var(--space-2xs); bottom: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+.commit-button-bloom {
+  position: absolute;
+  left: var(--space-2xs); right: 100%; bottom: -3px;
+  height: 4px;
+  background: var(--tab-color);
+  filter: blur(3px);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: right var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.commit-button-line {
+  position: absolute;
+  left: var(--space-2xs); right: 100%; bottom: 0;
+  height: 1px;
+  background: var(--tab-color);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 6px var(--tab-glow);
+  transition: right var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.commit-button:not(:disabled):hover .commit-button-label {
+  color: var(--ink-100);
+  letter-spacing: 0.26em;
+}
+.commit-button:not(:disabled):hover .commit-button-bloom { right: var(--space-2xs); opacity: 0.6; }
+.commit-button:not(:disabled):hover .commit-button-line  { right: var(--space-2xs); opacity: 1; }
+.commit-button:not(:disabled):active .commit-button-line { animation: ds-commit-sweep 0.5s var(--ease-out); }
+@keyframes ds-commit-sweep {
+  0%   { box-shadow: 0 0 6px var(--tab-glow); }
+  50%  { box-shadow: 0 0 22px 2px var(--tab-glow-strong), 0 0 5px var(--tab-color); }
+  100% { box-shadow: 0 0 6px var(--tab-glow); }
+}
+
+/* ── delete-button — boxless glyph, reddens on hover ──────────────── */
+
+.delete-button {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--ink-28);
+  font-size: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s linear;
+}
+.delete-button:hover { color: rgba(255,120,120,0.9); }
+
+/* ── field-input — boxless, text rides on the bed, baseline ignites ─ */
+
+.field-input {
+  width: 100%;
+  padding: 6px var(--space-3xs) 9px;
+  color: rgba(255,255,255,0.90);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-tight);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  box-sizing: border-box;
+  transition: border-color var(--dur-base) linear, box-shadow var(--dur-base) var(--ease-out);
+}
+.field-input::placeholder {
+  color: var(--ink-16);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-tight);
+}
+.field-input:focus {
+  background: none;
+  border-bottom-color: var(--tab-color);
+  box-shadow: 0 1px 0 0 var(--tab-color), 0 8px 20px -10px var(--tab-glow);
+}
+.field-input.is-set { border-bottom-color: rgba(0,200,100,0.45); }
+.field-input--sm { padding: var(--space-2xs) var(--space-3xs) 7px; font-size: 0.82rem; }
+
+/* ── field-select — same baseline, filament chevron ──────────────── */
+
+.field-select {
+  width: 100%;
+  padding: 6px 28px 9px var(--space-3xs);
+  color: rgba(255,255,255,0.90);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-tight);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  box-shadow: none;
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><path d="M1 3 L5 7 L9 3" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  transition: border-color var(--dur-base) linear, box-shadow var(--dur-base) var(--ease-out);
+}
+.field-select:hover { border-bottom-color: rgba(255,255,255,0.22); }
+.field-select:focus {
+  border-bottom-color: var(--tab-color);
+  box-shadow: 0 1px 0 0 var(--tab-color), 0 8px 20px -10px var(--tab-glow);
+}
+.field-select option { background: var(--surface-sunk-focus); color: rgba(255,255,255,0.85); }
+
+/* ── field typography + form rhythm ──────────────────────────────── */
+
+.field-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-22);
+  margin-bottom: var(--space-xs);
+}
+.field-hint {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-28);
+  line-height: 1.6;
+}
+.form-group { margin-bottom: var(--space-xl); }
+.form-group:last-child { margin-bottom: 0; }
+
+/* ── chip — toggle pill ──────────────────────────────────────────── */
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 1px; }
+.chip {
+  padding: 9px 18px;
+  border: 1px solid var(--line-medium);
+  background: var(--surface-rail);
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-28);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--dur-base) linear, border-color var(--dur-base) linear, background var(--dur-base) linear;
+}
+.chip:hover {
+  border-color: rgba(255,255,255,0.22);
+  color: var(--ink-55);
+  background: var(--surface-face-b);
+}
+.chip.active {
+  border-color: color-mix(in srgb, var(--tab-color) 50%, rgba(255,255,255,0.45));
+  color: #fff;
+  background: color-mix(in srgb, var(--tab-color) 14%, var(--surface-face-a));
+  box-shadow: inset 0 -2px 0 -1px var(--tab-color);
+}
+
+/* ── switch — sliding pole toggle ────────────────────────────────── */
+
+.switch {
+  flex-shrink: 0;
+  width: 38px; height: 18px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-sunk);
+  position: relative;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+  transition: border-color var(--dur-base) linear, background var(--dur-base) linear;
+}
+.switch.on {
+  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.40));
+  background: color-mix(in srgb, var(--tab-color) 16%, var(--surface-sunk));
+}
+.switch-pole {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 10px; height: 10px;
+  background: rgba(255,255,255,0.25);
+  transition: left 0.26s var(--ease-rise), background 0.26s linear;
+}
+.switch.on .switch-pole {
+  left: 23px;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255,255,255,0.45);
+}
+
+/* ── check-row — checkbox as a trace row ─────────────────────────── */
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line-soft);
+}
+.check-row:last-of-type { border-bottom: none; }
+.check-box {
+  flex-shrink: 0;
+  width: 14px; height: 14px;
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s linear;
+}
+.check-row.checked .check-box {
+  border-color: var(--tab-color);
+  box-shadow: inset 0 0 4px var(--tab-glow);
+}
+.check-tick {
+  width: 8px; height: 8px;
+  background: var(--tab-color);
+  box-shadow: 0 0 5px var(--tab-glow);
+}
+.check-label {
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-base);
+  color: var(--ink-38);
+  transition: color 0.15s linear;
+}
+.check-row.checked .check-label,
+.check-row:hover .check-label { color: var(--ink-72); }
+
+/* ── station — a liftable selection tile, lit top-edge tick ──────────
+   The reusable surface behind mode options, add-tiles, any "pick me"
+   target. Quiet at rest; ignites its top tick + lifts on hover/active.
+   Compose with a content class (e.g. .option-row) for typography. */
+
+.station {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  border: none;
+  border-top: 1px solid var(--line-medium);
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    background var(--dur-slow) var(--ease-decay),
+    transform  var(--dur-slow) var(--ease-decay),
+    box-shadow var(--dur-slow) var(--ease-decay);
+  user-select: none;
+}
+.station::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity    var(--dur-decay) var(--ease-decay),
+    transform  var(--dur-decay) var(--ease-decay),
+    box-shadow var(--dur-decay) var(--ease-decay);
+}
+.station:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 14%, transparent),
+    rgba(255,255,255,0.012));
+}
+.station:hover::before,
+.station.active::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 10px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transition-duration: var(--dur-instant);
+}
+.station.active {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 18%, transparent),
+    rgba(255,255,255,0.012));
+  box-shadow: 0 14px 24px -12px rgba(0,0,0,0.85), 0 0 30px -8px var(--tab-glow);
+}
+
+/* ── option-row — station content: label + description radio choice ─ */
+
+.option-row {
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-xs);
+}
+.option-row-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 6px;
+}
+/* Radio dot suppressed by default — elevation is the selection signal.
+   Add .option-row--radio to show an explicit dot. */
+.option-radio { display: none; }
+.option-row--radio .option-radio {
+  display: flex;
+  flex-shrink: 0;
+  width: 10px; height: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+}
+.option-row--radio.active .option-radio { border-color: var(--tab-color); }
+.option-radio-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--tab-color);
+  box-shadow: 0 0 5px var(--tab-glow);
+}
+.option-label {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-38);
+  transition: color var(--dur-slow) var(--ease-decay);
+}
+.station:hover .option-label  { color: var(--ink-72); }
+.station.active .option-label { color: var(--ink-100); }
+.option-desc {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--ink-28);
+  line-height: 1.5;
+  margin: 2px 0;
+}
+.option-note {
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--ink-16);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ── status-badge — state pill ───────────────────────────────────── */
+
+.status-badge {
+  font-family: var(--font-display);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+  opacity: 0.8;
+}
+.status-badge--ok   { color: rgba(0,200,100,0.75); }
+.status-badge--warn { color: rgba(255,140,0,0.80); }
+.status-badge--err  { color: rgba(255,80,80,0.80); }
+.status-badge--soon { color: var(--ink-38); }
+.status-badge--accent {
+  color: var(--tab-color);
+  border-color: color-mix(in srgb, var(--tab-color) 35%, transparent);
+}
+
+/* ── divider + subsection head ───────────────────────────────────── */
+
+.divider {
+  height: 1px;
+  background: var(--line-medium);
+  margin: var(--space-xl) 0;
+}
+.subsection-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-medium);
+}
+.subsection-head-title {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-28);
+}
+.subsection-head-title::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  margin-top: 5px;
+  background: var(--tab-color);
+  box-shadow: 0 0 4px var(--tab-glow);
+}

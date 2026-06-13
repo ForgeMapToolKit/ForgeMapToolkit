@@ -1,323 +1,933 @@
-/* ── 1. TAB ROOT ─────────────────────────────────── */
-.wreckage-tab {
+﻿/* ═══════════════════════════════════════════════════════════════════
+   WRECKAGE TAB — Wreckage.css
+   Wreckage-specific layout on top of the TRACE shared system.
+   Accent: --wreckages-color (#FE1818 red)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Tab root ─────────────────────────────────────────────────── */
+
+.wr-tab {
   --tab-color:       var(--wreckages-color);
   --tab-glow:        var(--wreckages-glow);
   --tab-glow-strong: var(--wreckages-glow-strong);
-
-  color:       var(--text-primary);
-  font-family: 'Poppins', sans-serif;
-  background:  var(--bg-primary);
-  min-height:  100vh;
-  padding:     40px 20px;
-  animation:   wreckageTabFadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
+  background-color: #060404; /* warmer, darker — kills the blue-grey cast */
 }
 
-@keyframes wreckageTabFadeIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0);    }
+/* ── 4. Input rows ───────────────────────────────────────────────── */
+
+.wr-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
+.wr-input-row .field-input { flex: 1; margin-bottom: 0; }
 
-
-/* ── 3. ACCESSIBILITY ────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .wreckage-tab *,
-  .wreckage-tab *::before,
-  .wreckage-tab *::after {
-    animation-duration:        0.01ms !important;
-    animation-iteration-count: 1      !important;
-    transition-duration:       0.01ms !important;
-  }
+/* Map info readout */
+.wr-map-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  font-family: 'JetBrains Mono', monospace;
 }
-
-.wreckage-tab a:focus-visible,
-.wreckage-tab button:focus-visible,
-.wreckage-tab input:focus-visible {
-  outline:        2px solid var(--wreckages-color);
-  outline-offset: 5px;
-}
-
-.wreckage-tab ::selection {
-  background: var(--wreckages-color);
-  color:      var(--bg-primary);
-}
-
-/* ── 4. PREVIEW CARD (always-visible top accent) ─── */
-.preview-card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.01) 50%,
-    rgba(0,   0,   0,   0.20) 100%
-  );
-  border:          1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  border-radius:   0;
-  padding:         35px;
-  position:        relative;
-  overflow:        hidden;
-}
-
-.preview-card::before {
-  content:    '';
-  position:   absolute;
-  top: 0; left: 0; right: 0;
-  height:     3px;
-  background: linear-gradient(
-    90deg,
-    transparent      0%,
-    var(--tab-color) 50%,
-    transparent      100%
-  );
-  box-shadow: 0 0 25px var(--tab-glow-strong);
-}
-
-/* ── 5. PREVIEW COLUMN ───────────────────────────── */
-.wreckage-tab .tab-col-detail {
-  position: sticky;
-  top:      40px;
-  height:   fit-content;
-}
-
-/* ── 6. SECTION DESCRIPTION (wreckage-only) ──────── */
-.wreckage-section-description {
-  color:         var(--text-secondary);
-  font-size:     0.92rem;
-  margin-bottom: 28px;
-  font-weight:   300;
-  line-height:   1.7;
-}
-
-.wreckage-file-input { display: none; }
-
-/* ── 11. CANVAS ──────────────────────────────────── */
-.wreckage-canvas-container {
-  position:   relative;
-  margin:     0 auto;
-  background: rgba(0, 0, 0, 0.6);
-  overflow:   hidden;
-  border:     1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8);
-}
-
-.wreckage-preview-canvas {
-  display: block;
-  width:   100%;
-  height:  100%;
-  cursor:  crosshair;
-}
-
-.wreckage-canvas-placeholder {
-  position:       absolute;
-  top:            50%;
-  left:           50%;
-  transform:      translate(-50%, -50%);
-  color:          var(--text-muted);
-  font-size:      1.15rem;
-  pointer-events: none;
-  font-weight:    300;
-  letter-spacing: 0.08em;
+.wr-map-info-tag {
+  font-size: 0.58rem;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  font-family: 'Space Grotesk', sans-serif;
+}
+.wr-map-info-size { color: rgba(255,255,255,0.55); font-weight: 600; }
+.wr-map-info-sep  { color: rgba(255,255,255,0.22); }
+.wr-map-info-err  { color: rgba(255,100,100,0.5); font-size: 0.64rem; }
+
+.wr-path-hint {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.22);
+  margin-top: 5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── 5. Units grid ───────────────────────────────────────────────── */
+
+.wr-units-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* No focus-isolation dimming on hover — the rail stays grounded,
+   cards do not react to pointer passage. */
+
+/* Boot lamp-test — the top tick of each card flashes once on mount,
+   cascading down the stack by index. No fill: control returns to the
+   hover/selected state the instant the pulse passes. */
+.wr-units-grid .trace-item::before {
+  animation: wr-tick-lamp 0.5s linear calc(var(--row-i, 0) * 60ms + 1.0s);
+}
+
+/* The add-unit socket arrives last, after the lamp test has passed */
+.wr-units-grid > .wr-add-unit {
+  animation: trace-fade-in 0.4s linear 0.95s backwards;
+}
+@keyframes wr-tick-lamp {
+  0%   { opacity: 0; transform: scaleX(0.25); box-shadow: none; }
+  30%  { opacity: 1; transform: scaleX(1); box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color); }
+  48%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(0.25); box-shadow: none; }
+}
+
+/* Each card prints left→right after its plate lands, cascading down
+   the stack — `backwards` fill so no clip persists (hover shadows). */
+.wr-units-grid > .trace-item {
+  animation: trace-reveal 0.45s var(--trace-out) backwards;
+  animation-delay: calc(var(--row-i, 0) * 70ms + 0.5s);
+}
+/* ── 5c. TraceLine gesture on unit cards ─────────────────────────── */
+/* Each unit card carries a resident filament at its bottom edge —
+   the same three-layer structure as the home screen TraceLine.
+   On selected: line resolves full-width, bloom cools to hue.
+   The lamp-test ::before animation is reassigned to after. */
+
+/* Bloom layer */
+.wr-units-grid > .trace-item::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 100%; bottom: -1px;
+  height: 4px;
+  background: var(--tab-color);
+  filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: right 0.38s var(--trace-out), opacity 0.30s linear;
+  /* lamp-test overrides this on mount — shares the keyframe */
+  animation: wr-tick-lamp 0.5s linear calc(var(--row-i, 0) * 60ms + 1.0s);
+}
+/* 1px core line */
+.wr-units-grid > .trace-item::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 100%; bottom: -1px;
+  height: 1px;
+  background: var(--tab-color);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: right 0.38s var(--trace-out), opacity 0.28s linear;
+}
+/* Selected — filament resolves full-width */
+.wr-units-grid > .trace-item.selected::before {
+  right: 0;
+  opacity: 0.55;
+  box-shadow: 0 0 8px 2px var(--tab-glow);
+  animation: none; /* lamp-test done; hold the glow */
+}
+.wr-units-grid > .trace-item.selected::after {
+  right: 0;
+  opacity: 1;
 }
 
 
-/* ── 14. LIBRARY OVERLAY ─────────────────────────── */
-.wreckage-library-overlay {
-  position:        fixed;
-  inset:           0;
-  background:      rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  z-index:         1999;
-  animation:       overlayFadeIn 0.4s ease;
+/* trace-item uses tc-face-a/b; we push the cards deeper into the bed */
+.wr-units-grid > .trace-item {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tc-face-b) 60%, var(--tc-bed-b)) 0%,
+    color-mix(in srgb, var(--tc-face-b) 30%, var(--tc-bed-b)) 100%);
+  border-color: rgba(255,255,255,0.055);
+}
+.wr-units-grid > .trace-item.selected {
+  border-color: rgba(255,255,255,0.11);
+  box-shadow:
+    inset 2px 0 0 color-mix(in srgb, var(--tab-color) 55%, transparent),
+    0 14px 32px -18px rgba(0,0,0,0.85);
 }
 
-@keyframes overlayFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+
+
+.wr-unit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
-.wreckage-library-sidebar {
-  position:        fixed;
+.wr-unit-color-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s linear;
+}
+.wr-unit-color-dot:hover { transform: scale(1.3); }
+
+.wr-unit-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.80);
+  flex: 1;
+  margin: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Color picker panel — borderless inline swatch strip */
+.wr-color-picker {
+  padding: 8px 0 6px;
+  margin: 0 0 8px;
+  animation: trace-reveal-down 0.18s var(--trace-out) both;
+}
+.wr-color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.wr-color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.12s linear, box-shadow 0.12s linear;
+  flex-shrink: 0;
+}
+.wr-color-swatch:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 10px 2px currentColor;
+}
+
+
+/* ── 7. Coordinate entry ─────────────────────────────────────────── */
+
+.wr-coord-entry {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.wr-coord-entry:last-of-type { border-bottom: none; }
+
+.wr-coord-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.06em;
+}
+
+.wr-coord-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.wr-coord-field { display: flex; flex-direction: column; gap: 4px; }
+.wr-coord-field > label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+}
+
+/* ── 8. Add-unit card ────────────────────────────────────────────── */
+
+/* A free slot on the rail — borrows the mode station's lit top-edge
+   tick and lift, not a dashed box. Warm bed, no blue cast. */
+.wr-add-unit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  border: none;
+  cursor: pointer;
+  gap: 9px;
+  margin-top: 8px;
+  transform: translateY(0);
+  transition:
+    background 0.4s var(--trace-decay),
+    transform  0.4s var(--trace-decay);
+  user-select: none;
+}
+/* Top-edge phosphor tick — dormant, ignites on engage */
+.wr-add-unit::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity    0.9s var(--trace-decay),
+    transform  0.9s var(--trace-decay),
+    box-shadow 0.9s var(--trace-decay);
+}
+.wr-add-unit:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 14%, transparent),
+    rgba(255,255,255,0.012));
+}
+.wr-add-unit:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transition-duration: 0.06s;
+}
+.wr-add-unit:hover .wr-add-unit-icon { color: color-mix(in srgb, var(--tab-color) 70%, white); }
+.wr-add-unit-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: rgba(255,255,255,0.30);
+  transition: color 0.2s linear;
+}
+.wr-add-unit-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+}
+
+/* ── 10. Preview plate ───────────────────────────────────────────── */
+/* (base surface defined with .wr-plate in section 3) */
+
+/* Resident left-edge filament via border — the preview always carries the hue.
+   (::before is occupied by the shared specular highlight) */
+.wr-preview-plate {
+  border-left-color: color-mix(in srgb, var(--tab-color) 50%, rgba(255,255,255,0.06));
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.04) inset,
+    inset 2px 0 12px -2px color-mix(in srgb, var(--tab-color) 15%, transparent),
+    0 24px 48px -20px rgba(0,0,0,0.96),
+    0 4px 12px -4px rgba(0,0,0,0.70);
+}
+
+.wr-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+/* Upload area — boxless secondary action with a growing filament stub */
+.wr-upload-area {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+  margin-bottom: 14px;
+  transition: color 0.2s linear, letter-spacing 0.26s var(--trace-out);
+}
+.wr-upload-area::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 2px;
+  height: 1px;
+  width: 16px;
+  background: var(--tab-color);
+  opacity: 0.45;
+  box-shadow: 0 0 6px var(--tab-glow);
+  transition: width 0.34s var(--trace-out), opacity 0.2s linear;
+}
+.wr-upload-area:hover {
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.19em;
+}
+.wr-upload-area:hover::after { width: 100%; opacity: 1; }
+.wr-upload-icon { display: none; }
+.wr-file-input { display: none; }
+
+/* Canvas — a recessed instrument well, sunk into the plate */
+.wr-canvas-wrap {
+  position: relative;
+  background: radial-gradient(125% 125% at 50% 0%, #0c0c0f 0%, #050506 70%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 0 64px rgba(0,0,0,0.72),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 24px 52px -32px rgba(0,0,0,0.95);
+  overflow: hidden;
+  transition: border-color 0.3s var(--trace-decay), box-shadow 0.3s var(--trace-decay);
+}
+.wr-canvas-wrap:hover {
+  border-color: color-mix(in srgb, var(--tab-color) 22%, rgba(255,255,255,0.08));
+  box-shadow:
+    inset 0 0 64px rgba(0,0,0,0.72),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 24px 52px -32px rgba(0,0,0,0.95),
+    0 0 26px -10px var(--tab-glow);
+}
+.wr-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+/* Viewfinder corner brackets — the well is a calibrated stage */
+.wr-canvas-wrap::before,
+.wr-canvas-wrap::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  z-index: 2;
+  pointer-events: none;
+  transition: border-color 0.4s var(--trace-decay);
+}
+.wr-canvas-wrap::before {
+  top: 8px; left: 8px;
+  border-top: 1px solid rgba(255,255,255,0.22);
+  border-left: 1px solid rgba(255,255,255,0.22);
+}
+.wr-canvas-wrap::after {
+  bottom: 8px; right: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.22);
+  border-right: 1px solid rgba(255,255,255,0.22);
+}
+.wr-canvas-wrap:hover::before,
+.wr-canvas-wrap:hover::after {
+  border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.2));
+  transition-duration: 0.08s;
+}
+
+/* Boot scanline — one calibration pass down the stage on entry */
+.wr-canvas-scan {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 4%, var(--tab-color) 50%, transparent 96%);
+  box-shadow: 0 0 14px var(--tab-glow-strong);
+  opacity: 0;
+  animation: wr-scan 1.3s var(--trace-rise) 0.6s 1;
+}
+@keyframes wr-scan {
+  0%   { top: 0;    opacity: 0; }
+  12%  { opacity: 0.65; }
+  85%  { opacity: 0.35; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Live coordinate readout — the instrument needle, bottom-left */
+.wr-canvas-readout {
+  position: absolute;
+  left: 10px; bottom: 10px;
+  z-index: 3;
+  padding: 4px 9px;
+  background: var(--tc-sunk, #0a0a0d);
+  border: 1px solid rgba(255,255,255,0.09);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.5);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.3s var(--trace-decay), color 0.3s var(--trace-decay);
+}
+.wr-canvas-wrap:hover .wr-canvas-readout {
+  border-color: color-mix(in srgb, var(--tab-color) 35%, rgba(255,255,255,0.09));
+  color: rgba(255,255,255,0.75);
+}
+.wr-canvas-placeholder {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+  pointer-events: none;
+  text-align: center;
+}
+/* A single dormant filament under the prompt — softly breathing, the
+   only idle motion: the stage is armed and waiting for a placement. */
+.wr-canvas-placeholder::after {
+  content: '';
+  width: 40px; height: 1px;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow);
+  opacity: 0.4;
+  animation: wr-placeholder-breathe 2.6s var(--trace-decay) infinite;
+}
+@keyframes wr-placeholder-breathe {
+  0%, 100% { opacity: 0.25; transform: scaleX(0.7); }
+  50%      { opacity: 0.7;  transform: scaleX(1); }
+}
+
+/* Legend */
+.wr-legend { margin-top: 20px; }
+.wr-legend-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+/* Leading phosphor tick — same grammar as section titles */
+.wr-legend-title::before {
+  content: '';
+  width: 2px; height: 11px;
+  flex-shrink: 0;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow-strong), 0 0 2px var(--tab-color);
+}
+/* Live count of placed points, right-aligned in the title row */
+.wr-legend-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent 85%);
+}
+.wr-legend-list { display: flex; flex-direction: column; gap: 5px; }
+.wr-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.45);
+  animation: trace-reveal 0.4s var(--trace-out) backwards;
+  animation-delay: calc(var(--row-i, 0) * 55ms + 0.75s);
+  transition: color 0.45s var(--trace-decay);
+}
+.wr-legend-row:hover {
+  color: rgba(255,255,255,0.9);
+  transition-duration: 0.08s;
+}
+.wr-legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: box-shadow 0.7s var(--trace-decay);
+}
+/* The dot ignites in the unit's own hue — phosphor, not paint */
+.wr-legend-row:hover .wr-legend-dot {
+  box-shadow: 0 0 10px var(--dot-c, currentColor), 0 0 3px var(--dot-c, currentColor);
+  transition-duration: 0.06s;
+}
+.wr-legend-pts {
+  margin-left: auto;
+  font-size: 0.64rem;
+  color: rgba(255,255,255,0.22);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hint row */
+.wr-hint {
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: var(--tc-rail);
+  border-left: 2px solid color-mix(in srgb, var(--tab-color) 40%, rgba(255,255,255,0.07));
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.30);
+  letter-spacing: 0.04em;
+}
+
+/* ── 11. Category path hint ──────────────────────────────────────── */
+
+.wr-cat-path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  color: rgba(255,255,255,0.22);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ── 12. Library overlay (blueprint / emitter legacy) ────────────── */
+
+.wr-lib-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.80);
+  z-index: 1999;
+  animation: trace-reveal-down 0.18s var(--trace-out) both;
+}
+
+.wr-lib-sidebar {
+  position: fixed;
   left: 0; top: 0; bottom: 0;
-  width:           550px;
-  background:      rgba(10, 10, 10, 0.98);
-  backdrop-filter: blur(20px) saturate(180%);
-  z-index:         2000;
-  display:         flex;
-  flex-direction:  column;
-  box-shadow:      8px 0 60px rgba(0, 0, 0, 0.8);
-  animation:       sidebarSlideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  width: 550px;
+  background: linear-gradient(180deg, var(--tc-bed-a, #050507) 0%, var(--tc-bed-b, #0b0b0e) 240px, var(--tc-bed-b, #0b0b0e) 100%);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 16px 0 60px rgba(0,0,0,0.8);
 }
 
-@keyframes sidebarSlideIn {
-  from { transform: translateX(-100%); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+.wr-lib-sidebar::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, transparent 10%, var(--wreckages-color) 30%, var(--wreckages-color) 70%, transparent 90%);
+  box-shadow: 0 0 20px var(--wreckages-glow-strong);
 }
 
-.wreckage-library-sidebar::before {
-  content:    '';
-  position:   absolute;
-  top: 0; right: 0;
-  width:      3px;
-  height:     100%;
-  background: linear-gradient(180deg, transparent 0%, var(--wreckages-color) 15%, var(--wreckages-color) 85%, transparent 100%);
-  box-shadow: 0 0 40px var(--wreckages-glow-strong);
-}
-
-.wreckage-library-header {
-  padding:         30px;
-  border-bottom:   1px solid rgba(255, 255, 255, 0.1);
-  display:         flex;
+.wr-lib-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
   justify-content: space-between;
-  align-items:     center;
+  align-items: center;
+  flex-shrink: 0;
 }
-
-.wreckage-library-title {
-  font-family:    'Space Grotesk', sans-serif;
-  font-size:      1.4rem;
-  font-weight:    600;
-  letter-spacing: 0.1em;
-  color:          var(--wreckages-color);
-  text-shadow:    0 0 20px var(--wreckages-glow);
+.wr-lib-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
 }
-
-.wreckage-library-content {
-  flex:       1;
+.wr-lib-body {
+  flex: 1;
   overflow-y: auto;
-  padding:    25px;
+  padding: 24px 28px;
 }
 
-.wreckage-library-upload { margin-bottom: 25px; }
-
-.wreckage-upload-label {
-  display:        block;
-  padding:        18px 25px;
-  background:     rgba(255, 255, 255, 0.05);
-  border:         1px solid rgba(255, 255, 255, 0.15);
-  cursor:         pointer;
-  text-align:     center;
-  font-size:      0.9rem;
-  font-weight:    500;
-  letter-spacing: 0.08em;
-  transition:     all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.wreckage-upload-label:hover {
-  background:   rgba(255, 255, 255, 0.08);
-  border-color: var(--wreckages-color);
-  color:        var(--wreckages-color);
-  box-shadow:   0 0 20px var(--wreckages-glow);
-}
-
-.wreckage-selection-info {
-  display:         flex;
+/* Selection info bar */
+.wr-selection-bar {
+  display: flex;
   justify-content: space-between;
-  align-items:     center;
-  padding:         15px 20px;
-  background:      rgba(255, 255, 255, 0.1);
-  border:          1px solid var(--wreckages-color);
-  margin-bottom:   20px;
-  font-size:       0.9rem;
-  color:           var(--wreckages-color);
-  font-weight:     600;
+  align-items: center;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--wreckages-color) 12%, var(--tc-face-a));
+  border: 1px solid color-mix(in srgb, var(--wreckages-color) 40%, rgba(255,255,255,0.08));
+  margin-bottom: 16px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.62);
 }
 
-.wreckage-btn-confirm {
-  background:     var(--wreckages-color);
-  color:          #000;
-  border:         none;
-  padding:        8px 18px;
-  cursor:         pointer;
-  font-size:      0.85rem;
-  font-weight:    600;
-  letter-spacing: 0.08em;
-  transition:     all 0.3s ease;
+/* Blueprint emitter list rows */
+.wr-emitter-row {
+  padding: 12px 16px;
+  background: var(--tc-face-b);
+  border: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition:
+    background   0.15s linear,
+    border-color 0.15s linear;
+}
+.wr-emitter-row:hover {
+  background: var(--tc-face-a);
+  border-color: color-mix(in srgb, var(--tab-color) 22%, rgba(255,255,255,0.12));
+}
+.wr-emitter-row.selected {
+  background: color-mix(in srgb, var(--tab-color) 14%, var(--tc-face-a));
+  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.12));
+  box-shadow: inset 2px 0 0 var(--tab-color);
+}
+.wr-emitter-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.80);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wr-emitter-path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.64rem;
+  color: rgba(255,255,255,0.28);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wr-check {
+  color: rgba(255,255,255,0.70);
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.wreckage-btn-confirm:hover {
-  box-shadow: 0 0 20px var(--wreckages-glow);
-  transform:  translateY(-2px);
+.wr-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 0.06em;
 }
 
-.wreckage-emitter-list  { display: flex; flex-direction: column; }
-.wreckage-empty-state   { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+/* ── 13. Emitter category config modal ───────────────────────────── */
 
-/* ── 15. GHOST / ICON BUTTON (wreckage-specific) ─── */
-.wreckage-btn-icon {
-  background:    rgba(255, 255, 255, 0.06);
-  border:        1px solid rgba(255, 255, 255, 0.12);
-  color:         var(--text-secondary);
-  padding:       12px 16px;
-  cursor:        pointer;
-  font-size:     1.1rem;
-  transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  font-weight:   600;
+.wr-cat-section {
+  padding: 20px 24px;
+  background: linear-gradient(180deg, var(--tc-face-a), var(--tc-face-b));
+  border: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 10px;
+}
+.wr-cat-section:hover { border-color: rgba(255,255,255,0.12); }
+
+.wr-cat-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 16px;
+}
+.wr-cat-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.70);
+}
+.wr-cat-count {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.64rem;
+  color: rgba(255,255,255,0.28);
+  margin-left: auto;
 }
 
-.wreckage-btn-icon:hover {
-  background:   rgba(255, 255, 255, 0.1);
-  border-color: var(--wreckages-color);
-  color:        var(--wreckages-color);
-  box-shadow:   0 0 20px var(--wreckages-glow);
-  transform:    translateY(-2px);
+.wr-emitter-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
+.wr-emitter-toggle {
+  padding: 10px 14px;
+  background: var(--tc-sunk);
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.38);
+  transition:
+    background   0.15s linear,
+    border-color 0.15s linear,
+    color        0.15s linear,
+    box-shadow   0.15s linear;
+}
+.wr-emitter-toggle:hover {
+  background: var(--tc-rail);
+  border-color: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.65);
+}
+.wr-emitter-toggle.active {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--wreckages-color) 16%, var(--tc-face-a)),
+    color-mix(in srgb, var(--wreckages-color) 5%, var(--tc-face-b)));
+  border-color: color-mix(in srgb, var(--wreckages-color) 45%, rgba(255,255,255,0.08));
+  color: rgba(255,255,255,0.85);
+  box-shadow: inset 2px 0 0 var(--wreckages-color), 0 0 12px var(--wreckages-glow);
+}
+.wr-emitter-toggle-check {
+  color: var(--wreckages-color);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-/* ── 18. RESPONSIVE ──────────────────────────────── */
-@media (max-width: 1400px) {
-  .wreckage-tab .tab-col-detail { position: relative; top: 0; }
-  .help-row { grid-template-columns: 1fr 500px 1fr; }
-}
+/* ── 14. Responsive ──────────────────────────────────────────────── */
 
-@media (max-width: 1200px) {
-  .help-row { grid-template-columns: 1fr; gap: 30px; }
-  .help-center-image { max-width: 100%; order: -1; }
-  .help-left, .help-right {
-    text-align: left;
-    border-left: 3px solid transparent;
-    border-right: none;
-  }
-  .help-left .help-feature-title::after {
-    margin-left: 0;
-    background: linear-gradient(90deg, var(--tab-color) 0%, transparent 100%);
-  }
-  .help-left .help-feature-list li { padding-left: 25px; padding-right: 0; }
-  .help-left .help-feature-list li::before { left: 0; right: auto; }
+@media (max-width: 1080px) {
+  .wr-grid { grid-template-columns: 1fr; }
+  .wr-col-detail { position: relative; top: 0; }
 }
 
 @media (max-width: 768px) {
-  .units-grid { grid-template-columns: 1fr; }
-  .wreckage-library-sidebar { width: 100%; }
+  .wr-lib-sidebar { width: 100%; }
 }
 
-.wreckage-tab .help-adv-card-features li::before   { color: rgba(255,255,255,0.7); }
-.wreckage-tab .help-adv-card-features li:hover      { border-left-color: rgba(255,255,255,0.3); }
-.wreckage-tab .help-adv-card-features strong        { color: #ffffff; }
+/* ── 15. Reduced motion ──────────────────────────────────────────── */
 
-.wreckage-tab .help-adv-ts-q strong                 { color: #ffffff; }
-
-.wreckage-tab .help-adv-note strong                 { color: #ffffff; }
-
-.wreckage-tab .help-adv-file-item.folder            { color: rgba(255,255,255,0.55); }
-.wreckage-tab .help-adv-file-item.highlight         { color: #ffffff; }
-
-.wreckage-tab .help-adv-code-label                  { color: rgba(255,255,255,0.45); }
-
-.wreckage-tab .help-adv-practice-card h4            { color: #ffffff; }
-
-.wreckage-tab .help-info-details-list li strong     { color: #ffffff; }
-.wreckage-tab .help-info-note strong                { color: #ffffff; }
-
-.wreckage-tab .help-modal-content strong[style*="wreckages-color"] {
-  color: #ffffff !important;
+@media (prefers-reduced-motion: reduce) {
+  .wr-tab *,
+  .wr-tab *::before,
+  .wr-tab *::after {
+    animation-duration:   0.01ms !important;
+    animation-delay:      0ms    !important;
+    transition-duration:  0.01ms !important;
+  }
 }
 
-.wreckage-tab .help-adv-code-sample pre,
-.wreckage-tab .help-adv-code-sample pre code { color: rgba(255, 255, 255, 0.82); }
+/* ── 16. Focus / selection ───────────────────────────────────────── */
 
-.wreckage-tab .help-adv-code-label           { color: rgba(255, 255, 255, 0.38); }
-
-.wreckage-tab .help-adv-code-block code      { color: rgba(255, 255, 255, 0.82); }
-
-.wreckage-tab .help-adv-ts-q {
-  background:  rgba(255, 255, 255, 0.03);
-  border-left: 3px solid rgba(255, 255, 255, 0.25);
+.wr-tab a:focus-visible,
+.wr-tab button:focus-visible,
+.wr-tab input:focus-visible {
+  outline: 1px solid rgba(255,255,255,0.60);
+  outline-offset: 2px;
 }
+.wr-tab ::selection {
+  background: var(--wreckages-color);
+  color: #000;
+}
+
+/* ── 18g. Unit card — register entry; frame = identity + selection ── */
+/* No filled monolith and no enclosing box around the stack — cards sit
+   directly on the bed, separated by the grid gap. Quiet at rest; the
+   top tick ignites in the unit's OWN hue on hover; the selected card's
+   whole frame takes that hue. The header swatch is the colour-picker
+   entry point. (--uc-color is set inline per card from unit.color.) */
+
+.wr-tab .wr-uc {
+  position: relative;
+  padding: 15px 18px 17px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.016), rgba(255,255,255,0.003));
+  border: 1px solid rgba(255,255,255,0.05);
+  border-top-color: rgba(255,255,255,0.08);
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    transform    0.4s var(--trace-decay),
+    background   0.4s var(--trace-decay),
+    border-color 0.4s var(--trace-decay),
+    box-shadow   0.4s var(--trace-decay);
+}
+/* top-edge phosphor tick — the unit's own colour */
+.wr-tab .wr-uc::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--uc-color, var(--tab-color));
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity    0.9s var(--trace-decay),
+    transform  0.9s var(--trace-decay),
+    box-shadow 0.9s var(--trace-decay);
+}
+.wr-tab .wr-uc:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--uc-color, white) 22%, rgba(255,255,255,0.08));
+}
+.wr-tab .wr-uc:hover::before,
+.wr-tab .wr-uc.selected::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--uc-color, white) 55%, transparent), 0 0 3px var(--uc-color, white);
+  transition-duration: 0.06s;
+}
+/* selected — the whole frame takes the unit's colour; identity is the
+   selection signal, no separate red accent */
+.wr-tab .wr-uc.selected {
+  border-color: color-mix(in srgb, var(--uc-color) 65%, rgba(255,255,255,0.1));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--uc-color) 7%, rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.003));
+  box-shadow:
+    0 14px 26px -16px rgba(0,0,0,0.9),
+    0 0 28px -10px color-mix(in srgb, var(--uc-color) 50%, transparent);
+}
+
+/* Header swatch — the unit's hue AND the colour-picker entry point */
+.wr-tab .wr-unit-color-dot {
+  width: 14px; height: 14px;
+  border-radius: 0;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 0 8px -2px var(--uc-color);
+  transition: transform 0.15s var(--trace-rise), box-shadow 0.2s linear, border-color 0.2s linear;
+}
+.wr-tab .wr-unit-color-dot:hover {
+  transform: scale(1.28);
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 0 12px 0 var(--uc-color);
+}
+
+/* Title — dim at rest, white when engaged */
+.wr-tab .wr-uc .wr-unit-title {
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  transition: color 0.3s var(--trace-decay);
+}
+.wr-tab .wr-uc:hover .wr-unit-title,
+.wr-tab .wr-uc.selected .wr-unit-title { color: rgba(255,255,255,0.92); }
+
+/* Coordinate register — each point is its own recessed block */
+.wr-tab .wr-coord-entry {
+  padding: 11px 14px 13px;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.018);
+  border: none;
+  border-left: 2px solid rgba(255,255,255,0.10);
+  transition: border-left-color 0.2s linear, background 0.2s linear;
+}
+.wr-tab .wr-coord-entry:hover { background: rgba(255,255,255,0.028); }
+/* mirror points carry the tab accent on their edge */
+.wr-tab .wr-coord-entry.mirror {
+  border-left-color: color-mix(in srgb, var(--tab-color) 50%, rgba(255,255,255,0.1));
+}
+
+/* ── 17. Help modal accent overrides ────────────────────────────── */
+
+.wr-tab .help-adv-card-features li::before   { color: rgba(255,255,255,0.7); }
+.wr-tab .help-adv-card-features li:hover      { border-left-color: rgba(255,255,255,0.3); }
+.wr-tab .help-adv-card-features strong        { color: #ffffff; }
+.wr-tab .help-adv-ts-q strong                 { color: #ffffff; }
+.wr-tab .help-adv-note strong                 { color: #ffffff; }
+.wr-tab .help-adv-file-item.folder            { color: rgba(255,255,255,0.55); }
+.wr-tab .help-adv-file-item.highlight         { color: #ffffff; }
+.wr-tab .help-adv-code-label                  { color: rgba(255,255,255,0.45); }
+.wr-tab .help-adv-practice-card h4            { color: #ffffff; }
+.wr-tab .help-info-details-list li strong     { color: #ffffff; }
+.wr-tab .help-info-note strong                { color: #ffffff; }
+.wr-tab .help-adv-ts-q {
+  background:  rgba(255,255,255,0.03);
+  border-left: 3px solid rgba(255,255,255,0.25);
+}
+.wr-tab .help-adv-code-sample pre,
+.wr-tab .help-adv-code-sample pre code        { color: rgba(255,255,255,0.82); }
+.wr-tab .help-adv-code-block code             { color: rgba(255,255,255,0.82); }

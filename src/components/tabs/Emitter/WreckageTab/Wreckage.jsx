@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import '../../../shared/shared.css';
+import '../../../shared/trace.css';
 import './Wreckage.css';
 import { luxuryAlert, luxuryConfirm } from '../../../modals/notifications';
 import { generateReadme as buildReadme, writeReadme } from '../../../../../utils/readmeGenerator';
 import UnitLibraryOverlay from '../../Libraries/UnitLibrary/UnitLibraryOverlay';
 import EmitterLibraryOverlay from '../../Libraries/EmitterLibrary/EmitterLibraryOverlay';
 import WreckageHelpModal from '../../HelpModals/Wreckage_help.jsx';
+import WorkspaceConsole from '../../../shared/WorkspaceConsole/WorkspaceConsole.jsx';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
@@ -171,6 +173,7 @@ const WreckageTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecor
   const [activeHelpTab, setActiveHelpTab] = useState('help-guide');
   const [activeEmitterHelpSubTab, setActiveEmitterHelpSubTab] = useState('smart');
   const [activeAdvancedSubTab, setActiveAdvancedSubTab] = useState('coords');
+  const [activeSection, setActiveSection] = useState('config');
   const [helpGuideSelected, setHelpGuideSelected] = useState(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -181,6 +184,7 @@ const [showEmitterCategoryConfig, setShowEmitterCategoryConfig] = useState(false
   const emittersRef = useRef(null);
   const unitsRef = useRef(null);
   const canvasContainerRef = useRef(null);
+  const coordReadoutRef = useRef(null);
   const mirrorModeRef = useRef(null);
   const generateButtonRef = useRef(null);
   const mapNameValueRef = useRef(mapName);
@@ -771,6 +775,51 @@ useEffect(() => {
     }
     setBlueprintPaths(newPaths);
   };
+
+  
+const WR_SECTIONS = [
+  {
+    id:     'config',
+    index:  '01',
+    label:  'Configuration',
+    desc:   'Set the map name and assign emitter blueprints for this wreckage register.',
+    // 'done' lights the tick green when the minimum required fields are set
+    done:   !!(mapName && blueprintPaths.some(p => p.trim())),
+    locked: false,
+  },
+  {
+    id:     'units',
+    index:  '02',
+    label:  'Units',
+    desc:   'Define unit types and place their coordinates on the map canvas.',
+    // Count badge shows how many units have at least one placed coordinate
+    count:  units.filter(u => u.coordinates.some(c => c.x && c.z)).length,
+    done:   units.some(u => u.coordinates.some(c => c.x && c.z)),
+    locked: false,
+  },
+  {
+    id:     'matching',
+    index:  '03',
+    label:  'Matching',
+    desc:   'Choose how emitters are matched to unit categories.',
+    done:   !!emitterMatchingMode,
+    locked: false,
+  },
+  {
+    id:     'output',
+    index:  '04',
+    label:  'Output',
+    desc:   'Configure export options before generating the Lua files.',
+    done:   false,
+    locked: false,
+  },
+];
+
+const isReady = !!(
+  mapName.trim() &&
+  blueprintPaths.some(p => p.trim()) &&
+  units.some(u => u.coordinates.some(c => c.x && c.z))
+);
 
   // ── Unit Management ───────────────────────────────────────────────────────────
 
@@ -1923,8 +1972,559 @@ TypeClass = ${instanceName}`;
     }
   };
 
+  // ── Live register readouts ───────────────────────────────────────────────
+  const wrTotalPoints  = units.reduce((s, u) => s + u.coordinates.filter(c => c.x && c.z).length, 0);
+  const wrEmitterCount = blueprintPaths.filter(p => p.trim()).length;
+
+  // Live coordinate readout — written straight to the DOM (no re-render per
+  // mousemove; the readout is an instrument needle, not React state)
+  const handleCanvasMove = (e) => {
+    const canvas = canvasRef.current;
+    const out = coordReadoutRef.current;
+    if (!canvas || !out) return;
+    const rect = canvas.getBoundingClientRect();
+    const scale = (parseFloat(mapSize) || 1024) / 1024;
+    const wx = ((e.clientX - rect.left) / rect.width) * 1024 * scale + mapOffsetX;
+    const wz = ((e.clientY - rect.top) / rect.height) * 1024 * scale + mapOffsetY;
+    out.textContent = `X ${wx.toFixed(1)} · Z ${wz.toFixed(1)}`;
+  };
+  const handleCanvasLeave = () => {
+    if (coordReadoutRef.current) coordReadoutRef.current.textContent = '— · —';
+  };
+
+  // ── Section content map — each section's JSX ────────────────────────────────
+
+  const sectionContent = {
+
+    config: (
+      <>
+        <div style={{ marginBottom: '20px' }}>
+          <label className="field-label">Map Name</label>
+          <input
+            type="text"
+            className="field-input"
+            value={mapName}
+            onChange={(e) => setMapName(e.target.value)}
+            placeholder="e.g. Hades_Dust.v0002"
+          />
+          {mapInfo && (
+            <div className="wr-map-info">
+              {mapInfo.ok ? (<>
+                <span className="wr-map-info-tag">Map</span>
+                <span className="wr-map-info-size">{mapInfo.mapSize} × {mapInfo.mapSize}</span>
+                <span className="wr-map-info-sep">·</span>
+                <span>{mapInfo.km} km</span>
+                {mapInfo.playableSize !== mapInfo.mapSize && (<>
+                  <span className="wr-map-info-sep">·</span>
+                  <span>playable {mapInfo.playableKm} km</span>
+                </>)}
+              </>) : (
+                <span className="wr-map-info-err">{mapInfo.error}</span>
+              )}
+            </div>
+          )}
+          {mapName && (
+            <div className="wr-path-hint">
+              {`Saves to: /maps/${mapName.match(/\.v\d{4}$/) ? mapName : mapName + '.v0001'}/`}
+            </div>
+          )}
+        </div>
+
+        <div ref={emittersRef}>
+          <label className="field-label">Emitters</label>
+          {blueprintPaths.map((path, idx) => {
+            let displayPath = path;
+            if (mapName && path &&
+                !path.startsWith('/maps/') &&
+                !path.startsWith('/effects/') &&
+                !path.startsWith('/env/') &&
+                !path.startsWith('/textures/') &&
+                !path.startsWith('/units/') &&
+                !path.startsWith('/projectiles/')) {
+              let finalMapName = mapName.trim();
+              if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) {
+                finalMapName += '.v0001';
+              }
+              const relativePath = path.startsWith('/') ? path.substring(1) : path;
+              displayPath = `/maps/${finalMapName}/${relativePath}`;
+            }
+            return (
+              <div key={idx} className="wr-input-row">
+                <input
+                  type="text"
+                  className="field-input"
+                  value={displayPath}
+                  onChange={(e) => {
+                    let newPath = e.target.value;
+                    if (mapName && newPath.startsWith('/maps/')) {
+                      let finalMapName = mapName.trim();
+                      if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) {
+                        finalMapName += '.v0001';
+                      }
+                      const prefix = `/maps/${finalMapName}/`;
+                      if (newPath.startsWith(prefix)) {
+                        newPath = '/' + newPath.substring(prefix.length);
+                      }
+                    }
+                    updateBlueprintPath(idx, newPath);
+                  }}
+                  onBlur={(e) => {
+                    let val = e.target.value;
+                    if (mapName && val.startsWith('/maps/')) {
+                      let finalMapName = mapName.trim();
+                      if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) finalMapName += '.v0001';
+                      const prefix = `/maps/${finalMapName}/`;
+                      if (val.startsWith(prefix)) val = '/' + val.substring(prefix.length);
+                    }
+                    resolveEmitterPath(idx, val);
+                  }}
+                  placeholder="/effects/emitters/weather_sand_01_emit.bp"
+                />
+                <button className="delete-button" onClick={() => deleteBlueprintPath(idx)}>×</button>
+              </div>
+            );
+          })}
+
+          <button
+            onClick={() => { const newPaths = [...blueprintPaths]; newPaths.push(''); setBlueprintPaths(newPaths); }}
+            className="action-button action-button--full"
+            style={{ marginBottom: '8px' }}
+          >
+            Add Emitter
+          </button>
+
+          <button
+            onClick={() => setShowEmitterLibrary(true)}
+            className="action-button action-button--full"
+          >
+            Library
+          </button>
+        </div>
+      </>
+    ),
+
+    units: (
+      <>
+        <div className="trace-section-head" style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              className="action-button"
+              onClick={handleImportFromMap}
+              title="Import wreckages from the current map's _script.lua and _save.lua"
+            >
+              Import from Map
+            </button>
+            {units.length >= 1 && (
+              <button className="action-button action-button--danger" onClick={deleteAllUnits}>Delete All</button>
+            )}
+          </div>
+        </div>
+
+        <div className="wr-units-grid">
+          {units.map((unit, unitIdx) => (
+            <div
+              key={unit.id}
+              className={`wr-uc${unitIdx === selectedUnit ? ' selected' : ''}`}
+              style={{ '--row-i': unitIdx, '--uc-color': unit.color }}
+              onClick={() => setSelectedUnit(unitIdx)}
+            >
+              <div className="wr-unit-header">
+                <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+                  <div
+                    className="wr-unit-color-dot"
+                    style={{ backgroundColor: unit.color }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowColorPicker(showColorPicker === unitIdx ? null : unitIdx);
+                    }}
+                  />
+                  <span className="wr-unit-title">
+                    {unit.unitName ? `${unit.unitName} (${unit.unitType})` : unit.unitType || `Unit ${unitIdx + 1}`}
+                  </span>
+                </div>
+                <button
+                  className="delete-button"
+                  onClick={(e) => { e.stopPropagation(); deleteUnit(unitIdx); }}
+                >×</button>
+              </div>
+
+              {showColorPicker === unitIdx && (
+                <div className="wr-color-picker" onClick={(e) => e.stopPropagation()}>
+                  <div className="wr-color-grid">
+                    {availableColors.map((colorOption, colorIdx) => (
+                      <div
+                        key={colorIdx}
+                        className="wr-color-swatch"
+                        style={{ backgroundColor: colorOption.color }}
+                        onClick={() => { updateUnit(unitIdx, 'color', colorOption.color); setShowColorPicker(null); }}
+                        title={colorOption.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginBottom: '8px' }}>
+                <div className="wr-input-row">
+                  <input
+                    type="text"
+                    className="field-input"
+                    value={unit.unitType}
+                    onChange={(e) => updateUnit(unitIdx, 'unitType', e.target.value)}
+                    placeholder="UEL0203"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                  <button
+                    className="action-button"
+                    style={{ flexShrink: 0 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedUnit(unitIdx);
+                      setShowUnitLibrary(true);
+                      loadUnitLibrary();
+                    }}
+                  >
+                    Library
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '8px' }}>
+                <label className="field-label" style={{ marginBottom: '10px' }}>Unit Categories (optional)</label>
+                {unit.unitCategories && unit.unitCategories.map((category, catIdx) => (
+                  <div key={catIdx} className="wr-input-row">
+                    <input
+                      type="text"
+                      className="field-input"
+                      value={category}
+                      onChange={(e) => updateUnitCategory(unitIdx, catIdx, e.target.value)}
+                      placeholder={`Category ${catIdx + 1} (e.g., Land, T2)`}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <button
+                      className="delete-button"
+                      onClick={(e) => { e.stopPropagation(); deleteUnitCategory(unitIdx, catIdx); }}
+                    >×</button>
+                  </div>
+                ))}
+                <button
+                  className="action-button action-button--full"
+                  onClick={(e) => { e.stopPropagation(); addUnitCategory(unitIdx); }}
+                >Add Category</button>
+              </div>
+
+              {unit.unitCategories && unit.unitCategories.length > 0 && (
+                <div className="wr-cat-path">
+                  wreckages/{unit.unitCategories.filter(c => c.trim()).join('/')}/{unit.unitType || 'unit_id'}
+                </div>
+              )}
+
+              {unitIdx === selectedUnit && (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="trace-subsection"
+                    onClick={() => setCoordsOpen(prev => ({ ...prev, [unitIdx]: !prev[unitIdx] }))}
+                  >
+                    Coordinates ({unit.coordinates.filter(c => c.x && c.z).length})
+                  </div>
+                  {coordsOpen[unitIdx] && (<>
+                    {unit.coordinates.map((coord, coordIdx) => (
+                      <div key={coordIdx} className={`wr-coord-entry${coord.isMirrored ? ' mirror' : ''}`}>
+                        <div className="wr-coord-label-row">
+                          <span>Point {coordIdx + 1}{coord.isMirrored ? ' · mirror' : ''}</span>
+                          <button className="delete-button" onClick={() => deleteCoordinate(unitIdx, coordIdx)}>×</button>
+                        </div>
+                        <div className="wr-coord-grid">
+                          <div className="wr-coord-field">
+                            <label>X</label>
+                            <input type="text" className="field-input field-input--sm" value={coord.x}
+                              onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'x', e.target.value)} placeholder="256" />
+                          </div>
+                          <div className="wr-coord-field">
+                            <label>Y</label>
+                            <input type="text" className="field-input field-input--sm" value={coord.y}
+                              onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'y', e.target.value)} placeholder="26" />
+                          </div>
+                          <div className="wr-coord-field">
+                            <label>Z</label>
+                            <input type="text" className="field-input field-input--sm" value={coord.z}
+                              onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'z', e.target.value)} placeholder="256" />
+                          </div>
+                        </div>
+                        <div className="wr-coord-grid" style={{ marginTop: '8px' }}>
+                          <div className="wr-coord-field">
+                            <label>Heading</label>
+                            <input type="text" className="field-input field-input--sm" value={coord.heading}
+                              onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'heading', e.target.value)} placeholder="math.pi" />
+                          </div>
+                          <div className="wr-coord-field">
+                            <label>Pitch</label>
+                            <input type="text" className="field-input field-input--sm" value={coord.pitch}
+                              onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'pitch', e.target.value)} placeholder="0.0" />
+                          </div>
+                          <div className="wr-coord-field">
+                            <label>Roll</label>
+                            <input type="text" className="field-input field-input--sm" value={coord.roll}
+                              onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'roll', e.target.value)} placeholder="math.pi" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                      <button className="action-button" style={{ flex: 1 }} onClick={() => addCoordinate(unitIdx)}>
+                        Add Coordinate
+                      </button>
+                      {unit.coordinates.some(c => c.x && c.z) && (
+                        <button
+                          className="action-button action-button--danger"
+                          onClick={async () => {
+                            const confirmed = await luxuryConfirm('Delete all coordinates for this unit?', 'Confirm Delete', 'Delete All', 'Cancel');
+                            if (confirmed) deleteAllCoordinates(unitIdx);
+                          }}
+                        >Delete All</button>
+                      )}
+                    </div>
+                  </>)}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <div className="wr-add-unit" onClick={addUnit}>
+            <div className="wr-add-unit-icon">+</div>
+            <span className="wr-add-unit-label">Add Unit Type</span>
+          </div>
+        </div>
+      </>
+    ),
+
+    matching: (
+      <>
+        <div style={{ marginBottom: '16px' }}>
+          {[
+            { key: 'smart',        label: 'Smart Combination (3-Tier)', desc: 'Perfect Match → Partial Match → Fallback',  note: 'Unit ["Land","T3"] gets emitters active for BOTH first' },
+            { key: 'simple',       label: 'Simple Union',               desc: 'Use ALL emitters active for ANY category',  note: 'Unit ["Land","T3"] gets all emitters active for Land OR T3' },
+            { key: 'lastCategory', label: 'Last Category Only',         desc: 'Match only the last category in the list',  note: 'Unit ["Land","T2","Heavy"] → matches "Heavy" only' },
+          ].map(({ key, label, desc, note }) => (
+            <div
+              key={key}
+              className={`station option-row${emitterMatchingMode === key ? ' active' : ''}`}
+              onClick={() => setEmitterMatchingMode(key)}
+            >
+              <div className="option-row-head">
+                <div className={`option-radio${emitterMatchingMode === key ? ' on' : ''}`}>
+                  {emitterMatchingMode === key && <div className="option-radio-dot" />}
+                </div>
+                <span className="option-label">{label}</span>
+              </div>
+              <div className="option-desc">{desc}</div>
+              <em className="option-note">{note}</em>
+            </div>
+          ))}
+        </div>
+        <button
+          className="action-button action-button--full"
+          onClick={() => setShowEmitterCategoryConfig(true)}
+        >
+          Configure Emitter-Category Assignment
+        </button>
+      </>
+    ),
+
+    output: (
+      <>
+        <label className="checkbox-label" style={{ marginBottom: '12px', cursor: 'pointer' }} onClick={() => setGenerateReadme(!generateReadme)}>
+          <div className={`checkbox${generateReadme ? ' checked' : ''}`}>
+            {generateReadme && (
+              <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </div>
+          <span className="checkbox-text">Generate README file</span>
+        </label>
+        <label className="checkbox-label" style={{ marginBottom: '20px', cursor: 'pointer' }} onClick={() => setExportRawLua(!exportRawLua)}>
+          <div className={`checkbox${exportRawLua ? ' checked' : ''}`}>
+            {exportRawLua && (
+              <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </div>
+          <span className="checkbox-text">Export props.lua (no SCMAP)</span>
+        </label>
+
+        {/* Primary commit — the signature action, moved out of the rail.
+            Full three-layer TraceLine ignites on hover, sweeps on click. */}
+        <button
+          className="commit-button"
+          disabled={!isReady}
+          onClick={isReady ? generateFiles : undefined}
+          aria-label="Generate wreckage files"
+        >
+          <span className="commit-button-label">Generate Wreckage</span>
+          <span className="commit-button-status">{isReady ? 'Ready' : 'Not Ready'}</span>
+          <span className="commit-button-bloom" aria-hidden="true" />
+          <span className="commit-button-line" aria-hidden="true" />
+        </button>
+      </>
+    ),
+  };
+
+  // ── Preview slot — map canvas, markers, legend, hint ─────────────────────────
+
+  const previewSlot = (
+    <>
+      {previewLoading ? (
+        <div className="wr-upload-area" style={{ pointerEvents: 'none', opacity: 0.6 }}>
+          <span>Loading preview from .scmap…</span>
+        </div>
+      ) : (
+        <div
+          className="wr-upload-area"
+          onClick={() => fileInputRef.current?.click()}
+          title={previewImageData ? 'Click to replace preview image' : 'Click to upload map image'}
+        >
+          <span>{previewImageData ? 'Replace Map Image' : 'Upload Map Image'}</span>
+          <input ref={fileInputRef} type="file" className="wr-file-input" accept="image/*" onChange={handleImageUpload} />
+        </div>
+      )}
+
+      <div
+        ref={canvasContainerRef}
+        className="wr-canvas-wrap"
+        style={{ width: '100%', aspectRatio: '1' }}
+        onMouseMove={handleCanvasMove}
+        onMouseLeave={handleCanvasLeave}
+      >
+        <canvas
+          ref={canvasRef}
+          className="wr-canvas"
+          width={1024}
+          height={1024}
+          onClick={handleCanvasClick}
+          style={{ width: '100%', height: '100%', display: 'block' }}
+        />
+        <div className="wr-canvas-scan" aria-hidden="true" />
+        <div className="wr-canvas-readout" ref={coordReadoutRef}>— · —</div>
+
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          pointerEvents: 'none'
+        }}>
+          {markers.map(marker => (
+            <div
+              key={marker.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteCoordinate(marker.unitIdx, marker.coordIdx);
+              }}
+              style={{
+                position: 'absolute',
+                left: `${marker.x}%`,
+                top: `${marker.z}%`,
+                transform: 'translate(-50%, -50%)',
+                width: marker.isSelected ? '16px' : '12px',
+                height: marker.isSelected ? '16px' : '12px',
+                borderRadius: '50%',
+                backgroundColor: marker.color,
+                border: marker.isSelected ? '3px solid white' : '2px solid white',
+                boxShadow: `0 0 ${marker.isSelected ? '20px' : '15px'} ${marker.color}, 0 0 ${marker.isSelected ? '10px' : '5px'} rgba(255,255,255,0.5)`,
+                transition: 'all 0.3s ease',
+                pointerEvents: 'auto',
+                cursor: 'pointer'
+              }}
+              title={`${marker.unitType} - Click to delete`}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.3)';
+                e.currentTarget.style.boxShadow = `0 0 30px ${marker.color}, 0 0 15px rgba(255,255,255,0.8)`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
+                e.currentTarget.style.boxShadow = `0 0 ${marker.isSelected ? '20px' : '15px'} ${marker.color}, 0 0 ${marker.isSelected ? '10px' : '5px'} rgba(255,255,255,0.5)`;
+              }}
+            >
+              {marker.isMirrored && (
+                <div style={{
+                  position: 'absolute',
+                  inset: '-2px',
+                  borderLeft: '2px solid white',
+                  borderTop: '2px solid white'
+                }} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {!previewImage && units.every(u => u.coordinates.every(c => !c.x)) && (
+          <div className="wr-canvas-placeholder">
+            Click on canvas to place units
+          </div>
+        )}
+      </div>
+
+      <div className="wr-legend">
+        <div className="wr-legend-title">Unit Legend</div>
+        <div className="wr-legend-list">
+          {units.map((unit, idx) => (
+            <div key={unit.id} className="wr-legend-row" style={{ '--row-i': idx, '--dot-c': unit.color }}>
+              <div className="wr-legend-dot" style={{ backgroundColor: unit.color }} />
+              <span>
+                {unit.unitName
+                  ? `${unit.unitName} (${unit.unitType.toUpperCase()})`
+                  : unit.unitType.toUpperCase() || `Unit ${idx + 1}`}
+              </span>
+              <span className="wr-legend-pts">
+                {unit.coordinates.filter(c => c.x && c.z).length} pts
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="wr-hint">
+        Click canvas to place · {mirrorMode !== 'none' ? `${mirrorMode} mirror active` : 'no mirror'}
+      </div>
+    </>
+  );
+
+  // ── Mirror slot — select in preview header ────────────────────────────────────
+
+  const mirrorSlot = (
+    <div className="preview-panel-head-controls">
+      <select
+        ref={mirrorModeRef}
+        className="field-select"
+        style={{ width: 'auto' }}
+        value={mirrorMode}
+        onChange={(e) => setMirrorMode(e.target.value)}
+      >
+        <option value="none">No Mirror</option>
+        <option value="diagonal">Diagonal</option>
+        <option value="horizontal">Horizontal</option>
+        <option value="vertical">Vertical</option>
+      </select>
+      {previewImageData && (
+        <button
+          className="action-button action-button--danger"
+          style={{ padding: '4px 10px', fontSize: '0.62rem' }}
+          onClick={() => {
+            localStorage.removeItem('shared_preview_image');
+            setPreviewImageData(null);
+            setPreviewImage(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+          }}
+        >
+          Remove Preview
+        </button>
+      )}
+    </div>
+  );
+
   return (
-    <div className="wreckage-tab tab-scrollbar" style={{ '--tab-color': 'var(--wreckages-color)', '--tab-glow': 'var(--wreckages-glow)', '--tab-glow-strong': 'var(--wreckages-glow-strong)' }}>
+    <div className="wr-tab trace-tab">
       {!showHelp && !showUnitLibrary && !showEmitterLibrary && !showBlueprintLibrary && (
         <button className="help-btn" onClick={() => setShowHelp(true)} title="Toggle Help Overlay">?</button>
       )}
@@ -1981,113 +2581,139 @@ TypeClass = ${instanceName}`;
         return (
           <>
             <div
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 1999 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', zIndex: 1999 }}
               onClick={() => setShowEmitterCategoryConfig(false)}
             />
+
+            {/* Live preview sidebar — left */}
             <div
-              className="help-modal"
-              style={{ '--tab-color': 'var(--wreckages-color)', '--tab-glow': 'var(--wreckages-glow)', '--tab-glow-strong': 'var(--wreckages-glow-strong)',
-                width: 'calc(95vw - 500px)', maxWidth: '1500px',
-                border: '2px solid rgba(255,68,0,0.25)',
-                boxShadow: '0 25px 80px rgba(0,0,0,0.95), 0 0 100px var(--wreckages-glow)',
-                zIndex: 2000,
+              style={{
+                position: 'fixed', left: 0, top: 0, bottom: 0, width: '360px',
+                background: 'linear-gradient(180deg, #050507 0%, #0b0b0e 240px, #0b0b0e 100%)',
+                borderRight: '1px solid rgba(255,255,255,0.07)',
+                zIndex: 2001, display: 'flex', flexDirection: 'column', overflow: 'hidden',
               }}
               onClick={e => e.stopPropagation()}
             >
-              {/* Top accent line */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, transparent, var(--wreckages-color) 30%, var(--wreckages-color) 70%, transparent)', boxShadow: '0 0 30px var(--wreckages-glow)', zIndex: 1 }} />
+              <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+                <span className="trace-section-title">Live Preview</span>
+                <div className="trace-sublabel" style={{ marginTop: '6px' }}>Emitters active per unit</div>
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {units.map((unit, unitIdx) => {
+                    const applicable = getEmittersForUnit(unit);
+                    const hasCats = unit.unitCategories && unit.unitCategories.some(c => c.trim());
+                    return (
+                      <div key={unit.id} className="trace-item">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: unit.color, flexShrink: 0 }} />
+                          <span style={{ fontFamily: 'Space Grotesk', fontSize: '0.76rem', fontWeight: 600, color: 'rgba(255,255,255,0.80)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+                            {unit.unitType?.toUpperCase() || `Unit ${unitIdx + 1}`}
+                          </span>
+                        </div>
+                        {hasCats && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginBottom: '8px' }}>
+                            {unit.unitCategories.filter(c => c.trim()).map((cat, i) => (
+                              <span key={i} className="trace-badge trace-badge--accent" style={{ fontSize: '0.60rem' }}>{cat}</span>
+                            ))}
+                          </div>
+                        )}
+                        <div style={{ fontFamily: 'Space Grotesk', fontSize: '0.68rem', color: 'rgba(255,255,255,0.28)', marginBottom: '6px' }}>
+                          {applicable.length} emitter{applicable.length !== 1 ? 's' : ''} active
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          {applicable.map((p, i) => (
+                            <div key={i} style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', padding: '4px 8px', background: 'rgba(255,255,255,0.02)', borderLeft: '2px solid rgba(255,255,255,0.08)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={p}>
+                              {getEmitterNameFromPath(p)}
+                            </div>
+                          ))}
+                          {applicable.length === 0 && (
+                            <div style={{ fontSize: '0.68rem', color: 'rgba(255,193,7,0.6)', fontStyle: 'italic', padding: '4px 0' }}>No matching emitters</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {units.length === 0 && (
+                    <div className="wr-empty-state" style={{ padding: '40px 20px' }}>No units configured yet.</div>
+                  )}
+                </div>
+              </div>
+            </div>
 
-              {/* Header */}
-              <div className="help-modal-header" style={{ background: 'rgba(255,68,0,0.03)' }}>
+            {/* Main modal — centered on the viewport, independent of the
+                sidebar, and in front of it */}
+            <div
+              className="help-modal"
+              style={{
+                '--tab-color': 'var(--wreckages-color)',
+                '--tab-glow': 'var(--wreckages-glow)',
+                '--tab-glow-strong': 'var(--wreckages-glow-strong)',
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                margin: 0,
+                width: 'min(1080px, 88vw)',
+                maxWidth: 'none',
+                maxHeight: '88vh',
+                background: 'linear-gradient(180deg, #0d0d11 0%, #0a0a0d 100%)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                boxShadow: '0 40px 90px rgba(0,0,0,0.92)',
+                display: 'flex',
+                flexDirection: 'column',
+                zIndex: 2002,
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="help-modal-header">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                   <div>
-                    <h2 style={{ margin: '0 0 10px', color: 'var(--wreckages-color)', fontSize: '1.8rem', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                      Emitter-Category Assignment
-                    </h2>
-                    <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: 1.6 }}>
-                      Control which emitters are used for specific unit categories.<br/>
-                      Toggle emitter buttons to activate or deactivate them per category.
-                    </p>
+                    <span className="trace-section-title" style={{ fontSize: '1rem' }}>Emitter-Category Assignment</span>
+                    <div className="trace-sublabel" style={{ marginTop: '6px' }}>
+                      Control which emitters are used for specific unit categories. Toggle to activate / deactivate per category.
+                    </div>
                   </div>
-                  <button
-                    className="help-modal-close"
-                    onClick={() => setShowEmitterCategoryConfig(false)}
-                  >×</button>
+                  <button className="help-modal-close" onClick={() => setShowEmitterCategoryConfig(false)}>×</button>
                 </div>
               </div>
 
-              {/* Content */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '30px 40px' }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '28px 36px' }}>
                 {allCategories.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '100px 20px', color: 'var(--text-secondary)' }}>
-                    <div style={{ fontSize: '5rem', marginBottom: '30px', opacity: 0.3 }}>🏷️</div>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '20px', color: 'var(--text-primary)', fontWeight: 600 }}>No Unit Categories Defined</h3>
-                    <p style={{ fontSize: '1.05rem', lineHeight: 1.7, maxWidth: '600px', margin: '0 auto', color: 'var(--text-secondary)' }}>
-                      Add categories to your units first.<br/>Go to the Units section and click "+ Add Category".
-                    </p>
+                  <div className="wr-empty-state" style={{ padding: '80px 20px' }}>
+                    <p style={{ marginBottom: '8px', color: 'rgba(255,255,255,0.55)' }}>No Unit Categories Defined</p>
+                    <p className="trace-sublabel">Add categories to your units first — go to Units and click "+ Add Category".</p>
                   </div>
                 ) : validEmitters.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '100px 20px', color: 'var(--text-secondary)' }}>
-                    <div style={{ fontSize: '5rem', marginBottom: '30px', opacity: 0.3 }}>⚡</div>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '20px', color: 'var(--text-primary)', fontWeight: 600 }}>No Emitters Configured</h3>
-                    <p style={{ fontSize: '1.05rem', lineHeight: 1.7, maxWidth: '600px', margin: '0 auto', color: 'var(--text-secondary)' }}>
-                      Add emitter paths in the Configuration section first.
-                    </p>
+                  <div className="wr-empty-state" style={{ padding: '80px 20px' }}>
+                    <p style={{ marginBottom: '8px', color: 'rgba(255,255,255,0.55)' }}>No Emitters Configured</p>
+                    <p className="trace-sublabel">Add emitter paths in the Configuration section first.</p>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                    {/* Info box */}
-                    <div style={{ background: 'rgba(255,68,0,0.05)', border: '1px solid rgba(255,68,0,0.2)', borderLeft: '4px solid var(--wreckages-color)', padding: '20px 25px', borderRadius: '4px', marginBottom: '10px' }}>
-                      <p style={{ margin: '0 0 10px', fontSize: '1rem', fontWeight: 600, color: 'var(--wreckages-color)' }}>How Assignment Works</p>
-                      <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.92rem', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
-                        <li><strong style={{ color: '#fff' }}>Colored button</strong> — emitter IS used for this category</li>
-                        <li><strong style={{ color: '#fff' }}>Gray button</strong> — emitter is NOT used for this category</li>
-                        <li>All emitters are active by default — deactivate to exclude</li>
-                      </ul>
-                    </div>
-
-                    {/* Category rows */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {allCategories.map((category, catIdx) => (
-                      <div key={catIdx}
-                        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '25px 30px', transition: 'all 0.3s ease' }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,68,0,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                      >
-                        {/* Category header */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--wreckages-color)', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'Space Grotesk, sans-serif', marginBottom: '4px' }}>
-                              {category}
-                            </div>
-                            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                              {validEmitters.filter(p => isEmitterActiveForCategory(p, category)).length} of {validEmitters.length} emitters active
-                            </div>
-                          </div>
+                      <div key={catIdx} className="wr-cat-section">
+                        <div className="wr-cat-header">
+                          <span className="wr-cat-name">{category}</span>
+                          <span className="wr-cat-count">
+                            {validEmitters.filter(p => isEmitterActiveForCategory(p, category)).length} / {validEmitters.length} active
+                          </span>
                         </div>
-
-                        {/* Emitter toggle buttons */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px' }}>
+                        <div className="wr-emitter-toggle-grid">
                           {validEmitters.map((path, eIdx) => {
                             const active = isEmitterActiveForCategory(path, category);
                             return (
-                              <button key={eIdx}
+                              <button
+                                key={eIdx}
+                                className={`wr-emitter-toggle${active ? ' active' : ''}`}
                                 onClick={() => toggleEmitterCategory(path, category)}
                                 title={path}
-                                style={{
-                                  background: active ? 'linear-gradient(135deg, rgba(255,68,0,0.25) 0%, rgba(255,68,0,0.12) 100%)' : 'rgba(255,255,255,0.06)',
-                                  color: active ? 'var(--wreckages-color)' : 'rgba(255,255,255,0.45)',
-                                  border: `2px solid ${active ? 'var(--wreckages-color)' : 'rgba(255,255,255,0.12)'}`,
-                                  padding: '12px 16px', borderRadius: '4px', cursor: 'pointer',
-                                  fontSize: '0.85rem', fontWeight: active ? 700 : 500, letterSpacing: '0.03em',
-                                  transition: 'all 0.25s cubic-bezier(0.23,1,0.32,1)',
-                                  boxShadow: active ? '0 0 18px var(--wreckages-glow)' : 'none',
-                                  textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px',
-                                }}
-                                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,68,0,0.3)'; } }}
-                                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; } }}
                               >
-                                <span style={{ flex: 1 }}>{getEmitterNameFromPath(path)}</span>
-                                {active && <span style={{ fontWeight: 700, color: 'var(--wreckages-color)' }}>✓</span>}
+                                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {getEmitterNameFromPath(path)}
+                                </span>
+                                {active && <span className="wr-emitter-toggle-check">✓</span>}
                               </button>
                             );
                           })}
@@ -2098,78 +2724,11 @@ TypeClass = ${instanceName}`;
                 )}
               </div>
 
-              {/* Footer */}
-              <div style={{ padding: '18px 30px', borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              <div style={{ padding: '16px 28px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                <span className="trace-sublabel">
                   {allCategories.length} {allCategories.length === 1 ? 'category' : 'categories'} · {validEmitters.length} emitters · {units.length} units
                 </span>
-                <button className="btn-primary" onClick={() => setShowEmitterCategoryConfig(false)} style={{ padding: '10px 28px' }}>
-                  Done
-                </button>
-              </div>
-            </div>
-
-            {/* RIGHT SIDEBAR: Live Preview */}
-            <div style={{
-              position: 'fixed', left: 0, top: 0, bottom: 0, width: '420px',
-              background: 'linear-gradient(135deg, rgba(10,10,10,0.98) 0%, rgba(5,5,5,0.98) 100%)',
-              borderRight: '2px solid rgba(255,68,0,0.2)', boxShadow: '5px 0 30px rgba(0,0,0,0.8)',
-              zIndex: 2001, display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            }} onClick={e => e.stopPropagation()}>
-              <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '3px', background: 'linear-gradient(180deg, transparent, var(--wreckages-color) 30%, var(--wreckages-color) 70%, transparent)', boxShadow: '0 0 20px var(--wreckages-glow)' }} />
-              <div style={{ padding: '28px 24px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-                <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', color: 'var(--wreckages-color)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Space Grotesk, sans-serif' }}>
-                  Live Preview
-                </h3>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  Emitters that will be used per unit
-                </div>
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {units.map((unit, unitIdx) => {
-                    const applicable = getEmittersForUnit(unit);
-                    const hasCats = unit.unitCategories && unit.unitCategories.some(c => c.trim());
-                    return (
-                      <div key={unit.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                          <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: unit.color, boxShadow: `0 0 8px ${unit.color}`, flexShrink: 0 }} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {unit.unitType?.toUpperCase() || `Unit ${unitIdx + 1}`}
-                            </div>
-                            {hasCats && (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '4px' }}>
-                                {unit.unitCategories.filter(c => c.trim()).map((cat, i) => (
-                                  <span key={i} style={{ background: 'rgba(255,68,0,0.12)', border: '1px solid rgba(255,68,0,0.25)', color: 'var(--wreckages-color)', padding: '1px 7px', borderRadius: '3px', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{cat}</span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '6px', padding: '6px 10px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px' }}>
-                          {applicable.length} emitter{applicable.length !== 1 ? 's' : ''} active
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          {applicable.map((p, i) => (
-                            <div key={i} style={{ fontSize: '0.73rem', color: 'var(--text-secondary)', padding: '5px 8px', background: 'rgba(255,255,255,0.03)', borderLeft: '2px solid rgba(255,68,0,0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={p}>
-                              {getEmitterNameFromPath(p)}
-                            </div>
-                          ))}
-                          {applicable.length === 0 && (
-                            <div style={{ fontSize: '0.73rem', color: 'rgba(255,193,7,0.7)', fontStyle: 'italic', textAlign: 'center', padding: '6px' }}>No matching emitters</div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {units.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '30px 20px', color: 'var(--text-muted)' }}>
-                      <div style={{ fontSize: '2.5rem', marginBottom: '10px', opacity: 0.3 }}>🃏</div>
-                      <p style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>No units configured yet.</p>
-                    </div>
-                  )}
-                </div>
+                <button className="btn-action btn-action--accent" onClick={() => setShowEmitterCategoryConfig(false)}>Done</button>
               </div>
             </div>
           </>
@@ -2178,127 +2737,51 @@ TypeClass = ${instanceName}`;
 
       {showBlueprintLibrary && (
         <>
-          <div className="wreckage-library-overlay" onClick={() => setShowBlueprintLibrary(false)} />
-          <div className="wreckage-library-sidebar">
-            <div className="wreckage-library-header">
-              <h2 className="wreckage-library-title">EMITTER LIBRARY</h2>
-              <button
-                className="help-modal-close"
-                onClick={() => setShowBlueprintLibrary(false)}
-              >
-                ×
-              </button>
+          <div className="wr-lib-overlay" onClick={() => setShowBlueprintLibrary(false)} />
+          <div className="wr-lib-sidebar">
+            <div className="wr-lib-header">
+              <span className="wr-lib-title">Emitter Library</span>
+              <button className="help-modal-close" onClick={() => setShowBlueprintLibrary(false)}>×</button>
             </div>
 
-            <div className="wreckage-library-content">
-              <div className="wreckage-library-upload">
-                <label className="wreckage-upload-label">
+            <div className="wr-lib-body">
+              <div style={{ marginBottom: '16px' }}>
+                <label className="action-button action-button--full" style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer' }}>
                   Load Library JSON
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={(e) => handleLibraryUpload(e, 'blueprint')}
-                    style={{ display: 'none' }}
-                  />
+                  <input type="file" accept=".json" onChange={(e) => handleLibraryUpload(e, 'blueprint')} style={{ display: 'none' }} />
                 </label>
               </div>
 
               {selectedBlueprints.length > 0 && (
-                <div className="wreckage-selection-info">
+                <div className="wr-selection-bar">
                   <span>{selectedBlueprints.length} emitter(s) selected</span>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      className="btn-secondary"
-                      onClick={() => setSelectedBlueprints([])}
-                      style={{ padding: '8px 15px', fontSize: '0.8rem' }}
-                    >
-                      Clear All
-                    </button>
-                    <button
-                      className="wreckage-btn-confirm"
-                      onClick={confirmBlueprintSelection}
-                    >
-                      Add to Config
-                    </button>
+                    <button className="action-button" onClick={() => setSelectedBlueprints([])}>Clear All</button>
+                    <button className="btn-action btn-action--accent" onClick={confirmBlueprintSelection}>Add to Config</button>
                   </div>
                 </div>
               )}
 
-              <div className="wreckage-emitter-list">
+              <div>
                 {blueprintLibrary && blueprintLibrary.length > 0 ? (
                   blueprintLibrary.map((emitter, idx) => {
-                    const isSelected = selectedBlueprints.some(
-                      e => e.path === emitter.path
-                    );
-
+                    const isSelected = selectedBlueprints.some(e => e.path === emitter.path);
                     return (
                       <div
                         key={idx}
+                        className={`wr-emitter-row${isSelected ? ' selected' : ''}`}
                         onClick={() => toggleBlueprintSelection(emitter)}
-                        style={{
-                          cursor: 'pointer',
-                          background: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                          border: `2px solid ${isSelected ? '#FFFFFF' : 'rgba(255, 255, 255, 0.1)'}`,
-                          borderRadius: '8px',
-                          padding: '12px',
-                          transition: 'all 0.3s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          minHeight: '60px',
-                          boxShadow: isSelected ? '0 0 20px rgba(255, 255, 255, 0.3)' : 'none',
-                          marginBottom: '8px'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isSelected) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                            e.currentTarget.style.borderColor = '#FFFFFF';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isSelected) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                          }
-                        }}
                       >
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            marginBottom: '4px',
-                            color: '#fff',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {emitter.name}
-                          </div>
-                          <div style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--text-muted)',
-                            fontFamily: 'monospace',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {emitter.path}
-                          </div>
+                          <div className="wr-emitter-name">{emitter.name}</div>
+                          <div className="wr-emitter-path">{emitter.path}</div>
                         </div>
-
-                        {isSelected && (
-                          <div style={{
-                            color: '#FFFFFF',
-                            fontSize: '1.5rem',
-                            fontWeight: '700',
-                            flexShrink: 0
-                          }}>✓</div>
-                        )}
+                        {isSelected && <span className="wr-check">✓</span>}
                       </div>
                     );
                   })
                 ) : (
-                  <div className="wreckage-empty-state">
+                  <div className="wr-empty-state">
                     <p>No emitter library loaded.</p>
                     <p>Upload a library JSON file to get started.</p>
                   </div>
@@ -2309,638 +2792,21 @@ TypeClass = ${instanceName}`;
         </>
       )}
 
-      <div className="tab-grid">
-        <div className="tab-col-config">
-          <div className="section-card">
-            <h2 className="section-title">
-              CONFIGURATION
-            </h2>
-            <div className="form-group" ref={mapNameRef}>
-              <label className="form-label">Map Name</label>
-              <input
-                type="text"
-                className="form-input"
-                value={mapName}
-                onChange={(e) => setMapName(e.target.value)}
-                placeholder="e.g. Hades_Dust.v0002"
-              />
 
-              {/* Map Info — auto-fetched from save.lua */}
-              {mapInfo && (
-                <div style={{
-                  marginTop: '6px',
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)',
-                  fontFamily: 'monospace',
-                }}>
-                  {mapInfo.ok ? (<>
-                    <span style={{
-                      color: 'rgba(255,255,255,0.18)', fontSize: '0.58rem',
-                      letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'inherit',
-                    }}>MAP</span>
-                    <span style={{color: 'rgba(255,255,255,0.55)', fontWeight: 600}}>
-                      {mapInfo.mapSize} × {mapInfo.mapSize}
-                    </span>
-                    <span style={{color: 'rgba(255,255,255,0.22)'}}>·</span>
-                    <span>{mapInfo.km} km</span>
-                    {mapInfo.playableSize !== mapInfo.mapSize && (<>
-                      <span style={{color: 'rgba(255,255,255,0.22)'}}>·</span>
-                      <span style={{color: 'rgba(255,255,255,0.28)'}}>
-                        playable {mapInfo.playableKm} km
-                      </span>
-                    </>)}
-                  </>) : (
-                    <span style={{color: 'rgba(255,100,100,0.5)', fontSize: '0.65rem'}}>
-                      {mapInfo.error}
-                    </span>
-                  )}
-                </div>
-              )}
-              {mapName && (
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '5px', fontStyle: 'italic' }}>
-                  {`Saves to: /maps/${mapName.match(/\.v\d{4}$/) ? mapName : mapName + '.v0001'}/`}
-                </div>
-              )}
-            </div>
-
-            <div className="form-group" ref={emittersRef}>
-              <label className="form-label">Emitters</label>
-              {blueprintPaths.map((path, idx) => {
-                let displayPath = path;
-                if (mapName && path &&
-                    !path.startsWith('/maps/') &&
-                    !path.startsWith('/effects/') &&
-                    !path.startsWith('/env/') &&
-                    !path.startsWith('/textures/') &&
-                    !path.startsWith('/units/') &&
-                    !path.startsWith('/projectiles/')) {
-                  let finalMapName = mapName.trim();
-                  if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) {
-                    finalMapName += '.v0001';
-                  }
-                  const relativePath = path.startsWith('/') ? path.substring(1) : path;
-                  displayPath = `/maps/${finalMapName}/${relativePath}`;
-                }
-                
-                return (
-                  <div key={idx} className="input-row">
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={displayPath}
-                      onChange={(e) => {
-                        let newPath = e.target.value;
-                        if (mapName && newPath.startsWith('/maps/')) {
-                          let finalMapName = mapName.trim();
-                          if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) {
-                            finalMapName += '.v0001';
-                          }
-                          const prefix = `/maps/${finalMapName}/`;
-                          if (newPath.startsWith(prefix)) {
-                            newPath = '/' + newPath.substring(prefix.length);
-                          }
-                        }
-                        updateBlueprintPath(idx, newPath);
-                      }}
-                      onBlur={(e) => {
-                        let val = e.target.value;
-                        if (mapName && val.startsWith('/maps/')) {
-                          let finalMapName = mapName.trim();
-                          if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) finalMapName += '.v0001';
-                          const prefix = `/maps/${finalMapName}/`;
-                          if (val.startsWith(prefix)) val = '/' + val.substring(prefix.length);
-                        }
-                        resolveEmitterPath(idx, val);
-                      }}
-                      placeholder="/effects/emitters/weather_sand_01_emit.bp"
-                    />
-                    <button
-                      className="btn-delete-sm"
-                      onClick={() => deleteBlueprintPath(idx)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                );
-              })}
-
-              <button 
-                onClick={() => {
-                  const newPaths = [...blueprintPaths];
-                  newPaths.push('');
-                  setBlueprintPaths(newPaths);
-                }}
-                className="btn-secondary"
-                style={{ width: '100%', marginBottom: '10px' }}
-              >
-                + Add Emitter
-              </button>
-
-              <button 
-                onClick={() => setShowEmitterLibrary(true)} 
-                className="btn-library"
-                style={{ width: '100%' }}
-              >
-                Library
-              </button>
-            </div>
-          </div>
-
-          <div className="section-card" ref={unitsRef}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h2 className="section-title" style={{ margin: 0 }}>UNITS</h2>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  className="btn-secondary"
-                  style={{ fontSize: '0.78rem', padding: '6px 14px' }}
-                  onClick={handleImportFromMap}
-                  title="Import wreckages from the current map's _script.lua and _save.lua"
-                >
-                  ↓ Import from Map
-                </button>
-                {units.length >= 1 && (
-                  <button
-                    className="btn-delete-text"
-                    style={{ fontSize: '0.78rem', padding: '6px 14px', height: 'auto' }}
-                    onClick={deleteAllUnits}
-                    title="Delete all unit cards"
-                  >
-                    Delete All
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="units-grid">
-              {units.map((unit, unitIdx) => (
-                <div 
-                  key={unit.id} 
-                  className={`item-card ${unitIdx === selectedUnit ? 'selected' : ''}`}
-                  onClick={() => setSelectedUnit(unitIdx)}
-                >
-                  <div className="item-card-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                      <div
-                        className="item-card-color-indicator"
-                        style={{ backgroundColor: unit.color }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowColorPicker(showColorPicker === unitIdx ? null : unitIdx);
-                        }}
-                      />
-<span className="item-card-title">
-  {unit.unitName ? `${unit.unitName} (${unit.unitType})` : unit.unitType || `Unit ${unitIdx + 1}`}
-</span>
-                    </div>
-                    <button
-                      className="btn-delete-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteUnit(unitIdx);
-                      }}
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  {showColorPicker === unitIdx && (
-                    <div 
-                      className="item-card-color-picker"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="item-card-color-grid">
-                        {availableColors.map((colorOption, colorIdx) => (
-                          <div
-                            key={colorIdx}
-                            className="item-card-color-option"
-                            style={{ 
-                              backgroundColor: colorOption.color,
-                              boxShadow: `0 0 10px ${colorOption.glow}`
-                            }}
-                            onClick={() => {
-                              updateUnit(unitIdx, 'color', colorOption.color);
-                              setShowColorPicker(null);
-                            }}
-                            title={colorOption.name}
-                          />
-                        ))}
-                      </div>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Custom color (#HEX or hsl())"
-                        onChange={(e) => {
-                          const value = e.target.value.trim();
-                          if (value) {
-                            updateUnit(unitIdx, 'color', value);
-                          }
-                        }}
-                        style={{ marginTop: '10px' }}
-                      />
-                    </div>
-                  )}
-
-                  <div className="item-card-content">
-                    <div className="input-row">
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={unit.unitType}
-                        onChange={(e) => {
-  updateUnit(unitIdx, 'unitType', e.target.value);
-}}
-                        placeholder="UEL0203"
-                        onClick={(e) => e.stopPropagation()}
-                        style={{ textTransform: 'uppercase' }}
-                      />
-                      <button
-                        className="btn-library"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedUnit(unitIdx);
-                          setShowUnitLibrary(true);
-                          loadUnitLibrary();
-                        }}
-                      >
-                        Library
-                      </button>
-                    </div>
-                  </div>
-
-{/* NEU: Unit Categories Section */}
-<div style={{ marginTop: '5px' }}>
-  <label style={{ 
-    fontSize: '0.82rem', 
-    fontWeight: '500',
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.65)',
-    display: 'block',
-    marginBottom: '15px'
-  }}>
-    Unit Categories (optional)
-  </label>
-  
-  {unit.unitCategories && unit.unitCategories.map((category, catIdx) => (
-    <div key={catIdx} className="input-row" style={{ marginBottom: '8px' }}>
-      <input
-        type="text"
-        className="form-input"
-        value={category}
-        onChange={(e) => updateUnitCategory(unitIdx, catIdx, e.target.value)}
-        placeholder={`Category ${catIdx + 1} (e.g., Land, T2)`}
-        onClick={(e) => e.stopPropagation()}
-      />
-      <button
-        className="btn-delete-sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          deleteUnitCategory(unitIdx, catIdx);
-        }}
+      {/* ── Console shell — generic gold-standard layout ──────────────── */}
+      <WorkspaceConsole
+        sections={WR_SECTIONS}
+        activeSection={activeSection}
+        onSelect={setActiveSection}
+        previewSlot={previewSlot}
+        mirrorSlot={mirrorSlot}
+        ghostLabel="WRECKAGES"
+        renderEyebrow={(s) => `EMITTER REGISTER — ${s.index} — WRECKAGE CONSOLE`}
+        railStorageKey="wrc-rail-pinned"
+        navLabel="Wreckage console navigation"
       >
-        ×
-      </button>
-    </div>
-  ))}
-  
-<button
-  className="btn-secondary"
-  onClick={(e) => {
-    e.stopPropagation();
-    addUnitCategory(unitIdx);
-  }}
-  style={{ width: '100%', fontSize: '0.85rem', padding: '10px' }}
->
-  + Add Category
-</button>
-</div>
-
-{unit.unitCategories && unit.unitCategories.length > 0 && (
-  <div style={{ marginTop: '10px', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-    Path: wreckages/{unit.unitCategories.filter(c => c.trim()).join('/')}/{unit.unitType || 'unit_id'}
-  </div>
-)}
-
-                  {unitIdx === selectedUnit && (
-                    <div className="item-card-details" onClick={(e) => e.stopPropagation()}>
-                      <div
-                        className="subsection-title"
-                        style={{ cursor: 'pointer', userSelect: 'none' }}
-                        onClick={() => setCoordsOpen(prev => ({ ...prev, [unitIdx]: !prev[unitIdx] }))}
-                      >
-                        Coordinates ({unit.coordinates.filter(c => c.x && c.z).length})
-                      </div>
-
-                      {/* ── Content: only when open ── */}
-                      {coordsOpen[unitIdx] && (<>
-                        {unit.coordinates.map((coord, coordIdx) => (
-                          <div key={coordIdx} className="coordinate-entry">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                Point {coordIdx + 1}{coord.isMirrored ? ' (mirror)' : ''}
-                              </span>
-                              <button className="btn-delete-xs" onClick={() => deleteCoordinate(unitIdx, coordIdx)}>×</button>
-                            </div>
-                            <div className="coord-grid">
-                              <div className="coord-field">
-                                <label>X</label>
-                                <input type="text" className="form-input-sm" value={coord.x}
-                                  onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'x', e.target.value)} placeholder="256" />
-                              </div>
-                              <div className="coord-field">
-                                <label>Y</label>
-                                <input type="text" className="form-input-sm" value={coord.y}
-                                  onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'y', e.target.value)} placeholder="26" />
-                              </div>
-                              <div className="coord-field">
-                                <label>Z</label>
-                                <input type="text" className="form-input-sm" value={coord.z}
-                                  onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'z', e.target.value)} placeholder="256" />
-                              </div>
-                            </div>
-                            <div className="coord-grid" style={{ marginTop: '10px' }}>
-                              <div className="coord-field">
-                                <label>Heading</label>
-                                <input type="text" className="form-input-sm" value={coord.heading}
-                                  onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'heading', e.target.value)} placeholder="math.pi" />
-                              </div>
-                              <div className="coord-field">
-                                <label>Pitch</label>
-                                <input type="text" className="form-input-sm" value={coord.pitch}
-                                  onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'pitch', e.target.value)} placeholder="0.0" />
-                              </div>
-                              <div className="coord-field">
-                                <label>Roll</label>
-                                <input type="text" className="form-input-sm" value={coord.roll}
-                                  onChange={(e) => updateCoordinate(unitIdx, coordIdx, 'roll', e.target.value)} placeholder="math.pi" />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-                          <button className="btn-secondary" onClick={() => addCoordinate(unitIdx)} style={{ flex: 1 }}>
-                            + Add Coordinate
-                          </button>
-                          {unit.coordinates.some(c => c.x && c.z) && (
-                            <button
-                              className="btn-delete"
-                              onClick={async () => {
-                                const confirmed = await luxuryConfirm('Delete all coordinates for this unit?', 'Confirm Delete', 'Delete All', 'Cancel');
-                                if (confirmed) deleteAllCoordinates(unitIdx);
-                              }}
-                              style={{ padding: '10px 20px' }}
-                            >Delete All</button>
-                          )}
-                        </div>
-                      </>)}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              <div className="item-card-add" onClick={addUnit}>
-                <div className="item-card-add-icon">
-                  <span style={{ fontSize: '2rem' }}>+</span>
-                </div>
-                <span className="item-card-add-text">ADD UNIT TYPE</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Emitter Matching Mode + Category Assignment */}
-          <div className="section-card" style={{ marginBottom: '16px' }}>
-            <label className="form-label" style={{ marginBottom: '15px', display: 'block' }}>
-              Emitter Matching Mode
-            </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-              {[
-                { key: 'smart',        label: 'Smart Combination (3-Tier)', desc: 'Perfect Match → Partial Match → Fallback',    note: 'Unit ["Land", "T3"] gets only emitters active for BOTH categories first' },
-                { key: 'simple',       label: 'Simple Union',               desc: 'Use ALL emitters active for ANY category',    note: 'Unit ["Land", "T3"] gets all emitters active for Land OR T3' },
-                { key: 'lastCategory', label: 'Last Category Only',         desc: 'Match only the last category in the list',   note: 'Unit ["Land", "T2", "Heavy"] → matches "Heavy" only' },
-              ].map(({ key, label, desc, note }) => (
-                <div key={key}
-                  onClick={() => setEmitterMatchingMode(key)}
-                  style={{
-                    padding: '14px 18px',
-                    background: emitterMatchingMode === key
-                      ? 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)'
-                      : 'rgba(255,255,255,0.04)',
-                    border: `2px solid ${emitterMatchingMode === key ? 'var(--wreckages-color)' : 'rgba(255,255,255,0.12)'}`,
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: emitterMatchingMode === key ? '0 0 16px var(--wreckages-glow)' : 'none',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
-                    <div style={{
-                      width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
-                      border: `2px solid ${emitterMatchingMode === key ? 'var(--wreckages-color)' : 'rgba(255,255,255,0.4)'}`,
-                      background: emitterMatchingMode === key ? 'var(--wreckages-color)' : 'transparent',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {emitterMatchingMode === key && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#000' }} />}
-                    </div>
-                    <strong style={{ fontSize: '0.92rem', color: emitterMatchingMode === key ? 'var(--wreckages-color)' : '#fff', fontWeight: 600 }}>
-                      {label}
-                    </strong>
-                  </div>
-                  <p style={{ margin: '0 0 2px 30px', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{desc}</p>
-                  <em style={{ margin: '0 0 0 30px', fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block' }}>{note}</em>
-                </div>
-              ))}
-            </div>
-
-            <button
-              className="btn-secondary"
-              style={{ width: '100%', padding: '16px', fontSize: '0.92rem' }}
-              onClick={() => setShowEmitterCategoryConfig(true)}
-            >
-              Configure Emitter-Category Assignment
-            </button>
-          </div>
-
-          {/* Generate options + button — unified card */}
-          <div className="section-card">
-            <label className="checkbox-label" style={{ marginBottom: '12px', cursor: 'pointer' }} onClick={() => setGenerateReadme(!generateReadme)}>
-              <div className={`checkbox${generateReadme ? ' checked' : ''}`}>
-                {generateReadme && (
-                  <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
-              </div>
-              <span className="checkbox-text">Generate README file</span>
-            </label>
-            <label className="checkbox-label" style={{ marginBottom: '20px', cursor: 'pointer' }} onClick={() => setExportRawLua(!exportRawLua)}>
-              <div className={`checkbox${exportRawLua ? ' checked' : ''}`}>
-                {exportRawLua && (
-                  <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
-              </div>
-              <span className="checkbox-text">Export props.lua (no SCMAP)</span>
-            </label>
-            <button onClick={generateFiles} className="btn-primary btn-lg" ref={generateButtonRef}>
-              GENERATE FILES
-            </button>
-          </div>
-        </div>
-
-        <div className="tab-col-detail">
-          <div className="section-card preview-card">
-            <div className="preview-header">
-              <h2 className="section-title" style={{ margin: 0 }}>
-                PREVIEW
-              </h2>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <select
-                  ref={mirrorModeRef}
-                  className="btn-toggle"
-                  value={mirrorMode}
-                  onChange={(e) => setMirrorMode(e.target.value)}
-                >
-                  <option value="none">No Mirror</option>
-                  <option value="diagonal">Diagonal</option>
-                  <option value="horizontal">Horizontal</option>
-                  <option value="vertical">Vertical</option>
-                </select>
-                {previewImageData && (
-  <button
-    className="btn-delete-text"
-    onClick={() => {
-      localStorage.removeItem('shared_preview_image');
-      setPreviewImageData(null);
-      setPreviewImage(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }}
-  >
-    Delete Preview
-  </button>
-)}
-              </div>
-            </div>
-
-            {/* Auto-load status / manual upload area */}
-            {previewLoading ? (
-              <div className="upload-area" style={{ pointerEvents: 'none', opacity: 0.6 }}>
-                <span className="upload-icon" style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⟳</span>
-                <span>Loading preview from .scmap…</span>
-              </div>
-            ) : (
-              <div className="upload-area" onClick={() => fileInputRef.current?.click()}
-                title={previewImageData ? 'Click to replace the preview with a custom image' : 'Click to manually upload a map image'}>
-                <span className="upload-icon"></span>
-                <span>Click to upload map image manually</span>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="wreckage-file-input"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
-              </div>
-            )}
-
-            <div ref={canvasContainerRef} className="wreckage-canvas-container" style={{ position: 'relative', width: '700px', height: '700px' }}>
-              <canvas
-                ref={canvasRef}
-                className="wreckage-preview-canvas"
-                width={1024}
-                height={1024}
-                onClick={handleCanvasClick}
-                style={{ width: '100%', height: '100%', display: 'block' }}
-              />
-              
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                pointerEvents: 'none'
-              }}>
-                {markers.map(marker => (
-                  <div
-                    key={marker.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteCoordinate(marker.unitIdx, marker.coordIdx);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      left: `${marker.x}%`,
-                      top: `${marker.z}%`,
-                      transform: 'translate(-50%, -50%)',
-                      width: marker.isSelected ? '16px' : '12px',
-                      height: marker.isSelected ? '16px' : '12px',
-                      borderRadius: '50%',
-                      backgroundColor: marker.color,
-                      border: marker.isSelected ? '3px solid white' : '2px solid white',
-                      boxShadow: `0 0 ${marker.isSelected ? '20px' : '15px'} ${marker.color}, 0 0 ${marker.isSelected ? '10px' : '5px'} rgba(255,255,255,0.5)`,
-                      transition: 'all 0.3s ease',
-                      pointerEvents: 'auto',
-                      cursor: 'pointer'
-                    }}
-                    title={`${marker.unitType} - Click to delete`}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.3)';
-                      e.currentTarget.style.boxShadow = `0 0 30px ${marker.color}, 0 0 15px rgba(255,255,255,0.8)`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
-                      e.currentTarget.style.boxShadow = `0 0 ${marker.isSelected ? '20px' : '15px'} ${marker.color}, 0 0 ${marker.isSelected ? '10px' : '5px'} rgba(255,255,255,0.5)`;
-                    }}
-                  >
-                    {marker.isMirrored && (
-                      <div style={{
-                        position: 'absolute',
-                        inset: '-2px',
-                        borderLeft: '2px solid white',
-                        borderTop: '2px solid white'
-                      }} />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {!previewImage && units.every(u => u.coordinates.every(c => !c.x)) && (
-                <div className="wreckage-canvas-placeholder">
-                  Click on canvas to place units
-                </div>
-              )}
-            </div>
-
-            <div className="preview-legend">
-              <div className="preview-legend-title">UNIT LEGEND</div>
-              <div className="preview-legend-items">
-                {units.map((unit, idx) => (
-                  <div key={unit.id} className="preview-legend-item">
-                    <div
-                      className="preview-legend-color"
-                      style={{ backgroundColor: unit.color,
-                               textTransform: 'uppercase' }}
-                    />
-<span>
- {unit.unitName ? `${unit.unitName} (${unit.unitType.toUpperCase()})` : unit.unitType.toUpperCase() || `Unit ${idx + 1}`}
-</span>
-                    <span className="preview-coord-count">
-                      {unit.coordinates.filter(c => c.x && c.z).length} pts
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="hint-box">
-              Click on the canvas to place coordinates - {mirrorMode !== 'none' ? `${mirrorMode} mirroring active` : 'No mirroring'}
-            </div>
-          </div>
-        </div>
-      </div>
+        {sectionContent[activeSection]}
+      </WorkspaceConsole>
 
       {showHelp && (
         <WreckageHelpModal
