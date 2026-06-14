@@ -26,6 +26,11 @@ const LOG_LEVEL_OPTIONS = [
   { value: 'off',   label: 'Off' },
 ];
 
+const ATMOSPHERE_QUALITY_OPTIONS = [
+  { value: 'performant', label: 'Performant' },
+  { value: 'fast',       label: 'Fast' },
+];
+
 const AUTOSAVE_INTERVAL_OPTIONS = [
   { value: 5,    label: '5 min'  },
   { value: 15,   label: '15 min' },
@@ -36,11 +41,20 @@ const AUTOSAVE_INTERVAL_OPTIONS = [
   { value: 10080,label: '7 d'    },
 ];
 
+// `process` is unavailable in the context-isolated renderer (and undefined
+// under the Vite dev server, where it threw a ReferenceError on load). Guard
+// it so module load never crashes; these are only first-run fallbacks — real
+// paths arrive from settings-load via IPC.
+const OS_USER =
+  (typeof process !== 'undefined' && process.env)
+    ? (process.env.USERNAME || process.env.USER || '')
+    : '';
+
 const DEFAULT_PATHS = {
   faInstallPath:    'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Supreme Commander Forged Alliance',
   fafPath:          'C:\\ProgramData\\FAForever',
-  mapsFolder:       `C:\\Users\\${(process.env.USERNAME || process.env.USER || '')}\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance\\maps`,
-  backupFolder:     `C:\\Users\\${(process.env.USERNAME || process.env.USER || '')}\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance\\maps\\MapBackups`,
+  mapsFolder:       `C:\\Users\\${OS_USER}\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance\\maps`,
+  backupFolder:     `C:\\Users\\${OS_USER}\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance\\maps\\MapBackups`,
   emitterBpFolder:  'C:\\ForgeMapToolkit\\public\\emitter',
   customPropsFolder: '',
   skyboxAssetsFolder: '',
@@ -77,6 +91,7 @@ const SETTINGS_DEFAULTS = {
   skyboxFolderPath:      '',
   contribSkyboxAutoSwitch: true,
   defaultMirrorMode:       'none',
+  atmosphereQuality:       'performant',
 };
 
 function applyDefaultPaths(s) {
@@ -728,6 +743,22 @@ const SectionContent = ({ id, settings, set, scanStatus, setScanStatus }) => {
   // ── 06 Performance ───────────────────────────────────────────────────────────
   if (id === 'performance') return (
     <div className="st-content-stack">
+      <div className="st-field">
+        <div className="st-field-header">
+          <label className="st-label">Home Atmosphere</label>
+          <span className="st-sublabel">
+            Volumetric haze behind the home screen. Performant — full effect with
+            motion and depth (two layers, uses the GPU). Fast — a single static
+            layer with no motion, for weaker machines.
+          </span>
+        </div>
+        <ChipSelector
+          options={ATMOSPHERE_QUALITY_OPTIONS}
+          value={settings.atmosphereQuality || 'performant'}
+          onChange={v => set('atmosphereQuality', v)}
+        />
+      </div>
+      <Divider />
       <div className="st-field">
         <div className="st-field-header">
           <label className="st-label">Max Worker Threads</label>

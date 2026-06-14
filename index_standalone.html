@@ -1,0 +1,3244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Emitter Assignment — Rework Mockup v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* === css/index.css === */
+/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — single import point
+   Import this once in a tab to inherit the full gold-standard language:
+
+     import '../../../shared/design-system/index.css';
+
+   Then set ONE thing on the tab root to theme it:
+     style={{ '--tab-color': '#FE1818',
+              '--tab-glow': 'rgba(254,24,24,0.25)',
+              '--tab-glow-strong': 'rgba(254,24,24,0.55)' }}
+
+   Order matters: tokens first (define vars), then primitives + layout
+   (consume them).
+   ═══════════════════════════════════════════════════════════════════ */
+
+
+/* === css/tokens.css === */
+/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — tokens.css
+   The single source of truth for every reusable value: spacing,
+   typography, surfaces, ink, hairlines, accent, glow, motion, depth.
+
+   This file declares tokens ONLY (no selectors with visual rules).
+   Primitives (primitives.css) and the layout shell (layout.css)
+   consume these — never hardcoded px / hex / easings.
+
+   The Wreckage tab is the gold-standard reference implementation.
+   A new tab inherits the entire language by importing
+   design-system/index.css and setting ONE thing: --tab-color.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Motion — easings ───────────────────────────────────────────── */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);    /* settle / reveal     */
+  --ease-rise:  cubic-bezier(0.55, 0, 0.15, 1);   /* mechanical actuate  */
+  --ease-decay: cubic-bezier(0.2, 0.55, 0.35, 1); /* phosphor ignite→cool*/
+
+  /* ── Motion — durations ─────────────────────────────────────────── */
+  --dur-instant: 0.06s;  /* ignite — tick lights the instant you touch  */
+  --dur-fast:    0.18s;
+  --dur-base:    0.25s;
+  --dur-slow:    0.45s;
+  --dur-decay:   0.9s;   /* phosphor cool — long, never instant         */
+
+  /* ── Spacing scale ──────────────────────────────────────────────── */
+  --space-3xs: 3px;
+  --space-2xs: 4px;
+  --space-xs:  8px;
+  --space-sm:  12px;
+  --space-md:  16px;
+  --space-lg:  20px;
+  --space-xl:  28px;
+  --space-2xl: 36px;
+  --space-3xl: 64px;
+  --space-4xl: 72px;
+
+  /* ── Typography — families ──────────────────────────────────────── */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
+
+  /* ── Typography — size scale ────────────────────────────────────── */
+  --text-3xs: 0.54rem;  /* eyebrows, captions                          */
+  --text-2xs: 0.56rem;
+  --text-xs:  0.62rem;
+  --text-sm:  0.68rem;
+  --text-md:  0.72rem;
+  --text-lg:  0.8rem;
+  --text-input: 11px;   /* control text (inputs/buttons)               */
+
+  /* ── Typography — weights ───────────────────────────────────────── */
+  --weight-light:   300;
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semi:    600;
+  --weight-bold:    700;
+
+  /* ── Typography — letter-spacing (tracking) ─────────────────────── */
+  --track-tight:   0.02em;
+  --track-snug:    0.06em;
+  --track-base:    0.1em;
+  --track-wide:    0.16em;
+  --track-wider:   0.22em;
+  --track-eyebrow: 0.3em;   /* register lines / eyebrows               */
+
+  /* ── Surface ladder — warm near-black, no blue cast, opaque ─────── */
+  --surface-bed-a:      #050507;  /* bed — recessed top band            */
+  --surface-bed-b:      #0b0b0e;  /* bed — floor                        */
+  --surface-face-a:     #18181c;  /* card face — lit top edge           */
+  --surface-face-b:     #101013;  /* card face — shaded foot            */
+  --surface-face-hover: #1d1d22;  /* card face on engage (pre-hue)      */
+  --surface-sunk:       #0a0807;  /* recessed channel (inputs, wells)   */
+  --surface-sunk-focus: #100c0b;  /* channel, focused                   */
+  --surface-rail:       #0d0d10;  /* secondary panels / rows            */
+  --surface-canvas:     #060404;  /* the deepest plate (workspace root) */
+
+  /* ── Ink — text on dark, expressed as white alphas ──────────────── */
+  --ink-100: rgba(255,255,255,0.93);  /* titles                        */
+  --ink-72:  rgba(255,255,255,0.72);  /* primary body                  */
+  --ink-55:  rgba(255,255,255,0.55);  /* default body                  */
+  --ink-38:  rgba(255,255,255,0.38);  /* muted                         */
+  --ink-28:  rgba(255,255,255,0.28);  /* faint                         */
+  --ink-22:  rgba(255,255,255,0.22);  /* labels at rest                */
+  --ink-16:  rgba(255,255,255,0.16);  /* captions / ghost-bright       */
+
+  /* ── Hairlines — structural borders ─────────────────────────────── */
+  --line-soft:   rgba(255,255,255,0.05);
+  --line-medium: rgba(255,255,255,0.07);
+  --line-strong: rgba(255,255,255,0.14);
+
+  /* ── Accent — the ONLY per-tab variable ─────────────────────────────
+     A tab sets --tab-color / --tab-glow / --tab-glow-strong on its root
+     (inline style or its own CSS); the values below are just fallbacks.
+     The whole design system references var(--tab-color) DIRECTLY — never
+     via a :root-level alias, because a custom property whose value is
+     `var(--tab-color)` is resolved where it is DECLARED. Declared at
+     :root it would bake the white fallback and inherit that everywhere,
+     ignoring a tab's later override. Direct var(--tab-color) is a
+     normally-inherited property, so a tab root's red flows down intact. */
+  --tab-color:       rgba(255,255,255,0.6);          /* fallback        */
+  --tab-glow:        rgba(255,255,255,0.2);
+  --tab-glow-strong: rgba(255,255,255,0.35);
+
+  /* ── Status colors ──────────────────────────────────────────────── */
+  --status-ok:   rgba(0,200,100,0.6);
+  --status-warn: #ff8c00;
+  --status-err:  rgba(255,80,80,0.85);
+
+  /* ── Shadow (accent-free; accent glows are inlined at use sites) ──── */
+  --shadow-card:  0 2px 6px -3px rgba(0,0,0,0.7);
+
+  /* ── Z-index scale ──────────────────────────────────────────────── */
+  --z-base:    1;
+  --z-rail:    10;
+  --z-grain:   40;
+  --z-overlay: 1000;
+}
+
+/* === css/primitives.css === */
+﻿/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — primitives.css
+   Reusable controls in the boxless TRACE language. The traceline IS
+   the affordance — nothing carries a box; ignition, baseline and lift
+   do the signalling. Every value flows from tokens.css; the only
+   per-tab variable is --tab-color (+ --tab-glow, --tab-glow-strong),
+   referenced directly so a tab root's color inherits down intact.
+
+   Contents:
+     · ticks + filaments      (the phosphor grammar)
+     · action-button          (filament-stub secondary action)
+     · button-solid           (machined filled CTA)
+     · commit-button          (primary three-layer TraceLine commit)
+     · delete-button          (boxless glyph)
+     · field-input / -select  (boxless, baseline ignites)
+     · field-label / -hint    (form typography)
+     · form-group             (label + control rhythm)
+     · chip / switch / check-row  (toggles)
+     · station + option-row   (liftable selection tiles)
+     · status-badge           (state pills)
+     · divider / subsection-head
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Ticks — phosphor: ignites instantly, decays slowly ───────────── */
+
+.tick {
+  width: 2px;
+  height: 14px;
+  background: var(--ink-16);
+  transform: scaleY(0.4);
+  transform-origin: center;
+  flex-shrink: 0;
+  transition:
+    background var(--dur-decay) var(--ease-decay),
+    box-shadow var(--dur-decay) var(--ease-decay),
+    transform  var(--dur-decay) var(--ease-decay);
+}
+.tick--lg { height: 20px; }
+.tick.lit {
+  background: var(--tab-color);
+  box-shadow: 0 0 10px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transform: scaleY(1);
+  transition-duration: var(--dur-instant);
+}
+
+/* ── Filament — a three-layer printed line (bloom + core + hot) ───── */
+
+.filament { position: relative; height: 1px; overflow: visible; }
+.filament-bloom {
+  position: absolute; inset: 0; top: -4px; bottom: -4px;
+  background: var(--tab-color);
+  filter: blur(7px);
+  opacity: 0.4;
+}
+.filament-core {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--tab-color), transparent 78%);
+  opacity: 0.38;
+}
+.filament-hot {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.95);
+  opacity: 0;
+}
+
+/* ── action-button — secondary action, auto-growing filament stub ─── */
+
+.action-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px var(--space-3xs);
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--ink-38);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--dur-base) linear, letter-spacing var(--dur-base) var(--ease-out);
+}
+/* the stub — short at rest, grows to full width on hover */
+.action-button::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 2px;
+  height: 1px;
+  width: 16px;
+  background: var(--tab-color);
+  opacity: 0.45;
+  box-shadow: 0 0 6px var(--tab-glow);
+  transition: width var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.action-button:hover {
+  color: var(--ink-100);
+  letter-spacing: 0.19em;
+}
+.action-button:hover::after { width: 100%; opacity: 1; }
+.action-button:disabled { opacity: 0.35; cursor: default; }
+.action-button:disabled::after { width: 16px; opacity: 0.2; }
+
+.action-button--full { width: 100%; justify-content: flex-start; }
+
+/* danger hue — destructive actions, same mechanic */
+.action-button--danger { color: rgba(255,80,80,0.55); }
+.action-button--danger::after {
+  background: #ff5050;
+  box-shadow: 0 0 6px rgba(255,80,80,0.4);
+}
+.action-button--danger:hover { color: #ff6060; }
+
+/* ── button-solid — machined filled CTA (the boxed primary) ───────── */
+
+.button-solid {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 32px;
+  background: linear-gradient(180deg, var(--surface-face-a), var(--surface-face-b));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 2px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background   var(--dur-base) linear,
+    border-color var(--dur-base) linear,
+    box-shadow   var(--dur-base) var(--ease-out),
+    transform    var(--dur-base) var(--ease-out);
+}
+.button-solid:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--surface-face-hover), var(--surface-face-a));
+  border-color: rgba(255,255,255,0.40);
+  box-shadow: 0 0 24px rgba(255,255,255,0.08), 0 6px 22px -6px rgba(0,0,0,0.7);
+  transform: translateY(-1px);
+}
+.button-solid:active:not(:disabled) { transform: translateY(0); }
+.button-solid:disabled { opacity: 0.3; cursor: not-allowed; }
+.button-solid--full { width: 100%; justify-content: center; }
+.button-solid--accent {
+  border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.18));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 20%, var(--surface-face-a)),
+    color-mix(in srgb, var(--tab-color) 7%, var(--surface-face-b)));
+}
+.button-solid--accent:hover:not(:disabled) {
+  border-color: var(--tab-color);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 32%, var(--surface-face-hover)),
+    color-mix(in srgb, var(--tab-color) 12%, var(--surface-face-a)));
+  box-shadow: 0 0 26px var(--tab-glow-strong), 0 6px 22px -6px rgba(0,0,0,0.65);
+}
+
+/* ── commit-button — the signature primary action ────────────────────
+   No filled box: a label over a dormant baseline that ignites the full
+   three-layer TraceLine on hover and sweeps once on commit. State lives
+   in the mono readout (Ready / Not Ready), never in a fill colour. */
+
+.commit-button {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  width: 100%;
+  margin-top: 30px;
+  padding: var(--space-md) var(--space-2xs) 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  user-select: none;
+}
+.commit-button:disabled { cursor: default; }
+.commit-button-label {
+  font-size: 0.92rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-55);
+  transition: color var(--dur-slow) var(--ease-decay), letter-spacing var(--dur-slow) var(--ease-decay);
+}
+.commit-button:disabled .commit-button-label { color: var(--ink-28); }
+.commit-button-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--status-ok);
+  white-space: nowrap;
+}
+.commit-button:disabled .commit-button-status { color: rgba(255,140,0,0.6); }
+/* Dormant baseline */
+.commit-button::after {
+  content: '';
+  position: absolute;
+  left: var(--space-2xs); right: var(--space-2xs); bottom: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+.commit-button-bloom {
+  position: absolute;
+  left: var(--space-2xs); right: 100%; bottom: -3px;
+  height: 4px;
+  background: var(--tab-color);
+  filter: blur(3px);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: right var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.commit-button-line {
+  position: absolute;
+  left: var(--space-2xs); right: 100%; bottom: 0;
+  height: 1px;
+  background: var(--tab-color);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 6px var(--tab-glow);
+  transition: right var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.commit-button:not(:disabled):hover .commit-button-label {
+  color: var(--ink-100);
+  letter-spacing: 0.26em;
+}
+.commit-button:not(:disabled):hover .commit-button-bloom { right: var(--space-2xs); opacity: 0.6; }
+.commit-button:not(:disabled):hover .commit-button-line  { right: var(--space-2xs); opacity: 1; }
+.commit-button:not(:disabled):active .commit-button-line { animation: ds-commit-sweep 0.5s var(--ease-out); }
+@keyframes ds-commit-sweep {
+  0%   { box-shadow: 0 0 6px var(--tab-glow); }
+  50%  { box-shadow: 0 0 22px 2px var(--tab-glow-strong), 0 0 5px var(--tab-color); }
+  100% { box-shadow: 0 0 6px var(--tab-glow); }
+}
+
+/* ── delete-button — boxless glyph, reddens on hover ──────────────── */
+
+.delete-button {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--ink-28);
+  font-size: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s linear;
+}
+.delete-button:hover { color: rgba(255,120,120,0.9); }
+
+/* ── field-input — boxless, text rides on the bed, baseline ignites ─ */
+
+.field-input {
+  width: 100%;
+  padding: 6px var(--space-3xs) 9px;
+  color: rgba(255,255,255,0.90);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-tight);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  box-sizing: border-box;
+  transition: border-color var(--dur-base) linear, box-shadow var(--dur-base) var(--ease-out);
+}
+.field-input::placeholder {
+  color: var(--ink-16);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-tight);
+}
+.field-input:focus {
+  background: none;
+  border-bottom-color: var(--tab-color);
+  box-shadow: 0 1px 0 0 var(--tab-color), 0 8px 20px -10px var(--tab-glow);
+}
+.field-input.is-set { border-bottom-color: rgba(0,200,100,0.45); }
+.field-input--sm { padding: var(--space-2xs) var(--space-3xs) 7px; font-size: 0.82rem; }
+
+/* ── field-select — same baseline, filament chevron ──────────────── */
+
+.field-select {
+  width: 100%;
+  padding: 6px 28px 9px var(--space-3xs);
+  color: rgba(255,255,255,0.90);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-tight);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  box-shadow: none;
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><path d="M1 3 L5 7 L9 3" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  transition: border-color var(--dur-base) linear, box-shadow var(--dur-base) var(--ease-out);
+}
+.field-select:hover { border-bottom-color: rgba(255,255,255,0.22); }
+.field-select:focus {
+  border-bottom-color: var(--tab-color);
+  box-shadow: 0 1px 0 0 var(--tab-color), 0 8px 20px -10px var(--tab-glow);
+}
+.field-select option { background: var(--surface-sunk-focus); color: rgba(255,255,255,0.85); }
+
+/* ── field typography + form rhythm ──────────────────────────────── */
+
+.field-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-22);
+  margin-bottom: var(--space-xs);
+}
+.field-hint {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-28);
+  line-height: 1.6;
+}
+.form-group { margin-bottom: var(--space-xl); }
+.form-group:last-child { margin-bottom: 0; }
+
+/* ── chip — toggle pill ──────────────────────────────────────────── */
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 1px; }
+.chip {
+  padding: 9px 18px;
+  border: 1px solid var(--line-medium);
+  background: var(--surface-rail);
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-28);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--dur-base) linear, border-color var(--dur-base) linear, background var(--dur-base) linear;
+}
+.chip:hover {
+  border-color: rgba(255,255,255,0.22);
+  color: var(--ink-55);
+  background: var(--surface-face-b);
+}
+.chip.active {
+  border-color: color-mix(in srgb, var(--tab-color) 50%, rgba(255,255,255,0.45));
+  color: #fff;
+  background: color-mix(in srgb, var(--tab-color) 14%, var(--surface-face-a));
+  box-shadow: inset 0 -2px 0 -1px var(--tab-color);
+}
+
+/* ── switch — sliding pole toggle ────────────────────────────────── */
+
+.switch {
+  flex-shrink: 0;
+  width: 38px; height: 18px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-sunk);
+  position: relative;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+  transition: border-color var(--dur-base) linear, background var(--dur-base) linear;
+}
+.switch.on {
+  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.40));
+  background: color-mix(in srgb, var(--tab-color) 16%, var(--surface-sunk));
+}
+.switch-pole {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 10px; height: 10px;
+  background: rgba(255,255,255,0.25);
+  transition: left 0.26s var(--ease-rise), background 0.26s linear;
+}
+.switch.on .switch-pole {
+  left: 23px;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255,255,255,0.45);
+}
+
+/* ── check-row — checkbox as a trace row ─────────────────────────── */
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line-soft);
+}
+.check-row:last-of-type { border-bottom: none; }
+.check-box {
+  flex-shrink: 0;
+  width: 14px; height: 14px;
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s linear;
+}
+.check-row.checked .check-box {
+  border-color: var(--tab-color);
+  box-shadow: inset 0 0 4px var(--tab-glow);
+}
+.check-tick {
+  width: 8px; height: 8px;
+  background: var(--tab-color);
+  box-shadow: 0 0 5px var(--tab-glow);
+}
+.check-label {
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-base);
+  color: var(--ink-38);
+  transition: color 0.15s linear;
+}
+.check-row.checked .check-label,
+.check-row:hover .check-label { color: var(--ink-72); }
+
+/* ── station — a liftable selection tile, lit top-edge tick ──────────
+   The reusable surface behind mode options, add-tiles, any "pick me"
+   target. Quiet at rest; ignites its top tick + lifts on hover/active.
+   Compose with a content class (e.g. .option-row) for typography. */
+
+.station {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  border: none;
+  border-top: 1px solid var(--line-medium);
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    background var(--dur-slow) var(--ease-decay),
+    transform  var(--dur-slow) var(--ease-decay),
+    box-shadow var(--dur-slow) var(--ease-decay);
+  user-select: none;
+}
+.station::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity    var(--dur-decay) var(--ease-decay),
+    transform  var(--dur-decay) var(--ease-decay),
+    box-shadow var(--dur-decay) var(--ease-decay);
+}
+.station:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 14%, transparent),
+    rgba(255,255,255,0.012));
+}
+.station:hover::before,
+.station.active::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 10px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transition-duration: var(--dur-instant);
+}
+.station.active {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 18%, transparent),
+    rgba(255,255,255,0.012));
+  box-shadow: 0 14px 24px -12px rgba(0,0,0,0.85), 0 0 30px -8px var(--tab-glow);
+}
+
+/* ── option-row — station content: label + description radio choice ─ */
+
+.option-row {
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-xs);
+}
+.option-row-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 6px;
+}
+/* Radio dot suppressed by default — elevation is the selection signal.
+   Add .option-row--radio to show an explicit dot. */
+.option-radio { display: none; }
+.option-row--radio .option-radio {
+  display: flex;
+  flex-shrink: 0;
+  width: 10px; height: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+}
+.option-row--radio.active .option-radio { border-color: var(--tab-color); }
+.option-radio-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--tab-color);
+  box-shadow: 0 0 5px var(--tab-glow);
+}
+.option-label {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-38);
+  transition: color var(--dur-slow) var(--ease-decay);
+}
+.station:hover .option-label  { color: var(--ink-72); }
+.station.active .option-label { color: var(--ink-100); }
+.option-desc {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--ink-28);
+  line-height: 1.5;
+  margin: 2px 0;
+}
+.option-note {
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--ink-16);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ── status-badge — state pill ───────────────────────────────────── */
+
+.status-badge {
+  font-family: var(--font-display);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+  opacity: 0.8;
+}
+.status-badge--ok   { color: rgba(0,200,100,0.75); }
+.status-badge--warn { color: rgba(255,140,0,0.80); }
+.status-badge--err  { color: rgba(255,80,80,0.80); }
+.status-badge--soon { color: var(--ink-38); }
+.status-badge--accent {
+  color: var(--tab-color);
+  border-color: color-mix(in srgb, var(--tab-color) 35%, transparent);
+}
+
+/* ── divider + subsection head ───────────────────────────────────── */
+
+.divider {
+  height: 1px;
+  background: var(--line-medium);
+  margin: var(--space-xl) 0;
+}
+.subsection-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-medium);
+}
+.subsection-head-title {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-28);
+}
+.subsection-head-title::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  margin-top: 5px;
+  background: var(--tab-color);
+  box-shadow: 0 0 4px var(--tab-glow);
+}
+
+/* === css/layout.css === */
+﻿/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — layout.css
+   The workspace shell: a full-bleed tactical workstation made of a
+   collapsing console rail, a centered working column, a fixed preview
+   panel, a printed section header, and the instrument surface (grain +
+   boot sweep + ambient hue bleed). Feature-agnostic; color comes from
+   the per-tab --tab-color, referenced directly (inherits down intact).
+
+   Structure (see WorkspaceConsole.jsx):
+     .workspace
+       .workspace-body
+         .console-rail  ▸ .console-rail-track ▸ .rail-item*
+         .workspace-ghost--body          (background numerals)
+         .workspace-main ▸ .workspace-main-inner
+            .workspace-column ▸ .section (eyebrow→title→trace→content)
+            .preview-panel  ▸ head + body
+       .surface-grain
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Root — full-bleed instrument plate ──────────────────────────── */
+
+.workspace {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface-canvas);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 28px 28px;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  color: var(--ink-55);
+}
+
+/* Claim the whole content area — no centered max-width gutter */
+.tab-content:has(.workspace) {
+  padding: 0;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: none;
+}
+
+/* Ambient hue bleed from upper-left + vignette */
+.workspace::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 48% at 8% -6%,
+      color-mix(in srgb, var(--tab-color) 7%, transparent), transparent 68%),
+    radial-gradient(130% 120% at 50% 36%, transparent 58%, rgba(0,0,0,0.45) 100%);
+}
+
+/* Power-on carriage — sweeps the full root once on entry */
+.workspace::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 2px;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background: var(--tab-color);
+  box-shadow: 0 0 22px 2px var(--tab-glow-strong), 0 0 5px var(--tab-color);
+  opacity: 0;
+  animation: ds-boot-sweep 0.85s var(--ease-out) 0.12s 1;
+}
+@keyframes ds-boot-sweep {
+  0%   { opacity: 0;    transform: translateX(0); }
+  12%  { opacity: 0.85; }
+  88%  { opacity: 0.45; }
+  100% { opacity: 0;    transform: translateX(100vw); }
+}
+
+/* Film grain — the instrument's surface, above everything */
+.surface-grain {
+  position: absolute;
+  inset: -100%;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0"/></filter><rect width="320" height="320" filter="url(%23g)"/></svg>');
+  animation: ds-grain-shift 0.9s steps(2) infinite;
+}
+@keyframes ds-grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-1.2%, 0.8%); }
+  50%  { transform: translate(0.6%, -1.1%); }
+  75%  { transform: translate(-0.8%, -0.5%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Shared print primitives */
+@keyframes ds-print {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@keyframes ds-trace-print {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes ds-lamp {
+  0%   { background: rgba(255,255,255,0.1); box-shadow: none; }
+  35%  { background: var(--tab-color); box-shadow: 0 0 10px var(--tab-glow-strong); }
+  100% { background: rgba(255,255,255,0.1); box-shadow: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CONSOLE RAIL — collapsed index strip, extends on hover / pin / boot
+   ══════════════════════════════════════════════════════════════════ */
+
+.console-rail {
+  position: relative;
+  z-index: var(--z-rail);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 52px;
+  overflow: hidden;
+  border-right: 1px solid var(--line-medium);
+  background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent 18%);
+  transition: width 0.34s var(--ease-rise);
+}
+.console-rail:hover,
+.console-rail--open { width: 224px; }
+
+.console-rail-track {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--space-xs);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+.console-rail-track::-webkit-scrollbar { display: none; }
+
+/* Individual rail item */
+.rail-item {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  height: 48px;
+  padding: 0 0 0 var(--space-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
+  transition: background var(--dur-base) var(--ease-decay);
+}
+.rail-item:hover { background: rgba(255,255,255,0.025); }
+.rail-item--locked { pointer-events: none; opacity: 0.35; }
+
+/* Phosphor tick — ignites fast, decays slow */
+.rail-item-tick {
+  flex-shrink: 0;
+  width: 2px;
+  height: 14px;
+  background: rgba(255,255,255,0.1);
+  transition: background 0.6s var(--ease-decay), box-shadow 0.6s var(--ease-decay);
+  animation: ds-lamp 0.45s linear both;
+  animation-delay: calc(var(--slat-i) * 55ms + 200ms);
+}
+.rail-item:hover .rail-item-tick,
+.rail-item.active .rail-item-tick {
+  background: var(--tab-color);
+  box-shadow: 0 0 10px var(--tab-glow-strong);
+  transition-duration: var(--dur-instant);
+}
+.rail-item--done .rail-item-tick {
+  background: var(--status-ok);
+  box-shadow: 0 0 6px rgba(0,200,100,0.3);
+  transition-duration: 0.3s;
+}
+
+/* Index number */
+.rail-item-index {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-base);
+  color: var(--ink-28);
+  transition: color 0.3s linear;
+}
+.rail-item:hover .rail-item-index,
+.rail-item.active .rail-item-index { color: var(--ink-55); }
+.rail-item--done .rail-item-index  { color: rgba(0,200,100,0.5); }
+
+/* Label — hidden in collapsed strip, printed on extension */
+.rail-item-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-28);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.3s var(--ease-out), color 0.3s linear;
+  transition-delay: calc(var(--slat-i) * 22ms);
+}
+.console-rail:hover .rail-item-label,
+.console-rail--open .rail-item-label { clip-path: inset(0 0 0 0); }
+.rail-item:hover .rail-item-label  { color: var(--ink-100); transition-delay: 0ms; }
+.rail-item.active .rail-item-label { color: #fff; }
+
+/* Count badge */
+.rail-item-count {
+  margin-left: auto;
+  padding-right: var(--space-sm);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-snug);
+  font-family: var(--font-mono);
+  color: var(--ink-22);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.3s var(--ease-out), color 0.3s linear;
+  transition-delay: calc(var(--slat-i) * 22ms + 40ms);
+  white-space: nowrap;
+}
+.console-rail:hover .rail-item-count,
+.console-rail--open .rail-item-count { clip-path: inset(0 0 0 0); }
+.rail-item.active .rail-item-count,
+.rail-item:hover .rail-item-count { color: var(--ink-38); transition-delay: 0ms; }
+
+/* ══════════════════════════════════════════════════════════════════
+   WORKSPACE BODY — rail + main container
+   ══════════════════════════════════════════════════════════════════ */
+
+.workspace-body {
+  position: relative;
+  z-index: var(--z-base);
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workspace-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  overflow: hidden;
+}
+.workspace-main-inner {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  max-width: 1600px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* Working column — left, scrolls */
+.workspace-column {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.workspace-column::-webkit-scrollbar { width: 4px; }
+.workspace-column::-webkit-scrollbar-track { background: transparent; }
+.workspace-column::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
+.workspace-column::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION — one register, printed like a banner
+   eyebrow → title → trace filament → description → content
+   ══════════════════════════════════════════════════════════════════ */
+
+.section {
+  position: relative;
+  min-height: 100%;
+  padding: 0 var(--space-3xl) var(--space-4xl);
+  overflow: hidden;
+}
+
+/* Background ghost numerals */
+.workspace-ghost {
+  position: absolute;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 0;
+}
+.workspace-ghost--body {
+  top: 0; bottom: 0; left: 0;
+  width: 40%;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--space-md);
+  gap: 0.35em;
+  padding-left: var(--space-2xs);
+  animation: ds-print 0.36s var(--ease-out) 0.07s both;
+}
+.workspace-ghost--body .workspace-ghost-index {
+  flex-shrink: 0;
+  font-size: clamp(5rem, 16vw, 11rem);
+  letter-spacing: var(--track-base);
+  color: rgba(255,255,255,0.025);
+}
+.workspace-ghost--body .workspace-ghost-label {
+  flex-shrink: 0;
+  font-size: clamp(3rem, 8vw, 6rem);
+  letter-spacing: var(--track-eyebrow);
+  color: rgba(255,255,255,0.018);
+}
+
+.section-eyebrow {
+  position: relative;
+  z-index: var(--z-base);
+  padding-top: var(--space-2xl);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-16);
+  margin-bottom: 14px;
+  clip-path: inset(0 100% 0 0);
+  animation: ds-print 0.22s var(--ease-out) 0.05s both;
+}
+
+.section-title {
+  position: relative;
+  z-index: var(--z-base);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--ink-100);
+  clip-path: inset(0 100% 0 0);
+  animation: ds-print 0.36s var(--ease-out) 0.07s both;
+}
+
+.section-trace {
+  position: relative;
+  z-index: var(--z-base);
+  height: 1px;
+  margin: var(--space-lg) 0 10px;
+  display: flex;
+  align-items: center;
+}
+.section-trace-line {
+  height: 1px;
+  width: 120px;
+  background: var(--tab-color);
+  box-shadow: 0 0 6px 0 var(--tab-glow);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: ds-trace-print 0.36s var(--ease-out) 0.09s forwards;
+}
+.section-trace-hot {
+  position: absolute;
+  left: 0;
+  height: 1px;
+  width: 40px;
+  background: rgba(255,255,255,0.85);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: ds-trace-print 0.36s var(--ease-out) 0.09s both,
+             ds-hot-cool 1.1s linear 0.45s forwards;
+}
+@keyframes ds-hot-cool {
+  from { opacity: 0.85; }
+  to   { opacity: 0; }
+}
+
+.section-desc {
+  position: relative;
+  z-index: var(--z-base);
+  margin: 0 0 var(--space-2xl);
+  max-width: 520px;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-tight);
+  line-height: 1.75;
+  color: var(--ink-28);
+  clip-path: inset(0 100% 0 0);
+  animation: ds-print 0.28s var(--ease-out) 0.18s both;
+}
+
+.section-content {
+  position: relative;
+  z-index: var(--z-base);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PREVIEW PANEL — fixed right column, accent edge
+   ══════════════════════════════════════════════════════════════════ */
+
+.preview-panel {
+  position: relative;
+  flex: 1.5;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--tab-color);
+  box-shadow: inset 1px 0 12px -4px var(--tab-glow);
+  overflow: hidden;
+}
+.preview-panel-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 var(--space-lg);
+  border-bottom: 1px solid var(--line-medium);
+  position: relative;
+  z-index: var(--z-base);
+}
+.preview-panel-head-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.preview-panel-caption {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-16);
+}
+.preview-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-md) var(--space-lg) var(--space-xl);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.14) transparent;
+}
+.preview-panel-body::-webkit-scrollbar { width: 3px; }
+.preview-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); }
+
+/* ══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace::after,
+  .section-eyebrow,
+  .section-title,
+  .section-desc,
+  .section-trace-line,
+  .section-trace-hot,
+  .rail-item-tick,
+  .surface-grain { animation: none !important; }
+  .section-eyebrow,
+  .section-title,
+  .section-desc { clip-path: inset(0 0 0 0); }
+  .section-trace-line,
+  .section-trace-hot { transform: scaleX(1); }
+  .rail-item-label,
+  .rail-item-count { clip-path: inset(0 0 0 0); }
+}
+
+/* === css/trace.css === */
+/* ═══════════════════════════════════════════════════════════════════
+   TRACE — ForgeMapToolkit shared design system
+   Extracted from Banner / HomeScreen / Settings / MegaNavbar.
+   Import AFTER shared.css in every tab.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Easings ─────────────────────────────────────────────────────── */
+:root {
+  --trace-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --trace-rise:  cubic-bezier(0.55, 0, 0.15, 1);
+  --trace-decay: cubic-bezier(0.2, 0.55, 0.35, 1);
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────── */
+
+@keyframes trace-reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes trace-reveal-down {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes trace-tab-enter {
+  from { clip-path: inset(0 0 4% 0); opacity: 0; }
+  to   { clip-path: inset(0 0 0 0); opacity: 1;  }
+}
+
+@keyframes trace-print {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes trace-lamp {
+  0%   { background: rgba(255,255,255,0.08); }
+  35%  { background: var(--tab-color); box-shadow: 0 0 10px var(--tab-glow-strong); }
+  100% { background: rgba(255,255,255,0.08); }
+}
+
+@keyframes trace-bloom-settle {
+  0%, 35% { opacity: 0.85; }
+  100%     { opacity: 0.40; }
+}
+
+@keyframes trace-cool {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Safe entry fade — opacity only (never clips/contains fixed overlays) */
+@keyframes trace-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Plate / row rise — a short mechanical actuation upward into place */
+@keyframes trace-rise-in {
+  from { opacity: 0; transform: translateY(14px); clip-path: inset(0 0 6% 0); }
+  to   { opacity: 1; transform: translateY(0);    clip-path: inset(0 0 0 0); }
+}
+
+/* Film grain drift — the instrument surface */
+@keyframes trace-grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-1.2%, 0.8%); }
+  50%  { transform: translate(0.6%, -1.1%); }
+  75%  { transform: translate(-0.8%, -0.5%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Power draw — the surface briefly dims as a register engages */
+@keyframes trace-power-draw {
+  0%   { opacity: 0.14; }
+  100% { opacity: 0; }
+}
+
+/* Lamp-test — phosphor tick flashes bright once, then settles (boot) */
+@keyframes trace-lamp-test {
+  0%   { opacity: 0.30; transform: scaleY(0.4); }
+  30%  { opacity: 1;    transform: scaleY(1); box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color); }
+  48%  { opacity: 1;    transform: scaleY(1); }
+  100% { opacity: 0.30; transform: scaleY(0.4); box-shadow: none; }
+}
+
+/* ── Grain layer ─────────────────────────────────────────────────── */
+
+.trace-grain {
+  position: absolute;
+  inset: -100%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0"/></filter><rect width="320" height="320" filter="url(%23g)"/></svg>');
+  animation: trace-grain-shift 0.9s steps(2) infinite;
+}
+
+/* ── Tick ────────────────────────────────────────────────────────── */
+
+.trace-tick {
+  width: 2px;
+  height: 14px;
+  background: rgba(255,255,255,0.08);
+  transform: scaleY(0.4);
+  transform-origin: center;
+  flex-shrink: 0;
+  transition:
+    background  0.9s var(--trace-decay),
+    opacity     0.9s var(--trace-decay),
+    box-shadow  0.9s var(--trace-decay),
+    transform   0.9s var(--trace-decay);
+}
+
+.trace-tick--lg { height: 20px; }
+
+.trace-tick.lit,
+.trace-item:hover .trace-tick,
+.trace-item.selected .trace-tick {
+  background: var(--tab-color);
+  box-shadow: 0 0 10px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transform: scaleY(1);
+  transition-duration: 0.06s;
+}
+
+/* ── Trace filament ──────────────────────────────────────────────── */
+
+.trace-filament { position: relative; height: 1px; overflow: visible; }
+
+.trace-bloom {
+  position: absolute; inset: 0; top: -4px; bottom: -4px;
+  background: var(--tab-color);
+  filter: blur(7px);
+  opacity: 0.4;
+  transform: scaleX(0); transform-origin: left center;
+  animation: trace-print 0.32s var(--trace-out) both,
+             trace-bloom-settle 1.2s linear both;
+}
+
+.trace-core {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--tab-color), transparent 78%);
+  opacity: 0.38;
+  transform: scaleX(0); transform-origin: left center;
+  animation: trace-print 0.32s var(--trace-out) forwards;
+}
+
+.trace-hot {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.95);
+  opacity: 0;
+  transform: scaleX(0); transform-origin: left center;
+  animation: trace-print 0.32s var(--trace-out) both,
+             trace-cool  0.9s linear 0.42s both;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+
+.btn-action {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 32px;
+  background: linear-gradient(180deg, var(--tc-face-a, #18181c), var(--tc-face-b, #101013));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 2px;
+  color: #ffffff;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background   0.25s linear,
+    border-color 0.25s linear,
+    box-shadow   0.25s var(--trace-out),
+    transform    0.25s var(--trace-out);
+  white-space: nowrap;
+  user-select: none;
+}
+/* Gloss sweep — a diagonal light pass on the machined face */
+.btn-action::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 42%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.35s var(--trace-out);
+  pointer-events: none;
+}
+.btn-action::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-action > * { position: relative; z-index: 1; }
+.btn-action:hover:not(:disabled) {
+  background:   linear-gradient(180deg, var(--tc-face-hover, #1d1d22), var(--tc-face-a, #18181c));
+  border-color: rgba(255,255,255,0.40);
+  box-shadow:   0 0 24px rgba(255,255,255,0.08), 0 6px 22px -6px rgba(0,0,0,0.7);
+  transform:    translateY(-1px);
+}
+.btn-action:hover:not(:disabled)::after  { opacity: 1; }
+.btn-action:hover:not(:disabled)::before { opacity: 1; }
+.btn-action:active:not(:disabled) { transform: translateY(0); box-shadow: 0 0 14px rgba(255,255,255,0.05); }
+.btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-action--accent {
+  border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.18));
+  background:   linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 20%, var(--tc-face-a, #18181c)),
+    color-mix(in srgb, var(--tab-color) 7%, var(--tc-face-b, #101013)));
+}
+.btn-action--accent:hover:not(:disabled) {
+  border-color: var(--tab-color);
+  background:   linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 32%, var(--tc-face-hover, #1d1d22)),
+    color-mix(in srgb, var(--tab-color) 12%, var(--tc-face-a, #18181c)));
+  box-shadow:   0 0 26px var(--tab-glow-strong), 0 6px 22px -6px rgba(0,0,0,0.65);
+}
+
+.btn-action--full { width: 100%; justify-content: center; }
+
+.btn-action--saved {
+  background:   linear-gradient(180deg, #123a26, #0e2c1d);
+  border-color: rgba(0,200,100,0.40);
+  color:        rgba(0,220,110,0.9);
+}
+
+.btn-ghost-trace {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 2px;
+  color: rgba(255,255,255,0.45);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 0.2s linear,
+    color        0.2s linear,
+    background   0.2s linear,
+    box-shadow   0.2s var(--trace-out),
+    transform    0.2s var(--trace-out);
+  white-space: nowrap;
+  user-select: none;
+}
+.btn-ghost-trace:hover {
+  border-color: rgba(255,255,255,0.28);
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px -8px rgba(0,0,0,0.7);
+}
+.btn-ghost-trace:active { transform: translateY(0); }
+.btn-ghost-trace--accent:hover {
+  border-color: var(--tab-color);
+  color: var(--tab-color);
+  background: color-mix(in srgb, var(--tab-color) 7%, transparent);
+  box-shadow: 0 0 18px -2px var(--tab-glow), 0 5px 16px -8px rgba(0,0,0,0.7);
+}
+.btn-ghost-trace--full { width: 100%; justify-content: center; }
+
+.btn-danger-trace {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: transparent;
+  border: 1px solid rgba(255,60,60,0.25);
+  border-radius: 2px;
+  color: rgba(255,100,100,0.7);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background   0.2s linear,
+    border-color 0.2s linear,
+    color        0.2s linear;
+  white-space: nowrap;
+  user-select: none;
+}
+.btn-danger-trace:hover {
+  background:   rgba(255,60,60,0.08);
+  border-color: rgba(255,60,60,0.55);
+  color:        #ff6060;
+  box-shadow:   0 0 14px rgba(255,60,60,0.12);
+}
+
+.btn-delete-trace {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0;
+  color: rgba(255,255,255,0.28);
+  font-size: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    border-color 0.15s linear,
+    color        0.15s linear;
+  user-select: none;
+}
+.btn-delete-trace:hover {
+  border-color: rgba(255,80,80,0.4);
+  color: rgba(255,120,120,0.85);
+}
+
+/* ── Form controls ───────────────────────────────────────────────── */
+
+.trace-input {
+  width: 100%;
+  background: var(--tc-sunk, #0a0a0d);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-bottom-color: rgba(255,255,255,0.14);
+  border-radius: 0;
+  padding: 10px 12px;
+  color: rgba(255,255,255,0.82);
+  font-size: 11px;
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
+  letter-spacing: 0.025em;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+  transition:
+    border-color 0.2s linear,
+    background   0.2s linear,
+    box-shadow   0.2s linear;
+}
+.trace-input:focus {
+  border-color: rgba(255,255,255,0.16);
+  border-bottom-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.5));
+  background: var(--tc-sunk-focus, #111116);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4), 0 0 0 1px color-mix(in srgb, var(--tab-color) 14%, transparent);
+}
+.trace-input.is-set { border-bottom-color: rgba(0,200,100,0.35); }
+.trace-input::placeholder { color: rgba(255,255,255,0.18); }
+
+.trace-input--text {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+.trace-input--sm {
+  padding: 7px 10px;
+  font-size: 10.5px;
+}
+
+.trace-select {
+  width: 100%;
+  background: var(--tc-sunk, #0a0a0d);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0;
+  padding: 10px 36px 10px 12px;
+  color: rgba(255,255,255,0.82);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  outline: none;
+  box-sizing: border-box;
+  appearance: none;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+  transition: border-color 0.2s linear, background 0.2s linear;
+}
+.trace-select:hover { border-color: rgba(255,255,255,0.16); }
+.trace-select:focus {
+  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.16));
+  background: var(--tc-sunk-focus, #111116);
+}
+.trace-select option { background: #111114; color: rgba(255,255,255,0.85); }
+
+.trace-label {
+  display: block;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  margin-bottom: 8px;
+}
+
+.trace-sublabel {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.64rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: rgba(255,255,255,0.28);
+  line-height: 1.6;
+}
+
+.trace-chip-row { display: flex; flex-wrap: wrap; gap: 1px; }
+
+.trace-chip {
+  padding: 9px 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--tc-rail, #0d0d10);
+  border-radius: 0;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+  cursor: pointer;
+  transition:
+    color        0.2s linear,
+    border-color 0.2s linear,
+    background   0.2s linear;
+  user-select: none;
+}
+.trace-chip:hover {
+  border-color: rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.65);
+  background: var(--tc-face-b, #101013);
+}
+.trace-chip.active {
+  border-color: color-mix(in srgb, var(--tab-color) 50%, rgba(255,255,255,0.45));
+  color: #ffffff;
+  background: color-mix(in srgb, var(--tab-color) 14%, var(--tc-face-a, #18181c));
+  box-shadow: inset 0 -2px 0 -1px var(--tab-color);
+}
+
+.trace-switch {
+  flex-shrink: 0;
+  width: 38px; height: 18px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: var(--tc-sunk, #0a0a0d);
+  position: relative;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+  transition: border-color 0.25s linear, background 0.25s linear;
+}
+.trace-switch.on {
+  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.40));
+  background: color-mix(in srgb, var(--tab-color) 16%, var(--tc-sunk, #0a0a0d));
+}
+.trace-switch-pole {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 10px; height: 10px;
+  background: rgba(255,255,255,0.25);
+  transition:
+    left       0.26s var(--trace-rise),
+    background 0.26s linear;
+}
+.trace-switch.on .trace-switch-pole {
+  left: 23px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255,255,255,0.45);
+}
+
+/* ── Section layout ──────────────────────────────────────────────── */
+
+.trace-plate {
+  position: relative;
+  padding: 28px 0 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.055);
+}
+
+.trace-plate--bordered {
+  position: relative;
+  padding: 28px 32px;
+  background: linear-gradient(180deg, var(--tc-face-a, #18181c), var(--tc-face-b, #101013));
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.trace-plate--bordered + .trace-plate--bordered { margin-top: 12px; }
+
+.trace-section-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+}
+/* Trace filament — prints along the header baseline in the tab hue */
+.trace-section-head::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 58px; height: 1px;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow), 0 0 2px var(--tab-color);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: trace-print 0.42s var(--trace-out) 0.18s both;
+}
+
+.trace-section-eyebrow {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.30em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.13);
+}
+
+.trace-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.62);
+  margin: 0;
+}
+/* Leading phosphor tick on every section title */
+.trace-section-title::before {
+  content: '';
+  width: 2px; height: 13px;
+  flex-shrink: 0;
+  background: var(--tab-color);
+  box-shadow: 0 0 9px var(--tab-glow-strong), 0 0 2px var(--tab-color);
+}
+
+.trace-subsection {
+  display: flex;
+  align-items: center;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.60rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+  margin: 22px 0 12px;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.25s var(--trace-decay);
+}
+.trace-subsection::before {
+  content: '';
+  width: 2px; height: 11px;
+  flex-shrink: 0;
+  background: var(--tab-color);
+  box-shadow: 0 0 7px var(--tab-glow);
+  opacity: 0.55;
+  transition: opacity 0.25s var(--trace-decay), box-shadow 0.25s var(--trace-decay);
+}
+.trace-subsection::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent 85%);
+}
+.trace-subsection:hover {
+  color: rgba(255,255,255,0.5);
+}
+.trace-subsection:hover::before {
+  opacity: 1;
+  box-shadow: 0 0 11px var(--tab-glow-strong), 0 0 2px var(--tab-color);
+}
+
+.trace-item {
+  position: relative;
+  padding: 18px 20px;
+  /* solid machined monolith — a rigid block lit along its top edge,
+     resting a step out of the bed. Fully opaque. */
+  background: linear-gradient(180deg,
+    var(--tc-face-a) 0%,
+    color-mix(in srgb, var(--tc-face-a) 55%, var(--tc-face-b)) 42%,
+    var(--tc-face-b) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top-color: rgba(255,255,255,0.11);
+  border-radius: 0;
+  transform: translateY(0);
+  box-shadow: 0 2px 6px -3px rgba(0,0,0,0.7);
+  transition:
+    background   0.5s var(--trace-decay),
+    border-color 0.5s var(--trace-decay),
+    box-shadow   0.45s var(--trace-decay),
+    transform    0.45s var(--trace-decay);
+}
+.trace-item + .trace-item { margin-top: 8px; }
+
+/* Top-edge phosphor tick — dormant at rest, ignites on engage */
+.trace-item::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 2;
+  transition:
+    opacity    0.9s var(--trace-decay),
+    transform  0.9s var(--trace-decay),
+    box-shadow 0.9s var(--trace-decay);
+}
+
+/* Engaged: the block rises and the tool's hue washes down the face
+   from the lit top edge — solid, electrically alive, never see-through */
+.trace-item:hover {
+  border-color: color-mix(in srgb, var(--tab-color) 22%, rgba(255,255,255,0.10));
+  border-top-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.16));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 26%, var(--tc-face-hover)) 0%,
+    color-mix(in srgb, var(--tab-color) 8%, var(--tc-face-a)) 40%,
+    var(--tc-face-b) 100%);
+  transform: translateY(-3px);
+  box-shadow:
+    0 18px 30px -14px rgba(0,0,0,0.9),
+    0 0 34px -8px var(--tab-glow);
+  transition:
+    background   0.08s linear,
+    border-color 0.08s linear,
+    box-shadow   0.26s var(--trace-rise),
+    transform    0.26s var(--trace-rise);
+}
+.trace-item:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transition-duration: 0.06s;
+}
+
+.trace-item.selected {
+  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.12));
+  border-top-color: color-mix(in srgb, var(--tab-color) 72%, rgba(255,255,255,0.16));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 24%, var(--tc-face-hover)) 0%,
+    color-mix(in srgb, var(--tab-color) 7%, var(--tc-face-a)) 45%,
+    var(--tc-face-b) 100%);
+  box-shadow:
+    inset 3px 0 0 var(--tab-color),
+    0 14px 26px -16px rgba(0,0,0,0.9),
+    0 0 26px -10px var(--tab-glow);
+}
+.trace-item.selected::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+}
+
+/* ── Status badge ────────────────────────────────────────────────── */
+
+.trace-badge {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+  opacity: 0.8;
+}
+.trace-badge--ok   { color: rgba(0,200,100,0.75);  border-color: rgba(0,200,100,0.25);  }
+.trace-badge--warn { color: rgba(255,140,0,0.80);  border-color: rgba(255,140,0,0.25);  }
+.trace-badge--err  { color: rgba(255,80,80,0.80);  border-color: rgba(255,80,80,0.25);  }
+.trace-badge--soon { color: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.12); }
+.trace-badge--accent {
+  color: var(--tab-color);
+  border-color: color-mix(in srgb, var(--tab-color) 35%, transparent);
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────── */
+
+.trace-scroll::-webkit-scrollbar { width: 4px; }
+.trace-scroll::-webkit-scrollbar-track { background: transparent; }
+.trace-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
+.trace-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+/* ── Focus / selection ───────────────────────────────────────────── */
+
+.trace-tab *:focus-visible {
+  outline: 1px solid rgba(255,255,255,0.7);
+  outline-offset: 2px;
+}
+.trace-tab ::selection {
+  background: rgba(255,255,255,0.85);
+  color: #000;
+}
+
+/* ── Tab root ────────────────────────────────────────────────────── */
+
+/* Full-bleed: a TRACE tab claims the whole content area (no centered
+   max-width box, no gray gutter, no double padding) — the #070708 plate
+   runs edge to edge, continuous with the banner and navbar above it. */
+.tab-content:has(.trace-tab) {
+  padding: 0;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: none;
+}
+
+.trace-tab {
+  --tab-color:       rgba(255,255,255,0.6);
+  --tab-glow:        rgba(255,255,255,0.2);
+  --tab-glow-strong: rgba(255,255,255,0.35);
+
+  /* ── Solid surface palette (no transparency, no dots) ──────────────
+     The bed is a recessed near-black; the cards are solid machined
+     monoliths lifted a step out of it. Everything opaque. */
+  --tc-bed-a:       #050507;   /* bed, recessed top band */
+  --tc-bed-b:       #0b0b0e;   /* bed, floor */
+  --tc-face-a:      #18181c;   /* card face — lit top edge */
+  --tc-face-b:      #101013;   /* card face — shaded foot */
+  --tc-face-hover:  #1d1d22;   /* card face on engage (pre-hue) */
+  --tc-sunk:        #0a0a0d;   /* recessed channel (inputs, wells) */
+  --tc-sunk-focus:  #111116;   /* channel, focused */
+  --tc-rail:        #0d0d10;   /* secondary panels / rows */
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;          /* root is bounded; scrolling lives inside */
+  /* the bed — a solid recess, darker at the top edge (reads as depth) */
+  background: linear-gradient(180deg, var(--tc-bed-a) 0%, var(--tc-bed-b) 220px, var(--tc-bed-b) 100%);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* opacity-only entry — never clips or contains the fixed overlays */
+  animation: trace-fade-in 0.4s var(--trace-out) both;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .trace-tab *,
+  .trace-tab *::before,
+  .trace-tab *::after {
+    animation-duration:   0.01ms !important;
+    animation-delay:      0ms    !important;
+    transition-duration:  0.01ms !important;
+  }
+}
+
+/* === css/entity-console.css === */
+/* ═══════════════════════════════════════════════════════════════════
+   ENTITY CONSOLE — entity-console.css
+   The reusable register-entry surface, coordinate blocks, add-tile,
+   colour picker and map-preview instruments, lifted verbatim from the
+   WreckageTab gold standard and made tab-agnostic:
+     · the .wr-tab ancestor requirement is dropped — selectors stand
+       alone and recolor from whatever --tab-color is inherited;
+     · every --tc-* surface token carries the same inline fallback as
+       trace.css, so the surfaces render identically even in tabs that
+       don't carry the .trace-tab palette (e.g. .props-tab).
+   Depends on: trace.css (easings + keyframes, both :root-global) and
+   the Fable5 design-system tokens. Import those alongside this file.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Input rows ──────────────────────────────────────────────────── */
+
+.ec-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ec-input-row .field-input { flex: 1; margin-bottom: 0; }
+
+/* ── Map info readout + path hint ────────────────────────────────── */
+
+.ec-map-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  font-family: 'JetBrains Mono', monospace;
+}
+.ec-map-info-tag {
+  font-size: 0.58rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  font-family: 'Space Grotesk', sans-serif;
+}
+.ec-map-info-size { color: rgba(255,255,255,0.55); font-weight: 600; }
+.ec-map-info-sep  { color: rgba(255,255,255,0.22); }
+.ec-map-info-err  { color: rgba(255,100,100,0.5); font-size: 0.64rem; }
+
+.ec-path-hint {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.22);
+  margin-top: 5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Card grid ───────────────────────────────────────────────────── */
+
+.ec-card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* The add-tile socket arrives last, after the cards have printed in */
+.ec-card-grid > .ec-add-tile {
+  animation: trace-fade-in 0.4s linear 0.95s backwards;
+}
+
+/* ── Card — register entry; frame = identity + selection ──────────────
+   No filled monolith and no enclosing box around the stack — cards sit
+   directly on the bed, separated by the grid gap. Quiet at rest; the
+   top tick ignites in the entity's OWN hue on hover; the selected
+   card's whole frame takes that hue. The header swatch is the
+   colour-picker entry point. (--uc-color is set inline per card.) */
+
+.ec-card {
+  position: relative;
+  padding: 15px 18px 17px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.016), rgba(255,255,255,0.003));
+  border: 1px solid rgba(255,255,255,0.05);
+  border-top-color: rgba(255,255,255,0.08);
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    transform    0.4s var(--trace-decay),
+    background   0.4s var(--trace-decay),
+    border-color 0.4s var(--trace-decay),
+    box-shadow   0.4s var(--trace-decay);
+}
+/* top-edge phosphor tick — the entity's own colour */
+.ec-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--uc-color, var(--tab-color));
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity    0.9s var(--trace-decay),
+    transform  0.9s var(--trace-decay),
+    box-shadow 0.9s var(--trace-decay);
+}
+.ec-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--uc-color, white) 22%, rgba(255,255,255,0.08));
+}
+.ec-card:hover::before,
+.ec-card.selected::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--uc-color, white) 55%, transparent), 0 0 3px var(--uc-color, white);
+  transition-duration: 0.06s;
+}
+/* selected — the whole frame takes the entity's colour; identity is the
+   selection signal, no separate accent */
+.ec-card.selected {
+  border-color: color-mix(in srgb, var(--uc-color) 65%, rgba(255,255,255,0.1));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--uc-color) 7%, rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.003));
+  box-shadow:
+    0 14px 26px -16px rgba(0,0,0,0.9),
+    0 0 28px -10px color-mix(in srgb, var(--uc-color) 50%, transparent);
+}
+
+/* ── Card header ─────────────────────────────────────────────────── */
+
+.ec-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* Header swatch — the entity's hue AND the colour-picker entry point */
+.ec-card-dot {
+  width: 14px; height: 14px;
+  border-radius: 0;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 0 8px -2px var(--uc-color);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s var(--trace-rise), box-shadow 0.2s linear, border-color 0.2s linear;
+}
+.ec-card-dot:hover {
+  transform: scale(1.28);
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 0 12px 0 var(--uc-color);
+}
+
+/* Title — dim at rest, white when engaged */
+.ec-card-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  flex: 1;
+  margin: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.3s var(--trace-decay);
+}
+.ec-card:hover .ec-card-title,
+.ec-card.selected .ec-card-title { color: rgba(255,255,255,0.92); }
+
+/* ── Colour picker — borderless inline swatch strip ──────────────── */
+
+.ec-color-picker {
+  padding: 8px 0 6px;
+  margin: 0 0 8px;
+  animation: trace-reveal-down 0.18s var(--trace-out) both;
+}
+.ec-color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ec-color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.12s linear, box-shadow 0.12s linear;
+  flex-shrink: 0;
+}
+.ec-color-swatch:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 10px 2px currentColor;
+}
+
+/* ── Category path hint ──────────────────────────────────────────── */
+
+.ec-cat-path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  color: rgba(255,255,255,0.22);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ── Coordinate register — each point is its own recessed block ──── */
+
+.ec-coord-entry {
+  padding: 11px 14px 13px;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.018);
+  border: none;
+  border-left: 2px solid rgba(255,255,255,0.10);
+  transition: border-left-color 0.2s linear, background 0.2s linear;
+}
+.ec-coord-entry:hover { background: rgba(255,255,255,0.028); }
+/* mirror points carry the tab accent on their edge */
+.ec-coord-entry.mirror {
+  border-left-color: color-mix(in srgb, var(--tab-color) 50%, rgba(255,255,255,0.1));
+}
+.ec-coord-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.06em;
+}
+.ec-coord-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.ec-coord-field { display: flex; flex-direction: column; gap: 4px; }
+.ec-coord-field > label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+}
+
+/* ── Add-tile ─────────────────────────────────────────────────────────
+   A free slot on the rail — borrows the mode station's lit top-edge
+   tick and lift, not a dashed box. Warm bed, no blue cast. */
+.ec-add-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  border: none;
+  cursor: pointer;
+  gap: 9px;
+  margin-top: 8px;
+  transform: translateY(0);
+  transition:
+    background 0.4s var(--trace-decay),
+    transform  0.4s var(--trace-decay);
+  user-select: none;
+}
+.ec-add-tile::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity    0.9s var(--trace-decay),
+    transform  0.9s var(--trace-decay),
+    box-shadow 0.9s var(--trace-decay);
+}
+.ec-add-tile:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 14%, transparent),
+    rgba(255,255,255,0.012));
+}
+.ec-add-tile:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+  transition-duration: 0.06s;
+}
+.ec-add-tile:hover .ec-add-tile-icon { color: color-mix(in srgb, var(--tab-color) 70%, white); }
+.ec-add-tile-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: rgba(255,255,255,0.30);
+  transition: color 0.2s linear;
+}
+.ec-add-tile-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+}
+
+/* ── Empty state (overlay sidebars / modal bodies) ───────────────── */
+
+.ec-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 0.06em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAP PREVIEW — upload, canvas well, markers stage, legend, hint
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Upload area — boxless secondary action with a growing filament stub */
+.ec-upload {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+  margin-bottom: 14px;
+  transition: color 0.2s linear, letter-spacing 0.26s var(--trace-out);
+}
+.ec-upload::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 2px;
+  height: 1px;
+  width: 16px;
+  background: var(--tab-color);
+  opacity: 0.45;
+  box-shadow: 0 0 6px var(--tab-glow);
+  transition: width 0.34s var(--trace-out), opacity 0.2s linear;
+}
+.ec-upload:hover {
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.19em;
+}
+.ec-upload:hover::after { width: 100%; opacity: 1; }
+.ec-file-input { display: none; }
+
+/* Canvas — a recessed instrument well, sunk into the plate */
+.ec-canvas-wrap {
+  position: relative;
+  background: radial-gradient(125% 125% at 50% 0%, #0c0c0f 0%, #050506 70%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 0 64px rgba(0,0,0,0.72),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 24px 52px -32px rgba(0,0,0,0.95);
+  overflow: hidden;
+  transition: border-color 0.3s var(--trace-decay), box-shadow 0.3s var(--trace-decay);
+}
+.ec-canvas-wrap:hover {
+  border-color: color-mix(in srgb, var(--tab-color) 22%, rgba(255,255,255,0.08));
+  box-shadow:
+    inset 0 0 64px rgba(0,0,0,0.72),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 24px 52px -32px rgba(0,0,0,0.95),
+    0 0 26px -10px var(--tab-glow);
+}
+.ec-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+/* Viewfinder corner brackets — the well is a calibrated stage */
+.ec-canvas-wrap::before,
+.ec-canvas-wrap::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  z-index: 2;
+  pointer-events: none;
+  transition: border-color 0.4s var(--trace-decay);
+}
+.ec-canvas-wrap::before {
+  top: 8px; left: 8px;
+  border-top: 1px solid rgba(255,255,255,0.22);
+  border-left: 1px solid rgba(255,255,255,0.22);
+}
+.ec-canvas-wrap::after {
+  bottom: 8px; right: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.22);
+  border-right: 1px solid rgba(255,255,255,0.22);
+}
+.ec-canvas-wrap:hover::before,
+.ec-canvas-wrap:hover::after {
+  border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.2));
+  transition-duration: 0.08s;
+}
+
+/* Boot scanline — one calibration pass down the stage on entry */
+.ec-canvas-scan {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 4%, var(--tab-color) 50%, transparent 96%);
+  box-shadow: 0 0 14px var(--tab-glow-strong);
+  opacity: 0;
+  animation: ec-scan 1.3s var(--trace-rise) 0.6s 1;
+}
+@keyframes ec-scan {
+  0%   { top: 0;    opacity: 0; }
+  12%  { opacity: 0.65; }
+  85%  { opacity: 0.35; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Live coordinate readout — the instrument needle, bottom-left */
+.ec-canvas-readout {
+  position: absolute;
+  left: 10px; bottom: 10px;
+  z-index: 3;
+  padding: 4px 9px;
+  background: var(--tc-sunk, #0a0a0d);
+  border: 1px solid rgba(255,255,255,0.09);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.5);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.3s var(--trace-decay), color 0.3s var(--trace-decay);
+}
+.ec-canvas-wrap:hover .ec-canvas-readout {
+  border-color: color-mix(in srgb, var(--tab-color) 35%, rgba(255,255,255,0.09));
+  color: rgba(255,255,255,0.75);
+}
+.ec-canvas-placeholder {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+  pointer-events: none;
+  text-align: center;
+}
+/* A single dormant filament under the prompt — softly breathing, the
+   only idle motion: the stage is armed and waiting for a placement. */
+.ec-canvas-placeholder::after {
+  content: '';
+  width: 40px; height: 1px;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow);
+  opacity: 0.4;
+  animation: ec-placeholder-breathe 2.6s var(--trace-decay) infinite;
+}
+@keyframes ec-placeholder-breathe {
+  0%, 100% { opacity: 0.25; transform: scaleX(0.7); }
+  50%      { opacity: 0.7;  transform: scaleX(1); }
+}
+
+/* Legend */
+.ec-legend { margin-top: 20px; }
+.ec-legend-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ec-legend-title::before {
+  content: '';
+  width: 2px; height: 11px;
+  flex-shrink: 0;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow-strong), 0 0 2px var(--tab-color);
+}
+.ec-legend-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent 85%);
+}
+.ec-legend-list { display: flex; flex-direction: column; gap: 5px; }
+.ec-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.45);
+  animation: trace-reveal 0.4s var(--trace-out) backwards;
+  animation-delay: calc(var(--row-i, 0) * 55ms + 0.75s);
+  transition: color 0.45s var(--trace-decay);
+}
+.ec-legend-row:hover {
+  color: rgba(255,255,255,0.9);
+  transition-duration: 0.08s;
+}
+.ec-legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: box-shadow 0.7s var(--trace-decay);
+}
+.ec-legend-row:hover .ec-legend-dot {
+  box-shadow: 0 0 10px var(--dot-c, currentColor), 0 0 3px var(--dot-c, currentColor);
+  transition-duration: 0.06s;
+}
+.ec-legend-pts {
+  margin-left: auto;
+  font-size: 0.64rem;
+  color: rgba(255,255,255,0.22);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hint row */
+.ec-hint {
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: var(--tc-rail, #0d0d10);
+  border-left: 2px solid color-mix(in srgb, var(--tab-color) 40%, rgba(255,255,255,0.07));
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.30);
+  letter-spacing: 0.04em;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ec-card, .ec-card::before, .ec-card::after,
+  .ec-add-tile, .ec-add-tile::before,
+  .ec-canvas-scan, .ec-canvas-placeholder::after,
+  .ec-legend-row, .ec-color-picker {
+    animation-duration:  0.01ms !important;
+    animation-delay:     0ms     !important;
+    transition-duration: 0.01ms  !important;
+  }
+}
+
+/* === css/checkbox.css === */
+/* ── Checkbox — custom styled, uses --tab-color accent ───────────────────── */
+/*
+   Usage:
+     <label className="checkbox-label" onClick={() => setValue(!value)}>
+       <div className={`checkbox${value ? ' checked' : ''}`}>
+         {value && <span className="checkbox-check" />}
+       </div>
+       <span className="checkbox-text">Label text</span>
+     </label>
+*/
+.checkbox-label {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  cursor:      pointer;
+  user-select: none;
+}
+
+.checkbox {
+  width:        20px;
+  height:       20px;
+  flex-shrink:  0;
+  border:       2px solid rgba(255, 255, 255, 0.25);
+  background:   transparent;
+  position:     relative;
+  transition:   border-color 0.2s ease, background 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.checkbox.checked {
+  border-color: var(--tab-color);
+  background:   transparent;
+  box-shadow:   0 0 10px var(--tab-glow);
+}
+
+/* SVG checkmark drawn with CSS borders */
+.checkbox-check {
+  position:  absolute;
+  inset:     0;
+  display:   block;
+}
+
+.checkbox-check::before {
+  content:      '';
+  position:     absolute;
+  left:         3px;
+  top:          8px;
+  width:        5px;
+  height:       2px;
+  background:   var(--tab-color);
+  transform:    rotate(45deg);
+  transform-origin: right center;
+  box-shadow:   0 0 4px var(--tab-glow);
+}
+
+.checkbox-check::after {
+  content:      '';
+  position:     absolute;
+  left:         6px;
+  top:          4px;
+  width:        9px;
+  height:       2px;
+  background:   var(--tab-color);
+  transform:    rotate(-55deg);
+  transform-origin: left center;
+  box-shadow:   0 0 4px var(--tab-glow);
+}
+
+.checkbox-text {
+  font-size:   0.85rem;
+  font-weight: 500;
+  color:       rgba(255, 255, 255, 0.4);
+  transition:  color 0.2s ease;
+}
+
+.checkbox-label:has(.checkbox.checked) .checkbox-text {
+  color: var(--tab-color);
+}
+
+
+/* === css/root.css === */
+:root {
+  /* ── Shared Backgrounds ─────────────────────────── */
+  --bg-primary:   #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary:  #1a1a1a;
+  --bg-card:      #141414;
+  --bg-hover:     #1f1f1f;
+
+  /* ── Shared Text ────────────────────────────────── */
+  --text-primary:   #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted:     #666666;
+
+  /* ── Shared Borders ─────────────────────────────── */
+  --border-color: #2a2a2a;
+  --border-light: #333333;
+
+  /* ── App Brand Accent (default/homepage) ────────── */
+  --accent-primary:      #ff8c00;
+  --accent-light:        #ffa533;
+  --accent-dark:         #cc7000;
+  --accent-glow:         rgba(255, 140, 0, 0.35);
+  --accent-glow-strong:  rgba(255, 140, 0, 0.60);
+
+  /* ══════════════════════════════════════════════════
+     TAB ACCENT COLORS
+     Each tab needs: -color / -glow / -glow-strong / -glow-intense
+     ForgeMapToolkit reads these via var(--<id>-color) etc.
+     To add a new tab: add its block here — no other file needs touching.
+     ══════════════════════════════════════════════════ */
+
+  /* ── Emitter — Cyan ─────────────────────────────── */
+  --emitter-color:              #00DDFF;
+  --emitter-glow:               rgba(0, 221, 255, 0.35);
+  --emitter-glow-strong:        rgba(0, 221, 255, 0.60);
+  --emitter-glow-intense:       rgba(0, 221, 255, 0.80);
+  /* aliases used inside Emitter.css */
+  --emitter-accent:             var(--emitter-color);
+  --emitter-accent-glow:        var(--emitter-glow);
+  --emitter-accent-glow-strong: var(--emitter-glow-strong);
+  --emitter-accent-glow-intense:var(--emitter-glow-intense);
+
+  /* ── Wreckages — Rot ────────────────────────────── */
+  --wreckages-color:        #FE1818;
+  --wreckages-glow:         rgba(254, 24, 24, 0.35);
+  --wreckages-glow-strong:  rgba(254, 24, 24, 0.60);
+  --wreckages-glow-intense: rgba(254, 24, 24, 0.80);
+
+  /* ── Props — Dunkelgrün ─────────────────────────── */
+  --props-color:        #538A33;
+  --props-glow:         rgba(83, 138, 51, 0.35);
+  --props-glow-strong:  rgba(83, 138, 51, 0.60);
+  --props-glow-intense: rgba(83, 138, 51, 0.80);
+
+  /* ── Custom Props — Teal ────────────────────────── */
+  --customprops-color:        #3EA387;
+  --customprops-glow:         rgba(62, 163, 135, 0.35);
+  --customprops-glow-strong:  rgba(62, 163, 135, 0.60);
+  --customprops-glow-intense: rgba(62, 163, 135, 0.80);
+
+  /* ── TreeMap — Grün ─────────────────────────────── */
+  --treemap-color:        #18C748;
+  --treemap-glow:         rgba(24, 199, 72, 0.35);
+  --treemap-glow-strong:  rgba(24, 199, 72, 0.60);
+  --treemap-glow-intense: rgba(24, 199, 72, 0.80);
+
+  /* ── Rock Erosion — Orange-Gold ─────────────────── */
+  --rockerosion-color:              #FFAF00;
+  --rockerosion-glow:               rgba(255, 175, 0, 0.35);
+  --rockerosion-glow-strong:        rgba(255, 175, 0, 0.60);
+  --rockerosion-glow-intense:       rgba(255, 175, 0, 0.80);
+  /* aliases used inside RockErosion.css */
+  --rockerosion-accent:             var(--rockerosion-color);
+  --rockerosion-accent-glow:        var(--rockerosion-glow);
+  --rockerosion-accent-glow-strong: var(--rockerosion-glow-strong);
+  --rockerosion-accent-glow-intense:var(--rockerosion-glow-intense);
+
+  /* ── Stars — Lila ───────────────────────────────── */
+  --stars-color:        #8A12BD;
+  --stars-glow:         rgba(138, 18, 189, 0.35);
+  --stars-glow-strong:  rgba(138, 18, 189, 0.60);
+  --stars-glow-intense: rgba(138, 18, 189, 0.80);
+  /* aliases used inside Stars.css */
+  --st-accent:             var(--stars-color);
+  --st-accent-light:       #b040e8;
+  --st-accent-glow:        var(--stars-glow);
+  --st-accent-glow-strong: var(--stars-glow-strong);
+
+  /* ── Skybox Generator — Blau ────────────────────── */
+  --skybox-generator-color:        #3B76FF;
+  --skybox-generator-glow:         rgba(59, 118, 255, 0.35);
+  --skybox-generator-glow-strong:  rgba(59, 118, 255, 0.60);
+  --skybox-generator-glow-intense: rgba(59, 118, 255, 0.80);
+
+  /* ── SCMAP Tool — Gelb ──────────────────────────── */
+  --scmaptool-color:        #FFFA00;
+  --scmaptool-glow:         rgba(255, 250, 0, 0.35);
+  --scmaptool-glow-strong:  rgba(255, 250, 0, 0.60);
+  --scmaptool-glow-intense: rgba(255, 250, 0, 0.80);
+
+  /* ── Adaptive Map Helper — Orange ───────────────── */
+  --adaptivemaphelper-color:        #ff8c00;
+  --adaptivemaphelper-glow:         rgba(255, 140, 0, 0.35);
+  --adaptivemaphelper-glow-strong:  rgba(255, 140, 0, 0.60);
+  --adaptivemaphelper-glow-intense: rgba(255, 140, 0, 0.80);
+
+  /* ── History — Pink ─────────────────────────────── */
+  --history-color:        #FF8AFF;
+  --history-glow:         rgba(255, 138, 255, 0.35);
+  --history-glow-strong:  rgba(255, 138, 255, 0.60);
+  --history-glow-intense: rgba(255, 138, 255, 0.80);
+
+  /* ── Map Resizer — Türkis ───────────────────────── */
+  --mapresizer-color:        #00E5CC;
+  --mapresizer-glow:         rgba(0, 229, 204, 0.20);
+  --mapresizer-glow-strong:  rgba(0, 229, 204, 0.45);
+  --mapresizer-glow-intense: rgba(0, 229, 204, 0.75);
+
+  /* ── Economy Map — Mintgrün ─────────────────────── */
+  --economymap-color:        #00C896;
+  --economymap-glow:         rgba(0, 200, 150, 0.25);
+  --economymap-glow-strong:  rgba(0, 200, 150, 0.50);
+  --economymap-glow-intense: rgba(0, 200, 150, 0.75);
+
+  /* ── Preview Image — Pink ──────────────────────── */
+  --previewimage-color:        #FF007A;
+  --previewimage-glow:         rgba(255, 0, 122, 0.25);
+  --previewimage-glow-strong:  rgba(255, 0, 122, 0.55);
+  --previewimage-glow-intense: rgba(255, 0, 122, 0.85);
+  /* aliases used inside PreviewImage.css */
+  --preview-color:             #FF007A;
+  --preview-glow:              rgba(255, 0, 122, 0.25);
+  --preview-glow-strong:       rgba(255, 0, 122, 0.55);
+
+  /* ── Contributions — Gelbgrün ───────────────────── */
+  --contributions-color:        #A5E801;
+  --contributions-glow:         rgba(165, 232, 1, 0.35);
+  --contributions-glow-strong:  rgba(165, 232, 1, 0.60);
+  --contributions-glow-intense: rgba(165, 232, 1, 0.80);
+
+  /* ── Settings — Weiß ────────────────────────────── */
+  --settings-color:        #FFFFFF;
+  --settings-glow:         rgba(255, 255, 255, 0.15);
+  --settings-glow-strong:  rgba(255, 255, 255, 0.30);
+  --settings-glow-intense: rgba(255, 255, 255, 0.50);
+
+  /* ── Civilians — Gelb (legacy) ──────────────────── */
+  --civilians-color:        #FFFA00;
+  --civilians-glow:         rgba(255, 250, 0, 0.35);
+  --civilians-glow-strong:  rgba(255, 250, 0, 0.60);
+  --civilians-glow-intense: rgba(255, 250, 0, 0.80);
+
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #000; font-family: var(--font-display); }
+
+.ea-page {
+  position: relative;
+  min-height: 100vh;
+  background: var(--surface-canvas);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--ink-55);
+  padding: 48px;
+  --tab-color: var(--wreckages-color);
+  --tab-glow: var(--wreckages-glow);
+  --tab-glow-strong: var(--wreckages-glow-strong);
+}
+.ea-page-label {
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-16);
+  margin-bottom: 14px;
+}
+
+/* ── Provenance legend — every class below cites the real file:line
+   it is copied from. Nothing here is invented. ────────────────── */
+.ea-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: var(--space-3xl);
+  border: 1px solid var(--line-soft);
+}
+.ea-legend-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 280px;
+  gap: var(--space-lg);
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.002));
+  border-bottom: 1px solid var(--line-soft);
+}
+.ea-legend-row:last-child { border-bottom: none; }
+.ea-legend-class {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--ink-72);
+}
+.ea-legend-source {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-22);
+}
+.ea-legend-demo { display: flex; align-items: center; justify-content: flex-start; }
+
+/* ── Modal shell — flat surface ladder + hairline border + top
+   filament, the same idiom as .workspace / .section in layout.css
+   and the universal top-accent-bar every overlay variant in this
+   codebase already has (help-modal::before, acpo-panel::before). ── */
+.ea-modal {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 1180px;
+  height: 720px;
+  margin: 0 auto;
+  background: var(--surface-bed-b);
+  border: 1px solid var(--line-medium);
+  box-shadow: 0 40px 90px -20px rgba(0,0,0,0.9);
+  overflow: hidden;
+}
+.ea-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  box-shadow: 0 0 14px var(--tab-glow-strong);
+  z-index: 1;
+}
+
+/* ── Sidebar — live preview rail, real .ec-card structure ────────── */
+.ea-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-canvas);
+  border-right: 1px solid var(--line-soft);
+}
+.ea-sidebar-head {
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  border-bottom: 1px solid var(--line-soft);
+  flex-shrink: 0;
+}
+.ea-sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ── Main column ──────────────────────────────────────────────── */
+.ea-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+.ea-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  padding: var(--space-2xl) var(--space-2xl) 0;
+  flex-shrink: 0;
+}
+/* exact section-eyebrow / -title / -trace / -desc rhythm from
+   layout.css — the same one CONFIGURATION / OUTPUT / MATCHING use */
+.ea-header .section-eyebrow { padding-top: 0; }
+.ea-header .section-title { font-size: 1.65rem; }
+.ea-header .section-desc { margin-bottom: var(--space-xl); max-width: 620px; }
+
+.ea-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-2xl) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+.ea-body::-webkit-scrollbar { width: 6px; }
+.ea-body::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+.ea-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--tab-color), color-mix(in srgb, var(--tab-color) 40%, transparent));
+}
+
+/* subsection-head already has display:flex / justify-content:space-between
+   (primitives.css) — first child groups title + bulk actions */
+.ea-subsection-left { display: flex; align-items: center; gap: var(--space-md); }
+
+.ea-emitter-list { display: flex; flex-direction: column; }
+.ea-emitter-list .check-row { padding: var(--space-sm) 0; align-items: flex-start; }
+.ea-emitter-path {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-style: italic;
+  color: var(--ink-16);
+  margin-top: 2px;
+  transition: color var(--dur-base) linear;
+}
+.check-row:hover .ea-emitter-path,
+.check-row.checked .ea-emitter-path { color: var(--ink-28); }
+
+/* ── Footer — border-top hairline + hint + actions, the same
+   structure every overlay footer uses (acpo-footer), built from
+   field-hint + action-button instead of bespoke styles ────────── */
+.ea-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  padding: var(--space-md) var(--space-2xl);
+  border-top: 1px solid var(--line-soft);
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="ea-page">
+  <div class="ea-page-label">Emitter — Wreckage Console — Rework Mockup v2 · Configure Emitter-Category Assignment</div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       PROVENANCE — every class used below, with the exact real
+       usage it is taken from. Nothing invented.
+       ════════════════════════════════════════════════════════════ -->
+  <div class="ea-legend">
+
+    <div class="ea-legend-row">
+      <span class="ea-legend-class">.section-eyebrow / -title / -trace / -desc</span>
+      <span class="ea-legend-source">layout.css — the header every panel uses (Configuration / Output / Matching)</span>
+      <div class="ea-legend-demo">
+        <div>
+          <div class="section-eyebrow" style="padding-top:0;">Register — 0X — Console</div>
+          <div class="section-title" style="font-size:0.95rem;">Title</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ea-legend-row">
+      <span class="ea-legend-class">.delete-button (×)</span>
+      <span class="ea-legend-source">ec-card-header — every card's close/delete glyph</span>
+      <div class="ea-legend-demo">
+        <button class="delete-button">×</button>
+      </div>
+    </div>
+
+    <div class="ea-legend-row">
+      <span class="ea-legend-class">.ec-card / .ec-card-header / .ec-cat-path</span>
+      <span class="ea-legend-source">Wreckage.jsx — Units register entry (dot, title, category path)</span>
+      <div class="ea-legend-demo" style="width:100%;">
+        <div class="ec-card" style="--uc-color: var(--emitter-color); cursor:default; padding:10px 14px; width:100%;">
+          <div class="ec-card-header" style="margin-bottom:6px;">
+            <div style="display:flex; align-items:center; flex:1; min-width:0;">
+              <div class="ec-card-dot" style="background-color: var(--emitter-color);"></div>
+              <span class="ec-card-title" style="font-size:0.66rem;">UEL0203</span>
+            </div>
+            <span class="status-badge status-badge--accent">2</span>
+          </div>
+          <div class="ec-cat-path" style="margin-top:0;">wreckages/Land/T3/UEL0203</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ea-legend-row">
+      <span class="ea-legend-class">.subsection-head / .subsection-head-title / .status-badge</span>
+      <span class="ea-legend-source">Emitter.jsx — "Global Randomness" / "Area Mask" section dividers</span>
+      <div class="ea-legend-demo" style="width:100%;">
+        <div class="subsection-head" style="width:100%; margin-bottom:0;">
+          <span class="subsection-head-title">Category</span>
+          <span class="status-badge status-badge--accent">2 / 3 active</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ea-legend-row">
+      <span class="ea-legend-class">.check-row / .check-box / .check-tick / .check-label</span>
+      <span class="ea-legend-source">Props.jsx — "Select Props Chunks" import list (toggleable rows)</span>
+      <div class="ea-legend-demo">
+        <label class="check-row checked" style="border-bottom:none; padding:0;">
+          <div class="check-box"><div class="check-tick"></div></div>
+          <span class="check-label">weather_sand_01_emit</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="ea-legend-row">
+      <span class="ea-legend-class">.action-button / .action-button--danger</span>
+      <span class="ea-legend-source">"Add Emitter" / "Library" (Configuration) and "Delete All" / "Clear All" bulk actions</span>
+      <div class="ea-legend-demo" style="gap: var(--space-lg); display:flex;">
+        <button class="action-button" style="padding:9px 0;">Select All</button>
+        <button class="action-button action-button--danger" style="padding:9px 0;">Reset Assignments</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       MODAL — reworked Configure Emitter-Category Assignment
+       ════════════════════════════════════════════════════════════ -->
+  <div class="ea-modal">
+
+    <!-- Live preview rail — real ec-card structure, no invented chips -->
+    <aside class="ea-sidebar">
+      <div class="ea-sidebar-head">
+        <span class="field-label" style="margin-bottom:4px;">Live Preview</span>
+        <span class="field-hint">Units update as emitters are assigned to their categories.</span>
+      </div>
+      <div class="ea-sidebar-body">
+
+        <div class="ec-card" style="--uc-color: var(--emitter-color); cursor:default;">
+          <div class="ec-card-header" style="margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; flex:1; min-width:0;">
+              <div class="ec-card-dot" style="background-color: var(--emitter-color);"></div>
+              <span class="ec-card-title">UEL0203</span>
+            </div>
+            <span class="status-badge status-badge--accent">2</span>
+          </div>
+          <div class="ec-cat-path" style="margin-top:0; margin-bottom:8px;">wreckages/Land/T3/UEL0203</div>
+          <span class="field-hint" style="font-family: var(--font-mono); font-size:0.64rem; display:block;">weather_sand_01_emit.bp</span>
+          <span class="field-hint" style="font-family: var(--font-mono); font-size:0.64rem; display:block;">debris_metal_03_emit.bp</span>
+        </div>
+
+        <div class="ec-card" style="--uc-color: var(--props-color); cursor:default;">
+          <div class="ec-card-header" style="margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; flex:1; min-width:0;">
+              <div class="ec-card-dot" style="background-color: var(--props-color);"></div>
+              <span class="ec-card-title">XSL0101</span>
+            </div>
+            <span class="status-badge status-badge--warn">0</span>
+          </div>
+          <div class="ec-cat-path" style="margin-top:0; margin-bottom:8px;">wreckages/Air/XSL0101</div>
+          <span class="field-hint" style="color: rgba(255,193,7,0.6); font-style: italic;">No matching emitters</span>
+        </div>
+
+        <div class="ec-card" style="--uc-color: var(--customprops-color); cursor:default;">
+          <div class="ec-card-header" style="margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; flex:1; min-width:0;">
+              <div class="ec-card-dot" style="background-color: var(--customprops-color);"></div>
+              <span class="ec-card-title">UEL0401</span>
+            </div>
+            <span class="status-badge status-badge--accent">1</span>
+          </div>
+          <div class="ec-cat-path" style="margin-top:0; margin-bottom:8px;">wreckages/T3/UEL0401</div>
+          <span class="field-hint" style="font-family: var(--font-mono); font-size:0.64rem; display:block;">debris_metal_03_emit.bp</span>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Main column -->
+    <div class="ea-main">
+
+      <div class="ea-header">
+        <div>
+          <div class="section-eyebrow">Emitter Register — 03 — Wreckage Console</div>
+          <h2 class="section-title">Emitter Assignment</h2>
+          <div class="section-trace" aria-hidden="true">
+            <div class="section-trace-line"></div>
+            <div class="section-trace-hot"></div>
+          </div>
+          <p class="section-desc">Control which emitters are active for each unit category. Toggle to activate or deactivate per category.</p>
+        </div>
+        <button class="delete-button" style="font-size: 1.3rem;" aria-label="Close">×</button>
+      </div>
+
+      <div class="ea-body">
+
+        <!-- Category: Land -->
+        <div>
+          <div class="subsection-head">
+            <div class="ea-subsection-left">
+              <span class="subsection-head-title">Land</span>
+              <button class="action-button">Select All</button>
+              <button class="action-button action-button--danger">Clear</button>
+            </div>
+            <span class="status-badge status-badge--accent">2 / 3 active</span>
+          </div>
+          <div class="ea-emitter-list">
+            <label class="check-row checked">
+              <div class="check-box"><div class="check-tick"></div></div>
+              <span class="check-label">
+                weather_sand_01_emit
+                <span class="ea-emitter-path">/effects/emitters/weather_sand_01_emit.bp</span>
+              </span>
+            </label>
+            <label class="check-row checked">
+              <div class="check-box"><div class="check-tick"></div></div>
+              <span class="check-label">
+                debris_metal_03_emit
+                <span class="ea-emitter-path">/effects/emitters/debris_metal_03_emit.bp</span>
+              </span>
+            </label>
+            <label class="check-row">
+              <div class="check-box"></div>
+              <span class="check-label">
+                smoke_blacksmoke_02_emit
+                <span class="ea-emitter-path">/effects/emitters/smoke_blacksmoke_02_emit.bp</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Category: Air -->
+        <div>
+          <div class="subsection-head">
+            <div class="ea-subsection-left">
+              <span class="subsection-head-title">Air</span>
+              <button class="action-button">Select All</button>
+              <button class="action-button action-button--danger">Clear</button>
+            </div>
+            <span class="status-badge status-badge--warn">0 / 3 active</span>
+          </div>
+          <div class="ea-emitter-list">
+            <label class="check-row">
+              <div class="check-box"></div>
+              <span class="check-label">
+                weather_sand_01_emit
+                <span class="ea-emitter-path">/effects/emitters/weather_sand_01_emit.bp</span>
+              </span>
+            </label>
+            <label class="check-row">
+              <div class="check-box"></div>
+              <span class="check-label">
+                debris_metal_03_emit
+                <span class="ea-emitter-path">/effects/emitters/debris_metal_03_emit.bp</span>
+              </span>
+            </label>
+            <label class="check-row">
+              <div class="check-box"></div>
+              <span class="check-label">
+                smoke_blacksmoke_02_emit
+                <span class="ea-emitter-path">/effects/emitters/smoke_blacksmoke_02_emit.bp</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Category: T3 -->
+        <div>
+          <div class="subsection-head">
+            <div class="ea-subsection-left">
+              <span class="subsection-head-title">T3</span>
+              <button class="action-button">Select All</button>
+              <button class="action-button action-button--danger">Clear</button>
+            </div>
+            <span class="status-badge status-badge--accent">1 / 3 active</span>
+          </div>
+          <div class="ea-emitter-list">
+            <label class="check-row">
+              <div class="check-box"></div>
+              <span class="check-label">
+                weather_sand_01_emit
+                <span class="ea-emitter-path">/effects/emitters/weather_sand_01_emit.bp</span>
+              </span>
+            </label>
+            <label class="check-row checked">
+              <div class="check-box"><div class="check-tick"></div></div>
+              <span class="check-label">
+                debris_metal_03_emit
+                <span class="ea-emitter-path">/effects/emitters/debris_metal_03_emit.bp</span>
+              </span>
+            </label>
+            <label class="check-row">
+              <div class="check-box"></div>
+              <span class="check-label">
+                smoke_blacksmoke_02_emit
+                <span class="ea-emitter-path">/effects/emitters/smoke_blacksmoke_02_emit.bp</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ea-footer">
+        <span class="field-hint">3 categories · 3 emitters · 3 units</span>
+        <button class="action-button action-button--danger">Reset All Assignments</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

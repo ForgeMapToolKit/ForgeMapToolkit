@@ -47,6 +47,22 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Atmosphere — volumetric substrate in two depth layers ─────────
+   Full-bleed canvas wrappers, never interactive, transparent so the
+   #070708 backdrop + dot-grid show through. The BACK layer (z 0) is the
+   broad mist body behind the hero title; the FRONT layer (z 6) is a
+   sparse veil that drifts in front of it — the title sits between them,
+   reading as embedded in the volume. Front stays below the header (z 10)
+   and grain (z 40). */
+.hs-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hs-atmosphere--back  { z-index: 0; }
+.hs-atmosphere--front { z-index: 6; }
+
 /* ── Film grain — the instrument's surface, above everything ─────── */
 
 .hs-grain {
@@ -130,6 +146,7 @@
   min-height: 0;
   position: relative;
   overflow: hidden;
+  z-index: 1; /* above the atmosphere canvas */
 }
 
 /* Architectural light — the rail is a lit console edge casting a
@@ -635,6 +652,7 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   position: relative;
+  z-index: 1; /* above the atmosphere canvas */
 }
 
 .hs-rail::-webkit-scrollbar { display: none; }

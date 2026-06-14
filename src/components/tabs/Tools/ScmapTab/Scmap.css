@@ -1,577 +1,319 @@
-/* =====================================================
-   SCMAP TOOL — YELLOW THEME
-   Mirrors Trees.css design language
-   ===================================================== */
+/* ═══════════════════════════════════════════════════════════════════
+   SCMAP TOOL — Scmap.css
+   Migrated to the FABLE5 design system. The tab is a WorkspaceConsole
+   (rail → working column → preview), so layout/typography/controls all
+   come from design-system primitives. This file only adds the few
+   SCMAP-specific instruments: the drop well, the map register rows, the
+   console log readout, the global drag overlay and the credits line.
+   Accent = the yellow --scmaptool-* tokens, surfaced as --tab-color.
+   ═══════════════════════════════════════════════════════════════════ */
 
 .scmap-tab {
-  color: var(--text-primary);
-  font-family: 'Poppins', sans-serif;
-  background: var(--bg-primary);
-  min-height: 100vh;
-  padding: 40px 20px;
-  animation: scmapTabFadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes scmapTabFadeIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.scmap-content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  max-width: 1800px;
-  margin: 0 auto;
-}
-
-/* =====================================================
-   SECTION CARDS
-   ===================================================== */
-.scmap-section-card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.01) 50%,
-    rgba(0, 0, 0, 0.2) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  border-radius: 0;
-  padding: 40px 35px;
-  margin-bottom: 30px;
   position: relative;
-  overflow: visible;
-  transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.scmap-section-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--scmap-color, #FFFA00) 30%,
-    var(--scmap-color, #FFFA00) 70%,
-    transparent 100%
-  );
-  opacity: 0;
-  transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-  z-index: 10;
-}
-
-.scmap-section-card:hover::before {
-  opacity: 1;
-  box-shadow: 0 0 25px var(--scmap-glow-strong, rgba(255,250,0,0.6));
-}
-
-.scmap-section-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.02) 50%,
-    rgba(0, 0, 0, 0.25) 100%
-  );
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.6),
-    0 0 50px var(--scmap-glow, rgba(255,250,0,0.35)),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-/* =====================================================
-   SECTION HEADER
-   ===================================================== */
-.scmap-section-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 8px;
   display: flex;
-  align-items: center;
-  gap: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
-
-.scmap-section-icon {
-  font-size: 1.6rem;
-  color: var(--scmap-color, #FFFA00);
-  filter: drop-shadow(0 0 12px var(--scmap-glow, rgba(255,250,0,0.35)))
-          drop-shadow(0 0 25px var(--scmap-glow, rgba(255,250,0,0.35)));
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.scmap-section-card:hover .scmap-section-icon {
-  filter: drop-shadow(0 0 18px var(--scmap-glow-strong, rgba(255,250,0,0.6)))
-          drop-shadow(0 0 35px var(--scmap-glow-strong, rgba(255,250,0,0.6)));
-  transform: scale(1.08);
-}
-
-.scmap-section-description {
-  color: var(--text-secondary);
-  font-size: 0.92rem;
-  margin-bottom: 28px;
-  font-weight: 300;
-  line-height: 1.7;
-}
-
-/* =====================================================
-   FORM ELEMENTS
-   ===================================================== */
-.scmap-form-group {
-  margin-bottom: 22px;
-}
-
-.scmap-form-label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
-}
-
-.scmap-form-input {
-  width: 100%;
-  padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  font-family: 'Poppins', sans-serif;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  box-sizing: border-box;
-}
-
-.scmap-form-input:focus {
-  outline: none;
-  border-color: var(--scmap-color, #FFFA00);
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 1px var(--scmap-color, #FFFA00),
-              0 0 25px var(--scmap-glow, rgba(255,250,0,0.35));
-}
-
-.scmap-path-display {
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  font-size: 0.8rem;
-  font-family: 'Poppins', sans-serif;
-  color: rgba(255, 255, 255, 0.45);
-  word-break: break-all;
-  min-height: 40px;
-  margin-top: 8px;
-}
-
-.scmap-path-display span {
-  color: var(--scmap-color, #FFFA00);
-}
-
-/* =====================================================
-   BUTTONS
-   ===================================================== */
-.scmap-btn-primary {
-  background: var(--scmap-color, #FFFA00);
-  color: var(--bg-primary, #0a0a0a);
-  border: none;
-  padding: 16px 36px;
-  border-radius: 0;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.88rem;
-  font-family: 'Poppins', sans-serif;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  width: 100%;
-}
-
-.scmap-btn-primary:hover:not(:disabled) {
-  box-shadow: 0 0 35px var(--scmap-glow-strong, rgba(255,250,0,0.6)),
-              0 8px 30px rgba(0, 0, 0, 0.5);
-  transform: translateY(-2px);
-}
-
-.scmap-btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.scmap-btn-primary:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.scmap-btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 12px 20px;
-  border-radius: 0;
-  font-weight: 500;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-family: 'Poppins', sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  white-space: nowrap;
-}
-
-.scmap-btn-secondary:hover:not(:disabled) {
-  border-color: var(--scmap-color, #FFFA00);
-  color: var(--scmap-color, #FFFA00);
-  background: rgba(255, 250, 0, 0.06);
-  box-shadow: 0 0 20px var(--scmap-glow, rgba(255,250,0,0.35));
-}
-
-.scmap-btn-secondary:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* =====================================================
-   MAP LIST
-   ===================================================== */
-.scmap-map-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.scmap-map-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.3s ease;
-  gap: 12px;
-}
-
-.scmap-map-item:hover {
-  border-color: rgba(255, 250, 0, 0.2);
-  background: rgba(255, 250, 0, 0.04);
-}
-
-.scmap-map-item-name {
-  font-size: 0.85rem;
-  font-family: 'Poppins', sans-serif;
-  color: rgba(255, 255, 255, 0.75);
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-height: 0;
+  --tab-color:       var(--scmaptool-color);
+  --tab-glow:        var(--scmaptool-glow);
+  --tab-glow-strong: var(--scmaptool-glow-strong);
 }
 
-.scmap-map-empty {
-  padding: 28px 0;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 0.82rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* =====================================================
-   LOG OUTPUT
-   ===================================================== */
-.scmap-log {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 14px 16px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.78rem;
-  line-height: 1.7;
-  max-height: 160px;
-  overflow-y: auto;
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 16px;
-}
-
-.scmap-log-line-ok   { color: rgba(180, 255, 180, 0.8); }
-.scmap-log-line-err  { color: rgba(255, 120, 120, 0.9); }
-.scmap-log-line-info { color: rgba(255, 250, 0, 0.6); }
-
-/* =====================================================
-   DIVIDER
-   ===================================================== */
-.scmap-divider {
-  border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  margin: 24px 0;
-}
-
-/* =====================================================
-   HEADER BAR
-   ===================================================== */
-.scmap-header-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1800px;
-  margin: 0 auto 28px auto;
-}
-
-.scmap-header-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.scmap-header-icon {
-  color: var(--scmap-color, #FFFA00);
-  font-size: 1.3rem;
-  filter: drop-shadow(0 0 10px var(--scmap-glow, rgba(255,250,0,0.35)));
-}
-
-.scmap-popout-btn {
-  background: rgba(255,255,255,0.04);
-  color: rgba(255,255,255,0.4);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 8px 16px;
-  font-size: 0.75rem;
-  font-family: 'Poppins', sans-serif;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.scmap-popout-btn:hover {
-  border-color: var(--scmap-color, #FFFA00);
-  color: var(--scmap-color, #FFFA00);
-  background: rgba(255,250,0,0.05);
-  box-shadow: 0 0 16px var(--scmap-glow, rgba(255,250,0,0.35));
-}
-
-/* =====================================================
-   FILE DROP ZONE
-   ===================================================== */
-.scmap-file-drop {
-  border: 2px dashed rgba(255,250,0,0.18);
-  background: rgba(255,250,0,0.02);
-  padding: 36px 20px;
+/* ── Drop well — a recessed instrument stage, not a dashed box ─────── */
+.scmap-drop {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-sm);
+  min-height: 188px;
+  padding: var(--space-2xl) var(--space-lg);
   cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  background: radial-gradient(125% 125% at 50% 0%, #0c0c0f 0%, #050506 70%);
+  border: 1px solid var(--line-strong);
+  box-shadow:
+    inset 0 0 64px rgba(0,0,0,0.72),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 24px 52px -32px rgba(0,0,0,0.95);
+  overflow: hidden;
+  transition: border-color var(--dur-base) var(--ease-decay), box-shadow var(--dur-base) var(--ease-decay);
+}
+.scmap-drop:hover {
+  border-color: color-mix(in srgb, var(--tab-color) 30%, var(--line-strong));
+  box-shadow:
+    inset 0 0 64px rgba(0,0,0,0.72),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 24px 52px -32px rgba(0,0,0,0.95),
+    0 0 26px -10px var(--tab-glow);
+}
+.scmap-drop.busy { cursor: default; }
+
+/* Viewfinder corner brackets — the well is a calibrated stage */
+.scmap-drop::before,
+.scmap-drop::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  z-index: 2;
+  pointer-events: none;
+  transition: border-color var(--dur-slow) var(--ease-decay);
+}
+.scmap-drop::before {
+  top: 10px; left: 10px;
+  border-top: 1px solid rgba(255,255,255,0.22);
+  border-left: 1px solid rgba(255,255,255,0.22);
+}
+.scmap-drop::after {
+  bottom: 10px; right: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.22);
+  border-right: 1px solid rgba(255,255,255,0.22);
+}
+.scmap-drop:hover::before,
+.scmap-drop:hover::after {
+  border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.2));
+  transition-duration: 0.08s;
+}
+
+.scmap-drop-prompt {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-38);
   text-align: center;
-  margin-bottom: 16px;
+  transition: color var(--dur-base) linear;
 }
-.scmap-file-drop:hover,
-.scmap-file-drop.has-file {
-  border-color: rgba(255,250,0,0.45);
-  background: rgba(255,250,0,0.04);
-}
-.scmap-file-drop-icon {
-  font-size: 2rem;
-  color: rgba(255,255,255,0.2);
-  transition: all 0.35s ease;
-}
-.scmap-file-drop:hover .scmap-file-drop-icon {
-  color: var(--scmap-color, #FFFA00);
-  filter: drop-shadow(0 0 14px var(--scmap-glow, rgba(255,250,0,0.35)));
-}
-.scmap-file-drop.has-file .scmap-file-drop-icon {
-  color: var(--scmap-color, #FFFA00);
-}
-.scmap-file-drop-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.35);
-  transition: color 0.3s;
-}
-.scmap-file-drop:hover .scmap-file-drop-label {
-  color: var(--scmap-color, #FFFA00);
-}
-.scmap-file-drop-name {
-  font-size: 0.85rem;
-  font-family: 'Poppins', sans-serif;
-  color: var(--scmap-color, #FFFA00);
-  max-width: 280px;
+.scmap-drop:hover .scmap-drop-prompt { color: var(--ink-72); }
+.scmap-drop.loaded .scmap-drop-prompt {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: color-mix(in srgb, var(--tab-color) 85%, #fff);
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.scmap-file-drop-hint {
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.2);
+.scmap-drop-sub {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-28);
+  text-align: center;
 }
 
-/* =====================================================
-   GLOBAL DRAG OVERLAY
-   ===================================================== */
+/* Breathing filament under the idle prompt — the stage is armed */
+.scmap-drop-fil {
+  position: relative;
+  z-index: 1;
+  width: 40px; height: 1px;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow);
+  opacity: 0.4;
+  animation: scmap-breathe 2.6s var(--ease-decay) infinite;
+}
+@keyframes scmap-breathe {
+  0%, 100% { opacity: 0.25; transform: scaleX(0.7); }
+  50%      { opacity: 0.7;  transform: scaleX(1); }
+}
+
+/* Calibration scanline while extracting */
+.scmap-drop.busy::before,
+.scmap-drop.busy::after { border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.2)); }
+.scmap-drop-scan {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 4%, var(--tab-color) 50%, transparent 96%);
+  box-shadow: 0 0 14px var(--tab-glow-strong);
+  animation: scmap-scan 1.1s var(--ease-rise) infinite;
+}
+@keyframes scmap-scan {
+  0%   { top: 0;    opacity: 0; }
+  12%  { opacity: 0.7; }
+  85%  { opacity: 0.35; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ── Hint line — derived output path ──────────────────────────────── */
+.scmap-hint {
+  margin-top: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+  color: var(--ink-28);
+  word-break: break-all;
+}
+.scmap-hint b {
+  font-weight: var(--weight-medium);
+  color: color-mix(in srgb, var(--tab-color) 80%, #fff);
+}
+
+/* ── Count badge on a subsection head — quiet mono ────────────────── */
+.scmap-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  color: var(--ink-22);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Map register — boxless rows, hairline separated ──────────────── */
+.scmap-list { display: flex; flex-direction: column; margin-top: var(--space-xs); }
+.scmap-map-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 13px var(--space-2xs);
+  border-bottom: 1px solid var(--line-soft);
+  transition: background var(--dur-base) linear;
+}
+.scmap-map-row:last-child { border-bottom: none; }
+.scmap-map-row:hover { background: rgba(255,255,255,0.018); }
+.scmap-map-row.is-packing { background: color-mix(in srgb, var(--tab-color) 6%, transparent); }
+.scmap-map-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.scmap-map-name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.scmap-map-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-22);
+}
+.scmap-empty {
+  padding: var(--space-2xl) 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--ink-22);
+}
+
+/* ── Console log — the live readout inside the preview panel ───────── */
+.scmap-preview { display: flex; flex-direction: column; height: 100%; }
+.scmap-console-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.14) transparent;
+}
+.scmap-console-scroll::-webkit-scrollbar { width: 3px; }
+.scmap-console-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); }
+.scmap-console {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.75;
+  color: var(--ink-38);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.scmap-line { display: block; }
+.scmap-line-ok   { color: var(--status-ok); }
+.scmap-line-err  { color: var(--status-err); }
+.scmap-line-info { color: color-mix(in srgb, var(--tab-color) 75%, #fff); }
+.scmap-console-empty {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-tight);
+  line-height: 1.6;
+  color: var(--ink-28);
+  font-style: italic;
+}
+
+/* ── Credits — quiet attribution, pinned under the console ────────── */
+.scmap-credits {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--font-display);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--ink-22);
+}
+.scmap-credits a {
+  color: color-mix(in srgb, var(--tab-color) 70%, #fff);
+  text-decoration: none;
+  font-weight: var(--weight-semi);
+  transition: color var(--dur-base) linear, text-shadow var(--dur-base) linear;
+}
+.scmap-credits a:hover { color: var(--tab-color); text-shadow: 0 0 12px var(--tab-glow); }
+
+/* ── Global drag overlay — a hue-led shutter on the plate ─────────── */
 .scmap-drag-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(6px);
+  z-index: var(--z-overlay, 1000);
+  background: rgba(5,5,7,0.82);
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  animation: trace-fade-in 0.18s linear;
 }
-.scmap-drag-overlay-inner {
-  border: 2px dashed var(--scmap-color, #FFFA00);
-  padding: 60px 80px;
+.scmap-drag-frame {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  box-shadow: 0 0 60px var(--scmap-glow, rgba(255,250,0,0.35));
-  animation: scmapOverlayPulse 1s ease-in-out infinite;
+  gap: var(--space-md);
+  padding: var(--space-3xl) var(--space-4xl);
+  border: 1px solid color-mix(in srgb, var(--tab-color) 40%, transparent);
+  box-shadow: 0 0 60px -10px var(--tab-glow), inset 0 0 40px -22px var(--tab-glow);
 }
-@keyframes scmapOverlayPulse {
-  0%,100% { box-shadow: 0 0 40px var(--scmap-glow, rgba(255,250,0,0.35)); }
-  50%      { box-shadow: 0 0 80px var(--scmap-glow-strong, rgba(255,250,0,0.6)); }
+.scmap-drag-frame::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color);
 }
-.scmap-drag-overlay-icon {
-  font-size: 3.5rem;
-  color: var(--scmap-color, #FFFA00);
-  filter: drop-shadow(0 0 20px var(--scmap-glow-strong, rgba(255,250,0,0.6)));
-}
-.scmap-drag-overlay-label {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--scmap-color, #FFFA00);
+.scmap-drag-label {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wider);
   text-transform: uppercase;
+  color: var(--ink-100);
 }
-
-/* =====================================================
-   MAP LIST ENHANCEMENTS
-   ===================================================== */
-.scmap-map-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,250,0,0.1);
-  color: var(--scmap-color, #FFFA00);
-  border: 1px solid rgba(255,250,0,0.2);
-  font-size: 0.65rem;
-  font-weight: 700;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  margin-left: 8px;
-  letter-spacing: 0.05em;
-}
-
-.scmap-map-item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  overflow: hidden;
-}
-
-.scmap-map-item-date {
-  font-size: 0.68rem;
-  font-family: 'Poppins', sans-serif;
-  color: rgba(255,255,255,0.25);
-  letter-spacing: 0.04em;
-}
-
-/* =====================================================
-   SPIN ANIMATION
-   ===================================================== */
-.scmap-spin {
-  display: inline-block;
-  animation: scmapSpinAnim 0.8s linear infinite;
-}
-@keyframes scmapSpinAnim { to { transform: rotate(360deg); } }
-/* =====================================================
-   CREDITS BAR
-   ===================================================== */
-.scmap-credits-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 1800px;
-  margin: -16px auto 24px auto;
-  padding: 9px 16px;
-  background: rgba(255, 250, 0, 0.03);
-  border: 1px solid rgba(255, 250, 0, 0.1);
-  border-left: 3px solid rgba(255, 250, 0, 0.35);
-}
-
-
-
-.scmap-credits-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+.scmap-drag-sub {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-base);
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.25);
-  font-family: 'Poppins', sans-serif;
+  color: var(--ink-38);
 }
 
-.scmap-credits-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--scmap-color, #FFFA00);
-  font-family: 'Poppins', sans-serif;
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 250, 0, 0.3);
-  text-underline-offset: 3px;
-  opacity: 0.7;
-  transition: opacity 0.2s, text-decoration-color 0.2s, text-shadow 0.2s;
-  cursor: pointer;
-}
-.scmap-credits-link:hover {
-  opacity: 1;
-  text-decoration-color: rgba(255, 250, 0, 0.9);
-  text-shadow: 0 0 14px var(--scmap-glow, rgba(255,250,0,0.5));
-}
-
-.scmap-credits-link-icon {
-  font-size: 0.65rem;
-  opacity: 0.6;
-  transition: opacity 0.2s, transform 0.2s;
-}
-.scmap-credits-link:hover .scmap-credits-link-icon {
-  opacity: 1;
-  transform: translate(1px, -1px);
-}
-
-.scmap-credits-sep {
-  width: 1px;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.12);
-  flex-shrink: 0;
-}
-
-.scmap-popout-row {
-  max-width: 1800px;
-  margin: 0 auto 28px auto;
-  display: flex;
-  justify-content: flex-end;
+@media (prefers-reduced-motion: reduce) {
+  .scmap-drop-fil, .scmap-drop-scan, .scmap-drag-overlay { animation: none !important; }
 }

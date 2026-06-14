@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../../../shared/shared.css';
+import '../../../shared/design-system/index.css';
+import WorkspaceConsole from '../../../shared/WorkspaceConsole/WorkspaceConsole.jsx';
 import './Scmap.css';
 import ScmapHelpModal from '../../HelpModals/Scmap_help.jsx';
 
@@ -29,6 +31,9 @@ export default function ScmapTool({ settings }) {
   const [activeHelpTab,   setActiveHelpTab]   = useState('main');
   const [helpSelected,    setHelpSelected]    = useState(null);
   const [activeAdvSubTab, setActiveAdvSubTab] = useState('workflow');
+
+  // ── Active console section (rail) ─────────────────────────────────
+  const [activeSection, setActiveSection] = useState('unpack');
 
   // ── Drag state (global drop onto the whole tab) ───────────────────
   const [globalDrag, setGlobalDrag] = useState(false);
@@ -179,6 +184,12 @@ export default function ScmapTool({ settings }) {
   };
 
   // ── Render ────────────────────────────────────────────────────────
+  const log     = activeSection === 'unpack' ? unpackLog : packLog;
+  const logRef  = activeSection === 'unpack' ? unpackLogRef : packLogRef;
+  const emptyMsg = activeSection === 'unpack'
+    ? 'Drop a .scmap anywhere to begin extraction. The log prints each block as it is parsed.'
+    : 'Select a map to assemble its .scmap binary. The log prints the output path and size.';
+
   return (
     <div
       className={`scmap-tab${globalDrag ? ' scmap-global-drag' : ''}`}
@@ -192,7 +203,6 @@ export default function ScmapTool({ settings }) {
         className="help-btn"
         onClick={() => { setShowHelp(h => !h); setHelpSelected(null); }}
         title="Help Guide"
-        style={{ '--tab-color': '#FFFA00', '--tab-glow': 'rgba(255,250,0,0.35)', '--tab-glow-strong': 'rgba(255,250,0,0.6)' }}
       >?</button>
 
       {/* ── Help modal ──────────────────────────────────────────────── */}
@@ -207,87 +217,93 @@ export default function ScmapTool({ settings }) {
           setActiveAdvSubTab={setActiveAdvSubTab}
         />
       )}
-      {/* Global drag overlay */}
+
+      {/* ── Global drag overlay ─────────────────────────────────────── */}
       {globalDrag && (
         <div className="scmap-drag-overlay">
-          <div className="scmap-drag-overlay-inner">
-            <div className="scmap-drag-overlay-icon">⬇</div>
-            <div className="scmap-drag-overlay-label">DROP .SCMAP TO UNPACK</div>
+          <div className="scmap-drag-frame">
+            <span className="scmap-drag-label">Drop .scmap to unpack</span>
+            <span className="scmap-drag-sub">Release anywhere — extraction starts immediately</span>
           </div>
         </div>
       )}
 
-      {/* Credits bar */}
-      <div className="scmap-credits-bar">
-        <span className="scmap-credits-label">Based on</span>
-        <a
-          className="scmap-credits-link"
-          href="https://github.com/The-Balthazar/BrewMapTool"
-          onClick={e => { e.preventDefault(); window.electronAPI.invoke('open-external', 'https://github.com/The-Balthazar/BrewMapTool'); }}
-        >
-          <span className="scmap-credits-link-icon">&#x2197;</span>
-          BrewMapTool
-        </a>
-        <span className="scmap-credits-sep"/>
-        <span className="scmap-credits-label">by</span>
-        <a
-          className="scmap-credits-link"
-          href="https://github.com/The-Balthazar"
-          onClick={e => { e.preventDefault(); window.electronAPI.invoke('open-external', 'https://github.com/The-Balthazar'); }}
-        >
-          <span className="scmap-credits-link-icon">&#x2197;</span>
-          The-Balthazar
-        </a>
-      </div>
-
-      {/* Popout */}
-      <div className="scmap-popout-row">
-        <button className="scmap-popout-btn" onClick={popOut} title="Open in separate window">
-          <span>⧉</span> POP OUT
-        </button>
-      </div>
-
-      <div className="scmap-content-grid">
-
-        {/* ── LEFT: UNPACK ── */}
-        <div>
-          <div className="scmap-section-card">
-            <div className="scmap-section-title">
-              <span className="scmap-section-icon">⬇</span>
-              Unpack
+      {/* ── Console shell ───────────────────────────────────────────── */}
+      <WorkspaceConsole
+        sections={[
+          { id: 'unpack', index: '01', label: 'Unpack', desc: 'Extract a .scmap binary into its named blocks — heightmap, normals, albedo, watermap and the rest.', done: unpackDone },
+          { id: 'pack',   index: '02', label: 'Pack',   desc: 'Reassemble an unpacked map folder back into a single .scmap binary.', count: maps.length },
+        ]}
+        activeSection={activeSection}
+        onSelect={setActiveSection}
+        ghostLabel="SCMAP"
+        renderEyebrow={(s) => `SCMAP REGISTER — ${s.index} — BINARY CONSOLE`}
+        railStorageKey="scmap-rail-pinned"
+        navLabel="SCMAP console navigation"
+        bootMs={280}
+        mirrorSlot={
+          <button className="action-button" onClick={popOut} title="Open in separate window">
+            Pop Out
+          </button>
+        }
+        previewSlot={
+          <div className="scmap-preview">
+            <div className="scmap-console-scroll" ref={logRef}>
+              {log.length === 0 ? (
+                <div className="scmap-console-empty">{emptyMsg}</div>
+              ) : (
+                <div className="scmap-console">
+                  {log.map((l, i) => (
+                    <span key={i} className={`scmap-line scmap-line-${l.type}`}>{l.text}</span>
+                  ))}
+                </div>
+              )}
             </div>
-            <hr className="scmap-divider" />
+            <div className="scmap-credits">
+              <span>Based on</span>
+              <a
+                href="https://github.com/The-Balthazar/BrewMapTool"
+                onClick={e => { e.preventDefault(); window.electronAPI.invoke('open-external', 'https://github.com/The-Balthazar/BrewMapTool'); }}
+              >BrewMapTool</a>
+              <span>by</span>
+              <a
+                href="https://github.com/The-Balthazar"
+                onClick={e => { e.preventDefault(); window.electronAPI.invoke('open-external', 'https://github.com/The-Balthazar'); }}
+              >The-Balthazar</a>
+            </div>
+          </div>
+        }
+      >
+        {/* ── 01 UNPACK ── */}
+        {activeSection === 'unpack' && (
+          <>
+            <div className="subsection-head">
+              <span className="subsection-head-title">Source</span>
+            </div>
 
             <div
-              className={`scmap-file-drop${unpackSrc ? ' has-file' : ''}`}
+              className={`scmap-drop${unpacking ? ' busy' : ''}${unpackSrc && !unpacking ? ' loaded' : ''}`}
               onClick={unpacking ? undefined : browse}
-              style={{ cursor: unpacking ? 'default' : 'pointer' }}
+              title={unpacking ? 'Extracting…' : 'Click to browse — or drop a .scmap anywhere'}
             >
-              {unpacking ? (
-                <>
-                  <div className="scmap-file-drop-icon"><span className="scmap-spin">⟳</span></div>
-                  <div className="scmap-file-drop-label">Unpacking…</div>
-                  <div className="scmap-file-drop-hint">{unpackSrc.split(/[\\/]/).pop()}</div>
-                </>
-              ) : unpackSrc ? (
-                <>
-                  <div className="scmap-file-drop-icon">📄</div>
-                  <div className="scmap-file-drop-name">{unpackSrc.split(/[\\/]/).pop()}</div>
-                  <div className="scmap-file-drop-hint">{unpackDone ? '✓ Done — click or drop to unpack another' : 'Click to change · or drop another file'}</div>
-                </>
-              ) : (
-                <>
-                  <div className="scmap-file-drop-icon">⬇</div>
-                  <div className="scmap-file-drop-label">DROP .SCMAP HERE</div>
-                  <div className="scmap-file-drop-hint">or click to browse — unpacks immediately</div>
-                </>
-              )}
+              {unpacking && <div className="scmap-drop-scan" aria-hidden="true" />}
+              <div className="scmap-drop-prompt">
+                {unpacking ? 'Extracting' : unpackSrc ? `${srcName}.scmap` : 'Drop .scmap here'}
+              </div>
+              <div className="scmap-drop-sub">
+                {unpacking
+                  ? unpackSrc.split(/[\\/]/).pop()
+                  : unpackSrc
+                    ? (unpackDone ? 'Done — click or drop another to unpack' : 'Click to change · or drop another')
+                    : 'or click to browse — unpacks immediately'}
+              </div>
+              {!unpacking && !unpackSrc && <span className="scmap-drop-fil" aria-hidden="true" />}
             </div>
 
             {unpackDone && lastOutputFolder && (
               <button
-                className="scmap-btn-secondary"
-                style={{ width: '100%', marginTop: 12 }}
+                className="action-button action-button--full"
+                style={{ marginTop: 'var(--space-md)' }}
                 onClick={() => openFolder(lastOutputFolder)}
               >
                 Open Output Folder
@@ -295,78 +311,43 @@ export default function ScmapTool({ settings }) {
             )}
 
             {srcName && (
-              <div className="scmap-path-display" style={{ marginBottom: 18 }}>
-                public/scmap/<span>{srcName}.scmap</span>/
-              </div>
+              <div className="scmap-hint">public/scmap/<b>{srcName}.scmap</b>/</div>
             )}
+          </>
+        )}
 
-            {unpackLog.length > 0 && (
-              <div className="scmap-log" ref={unpackLogRef}>
-                {unpackLog.map((l, i) => (
-                  <div key={i} className={`scmap-log-line-${l.type}`}>{l.text}</div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── RIGHT: PACK ── */}
-        <div>
-          <div className="scmap-section-card">
-            <div className="scmap-section-title">
-              <span className="scmap-section-icon">⬆</span>
-              Repack
-            </div>
-            <hr className="scmap-divider" />
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <label className="scmap-form-label" style={{ margin: 0 }}>
-                Unpacked Maps
-                {maps.length > 0 && <span className="scmap-map-count">{maps.length}</span>}
-              </label>
-              <button className="scmap-btn-secondary" onClick={loadMaps}>↺ Refresh</button>
+        {/* ── 02 PACK ── */}
+        {activeSection === 'pack' && (
+          <>
+            <div className="subsection-head">
+              <span className="subsection-head-title">Unpacked Maps</span>
+              {maps.length > 0 && <span className="scmap-count">{String(maps.length).padStart(2, '0')}</span>}
             </div>
 
-            <div className="scmap-map-list">
+            <button className="action-button" onClick={loadMaps}>Refresh List</button>
+
+            <div className="scmap-list">
               {maps.length === 0 ? (
-                <div className="scmap-map-empty">No unpacked maps found</div>
+                <div className="scmap-empty">No unpacked maps found</div>
               ) : maps.map(({ name, mtime }) => (
-                <div className="scmap-map-item" key={name}>
-                  <div className="scmap-map-item-info">
-                    <span className="scmap-map-item-name">{name}</span>
-                    {mtime ? <span className="scmap-map-item-date">{fmtDate(mtime)}</span> : null}
+                <div className={`scmap-map-row${packing === name ? ' is-packing' : ''}`} key={name}>
+                  <div className="scmap-map-meta">
+                    <span className="scmap-map-name">{name}</span>
+                    {mtime ? <span className="scmap-map-date">{fmtDate(mtime)}</span> : null}
                   </div>
-                  <button
-                    className="scmap-btn-secondary"
-                    onClick={() => doPack(name)}
-                    disabled={!!packing}
-                  >
-                    {packing === name
-                      ? <><span className="scmap-spin">⟳</span> Packing…</>
-                      : '⬆ Pack'
-                    }
+                  <button className="action-button" onClick={() => doPack(name)} disabled={!!packing}>
+                    {packing === name ? 'Packing…' : 'Pack'}
                   </button>
                 </div>
               ))}
             </div>
 
             {maps.length > 0 && (
-              <div className="scmap-path-display" style={{ marginTop: '14px' }}>
-                Output → <span>public/scmap/packed/</span>
-              </div>
+              <div className="scmap-hint">Output → <b>public/scmap/packed/</b></div>
             )}
-
-            {packLog.length > 0 && (
-              <div className="scmap-log" ref={packLogRef}>
-                {packLog.map((l, i) => (
-                  <div key={i} className={`scmap-log-line-${l.type}`}>{l.text}</div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-      </div>
+          </>
+        )}
+      </WorkspaceConsole>
     </div>
   );
 }

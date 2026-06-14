@@ -32,8 +32,8 @@
 
 .props-modal ::-webkit-scrollbar       { width: 6px; }
 .props-modal ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-.props-modal ::-webkit-scrollbar-thumb { background: rgba(165,232,1,0.4); }
-.props-modal ::-webkit-scrollbar-thumb:hover { background: var(--props-color); }
+.props-modal ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--tab-color) 40%, transparent); }
+.props-modal ::-webkit-scrollbar-thumb:hover { background: var(--tab-color); }
 
 
 /* ── 3. ACCESSIBILITY ────────────────────────────────────────────────────── */
@@ -83,7 +83,7 @@
 .props-prop-name-input {
   background:    transparent !important;
   border:        none !important;
-  border-bottom: 1px solid rgba(165, 232, 1, 0.2) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--tab-color) 20%, transparent) !important;
   box-shadow:    none !important;
   padding:       4px 8px !important;
   font-size:     0.95rem;
@@ -91,7 +91,7 @@
 
 .props-prop-name-input:focus {
   outline:             none !important;
-  border-bottom-color: var(--props-color) !important;
+  border-bottom-color: var(--tab-color) !important;
   box-shadow:          none !important;
   background:          transparent !important;
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import HeaderRegister from './components/HeaderRegister.jsx';
 import ProjectionStage from './components/ProjectionStage.jsx';
 import ToolRail from './components/ToolRail.jsx';
+import AtmosphereLayer from './atmosphere/AtmosphereLayer.jsx';
 import { getTool } from './data/toolRegistry.js';
 import './HomeScreen.css';
 
@@ -51,6 +52,13 @@ const HomeScreen = ({ onNavigate, appVersion, libraryScanned, scanning, settings
 
   return (
     <div className={`hs-root${commitToolId ? ' hs-root--commit' : ''}`}>
+
+      {/* Volumetric substrate — sits at the very back (z 0), homepage-only */}
+      <AtmosphereLayer
+        focusedToolId={focusedToolId}
+        commitToolId={commitToolId}
+        quality={settings?.atmosphereQuality ?? 'performant'}
+      />
 
       <HeaderRegister
         appVersion={appVersion}

@@ -1,10 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
+import '../../../shared/design-system/index.css';
 import '../../../shared/shared.css';
 import './Emitter.css';
 import EmitterLibraryOverlay from '../../Libraries/EmitterLibrary/EmitterLibraryOverlay';
 import { luxuryAlert, luxuryConfirm } from '../../../modals/notifications';
 import { generateReadme as buildReadme, writeReadme } from '../../../../../utils/readmeGenerator';
 import EmitterHelpModal from '../../HelpModals/Emitter_help.jsx';
+import WorkspaceConsole from '../../../shared/WorkspaceConsole/WorkspaceConsole.jsx';
+import {
+  EntityCard, EntityCardGrid, AddTile, CoordinateList,
+  MatchingMode, OutputChecklist, EmitterAssignmentOverlay, MapPreview,
+} from '../../../shared/entity-console/EntityConsole.jsx';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
@@ -60,7 +66,7 @@ const generateGridCoords = (stepX, stepZ, mapSize, mirrorMode, rand, maskImageDa
   const cellSize = radius > 0 ? radius / Math.SQRT2 : 1;
   const gridW    = Math.ceil(ms / cellSize);
   const gridH    = Math.ceil(ms / cellSize);
-  const grid     = new Array(gridW * gridH).fill(null); 
+  const grid     = new Array(gridW * gridH).fill(null);
 
   const gridKey  = (px, pz) => {
     const col = Math.floor(px / cellSize);
@@ -103,7 +109,7 @@ const generateGridCoords = (stepX, stepZ, mapSize, mirrorMode, rand, maskImageDa
         while (scanX < ms) { if (bright(scanX) > 127) break; scanX += 1; }
         if (scanX >= ms) continue;
         rx = scanX;
-      } else { 
+      } else {
         let scanX = rx;
         while (scanX >= 0) { if (bright(scanX) > 127) break; scanX -= 1; }
         if (scanX < 0) continue;
@@ -138,8 +144,8 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   const [mapName,          setMapNameState]          = useState(s.em_mapName          ?? '');
   const [mapsFolderPath,   setMapsFolderPathState]   = useState(s.em_mapsFolderPath   ?? '');
   const [mapInfo,              setMapInfo]              = useState(null);
-  const [mapOffsetX,           setMapOffsetX]           = useState(0); 
-  const [mapOffsetY,           setMapOffsetY]           = useState(0); 
+  const [mapOffsetX,           setMapOffsetX]           = useState(0);
+  const [mapOffsetY,           setMapOffsetY]           = useState(0);
 
   useEffect(() => {
     const name   = (mapName || '').trim();
@@ -159,6 +165,7 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       }
     }).catch(() => { setMapInfo(null); setMapSize('1024'); });
   }, [mapName, mapsFolderPath, settings?.mapsFolder]);
+
   const [mirrorMode,       setMirrorModeState]       = useState(s.em_mirrorMode       ?? settings?.defaultMirrorMode ?? 'diagonal');
   const [globalRandomness, setGlobalRandomnessState] = useState(s.em_globalRandomness ?? { ...DEFAULT_RANDOMNESS });
   const [emitterCards,     setEmitterCardsState]     = useState(s.em_emitterCards     ?? [makeEmitterCard()]);
@@ -168,6 +175,7 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   const [exportRawLua,        setExportRawLuaState]        = useState(s.em_exportRawLua        ?? false);
   const [emitterCategories,   setEmitterCategoriesState]   = useState(s.em_emitterCategories   ?? {});
   const [emitterMatchingMode, setEmitterMatchingModeState] = useState(s.em_emitterMatchingMode ?? 'smart');
+  const [activeSection,       setActiveSection]            = useState('config');
 
   const setMapSize          = v => { setMapSizeState(v);          onSharedChange('em_mapSize',        v); };
   const setMapName          = v => { setMapNameState(v);          onSharedChange('em_mapName',        v); };
@@ -226,9 +234,28 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   const [previewImageData,   setPreviewImageData]   = useState(null);
   const [previewLoading,     setPreviewLoading]     = useState(false);
   const [showEmitterLibrary, setShowEmitterLibrary] = useState(false);
-  const [libraryTargetCard,  setLibraryTargetCard]  = useState(null);
   const [showColorPicker,    setShowColorPicker]    = useState(null);
   const [coordsOpen,         setCoordsOpen]         = useState({});
+  const [showEmitterCategoryConfig, setShowEmitterCategoryConfig] = useState(false);
+  const [maskScanMode,       setMaskScanMode]       = useState('right');
+  const [maskImageData,      setMaskImageData]      = useState(null);
+  const [maskWidth,          setMaskWidth]          = useState(0);
+  const [maskHeight,         setMaskHeight]         = useState(0);
+  const [maskPreviewUrl,     setMaskPreviewUrl]     = useState(null);
+  const maskFileInputRef = useRef(null);
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showHelp,     setShowHelp]     = useState(false);
+  const [activeHelpTab,      setActiveHelpTab]      = useState('emittertab');
+  const [emitterHelpSelected, setEmitterHelpSelected] = useState(null);
+  const [activeAdvSubTab,    setActiveAdvSubTab]    = useState('workflow');
+
+  const canvasRef    = useRef(null);
+  const fileInputRef = useRef(null);
+  const mirrorRef    = useRef(mirrorMode);
+  useEffect(() => { mirrorRef.current = mirrorMode; }, [mirrorMode]);
+  const mapNameRef = useRef(mapName);
+  useEffect(() => { mapNameRef.current = mapName; }, [mapName]);
 
   const markers = emitterCards.flatMap((card, ci) =>
     card.coordinates
@@ -244,31 +271,11 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
           label:      card.label || `Card ${ci + 1}`,
           isSelected: ci === selectedCard,
           isMirrored: coord.isMirrored,
-          cardIdx:    ci,
+          entityIdx:  ci,
           coordIdx:   actualIdx,
         };
       })
   );
-  const [isGenerating,       setIsGenerating]       = useState(false);
-  const [showHelp,           setShowHelp]           = useState(false);
-  const [activeHelpTab,      setActiveHelpTab]      = useState('emittertab');
-  const [emitterHelpSelected, setEmitterHelpSelected] = useState(null);
-  const [activeAdvSubTab,    setActiveAdvSubTab]    = useState('workflow');
-  const [showEmitterCategoryConfig, setShowEmitterCategoryConfig] = useState(false);
-  const [maskScanMode,       setMaskScanMode]       = useState('right'); 
-  const [maskImageData,      setMaskImageData]      = useState(null);
-  const [maskWidth,          setMaskWidth]          = useState(0);
-  const [maskHeight,         setMaskHeight]         = useState(0);
-  const [maskPreviewUrl,   setMaskPreviewUrl]   = useState(null);
-  const maskFileInputRef = useRef(null);
-
-  const canvasRef    = useRef(null);
-  const fileInputRef = useRef(null);
-  const mirrorRef    = useRef(mirrorMode);
-  useEffect(() => { mirrorRef.current = mirrorMode; }, [mirrorMode]);
-  const emittersRef  = useRef(null);
-  const mapNameRef = useRef(mapName);
-  useEffect(() => { mapNameRef.current = mapName; }, [mapName]);
 
   useEffect(() => {
     if (previewImageData) {
@@ -279,46 +286,6 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       setPreviewImage(null);
     }
   }, [previewImageData]);
-
-  // ── Canvas Draw ───────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = 1024, H = 1024;
-    ctx.clearRect(0, 0, W, H);
-
-    if (previewImage && previewImage.complete) {
-      ctx.drawImage(previewImage, 0, 0, W, H);
-      ctx.fillStyle = 'rgba(0,0,0,0.28)';
-      ctx.fillRect(0, 0, W, H);
-    } else {
-      ctx.fillStyle = '#0a0a0a';
-      ctx.fillRect(0, 0, W, H);
-      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 8; i++) {
-        ctx.beginPath(); ctx.moveTo(i * W / 8, 0);     ctx.lineTo(i * W / 8, H); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0,           i*H/8); ctx.lineTo(W, i*H/8);   ctx.stroke();
-      }
-    }
-
-    if (mirrorMode !== 'none') {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([12, 8]);
-      if (mirrorMode === 'diagonal' || mirrorMode === 'vertical') {
-        ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke();
-      }
-      if (mirrorMode === 'diagonal' || mirrorMode === 'horizontal') {
-        ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-  }, [previewImage, mapSize, mirrorMode]);
 
   // ── Canvas Click ──────────────────────────────────────────────────────────────
 
@@ -423,11 +390,9 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
     ));
   };
 
-  // ── Emitter Paths (global) ────────────────────────────────────────────────────
+  // ── Emitter Paths ─────────────────────────────────────────────────────────────
 
-  const addEmitterPath = () => {
-    setEmitterPaths(prev => [...prev, '']);
-  };
+  const addEmitterPath = () => setEmitterPaths(prev => [...prev, '']);
 
   const updateEmitterPath = (pi, value) => {
     setEmitterPaths(prev => prev.map((p, j) => j === pi ? value : p));
@@ -466,17 +431,14 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   const getAllUniqueCategories = () => {
     const categoriesSet = new Set();
     emitterCards.forEach(card => {
-      if (card.emitterCategories && card.emitterCategories.length > 0) {
-        card.emitterCategories.forEach(cat => {
-          if (cat && cat.trim()) categoriesSet.add(cat.trim());
-        });
-      }
+      (card.emitterCategories || []).forEach(cat => {
+        if (cat && cat.trim()) categoriesSet.add(cat.trim());
+      });
     });
     return Array.from(categoriesSet).sort();
   };
 
-  const getAllEmitterPaths = () =>
-    emitterPaths.filter(p => p.trim());
+  const getAllEmitterPaths = () => emitterPaths.filter(p => p.trim());
 
   const toggleEmitterCategory = (emitterPath, category) => {
     setEmitterCategories(prev => {
@@ -501,30 +463,27 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   };
 
   const addEmitterCardCategory = (cardIndex) => {
-    const next = emitterCards.map((c, i) =>
+    setEmitterCards(emitterCards.map((c, i) =>
       i === cardIndex ? { ...c, emitterCategories: [...(c.emitterCategories || []), ''] } : c
-    );
-    setEmitterCards(next);
+    ));
   };
 
   const updateEmitterCardCategory = (cardIndex, catIndex, value) => {
-    const next = emitterCards.map((c, i) =>
+    setEmitterCards(emitterCards.map((c, i) =>
       i === cardIndex ? {
         ...c,
         emitterCategories: (c.emitterCategories || []).map((cat, j) => j === catIndex ? value : cat)
       } : c
-    );
-    setEmitterCards(next);
+    ));
   };
 
   const deleteEmitterCardCategory = (cardIndex, catIndex) => {
-    const next = emitterCards.map((c, i) =>
+    setEmitterCards(emitterCards.map((c, i) =>
       i === cardIndex ? {
         ...c,
         emitterCategories: (c.emitterCategories || []).filter((_, j) => j !== catIndex)
       } : c
-    );
-    setEmitterCards(next);
+    ));
   };
 
   const getEmittersForCard = (card) => {
@@ -562,9 +521,7 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       return;
     }
 
-    const validCards = emitterCards.filter(card =>
-      card.coordinates.some(c => c.x && c.z)
-    );
+    const validCards = emitterCards.filter(card => card.coordinates.some(c => c.x && c.z));
     if (validCards.length === 0) {
       await luxuryAlert('No emitter cards with coordinates found.', 'Nothing to Generate', 'warning');
       return;
@@ -574,9 +531,7 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       return;
     }
 
-    // Warn if any _prop.bp paths — these produce silent failures in-game
-    const propBpPaths = emitterPaths
-      .filter(p => p.trim().toLowerCase().endsWith('_prop.bp'));
+    const propBpPaths = emitterPaths.filter(p => p.trim().toLowerCase().endsWith('_prop.bp'));
     if (propBpPaths.length > 0) {
       const confirmed = await luxuryConfirm(
         `${propBpPaths.length} emitter path(s) end in _prop.bp:\n\n${propBpPaths.slice(0, 3).join('\n')}${propBpPaths.length > 3 ? `\n…and ${propBpPaths.length - 3} more` : ''}\n\nCreateEmitterAtBone requires a _emit.bp effect path, not a prop wrapper. The emitters will likely not appear in-game.\n\nDo you want to continue anyway?`,
@@ -597,7 +552,6 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       const emitterDestDir = `${mapFolderPath}\\env\\props\\emitter`;
       await ensureDir(emitterDestDir);
 
-      // Rebuild missing publicPaths on-the-fly (lost after app restart — not persisted)
       const resolvedPublicPaths = { ...emitterPublicPaths };
       const pathsNeedingLookup = emitterPaths.filter(p => p.trim() && !resolvedPublicPaths[p.trim()]);
       if (pathsNeedingLookup.length > 0) {
@@ -616,18 +570,17 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       }
 
       for (const rawPath of emitterPaths.filter(p => p.trim())) {
-          const srcAbsolute = resolvedPublicPaths[rawPath];
-          if (!srcAbsolute) continue;
-
-          const bpFileName = rawPath.replace(/\\/g, '/').split('/').pop();
-          const dest       = `${emitterDestDir}\\${bpFileName}`;
-          await window.electronAPI.invoke('copy-file', { src: srcAbsolute, dest });
-        }
+        const srcAbsolute = resolvedPublicPaths[rawPath];
+        if (!srcAbsolute) continue;
+        const bpFileName = rawPath.replace(/\\/g, '/').split('/').pop();
+        const dest       = `${emitterDestDir}\\${bpFileName}`;
+        await window.electronAPI.invoke('copy-file', { src: srcAbsolute, dest });
+      }
 
       const propsLuaEntries = [];
 
       for (const card of validCards) {
-        const coords = card.coordinates.filter(c => c.x && c.z);
+        const coords   = card.coordinates.filter(c => c.x && c.z);
         const rawPaths = getEmittersForCard(card).filter(p => p.trim());
         if (coords.length === 0 || rawPaths.length === 0) continue;
 
@@ -649,9 +602,6 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
           if (!emitterPath.startsWith('/maps/') &&
               !emitterPath.startsWith('/effects/') &&
               !emitterPath.startsWith('/env/')) {
-            // Strip any category prefix so the path always resolves to
-            // /maps/{map}/env/props/emitter/{file_emit.bp} — matching
-            // the flat copy target above.
             const bpFileName = emitterPath.replace(/\\/g, '/').split('/').pop();
             emitterPath = `/maps/${finalMapName}/env/props/emitter/${bpFileName}`;
           }
@@ -709,11 +659,7 @@ TypeClass = ${pairName}`;
 
         for (const coord of coords) {
           const assignedPath = emitterPropPaths[Math.floor(Math.random() * emitterPropPaths.length)];
-          propsLuaEntries.push({
-            path: assignedPath,
-            x: coord.x,
-            z: coord.z,
-          });
+          propsLuaEntries.push({ path: assignedPath, x: coord.x, z: coord.z });
         }
       }
 
@@ -735,7 +681,6 @@ TypeClass = ${pairName}`;
       }
       propsLuaContent += '}\n';
 
-      // ── Nächsten freien props-Dateinamen bestimmen ────────────────────────
       const existingEntries = await window.electronAPI.invoke('list-dir', { dirPath: mapFolderPath });
       let maxIdx = 0;
       let hasSingle = false;
@@ -748,13 +693,10 @@ TypeClass = ${pairName}`;
                              : hasSingle  ? `props1.lua`
                              : `props.lua`;
 
-      // ── Schreiben & ggf. SCMAP-Repack ─────────────────────────────────────
       let scmapEntry = { name: `${finalMapName} (no SCMAP modified)` };
       if (exportRawLua) {
-        // no-SCMAP: direkt ins Map-Root schreiben, fertig
         await writeFile(`${mapFolderPath}\\${propsLuaFileName}`, propsLuaContent);
       } else {
-        // SCMAP-Modus: unpack → direkt in unpack-Ordner schreiben → repack
         const dirEntries = existingEntries?.entries || [];
         const scmapFile = dirEntries.find(e => !e.isDirectory && e.name.toLowerCase().endsWith('.scmap'));
         if (!scmapFile) throw new Error(`No .scmap file found in ${mapFolderPath}`);
@@ -857,6 +799,7 @@ TypeClass = ${pairName}`;
       setIsGenerating(false);
     }
   };
+
   // ── Generate Grid ─────────────────────────────────────────────────────────────
 
   const handleGenerateGrid = async (ci) => {
@@ -872,10 +815,6 @@ TypeClass = ${pairName}`;
 
   // ── Library ───────────────────────────────────────────────────────────────────
 
-  const handleOpenLibrary = () => {
-    setShowEmitterLibrary(true);
-  };
-
   const handleLibraryConfirm = (selected) => {
     if (!selected?.length) { setShowEmitterLibrary(false); return; }
 
@@ -887,8 +826,8 @@ TypeClass = ${pairName}`;
 
     for (const e of selected) {
       if (e.source === 'toolkit' && e.publicPath) {
-        const fileName     = (e.publicPath.replace(/\\/g, '/')).split('/').pop();
-        const mapGamePath  = `/maps/${finalMapName}/env/props/emitter/${fileName}`;
+        const fileName    = (e.publicPath.replace(/\\/g, '/')).split('/').pop();
+        const mapGamePath = `/maps/${finalMapName}/env/props/emitter/${fileName}`;
         newPaths.push(mapGamePath);
         newPublicPaths[mapGamePath] = e.publicPath;
       } else {
@@ -903,7 +842,6 @@ TypeClass = ${pairName}`;
     });
     setEmitterPublicPaths(prev => ({ ...prev, ...newPublicPaths }));
 
-    // Resolve vanilla _prop.bp paths → their matching _emit.bp
     newPaths.forEach((p) => {
       if (p.trim().toLowerCase().endsWith('_prop.bp')) {
         window.electronAPI.invoke('resolve-prop-to-emit', { propGamePath: p.trim() }).then(res => {
@@ -917,7 +855,7 @@ TypeClass = ${pairName}`;
     setShowEmitterLibrary(false);
   };
 
-  // ── scmap Preview Auto-Load ───────────────────────────────────────────────────
+  // ── Preview Auto-Load ─────────────────────────────────────────────────────────
 
   const loadPreviewFromScmap = async (mapFolderPath) => {
     try {
@@ -943,7 +881,6 @@ TypeClass = ${pairName}`;
     }
   };
 
-  // Reset preview when map name or folder changes — then auto-load from scmap
   useEffect(() => {
     setPreviewImageData(null);
     const name   = (mapName || '').trim();
@@ -992,7 +929,7 @@ TypeClass = ${pairName}`;
 
   const availableColors = [
     { color: '#FFAF00', glow: 'rgba(255,175,0,0.35)'   },
-    { color: '#FF7B00', glow: 'rgba(255, 123, 0, 0.35)'   },
+    { color: '#FF7B00', glow: 'rgba(255,123,0,0.35)'   },
     { color: '#FFFA00', glow: 'rgba(255,250,0,0.35)'   },
     { color: '#A5E801', glow: 'rgba(165,232,1,0.35)'   },
     { color: '#538A33', glow: 'rgba(83,138,51,0.35)'   },
@@ -1007,173 +944,46 @@ TypeClass = ${pairName}`;
     { color: '#FF69B4', glow: 'rgba(255,105,180,0.35)' },
   ];
 
+  // ── Render ────────────────────────────────────────────────────────────────────
+
   return (
-    <div className="emitter-tab tab-scrollbar">
+    <div
+      className="emitter-tab"
+      style={{
+        '--tab-color':       'var(--emitter-color)',
+        '--tab-glow':        'var(--emitter-glow)',
+        '--tab-glow-strong': 'var(--emitter-glow-strong)',
+      }}
+    >
+      {/* ── Emitter-Category Assignment Overlay ── */}
+      {showEmitterCategoryConfig && (
+        <EmitterAssignmentOverlay
+          entities={emitterCards}
+          getEntityTitle={(card, idx) => card.label?.toUpperCase() || `Emitter ${idx + 1}`}
+          getEntityColor={(card) => card.color}
+          getEntityCategories={(card) => card.emitterCategories}
+          getEmittersForEntity={getEmittersForCard}
+          categories={getAllUniqueCategories()}
+          emitters={emitterPaths.filter(p => p.trim())}
+          isActive={isEmitterActiveForCategory}
+          onToggle={toggleEmitterCategory}
+          getName={getEmitterNameFromPath}
+          entityNoun="emitter"
+          sidebarHint="Emitters active per card"
+          onClose={() => setShowEmitterCategoryConfig(false)}
+          colorVars={{
+            '--tab-color':       'var(--emitter-color)',
+            '--tab-glow':        'var(--emitter-glow)',
+            '--tab-glow-strong': 'var(--emitter-glow-strong)',
+          }}
+        />
+      )}
 
-      {/* ── Emitter-Category Assignment Modal ── */}
-      {showEmitterCategoryConfig && (() => {
-        const allCategories = getAllUniqueCategories();
-        const validEmitters = getAllEmitterPaths();
-        return (
-          <>
-            <div className="em-cat-backdrop" onClick={() => setShowEmitterCategoryConfig(false)} />
-            <div className="em-cat-modal" onClick={e => e.stopPropagation()}>
-
-              {/* Header */}
-              <div className="em-cat-modal-header">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h2 className="help-modal-title">Emitter-Category Assignment</h2>
-                    <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: 1.6 }}>
-                      Control which emitters are used for specific card categories.<br/>
-                      Toggle emitter buttons to activate or deactivate them per category.
-                    </p>
-                  </div>
-                  <button className="help-modal-close" onClick={() => setShowEmitterCategoryConfig(false)}>×</button>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="em-cat-modal-content">
-                {allCategories.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '100px 20px', color: 'var(--text-secondary)' }}>
-                    <div style={{ fontSize: '5rem', marginBottom: '30px', opacity: 0.3 }}>🏷️</div>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '20px', color: 'var(--text-primary)', fontWeight: 600 }}>No Emitter Categories Defined</h3>
-                    <p style={{ fontSize: '1.05rem', lineHeight: 1.7, maxWidth: '600px', margin: '0 auto', color: 'var(--text-secondary)' }}>
-                      Add categories to your emitter cards first.<br/>Open a card and click "+ Add Category".
-                    </p>
-                  </div>
-                ) : validEmitters.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '100px 20px', color: 'var(--text-secondary)' }}>
-                    <div style={{ fontSize: '5rem', marginBottom: '30px', opacity: 0.3 }}>⚡</div>
-                    <h3 style={{ fontSize: '1.5rem', marginBottom: '20px', color: 'var(--text-primary)', fontWeight: 600 }}>No Emitter Paths Configured</h3>
-                    <p style={{ fontSize: '1.05rem', lineHeight: 1.7, maxWidth: '600px', margin: '0 auto', color: 'var(--text-secondary)' }}>
-                      Add emitter paths in the Configuration section first.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="em-cat-rows">
-                    {/* Info box */}
-                    <div className="em-cat-info">
-                      <p style={{ margin: '0 0 10px', fontSize: '1rem', fontWeight: 600, color: 'var(--tab-color)' }}>How Assignment Works</p>
-                      <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.92rem', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
-                        <li><strong style={{ color: '#fff' }}>Active button</strong> — emitter IS used for this category</li>
-                        <li><strong style={{ color: '#fff' }}>Gray button</strong> — emitter is NOT used for this category</li>
-                        <li>All emitters are active by default — deactivate to exclude</li>
-                      </ul>
-                    </div>
-
-                    {/* Category rows */}
-                    {allCategories.map((category, catIdx) => (
-                      <div key={catIdx} className="em-cat-row">
-                        {/* Category header */}
-                        <div className="em-cat-row-header">
-                          <div style={{ flex: 1 }}>
-                            <div className="em-cat-title">{category}</div>
-                            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                              {validEmitters.filter(p => isEmitterActiveForCategory(p, category)).length} of {validEmitters.length} emitters active
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Emitter toggle buttons */}
-                        <div className="em-cat-toggle-grid">
-                          {validEmitters.map((path, eIdx) => {
-                            const active = isEmitterActiveForCategory(path, category);
-                            return (
-                              <button key={eIdx}
-                                onClick={() => toggleEmitterCategory(path, category)}
-                                title={path}
-                                className={`em-cat-toggle${active ? ' active' : ''}`}
-                              >
-                                <span style={{ flex: 1 }}>{getEmitterNameFromPath(path)}</span>
-                                {active && <span style={{ fontWeight: 700 }}>✓</span>}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="em-cat-modal-footer">
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  {allCategories.length} {allCategories.length === 1 ? 'category' : 'categories'} · {validEmitters.length} emitters · {emitterCards.length} cards
-                </span>
-                <button className="btn-primary" onClick={() => setShowEmitterCategoryConfig(false)}>
-                  Done
-                </button>
-              </div>
-
-            </div>
-
-            {/* RIGHT SIDEBAR: Live Preview — outside modal, own fixed panel */}
-            <div className="em-cat-sidebar" onClick={e => e.stopPropagation()}>
-              <div className="em-cat-sidebar-header">
-                <h3 className="section-title" style={{ marginBottom: '4px' }}>Live Preview</h3>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  Emitters that will be used per card
-                </div>
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {emitterCards.map((card, ci) => {
-                    const applicable = getEmittersForCard(card);
-                    const hasCats = (card.emitterCategories || []).some(c => c.trim());
-                    return (
-                      <div key={card.id} className="em-cat-card">
-                        <div className="em-cat-card-meta">
-                          <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: card.color, boxShadow: `0 0 8px ${card.color}`, flexShrink: 0 }} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {card.label || `Card ${ci + 1}`}
-                            </div>
-                            {hasCats && (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '4px' }}>
-                                {(card.emitterCategories || []).filter(c => c.trim()).map((cat, i) => (
-                                  <span key={i} className="em-cat-tag">{cat}</span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="em-cat-card-count">
-                          {applicable.length} emitter{applicable.length !== 1 ? 's' : ''} active
-                        </div>
-                        <div className="em-cat-card-paths">
-                          {applicable.map((p, i) => (
-                            <div key={i} className="em-cat-path-item" title={p}>
-                              {getEmitterNameFromPath(p)}
-                            </div>
-                          ))}
-                          {applicable.length === 0 && (
-                            <div style={{ fontSize: '0.73rem', color: 'rgba(255,193,7,0.7)', fontStyle: 'italic', textAlign: 'center', padding: '6px' }}>No matching emitters</div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {emitterCards.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '30px 20px', color: 'var(--text-muted)' }}>
-                      <div style={{ fontSize: '2.5rem', marginBottom: '10px', opacity: 0.3 }}>🃏</div>
-                      <p style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>No emitter cards yet.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
-        );
-      })()}
-
-      {/*  Library overlay  */}
+      {/* ── Library overlay ── */}
       {showEmitterLibrary && (
         <EmitterLibraryOverlay
           onConfirm={handleLibraryConfirm}
-          onClose={() => { setShowEmitterLibrary(false); }}
+          onClose={() => setShowEmitterLibrary(false)}
           mapName={mapName}
           mapsFolder={settings?.mapsFolder ?? ''}
           accentColor="var(--emitter-color)"
@@ -1181,20 +991,12 @@ TypeClass = ${pairName}`;
         />
       )}
 
-      {/* 
-          HELP BUTTON — Fixed circle bottom-right (exact mirror of Trees tab)
-      */}
-      {!showHelp && !showEmitterLibrary && (
-        <button
-          className="help-btn"
-          onClick={() => setShowHelp(true)}
-          title="Toggle Help Overlay"
-        >?</button>
+      {/* ── Help button ── */}
+      {!showHelp && !showEmitterLibrary && !showEmitterCategoryConfig && (
+        <button className="help-btn" onClick={() => setShowHelp(true)} title="Toggle Help Overlay">?</button>
       )}
 
-      {/* 
-          HELP MODAL
-      */}
+      {/* ── Help modal ── */}
       {showHelp && (
         <EmitterHelpModal
           onClose={() => setShowHelp(false)}
@@ -1207,106 +1009,140 @@ TypeClass = ${pairName}`;
         />
       )}
 
-      {/* 
-          MAIN GRID  (mirrors .wreckage-content-grid  1fr 1fr)
-      */}
-      <div className="tab-grid">
-
-        {/*  LEFT CONFIG COLUMN  */}
-        <div className="tab-col-config">
-
-          {/*  CONFIGURATION card  */}
-          <div className="section-card">
-            <h2 className="section-title">
-              CONFIGURATION
-            </h2>
-
-            {/* Map Name */}
+      {/* ── WorkspaceConsole shell ── */}
+      <WorkspaceConsole
+        sections={[
+          { id: 'config',   index: '01', label: 'Configuration', desc: 'Set map name, emitter paths, grid randomness and area mask.', done: !!(mapName.trim() && emitterPaths.some(p => p.trim())) },
+          { id: 'emitters', index: '02', label: 'Emitters',      desc: 'Define emitter cards and place coordinates on the canvas.', count: emitterCards.reduce((n, c) => n + c.coordinates.filter(c => c.x && c.z).length, 0), done: emitterCards.some(c => c.coordinates.some(coord => coord.x && coord.z)) },
+          { id: 'matching', index: '03', label: 'Matching',      desc: 'Configure how emitters are assigned to card categories.',    done: !!emitterMatchingMode },
+          { id: 'export',   index: '04', label: 'Export',        desc: 'Generate emitter prop files and inject them into the .scmap.' },
+        ]}
+        activeSection={activeSection}
+        onSelect={setActiveSection}
+        ghostLabel="EMITTERS"
+        renderEyebrow={(s) => `EMITTER REGISTER — ${s.index} — EMITTER CONSOLE`}
+        railStorageKey="em-rail-pinned"
+        navLabel="Emitter console navigation"
+        bootMs={280}
+        mirrorSlot={
+          <>
+            <select
+              className="field-select"
+              value={mirrorMode}
+              onChange={e => setMirrorMode(e.target.value)}
+            >
+              <option value="none">No Mirror</option>
+              <option value="diagonal">Diagonal</option>
+              <option value="horizontal">Horizontal</option>
+              <option value="vertical">Vertical</option>
+            </select>
+            {previewImageData && (
+              <button
+                className="action-button action-button--danger"
+                onClick={() => {
+                  setPreviewImageData(null);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+              >
+                Delete Preview
+              </button>
+            )}
+          </>
+        }
+        previewSlot={
+          <MapPreview
+            previewLoading={previewLoading}
+            previewImageData={previewImageData}
+            onUploadClick={() => fileInputRef.current?.click()}
+            fileInputRef={fileInputRef}
+            onImageUpload={handleImageUpload}
+            canvasRef={canvasRef}
+            onCanvasClick={handleCanvasClick}
+            markers={markers}
+            onMarkerDelete={(marker) => deleteCoordinate(marker.entityIdx, marker.coordIdx)}
+            markerTitle={(marker) => `${marker.label} — Click to delete`}
+            showPlaceholder={!previewImage && emitterCards.every(c => c.coordinates.every(coord => !coord.x))}
+            placeholder="Click on canvas to place emitters"
+            legendTitle="Emitter Legend"
+            legendRows={emitterCards.map((card, i) => ({
+              id:    card.id,
+              color: card.color,
+              label: card.label || `Emitter ${i + 1}`,
+              pts:   card.coordinates.filter(c => c.x && c.z).length,
+            }))}
+            hint={`Click canvas to place · ${mirrorMode !== 'none' ? `${mirrorMode} mirror active` : 'no mirror'}`}
+          />
+        }
+      >
+        {/* ── 01 CONFIG ── */}
+        {activeSection === 'config' && (
+          <>
             <div className="form-group">
-              <label className="form-label">Map Name</label>
+              <label className="field-label">Map Name</label>
               <input
                 type="text"
-                className="form-input"
+                className="field-input"
                 placeholder="e.g. Hades_Dust.v0002"
                 value={mapName}
                 onChange={e => setMapName(e.target.value)}
               />
-
-              {/* Map Info — auto-fetched from save.lua */}
               {mapInfo && (
-                <div style={{
-                  marginTop: '6px',
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)',
-                  fontFamily: 'monospace',
-                }}>
+                <div className="ec-map-info">
                   {mapInfo.ok ? (<>
-                    <span style={{
-                      color: 'rgba(255,255,255,0.18)', fontSize: '0.58rem',
-                      letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'inherit',
-                    }}>MAP</span>
-                    <span style={{color: 'rgba(255,255,255,0.55)', fontWeight: 600}}>
-                      {mapInfo.mapSize} × {mapInfo.mapSize}
-                    </span>
-                    <span style={{color: 'rgba(255,255,255,0.22)'}}>·</span>
+                    <span className="ec-map-info-tag">Map</span>
+                    <span className="ec-map-info-size">{mapInfo.mapSize} × {mapInfo.mapSize}</span>
+                    <span className="ec-map-info-sep">·</span>
                     <span>{mapInfo.km} km</span>
                     {mapInfo.playableSize !== mapInfo.mapSize && (<>
-                      <span style={{color: 'rgba(255,255,255,0.22)'}}>·</span>
-                      <span style={{color: 'rgba(255,255,255,0.28)'}}>
-                        playable {mapInfo.playableKm} km
-                      </span>
+                      <span className="ec-map-info-sep">·</span>
+                      <span>playable {mapInfo.playableKm} km</span>
                     </>)}
                   </>) : (
-                    <span style={{color: 'rgba(255,100,100,0.5)', fontSize: '0.65rem'}}>
-                      {mapInfo.error}
-                    </span>
+                    <span className="ec-map-info-err">{mapInfo.error}</span>
                   )}
                 </div>
               )}
               {mapName && (
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '5px', fontStyle: 'italic' }}>
+                <div className="ec-path-hint">
                   {`Saves to: /maps/${mapName.match(/\.v\d{4}$/) ? mapName : mapName + '.v0001'}/`}
                 </div>
               )}
             </div>
 
             {/* Global Randomness */}
-            <div className="subsection-title">Global Randomness</div>
-
+            <div className="subsection-head">
+              <span className="subsection-head-title">Global Randomness</span>
+            </div>
             <div className="form-group">
-              <label className="form-label">Poisson Min. Distance</label>
+              <label className="field-label">Poisson Min. Distance</label>
               <input
                 type="number"
                 min="0"
-                className="form-input"
+                className="field-input"
                 placeholder="0"
                 value={globalRandomness.poissonRadius}
                 onChange={e => setGlobalRandomness(prev => ({ ...prev, poissonRadius: e.target.value }))}
               />
             </div>
 
-            {/*  Area Mask  */}
-            <div className="subsection-title">Area Mask</div>
-            <div
-              className="emitter-upload-area"
-              style={{ padding: '18px', marginBottom: '12px', cursor: 'pointer' }}
-              onClick={() => maskFileInputRef.current?.click()}
-            >
-              <span style={{ fontSize: '0.9rem' }}>
-                {maskImageData ? 'Mask loaded — click to replace' : 'Click to upload mask image (B/W)'}
-              </span>
+            {/* Area Mask */}
+            <div className="subsection-head">
+              <span className="subsection-head-title">Area Mask</span>
+            </div>
+            <div className="em-mask-upload" onClick={() => maskFileInputRef.current?.click()}>
+              <span>{maskImageData ? 'Mask loaded — click to replace' : 'Click to upload mask image (B/W)'}</span>
               <input
                 ref={maskFileInputRef}
                 type="file"
-                className="emitter-file-input"
+                style={{ display: 'none' }}
                 accept="image/*"
                 onChange={handleMaskUpload}
               />
             </div>
-            <div className="form-group" style={{ marginBottom: '14px' }}>
-              <label className="form-label">Dark Pixel Behaviour</label>
+            <div className="form-group">
+              <label className="field-label">Dark Pixel Behaviour</label>
               <select
-                className="form-input"
+                className="field-select"
                 value={maskScanMode}
                 onChange={e => setMaskScanMode(e.target.value)}
               >
@@ -1316,36 +1152,19 @@ TypeClass = ${pairName}`;
               </select>
             </div>
             {maskPreviewUrl && (
-              <div style={{ position: 'relative', marginBottom: '12px' }}>
+              <div className="em-mask-preview">
                 <img
                   src={maskPreviewUrl}
                   alt="Area Mask Preview"
-                  style={{
-                    width: '100%',
-                    display: 'block',
-                    imageRendering: 'pixelated',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    opacity: 0.85,
-                    filter: 'contrast(1.1)',
-                  }}
+                  className="em-mask-img"
                 />
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0,
-                  padding: '6px 10px',
-                  background: 'rgba(0,0,0,0.6)',
-                  fontSize: '0.72rem',
-                  color: 'var(--text-secondary)',
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                }}>
-                  {maskWidth} × {maskHeight} px
-                </div>
+                <div className="em-mask-dim">{maskWidth} × {maskHeight} px</div>
               </div>
             )}
             {maskImageData && (
               <button
-                className="btn-delete"
-                style={{ width: '100%' }}
+                className="action-button action-button--danger action-button--full"
+                style={{ marginBottom: 'var(--space-md)' }}
                 onClick={() => {
                   setMaskImageData(null); setMaskWidth(0); setMaskHeight(0);
                   setMaskPreviewUrl(null);
@@ -1354,510 +1173,207 @@ TypeClass = ${pairName}`;
               >Remove Mask</button>
             )}
 
-            {/*  Global Emitter Paths  */}
-            <div className="subsection-title" style={{ marginTop: '28px' }}>Emitter Paths</div>
-            <div className="form-group" ref={emittersRef}>
-              <label className="form-label">Emitters (_emit.bp)</label>
+            {/* Emitter Paths */}
+            <div className="subsection-head" style={{ marginTop: 'var(--space-xl)' }}>
+              <span className="subsection-head-title">Emitter Paths</span>
+            </div>
+            <div className="form-group">
+              <label className="field-label">Emitters (_emit.bp)</label>
               {emitterPaths.map((path, pi) => (
-                <div key={pi} className="input-row">
+                <div key={pi} className="ec-input-row">
                   <input
                     type="text"
-                    className="form-input"
+                    className="field-input field-input--mono"
                     placeholder="/effects/emitters/weather_sand_01_emit.bp"
                     value={path}
                     onChange={e => updateEmitterPath(pi, e.target.value)}
                     onBlur={e => resolveEmitterPath(pi, e.target.value)}
-                    style={{ fontFamily: 'Courier New, monospace', fontSize: '0.8rem' }}
                   />
-                  <button
-                    className="btn-delete-sm"
-                    onClick={() => deleteEmitterPath(pi)}
-                  >×</button>
+                  <button className="delete-button" onClick={() => deleteEmitterPath(pi)}>×</button>
                 </div>
               ))}
-              <button
-                className="btn-secondary"
-                style={{ width: '100%', marginBottom: '10px' }}
-                onClick={addEmitterPath}
-              >+ Add Emitter</button>
-              <button
-                className="btn-library"
-                style={{ width: '100%' }}
-                onClick={handleOpenLibrary}
-              >Library</button>
-            </div>
-          </div>
-
-          {/*  EMITTERS card  */}
-          <div className="section-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <h2 className="section-title" style={{ margin: 0 }}>EMITTERS</h2>
-              {emitterCards.length >= 1 && (
-                <button
-                  className="btn-delete-text"
-                  style={{ fontSize: '0.78rem', padding: '6px 14px', height: 'auto' }}
-                  onClick={deleteAllEmitterCards}
-                  title="Delete all emitter cards"
-                >
-                  Delete All
-                </button>
-              )}
-            </div>
-
-            <div className="emitter-units-grid">
-              {emitterCards.map((card, ci) => {
-                const isSelected = ci === selectedCard;
-                const coordCount = card.coordinates.filter(c => c.x && c.z).length;
-
-                return (
-                  <React.Fragment key={card.id}>
-                  <div
-                    className={`emitter-unit-card${isSelected ? ' selected' : ''}`}
-                    onClick={() => setSelectedCard(ci)}
-                  >
-                    {/*  Card header  */}
-                    <div className="emitter-unit-card-header">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                        <div
-                          className="emitter-color-indicator"
-                          style={{ backgroundColor: card.color }}
-                          onClick={e => {
-                            e.stopPropagation();
-                            setShowColorPicker(showColorPicker === ci ? null : ci);
-                          }}
-                        />
-                        <span className="emitter-unit-card-title">
-                          {card.label || `Emitter ${ci + 1}`}
-                        </span>
-                      </div>
-                      <button
-                        className="btn-delete-sm"
-                        onClick={e => { e.stopPropagation(); deleteEmitterCard(ci); }}
-                      >×</button>
-                    </div>
-
-                    {/*  Color picker dropdown  */}
-                    {showColorPicker === ci && (
-                      <div className="emitter-color-picker-dropdown" onClick={e => e.stopPropagation()}>
-                        <div className="emitter-color-grid">
-                          {availableColors.map((opt, oi) => (
-                            <div
-                              key={oi}
-                              className="emitter-color-option"
-                              style={{ backgroundColor: opt.color, boxShadow: `0 0 10px ${opt.glow}` }}
-                              onClick={() => { updateCard(ci, 'color', opt.color); setShowColorPicker(null); }}
-                            />
-                          ))}
-                        </div>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="Custom color (#HEX or hsl())"
-                          style={{ marginTop: '10px' }}
-                          onChange={e => { if (e.target.value) updateCard(ci, 'color', e.target.value); }}
-                          onClick={e => e.stopPropagation()}
-                        />
-                      </div>
-                    )}
-
-                    {/*  Card content — always visible  */}
-                    <div className="emitter-unit-card-content">
-
-                      {/* Label input */}
-                      <div className="input-row">
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="Label (e.g. Fire Emitters)..."
-                          value={card.label}
-                          onChange={e => { e.stopPropagation(); updateCard(ci, 'label', e.target.value); }}
-                          onClick={e => e.stopPropagation()}
-                        />
-                      </div>
-
-                      {/* Emitter Categories */}
-                      <div style={{ marginTop: '16px', marginBottom: '4px' }}>
-                        <label className="form-label" style={{ marginBottom: '10px', display: 'block' }}>
-                          Emitter Categories (optional)
-                        </label>
-                        {(card.emitterCategories || []).map((cat, catIdx) => (
-                          <div key={catIdx} className="input-row" style={{ marginBottom: '8px' }}>
-                            <input
-                              type="text"
-                              className="form-input"
-                              value={cat}
-                              onChange={e => { e.stopPropagation(); updateEmitterCardCategory(ci, catIdx, e.target.value); }}
-                              onClick={e => e.stopPropagation()}
-                              placeholder={`Category ${catIdx + 1} (e.g. Smoke, Fog)`}
-                            />
-                            <button
-                              className="btn-delete-sm"
-                              onClick={e => { e.stopPropagation(); deleteEmitterCardCategory(ci, catIdx); }}
-                            >×</button>
-                          </div>
-                        ))}
-                        <button
-                          className="btn-secondary"
-                          style={{ width: '100%', fontSize: '0.85rem', padding: '10px' }}
-                          onClick={e => { e.stopPropagation(); addEmitterCardCategory(ci); }}
-                        >
-                          + Add Category
-                        </button>
-                      </div>
-
-                    </div>
-                  </div>
-
-                    {/*  Expanded section — only when selected  */}
-                    {isSelected && (
-                      <div className="emitter-unit-coordinates" onClick={e => e.stopPropagation()}>
-
-                        {/* Grid placement */}
-                        <div className="subsection-title" style={{ marginTop: 0 }}>
-                          Grid Placement
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '10px' }}>
-                          <div>
-                            <label className="form-label" style={{ fontSize: '0.72rem' }}>X Step</label>
-                            <input
-                              type="number" min="1"
-                              className="form-input"
-                              placeholder="64"
-                              value={card.gridStepX}
-                              onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepX', e.target.value); }}
-                              onClick={e => e.stopPropagation()}
-                            />
-                          </div>
-                          <div>
-                            <label className="form-label" style={{ fontSize: '0.72rem' }}>Z Step</label>
-                            <input
-                              type="number" min="1"
-                              className="form-input"
-                              placeholder="64"
-                              value={card.gridStepZ}
-                              onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepZ', e.target.value); }}
-                              onClick={e => e.stopPropagation()}
-                            />
-                          </div>
-                        </div>
-
-                        <button
-                          className="btn-secondary"
-                          style={{ width: '100%', marginBottom: '20px' }}
-                          disabled={!card.gridStepX || !card.gridStepZ}
-                          onClick={e => { e.stopPropagation(); handleGenerateGrid(ci); }}
-                        >Generate Grid</button>
-
-                        {/* Per-card randomness override */}
-                        <div className="subsection-title">Card Randomness Override</div>
-                        <div style={{ marginBottom: '20px' }}>
-                          <label className="form-label" style={{ fontSize: '0.72rem' }}>Poisson Min. Distance</label>
-                          <input
-                            type="number" min="0"
-                            className="form-input"
-                            placeholder="0"
-                            value={card.randomness.poissonRadius}
-                            onChange={e => { e.stopPropagation(); updateCardRandomness(ci, 'poissonRadius', e.target.value); }}
-                            onClick={e => e.stopPropagation()}
-                          />
-                        </div>
-
-                        <div
-                          className="subsection-title"
-                          style={{ cursor: 'pointer', userSelect: 'none' }}
-                          onClick={() => setCoordsOpen(prev => ({ ...prev, [ci]: !prev[ci] }))}
-                        >
-                          Coordinates ({card.coordinates.filter(c => c.x && c.z).length})
-                          <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            {coordsOpen[ci] ? '▴' : '▾'}
-                          </span>
-                        </div>
-                        {coordsOpen[ci] && (<>
-                        {card.coordinates.map((coord, coordIdx) => (
-                          <div key={coordIdx} className={`emitter-coordinate-entry${coord.isMirrored ? ' is-mirrored' : ''}`}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                                Point {coordIdx + 1}
-                                {coord.isMirrored && <span className="emitter-mirror-badge">⟷ mirror</span>}
-                              </span>
-                              <button
-                                className="btn-delete-xs"
-                                onClick={() => deleteCoordinate(ci, coordIdx)}
-                              >×</button>
-                            </div>
-                            <div className="emitter-coord-grid">
-                              <div className="emitter-coord-field">
-                                <label>X</label>
-                                <input
-                                  type="text"
-                                  className="form-input form-input-sm"
-                                  value={coord.x}
-                                  placeholder="256"
-                                  onChange={e => updateCoordinate(ci, coordIdx, 'x', e.target.value)}
-                                />
-                              </div>
-                              <div className="emitter-coord-field">
-                                <label>Z</label>
-                                <input
-                                  type="text"
-                                  className="form-input form-input-sm"
-                                  value={coord.z}
-                                  placeholder="256"
-                                  onChange={e => updateCoordinate(ci, coordIdx, 'z', e.target.value)}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                          <button
-                            className="btn-secondary"
-                            onClick={() => addManualCoordinate(ci)}
-                            style={{ flex: 1 }}
-                          >+ Add Coordinate</button>
-                          {card.coordinates.length > 0 && (
-                            <button
-                              className="btn-delete"
-                              onClick={async () => {
-                                const ok = await luxuryConfirm('Delete all coordinates for this card?', 'Confirm Delete', 'Delete All', 'Cancel');
-                                if (ok) clearCoordinates(ci);
-                              }}
-                              style={{ padding: '10px 20px' }}
-                            >Delete All</button>
-                          )}
-                        </div>
-                        </>)}
-
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-
-              {/* Add card placeholder */}
-              <div className="emitter-add-unit-card" onClick={addEmitterCard}>
-                <div className="emitter-add-unit-icon">
-                  <span style={{ fontSize: '2rem' }}>+</span>
-                </div>
-                <span className="emitter-add-unit-text">ADD EMITTER CARD</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Emitter Matching Mode + Category Assignment */}
-          <div className="section-card" style={{ marginBottom: '16px' }}>
-            <label className="form-label" style={{ marginBottom: '15px', display: 'block' }}>
-              Emitter Matching Mode
-            </label>
-            <div className="em-mode-cards">
-              {[
-                { key: 'smart',        label: 'Smart Combination (3-Tier)', desc: 'Perfect Match → Partial Match → Fallback', note: 'Card ["Smoke", "Dense"] gets only emitters active for BOTH categories first' },
-                { key: 'simple',       label: 'Simple Union',               desc: 'Use ALL emitters active for ANY category', note: 'Card ["Smoke", "Dense"] gets all emitters active for Smoke OR Dense' },
-                { key: 'lastCategory', label: 'Last Category Only',         desc: 'Match only the last category in the list', note: 'Card ["Smoke", "Dense"] → matches "Dense" only' },
-              ].map(({ key, label, desc, note }) => (
-                <div key={key}
-                  onClick={() => setEmitterMatchingMode(key)}
-                  className={`em-mode-card${emitterMatchingMode === key ? ' selected' : ''}`}
-                >
-                  <div className="em-mode-card-row">
-                    <div className="em-mode-radio">
-                      {emitterMatchingMode === key && <div className="em-mode-radio-dot" />}
-                    </div>
-                    <strong style={{ fontSize: '0.92rem', color: emitterMatchingMode === key ? 'var(--tab-color)' : '#fff', fontWeight: 600 }}>
-                      {label}
-                    </strong>
-                  </div>
-                  <p style={{ margin: '0 0 2px 30px', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{desc}</p>
-                  <em style={{ margin: '0 0 0 30px', fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block' }}>{note}</em>
-                </div>
-              ))}
-            </div>
-
-            <button
-              className="btn-secondary"
-              style={{ width: '100%', padding: '16px', fontSize: '0.92rem' }}
-              onClick={() => setShowEmitterCategoryConfig(true)}
-            >
-              Configure Emitter-Category Assignment
-            </button>
-          </div>
-
-          {/* Generate options + button */}
-          <div className="section-card">
-              {/* README toggle */}
-              <label className="checkbox-label" style={{ marginBottom: '12px' }} onClick={() => !isGenerating && setGenerateReadme(!generateReadme)}>
-                <div className={`checkbox${generateReadme ? ' checked' : ''}`}>
-                  {generateReadme && (
-                    <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </div>
-                <span className="checkbox-text">Generate README file</span>
-              </label>
-              <label className="checkbox-label" style={{ marginBottom: '20px' }} onClick={() => !isGenerating && setExportRawLua(!exportRawLua)}>
-                <div className={`checkbox${exportRawLua ? ' checked' : ''}`}>
-                  {exportRawLua && (
-                    <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </div>
-                <span className="checkbox-text">Export props.lua (no SCMAP)</span>
-              </label>
-              <button
-                className="btn-primary btn-lg"
-                onClick={handleGenerate}
-                disabled={isGenerating}
-              >
-                {isGenerating ? 'GENERATING...' : 'GENERATE FILES'}
+              <button className="action-button action-button--full" style={{ marginBottom: 'var(--space-xs)' }} onClick={addEmitterPath}>
+                Add Emitter
+              </button>
+              <button className="action-button action-button--full" onClick={() => setShowEmitterLibrary(true)}>
+                Library
               </button>
             </div>
-        </div>
+          </>
+        )}
 
-        {/*  RIGHT PREVIEW COLUMN  */}
-        <div className="tab-col-detail">
-          <div className="section-card">
-
-            {/* Preview header — mirror dropdown + delete preview */}
-            <div className="emitter-preview-header">
-              <h2 className="section-title" style={{ margin: 0 }}>
-                PREVIEW
-              </h2>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <select
-                  className="btn-toggle"
-                  value={mirrorMode}
-                  onChange={e => setMirrorMode(e.target.value)}
-                >
-                  <option value="none">No Mirror</option>
-                  <option value="diagonal">Diagonal</option>
-                  <option value="horizontal">Horizontal</option>
-                  <option value="vertical">Vertical</option>
-                </select>
-                {previewImageData && (
-                  <button
-                    className="btn-delete-text"
-                    onClick={() => {
-                      setPreviewImageData(null);
-                      if (fileInputRef.current) fileInputRef.current.value = '';
-                    }}
-                  >Delete Preview</button>
+        {/* ── 02 EMITTERS ── */}
+        {activeSection === 'emitters' && (
+          <>
+            <div className="trace-section-head" style={{ marginBottom: 'var(--space-md)' }}>
+              <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+                {emitterCards.length >= 1 && (
+                  <button className="action-button action-button--danger" onClick={deleteAllEmitterCards}>
+                    Delete All
+                  </button>
                 )}
               </div>
             </div>
 
-            {/* Upload area / loading state */}
-            {previewLoading ? (
-              <div className="emitter-upload-area" style={{ cursor: 'default', opacity: 0.7 }}>
-                <span>Loading preview from .scmap…</span>
-              </div>
-            ) : (
-              <div className="emitter-upload-area" onClick={() => fileInputRef.current?.click()}>
-                <span>{previewImageData ? 'Click to replace map image' : 'Click to upload map image manually'}</span>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="emitter-file-input"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
-              </div>
-            )}
+            <EntityCardGrid>
+              {emitterCards.map((card, ci) => (
+                <EntityCard
+                  key={card.id}
+                  index={ci}
+                  color={card.color}
+                  selected={ci === selectedCard}
+                  onSelect={() => setSelectedCard(ci)}
+                  onDelete={() => deleteEmitterCard(ci)}
+                  title={card.label ? card.label.toUpperCase() : `Emitter ${ci + 1}`}
+                  availableColors={availableColors}
+                  showColorPicker={showColorPicker === ci}
+                  onToggleColorPicker={() => setShowColorPicker(showColorPicker === ci ? null : ci)}
+                  onPickColor={(c) => { updateCard(ci, 'color', c); setShowColorPicker(null); }}
+                >
+                  {ci === selectedCard && (<>
+                    {/* Label */}
+                    <div className="form-group">
+                      <label className="field-label">Label</label>
+                      <input
+                        type="text"
+                        className="field-input"
+                        placeholder="e.g. Fire Emitters"
+                        value={card.label}
+                        onChange={e => { e.stopPropagation(); updateCard(ci, 'label', e.target.value); }}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
 
-            {/* Canvas */}
-            <div className="emitter-canvas-container">
-              <canvas
-                ref={canvasRef}
-                className="emitter-preview-canvas"
-                width={1024}
-                height={1024}
-                onClick={handleCanvasClick}
-                style={{ width: '100%', height: '100%', display: 'block' }}
-              />
+                    {/* Categories */}
+                    <div className="form-group">
+                      <label className="field-label">Emitter Categories (optional)</label>
+                      {(card.emitterCategories || []).map((cat, catIdx) => (
+                        <div key={catIdx} className="ec-input-row">
+                          <input
+                            type="text"
+                            className="field-input"
+                            value={cat}
+                            onChange={e => { e.stopPropagation(); updateEmitterCardCategory(ci, catIdx, e.target.value); }}
+                            onClick={e => e.stopPropagation()}
+                            placeholder={`Category ${catIdx + 1} (e.g. Smoke, Fog)`}
+                          />
+                          <button className="delete-button" onClick={e => { e.stopPropagation(); deleteEmitterCardCategory(ci, catIdx); }}>×</button>
+                        </div>
+                      ))}
+                      <button
+                        className="action-button action-button--full"
+                        onClick={e => { e.stopPropagation(); addEmitterCardCategory(ci); }}
+                      >
+                        Add Category
+                      </button>
+                    </div>
 
-              {/* React marker overlay — hover + mirror like Wreckage */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
-                {markers.map(marker => (
-                  <div
-                    key={marker.id}
-                    onClick={e => { e.stopPropagation(); deleteCoordinate(marker.cardIdx, marker.coordIdx); }}
-                    title={`${marker.label} — Click to delete`}
-                    style={{
-                      position:        'absolute',
-                      left:            `${marker.x}%`,
-                      top:             `${marker.z}%`,
-                      transform:       'translate(-50%, -50%)',
-                      width:           marker.isSelected ? '16px' : '12px',
-                      height:          marker.isSelected ? '16px' : '12px',
-                      borderRadius:    '50%',
-                      backgroundColor: marker.color,
-                      border:          marker.isSelected ? '3px solid white' : '2px solid white',
-                      boxShadow:       `0 0 ${marker.isSelected ? '20px' : '15px'}px ${marker.color}, 0 0 ${marker.isSelected ? '10px' : '5px'}px rgba(255,255,255,0.5)`,
-                      transition:      'all 0.3s ease',
-                      pointerEvents:   'auto',
-                      cursor:          'pointer',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.35)';
-                      e.currentTarget.style.boxShadow = `0 0 30px ${marker.color}, 0 0 15px rgba(255,255,255,0.8)`;
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
-                      e.currentTarget.style.boxShadow = `0 0 ${marker.isSelected ? '20px' : '15px'}px ${marker.color}, 0 0 ${marker.isSelected ? '10px' : '5px'}px rgba(255,255,255,0.5)`;
-                    }}
-                  >
-                    {marker.isMirrored && (
-                      <div style={{
-                        position:    'absolute',
-                        inset:       '-2px',
-                        borderLeft:  '2px solid white',
-                        borderTop:   '2px solid white',
-                        borderRadius: '0',
-                        pointerEvents: 'none',
-                      }} />
-                    )}
-                  </div>
-                ))}
-              </div>
+                    {/* Grid Placement */}
+                    <div className="subsection-head">
+                      <span className="subsection-head-title">Grid Placement</span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)' }}>
+                      <div className="form-group">
+                        <label className="field-label" style={{ fontSize: '0.72rem' }}>X Step</label>
+                        <input
+                          type="number" min="1"
+                          className="field-input field-input--sm"
+                          placeholder="64"
+                          value={card.gridStepX}
+                          onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepX', e.target.value); }}
+                          onClick={e => e.stopPropagation()}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="field-label" style={{ fontSize: '0.72rem' }}>Z Step</label>
+                        <input
+                          type="number" min="1"
+                          className="field-input field-input--sm"
+                          placeholder="64"
+                          value={card.gridStepZ}
+                          onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepZ', e.target.value); }}
+                          onClick={e => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      className="action-button action-button--full"
+                      style={{ marginBottom: 'var(--space-lg)' }}
+                      disabled={!card.gridStepX || !card.gridStepZ}
+                      onClick={e => { e.stopPropagation(); handleGenerateGrid(ci); }}
+                    >Generate Grid</button>
 
-              {!previewImage && emitterCards.every(c => c.coordinates.length === 0) && (
-                <div className="emitter-canvas-placeholder">
-                  Click on canvas to place emitters
-                </div>
-              )}
-            </div>
+                    {/* Per-card randomness */}
+                    <div className="subsection-head">
+                      <span className="subsection-head-title">Card Randomness Override</span>
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 'var(--space-lg)' }}>
+                      <label className="field-label" style={{ fontSize: '0.72rem' }}>Poisson Min. Distance</label>
+                      <input
+                        type="number" min="0"
+                        className="field-input field-input--sm"
+                        placeholder="0"
+                        value={card.randomness.poissonRadius}
+                        onChange={e => { e.stopPropagation(); updateCardRandomness(ci, 'poissonRadius', e.target.value); }}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
 
-            {/* Legend */}
-            <div className="emitter-legend">
-              <div className="emitter-legend-title">EMITTER LEGEND</div>
-              <div className="emitter-legend-items">
-                {emitterCards.map((card, i) => (
-                  <div
-                    key={card.id}
-                    className={`emitter-legend-item${i === selectedCard ? ' active' : ''}`}
-                    onClick={() => setSelectedCard(i)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="emitter-legend-color" style={{ backgroundColor: card.color }} />
-                    <span>{card.label || `Emitter ${i + 1}`}</span>
-                    <span className="emitter-coord-count">
-                      {card.coordinates.filter(c => c.x && c.z).length} pts
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+                    {/* Coordinates */}
+                    <CoordinateList
+                      coordinates={card.coordinates}
+                      fields={[[
+                        { key: 'x', label: 'X', placeholder: '256' },
+                        { key: 'z', label: 'Z', placeholder: '256' },
+                      ]]}
+                      open={!!coordsOpen[ci]}
+                      onToggle={() => setCoordsOpen(prev => ({ ...prev, [ci]: !prev[ci] }))}
+                      labelFor={(coord, coordIdx) => `Point ${coordIdx + 1}${coord.isMirrored ? ' · mirror' : ''}`}
+                      onUpdate={(coordIdx, key, val) => updateCoordinate(ci, coordIdx, key, val)}
+                      onDelete={(coordIdx) => deleteCoordinate(ci, coordIdx)}
+                      onAdd={() => addManualCoordinate(ci)}
+                      hasPlaced={card.coordinates.some(c => c.x && c.z)}
+                      onDeleteAll={async () => {
+                        const ok = await luxuryConfirm('Delete all coordinates for this card?', 'Confirm Delete', 'Delete All', 'Cancel');
+                        if (ok) clearCoordinates(ci);
+                      }}
+                    />
+                  </>)}
+                </EntityCard>
+              ))}
+              <AddTile label="Add Emitter Card" onClick={addEmitterCard} />
+            </EntityCardGrid>
+          </>
+        )}
 
-            {/* Hint */}
-            <div className="emitter-hint-box">
-              Click canvas to place · Click dot to delete ·{' '}
-              {mirrorMode !== 'none' ? `${mirrorMode} mirroring active` : 'No mirroring'}
-            </div>
+        {/* ── 03 MATCHING ── */}
+        {activeSection === 'matching' && (
+          <MatchingMode
+            value={emitterMatchingMode}
+            onChange={setEmitterMatchingMode}
+            onConfigure={() => setShowEmitterCategoryConfig(true)}
+            modes={[
+              { key: 'smart',        label: 'Smart Combination (3-Tier)', desc: 'Perfect Match → Partial Match → Fallback',  note: 'Card ["Smoke", "Dense"] gets only emitters active for BOTH categories first' },
+              { key: 'simple',       label: 'Simple Union',               desc: 'Use ALL emitters active for ANY category',  note: 'Card ["Smoke", "Dense"] gets all emitters active for Smoke OR Dense' },
+              { key: 'lastCategory', label: 'Last Category Only',         desc: 'Match only the last category in the list',  note: 'Card ["Smoke", "Dense"] → matches "Dense" only' },
+            ]}
+          />
+        )}
 
-          </div>
-        </div>
-      </div>
+        {/* ── 04 EXPORT ── */}
+        {activeSection === 'export' && (
+          <OutputChecklist
+            ready={emitterCards.some(c => c.coordinates.some(coord => coord.x && coord.z))}
+            onCommit={handleGenerate}
+            commitLabel="Generate Files"
+            commitAriaLabel="Generate emitter files"
+            items={[
+              { label: 'Generate README file',       checked: generateReadme, onToggle: () => setGenerateReadme(!generateReadme) },
+              { label: 'Export props.lua (no SCMAP)', checked: exportRawLua,  onToggle: () => setExportRawLua(!exportRawLua) },
+            ]}
+          />
+        )}
+      </WorkspaceConsole>
     </div>
   );
 };

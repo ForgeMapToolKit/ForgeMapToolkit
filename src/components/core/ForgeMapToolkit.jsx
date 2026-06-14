@@ -371,8 +371,15 @@ const tabProps = {
 
         {!isHomepage && activeSection !== 'settings' && activeSection !== 'guides' && (
           <div className="suite-footer">
-            <div className="footer-gradient-line" />
-            <p className="footer-text">{appVersion ? `v${appVersion}` : 'v1.0'} • Created by Seraphim-Noob for Forged Alliance Forever</p>
+            <p className="footer-credit">
+              <span className="footer-part footer-part--ver">v{appVersion || '1.0'}</span>
+              <span className="footer-part">Seraphim-Noob</span>
+              <span className="footer-part">Forged Alliance Forever</span>
+            </p>
+            <div className="footer-trace" aria-hidden="true">
+              <div className="footer-trace-bloom" />
+              <div className="footer-trace-line" />
+            </div>
           </div>
         )}
 

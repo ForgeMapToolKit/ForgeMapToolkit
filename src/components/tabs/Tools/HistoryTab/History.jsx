@@ -19,7 +19,6 @@ import {
   getAllHistory,
   getTabsWithHistory,
   clearTabHistory,
-  clearAllHistory,
   formatBytes,
   commitHistoryEntry,
   applyInvertedDiff,

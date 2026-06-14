@@ -624,42 +624,72 @@ body {
 }
 
 /* =====================================================
-   FOOTER - PREMIUM
+   FOOTER — console base register (FABLE5)
+   A slim attribution strip whose bottom edge IS the homepage
+   traceline in its settled state — a 1px resident core in the
+   active accent over a soft bloom that glows upward. Recolors
+   with the active tool via --current-accent / --current-glow.
    ===================================================== */
 .suite-footer {
   position: relative;
+  flex-shrink: 0;
   margin-top: auto;
-  padding: 30px 2rem;
-  background: linear-gradient(
-    135deg,
-    var(--bg-secondary) 0%,
-    var(--bg-primary) 100%
-  );
-  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 32px 15px;
 }
 
-.footer-gradient-line {
+.footer-credit {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+.footer-part {
+  font-size: 0.56rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.18);
+  padding: 0 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  white-space: nowrap;
+}
+.footer-part:first-child { padding-left: 0; }
+.footer-part:last-child  { border-right: none; padding-right: 0; }
+.footer-part--ver {
+  font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.40);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bottom-edge traceline — homepage trace, settled, glowing upward */
+.footer-trace {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--current-accent) 50%,
-    transparent 100%
-  );
-  opacity: 0.4;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  pointer-events: none;
 }
-
-.footer-text {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 300;
-  letter-spacing: 0.08em;
+.footer-trace-bloom {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;
+  height: 5px;
+  background: var(--current-accent);
+  filter: blur(7px);
+  opacity: 0.38;
+  transition: background 0.6s ease, opacity 0.6s ease;
+}
+.footer-trace-line {
+  position: absolute;
+  inset: 0;
+  background: var(--current-accent);
+  box-shadow: 0 0 6px 0 var(--current-glow);
+  opacity: 0.85;
+  transition: background 0.6s ease, box-shadow 0.6s ease;
 }
 
 /* =====================================================
@@ -1149,8 +1179,7 @@ button:focus-visible {
    ===================================================== */
 .map-tool-suite,
 .luxury-navbar,
-.nav-item,
-.footer-gradient-line {
+.nav-item {
   transition-property: all;
   transition-duration: 0.6s;
   transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
@@ -1591,43 +1620,8 @@ body {
   }
 }
 
-/* =====================================================
-   FOOTER - PREMIUM
-   ===================================================== */
-.suite-footer {
-  position: relative;
-  padding: 30px 2rem;
-  background: linear-gradient(
-    135deg,
-    var(--bg-secondary) 0%,
-    var(--bg-primary) 100%
-  );
-  margin-top: auto;
-}
-
-.footer-gradient-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--current-accent) 50%,
-    transparent 100%
-  );
-  opacity: 0.4;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.footer-text {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 300;
-  letter-spacing: 0.08em;
-}
+/* FOOTER — defined once above (console base register). Duplicate
+   block removed during the FABLE5 footer refactor. */
 
 /* =====================================================
    RESPONSIVE DESIGN
@@ -2116,8 +2110,7 @@ button:focus-visible {
    ===================================================== */
 .map-tool-suite,
 .luxury-navbar,
-.nav-item,
-.footer-gradient-line {
+.nav-item {
   transition-property: all;
   transition-duration: 0.6s;
   transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);

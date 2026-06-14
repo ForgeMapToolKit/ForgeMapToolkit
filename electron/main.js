@@ -62,7 +62,7 @@ let splashWindow = null;
 app.once('ready', () => {
   splashWindow = new BrowserWindow({
     width: 1200,
-    height: 866,
+    height: 600,
     frame: false,
     transparent: true,
     resizable: false,
@@ -102,12 +102,18 @@ function createWindow() {
   if (process.env.NODE_ENV === 'development') {
     log.info('Loading dev server: http://localhost:5173');
     mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
   } else {
     const indexPath = path.join(__dirname, '../dist/index.html');
     log.info('Loading production build:', indexPath);
     mainWindow.loadFile(indexPath);
   }
+
+  // DevTools open on launch ONLY if the user enabled it (Settings → Developer
+  // → "Open DevTools on Launch"). Off by default, so the app never starts with
+  // them open in dev or prod; F12 toggles them anytime.
+  try {
+    if (readSettings().devTools) mainWindow.webContents.openDevTools();
+  } catch (_) { /* settings not readable — leave DevTools closed */ }
 
   // When the main window is ready, close splash and show main
   mainWindow.once('ready-to-show', () => {
@@ -194,7 +200,7 @@ function openLogWindow() {
 
 // __GUIDE_HASHES_START__
 const GUIDE_SCRIPT_HASHES = [
-  "'sha256-cDEiuQMW8yBArmecJ5rb405vilw1UM9FhGmgD+fjfTI='"
+  "'sha256-FFSS8Bf1a2XU04Nv79y2kuip49sN9dFjjSgFdS6I/eI='"
 ];
 // __GUIDE_HASHES_END__
 
@@ -231,9 +237,17 @@ function installCSP() {
     ? " http://localhost:5173 ws://localhost:5173"
     : "";
 
+  // In dev, Vite injects an inline React-refresh preamble. A script-src that
+  // lists hashes makes browsers IGNORE 'unsafe-inline', so dev gets its own
+  // hash-free policy that allows inline + eval + the dev server. Production
+  // stays strict and hash-pinned.
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173"
+    : `script-src 'self' 'sha256-2HCWXB1O/5LE2p1N3Wn6PZFyo3spKmW14WEJ3CeciXA=' ${GUIDE_SCRIPT_HASHES.join(' ')}`;
+
   const CSP = [
     "default-src 'none'",
-    `script-src 'self' 'sha256-2HCWXB1O/5LE2p1N3Wn6PZFyo3spKmW14WEJ3CeciXA=' ${GUIDE_SCRIPT_HASHES.join(' ')}${isDev ? " 'unsafe-eval' http://localhost:5173" : ""}`,
+    scriptSrc,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https://raw.githubusercontent.com https://avatars.githubusercontent.com",
     "media-src 'self' data:",
