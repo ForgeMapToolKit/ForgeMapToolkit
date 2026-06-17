@@ -25,14 +25,19 @@ import './Banner.css';
  * the register idles dark.
  *
  * Props:
- *  - activeSection: current tool id or null (home)
+ *  - activeSection:  current tool id or null (home)
+ *  - previewSection: tool id being hovered on the home screen (null otherwise).
+ *                    Drives the accent/glow so the banner previews the hovered
+ *                    tool's hue while idling on the homepage. The printed
+ *                    register label stays tied to the *active* tool only.
  */
-const Banner = ({ activeSection }) => {
-  const tool = getTool(activeSection);
+const Banner = ({ activeSection, previewSection = null }) => {
+  const tool      = getTool(activeSection);
+  const themeTool = tool ?? getTool(previewSection);
 
-  const accent     = tool?.color      ?? 'var(--accent-primary, #ff8c00)';
-  const glow       = tool?.glow       ?? 'var(--accent-glow, rgba(255,140,0,0.12))';
-  const glowStrong = tool?.glowStrong ?? 'var(--accent-glow-strong, rgba(255,140,0,0.7))';
+  const accent     = themeTool?.color      ?? 'var(--accent-primary, #ff8c00)';
+  const glow       = themeTool?.glow       ?? 'var(--accent-glow, rgba(255,140,0,0.12))';
+  const glowStrong = themeTool?.glowStrong ?? 'var(--accent-glow-strong, rgba(255,140,0,0.7))';
 
   return (
     <header

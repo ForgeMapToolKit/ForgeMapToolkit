@@ -8,9 +8,18 @@ import { generateReadme as buildReadme, writeReadme } from '../../../../../utils
 import EmitterHelpModal from '../../HelpModals/Emitter_help.jsx';
 import WorkspaceConsole from '../../../shared/WorkspaceConsole/WorkspaceConsole.jsx';
 import {
-  EntityCard, EntityCardGrid, AddTile, CoordinateList,
-  MatchingMode, OutputChecklist, EmitterAssignmentOverlay, MapPreview,
+  EmitterAssignmentOverlay, MapPreview,
 } from '../../../shared/entity-console/EntityConsole.jsx';
+import {
+  getMirroredCoords, kmLabel,
+  ensureDir, writeFile, injectPropsLua, resolveToolkitEmitterPublicPaths,
+  drawPlacementCanvas,
+  usePersistentState, useMapInfo, useScmapPreview, useEmitterCategories,
+} from '../../../shared/map-logic';
+import EmitterConfiguration from './Emitter_Configuration.jsx';
+import EmitterEmitters from './Emitter_Emitters.jsx';
+import EmitterMatching from './Emitter_Matching.jsx';
+import EmitterExport from './Emitter_Export.jsx';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
@@ -26,19 +35,6 @@ const makeEmitterCard = () => ({
   color:             `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`,
   emitterCategories: [],
 });
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const getMirroredCoords = (x, z, mapSize, mode, offsetX = 0) => {
-  const ms = parseFloat(mapSize) || 1024;
-  const far = 2 * offsetX + ms;
-  switch (mode) {
-    case 'diagonal':   return { x: far - x, z: far - z };
-    case 'horizontal': return { x,           z: far - z };
-    case 'vertical':   return { x: far - x,  z           };
-    default:           return null;
-  }
-};
 
 // ── Grid Generator (Poisson Disk Sampling) ────────────────────────────────────
 
@@ -140,83 +136,23 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
 
   // ── Shared State ──────────────────────────────────────────────────────────────
 
-  const [mapSize,          setMapSizeState]          = useState(s.em_mapSize          ?? settings?.defaultMapSize ?? '1024');
-  const [mapName,          setMapNameState]          = useState(s.em_mapName          ?? '');
-  const [mapsFolderPath,   setMapsFolderPathState]   = useState(s.em_mapsFolderPath   ?? '');
-  const [mapInfo,              setMapInfo]              = useState(null);
-  const [mapOffsetX,           setMapOffsetX]           = useState(0);
-  const [mapOffsetY,           setMapOffsetY]           = useState(0);
+  const [mapName,             setMapName]             = usePersistentState(s, 'em_mapName', '', onSharedChange);
+  const [mapsFolderPath,      setMapsFolderPath]      = usePersistentState(s, 'em_mapsFolderPath', '', onSharedChange);
+  const [mirrorMode,          setMirrorMode]          = usePersistentState(s, 'em_mirrorMode', settings?.defaultMirrorMode ?? 'diagonal', onSharedChange);
+  const [globalRandomness,    setGlobalRandomness]    = usePersistentState(s, 'em_globalRandomness', { ...DEFAULT_RANDOMNESS }, onSharedChange);
+  const [emitterCards,        setEmitterCards]        = usePersistentState(s, 'em_emitterCards', [makeEmitterCard()], onSharedChange);
+  const [emitterPaths,        setEmitterPaths]        = usePersistentState(s, 'em_emitterPaths', [''], onSharedChange);
+  const [emitterPublicPaths,  setEmitterPublicPaths]  = usePersistentState(s, 'em_emitterPublicPaths', {}, onSharedChange);
+  const [generateReadme,      setGenerateReadme]      = usePersistentState(s, 'em_generateReadme', settings?.generateReadme !== false, onSharedChange);
+  const [exportRawLua,        setExportRawLua]        = usePersistentState(s, 'em_exportRawLua', false, onSharedChange);
+  const [emitterCategories,   setEmitterCategories]   = usePersistentState(s, 'em_emitterCategories', {}, onSharedChange);
+  const [emitterMatchingMode, setEmitterMatchingMode] = usePersistentState(s, 'em_emitterMatchingMode', 'smart', onSharedChange);
+  const [activeSection,       setActiveSection]       = useState('config');
 
-  useEffect(() => {
-    const name   = (mapName || '').trim();
-    const folder = (mapsFolderPath || settings?.mapsFolder || '').trim();
-    if (!name || !folder) { setMapInfo(null); setMapSize('1024'); setMapOffsetX(0); setMapOffsetY(0); return; }
-    const finalName     = /\.v\d{4}$/.test(name) ? name : name + '.v0001';
-    const mapFolderPath = folder + '\\' + finalName;
-    window.electronAPI.invoke('read-map-info', { mapFolderPath }).then(res => {
-      if (res?.success) {
-        setMapInfo({ ok: true, mapSize: res.mapSize, km: res.km, playableSize: res.playableSize, playableKm: res.playableKm });
-        setMapSize(String(res.playableSize));
-        setMapOffsetX(res.x1); setMapOffsetY(res.y1);
-        onSharedChange('em_mapSize', String(res.playableSize));
-      } else {
-        setMapInfo({ ok: false, error: 'save.lua not found' });
-        setMapSize('1024'); setMapOffsetX(0); setMapOffsetY(0);
-      }
-    }).catch(() => { setMapInfo(null); setMapSize('1024'); });
-  }, [mapName, mapsFolderPath, settings?.mapsFolder]);
-
-  const [mirrorMode,       setMirrorModeState]       = useState(s.em_mirrorMode       ?? settings?.defaultMirrorMode ?? 'diagonal');
-  const [globalRandomness, setGlobalRandomnessState] = useState(s.em_globalRandomness ?? { ...DEFAULT_RANDOMNESS });
-  const [emitterCards,     setEmitterCardsState]     = useState(s.em_emitterCards     ?? [makeEmitterCard()]);
-  const [emitterPaths,     setEmitterPathsState]     = useState(s.em_emitterPaths     ?? ['']);
-  const [emitterPublicPaths, setEmitterPublicPathsState] = useState(s.em_emitterPublicPaths ?? {});
-  const [generateReadme,      setGenerateReadmeState]      = useState(s.em_generateReadme      ?? (settings?.generateReadme !== false));
-  const [exportRawLua,        setExportRawLuaState]        = useState(s.em_exportRawLua        ?? false);
-  const [emitterCategories,   setEmitterCategoriesState]   = useState(s.em_emitterCategories   ?? {});
-  const [emitterMatchingMode, setEmitterMatchingModeState] = useState(s.em_emitterMatchingMode ?? 'smart');
-  const [activeSection,       setActiveSection]            = useState('config');
-
-  const setMapSize          = v => { setMapSizeState(v);          onSharedChange('em_mapSize',        v); };
-  const setMapName          = v => { setMapNameState(v);          onSharedChange('em_mapName',        v); };
-  const setMapsFolderPath   = v => { setMapsFolderPathState(v);   onSharedChange('em_mapsFolderPath', v); };
-  const setMirrorMode       = v => { setMirrorModeState(v);       onSharedChange('em_mirrorMode',     v); };
-  const setGenerateReadme   = v => { setGenerateReadmeState(v);   onSharedChange('em_generateReadme', v); };
-  const setExportRawLua     = v => { setExportRawLuaState(v);     onSharedChange('em_exportRawLua', v); };
-  const setEmitterCategories   = v => { setEmitterCategoriesState(prev => { const next = typeof v === 'function' ? v(prev) : v; onSharedChange('em_emitterCategories', next); return next; }); };
-  const setEmitterMatchingMode = v => { setEmitterMatchingModeState(v); onSharedChange('em_emitterMatchingMode', v); };
-
-  const setEmitterPaths = v => {
-    setEmitterPathsState(prev => {
-      const next = typeof v === 'function' ? v(prev) : v;
-      onSharedChange('em_emitterPaths', next);
-      return next;
-    });
-  };
-
-  const setEmitterPublicPaths = v => {
-    setEmitterPublicPathsState(prev => {
-      const next = typeof v === 'function' ? v(prev) : v;
-      onSharedChange('em_emitterPublicPaths', next);
-      return next;
-    });
-  };
-
-  const setGlobalRandomness = v => {
-    setGlobalRandomnessState(prev => {
-      const next = typeof v === 'function' ? v(prev) : v;
-      onSharedChange('em_globalRandomness', next);
-      return next;
-    });
-  };
-
-  const setEmitterCards = v => {
-    setEmitterCardsState(prev => {
-      const next = typeof v === 'function' ? v(prev) : v;
-      onSharedChange('em_emitterCards', next);
-      return next;
-    });
-  };
+  const { mapInfo, mapSize, mapOffsetX, mapOffsetY } = useMapInfo({
+    mapName, mapsFolderPath, settings,
+    onMapSize: v => onSharedChange('em_mapSize', v),
+  });
 
   // ── Settings Sync ─────────────────────────────────────────────────────────────
 
@@ -230,9 +166,8 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   // ── Local UI State ────────────────────────────────────────────────────────────
 
   const [selectedCard,       setSelectedCard]       = useState(0);
-  const [previewImage,       setPreviewImage]       = useState(null);
-  const [previewImageData,   setPreviewImageData]   = useState(null);
-  const [previewLoading,     setPreviewLoading]     = useState(false);
+  const { previewImage, previewImageData, setPreviewImageData, previewLoading } =
+    useScmapPreview({ mapName, mapsFolderPath, settings });
   const [showEmitterLibrary, setShowEmitterLibrary] = useState(false);
   const [showColorPicker,    setShowColorPicker]    = useState(null);
   const [coordsOpen,         setCoordsOpen]         = useState({});
@@ -277,15 +212,22 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       })
   );
 
+  // ── Canvas Draw ───────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (previewImageData) {
-      const img = new Image();
-      img.onload = () => setPreviewImage(img);
-      img.src = previewImageData;
-    } else {
-      setPreviewImage(null);
-    }
-  }, [previewImageData]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    drawPlacementCanvas(ctx, {
+      width: 1024, height: 1024,
+      mapSize: parseFloat(mapSize) || 1024,
+      mapOffsetX, mapOffsetY,
+      previewImage, mirrorMode,
+      entities: emitterCards, selectedIdx: selectedCard,
+      getColor: card => card.color,
+      getCoords: card => card.coordinates,
+    });
+  }, [emitterCards, selectedCard, previewImage, mapSize, mirrorMode, mapOffsetX, mapOffsetY]);
 
   // ── Canvas Click ──────────────────────────────────────────────────────────────
 
@@ -414,53 +356,22 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
     });
   };
 
-  // ── IPC File Helpers ──────────────────────────────────────────────────────────
-
-  const writeFile = async (filePath, content) => {
-    const res = await window.electronAPI.invoke('write-file', { filePath, content });
-    if (!res?.success) throw new Error(res?.error || 'write-file failed');
-  };
-
-  const ensureDir = async (dirPath) => {
-    const res = await window.electronAPI.invoke('ensure-dir', { dirPath });
-    if (!res?.success) throw new Error(res?.error || 'ensure-dir failed');
-  };
-
   // ── Category Logic ────────────────────────────────────────────────────────────
 
-  const getAllUniqueCategories = () => {
-    const categoriesSet = new Set();
-    emitterCards.forEach(card => {
-      (card.emitterCategories || []).forEach(cat => {
-        if (cat && cat.trim()) categoriesSet.add(cat.trim());
-      });
-    });
-    return Array.from(categoriesSet).sort();
-  };
-
-  const getAllEmitterPaths = () => emitterPaths.filter(p => p.trim());
-
-  const toggleEmitterCategory = (emitterPath, category) => {
-    setEmitterCategories(prev => {
-      const next = { ...prev };
-      if (!next[emitterPath]) next[emitterPath] = [];
-      const idx = next[emitterPath].indexOf(category);
-      next[emitterPath] = idx > -1
-        ? next[emitterPath].filter(c => c !== category)
-        : [...next[emitterPath], category];
-      return next;
-    });
-  };
-
-  const isEmitterActiveForCategory = (emitterPath, category) => {
-    if (!emitterCategories[emitterPath]) return true;
-    return !emitterCategories[emitterPath].includes(category);
-  };
-
-  const getEmitterNameFromPath = (path) => {
-    const parts = path.split('/');
-    return parts[parts.length - 1].replace('_emit.bp', '').replace(/_/g, ' ');
-  };
+  const {
+    getAllUniqueCategories,
+    isEmitterActiveForCategory,
+    toggleEmitterCategory,
+    getEmitterNameFromPath,
+    getEmittersForEntity: getEmittersForCard,
+  } = useEmitterCategories({
+    entities: emitterCards,
+    getCategories: card => card.emitterCategories,
+    emitters: emitterPaths,
+    emitterCategories,
+    setEmitterCategories,
+    matchingMode: emitterMatchingMode,
+  });
 
   const addEmitterCardCategory = (cardIndex) => {
     setEmitterCards(emitterCards.map((c, i) =>
@@ -484,27 +395,6 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
         emitterCategories: (c.emitterCategories || []).filter((_, j) => j !== catIndex)
       } : c
     ));
-  };
-
-  const getEmittersForCard = (card) => {
-    const validEmitters = getAllEmitterPaths();
-    const activeCategories = (card.emitterCategories || []).filter(c => c.trim());
-    if (activeCategories.length === 0) return validEmitters;
-
-    if (emitterMatchingMode === 'smart') {
-      const perfect = validEmitters.filter(p => activeCategories.every(cat => isEmitterActiveForCategory(p, cat)));
-      if (perfect.length > 0) return perfect;
-      const partial = validEmitters.filter(p => activeCategories.some(cat => isEmitterActiveForCategory(p, cat)));
-      return partial.length > 0 ? partial : validEmitters;
-    } else if (emitterMatchingMode === 'simple') {
-      const union = validEmitters.filter(p => activeCategories.some(cat => isEmitterActiveForCategory(p, cat)));
-      return union.length > 0 ? union : validEmitters;
-    } else if (emitterMatchingMode === 'lastCategory') {
-      const last = activeCategories[activeCategories.length - 1];
-      const match = validEmitters.filter(p => isEmitterActiveForCategory(p, last));
-      return match.length > 0 ? match : validEmitters;
-    }
-    return validEmitters;
   };
 
   // ── Generate ──────────────────────────────────────────────────────────────────
@@ -552,22 +442,10 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       const emitterDestDir = `${mapFolderPath}\\env\\props\\emitter`;
       await ensureDir(emitterDestDir);
 
-      const resolvedPublicPaths = { ...emitterPublicPaths };
-      const pathsNeedingLookup = emitterPaths.filter(p => p.trim() && !resolvedPublicPaths[p.trim()]);
-      if (pathsNeedingLookup.length > 0) {
-        const scanRes = await window.electronAPI.invoke('scan-map-emitters', {
-          mapsFolder, mapName: finalMapName,
-        });
-        const scanned = scanRes?.emitters ?? [];
-        for (const rawPath of pathsNeedingLookup) {
-          const filename = rawPath.replace(/\\/g, '/').split('/').pop();
-          const match = scanned.find(
-            e => e.source === 'toolkit' && e.publicPath &&
-                 e.publicPath.replace(/\\/g, '/').split('/').pop() === filename
-          );
-          if (match) resolvedPublicPaths[rawPath] = match.publicPath;
-        }
-      }
+      const resolvedPublicPaths = await resolveToolkitEmitterPublicPaths({
+        paths: emitterPaths, knownPublic: emitterPublicPaths,
+        mapsFolder, mapName: finalMapName,
+      });
 
       for (const rawPath of emitterPaths.filter(p => p.trim())) {
         const srcAbsolute = resolvedPublicPaths[rawPath];
@@ -681,50 +559,12 @@ TypeClass = ${pairName}`;
       }
       propsLuaContent += '}\n';
 
-      const existingEntries = await window.electronAPI.invoke('list-dir', { dirPath: mapFolderPath });
-      let maxIdx = 0;
-      let hasSingle = false;
-      for (const e of (existingEntries?.entries || [])) {
-        if (e.name === 'props.lua') hasSingle = true;
-        const m = e.name.match(/^props(\d+)\.lua$/);
-        if (m) maxIdx = Math.max(maxIdx, parseInt(m[1]));
-      }
-      const propsLuaFileName = maxIdx > 0 ? `props${maxIdx + 1}.lua`
-                             : hasSingle  ? `props1.lua`
-                             : `props.lua`;
-
-      let scmapEntry = { name: `${finalMapName} (no SCMAP modified)` };
-      if (exportRawLua) {
-        await writeFile(`${mapFolderPath}\\${propsLuaFileName}`, propsLuaContent);
-      } else {
-        const dirEntries = existingEntries?.entries || [];
-        const scmapFile = dirEntries.find(e => !e.isDirectory && e.name.toLowerCase().endsWith('.scmap'));
-        if (!scmapFile) throw new Error(`No .scmap file found in ${mapFolderPath}`);
-        const scmapPath = `${mapFolderPath}\\${scmapFile.name}`;
-        scmapEntry = scmapFile;
-
-        const unpackRes = await window.electronAPI.invoke('scmap-unpack', { scmapPath });
-        if (!unpackRes.success) throw new Error(`Unpack failed: ${unpackRes.error}`);
-        const unpackedFolder = unpackRes.outputFolder;
-
-        await writeFile(`${unpackedFolder}\\${propsLuaFileName}`, propsLuaContent);
-
-        const mapNameForPack = unpackedFolder.split(/[\\\/]/).pop();
-        const packRes = await window.electronAPI.invoke('scmap-pack', { mapName: mapNameForPack });
-        if (!packRes.success) throw new Error(`Pack failed: ${packRes.error}`);
-
-        const copyBackRes = await window.electronAPI.invoke('copy-file', {
-          src:  packRes.outputPath,
-          dest: scmapPath,
-        });
-        if (!copyBackRes?.success) throw new Error('Failed to copy repacked .scmap back to map folder');
-      }
+      const { propsLuaFileName } = await injectPropsLua({
+        mapFolderPath, content: propsLuaContent, exportRawLua,
+      });
 
       if (generateReadme) {
-        const sizeNum   = parseFloat(mapSize) || 1024;
-        const kmPerUnit = 20 / 1024;
-        const km        = sizeNum * kmPerUnit;
-        const kmStr     = Number.isInteger(km) ? `${km}×${km}` : `${km.toFixed(1)}×${km.toFixed(1)}`;
+        const kmStr = kmLabel(mapSize);
 
         const outputLines = [`  Total placements : ${propsLuaEntries.length}`];
         if (exportRawLua && propsLuaFileName)
@@ -855,42 +695,6 @@ TypeClass = ${pairName}`;
     setShowEmitterLibrary(false);
   };
 
-  // ── Preview Auto-Load ─────────────────────────────────────────────────────────
-
-  const loadPreviewFromScmap = async (mapFolderPath) => {
-    try {
-      setPreviewLoading(true);
-      const dirRes = await window.electronAPI.invoke('list-dir', { dirPath: mapFolderPath });
-      if (!dirRes?.success) return;
-      const scmapEntry = dirRes.entries.find(e => !e.isDirectory && e.name.toLowerCase().endsWith('.scmap'));
-      if (!scmapEntry) return;
-      const scmapPath = mapFolderPath + '\\' + scmapEntry.name;
-      const unpackRes = await window.electronAPI.invoke('scmap-unpack', { scmapPath });
-      if (!unpackRes?.success) return;
-      const unpackDir = await window.electronAPI.invoke('list-dir', { dirPath: unpackRes.outputFolder });
-      if (!unpackDir?.success) return;
-      const previewEntry = unpackDir.entries.find(e => /^previewimage/i.test(e.name));
-      if (!previewEntry) return;
-      const ddsPath = unpackRes.outputFolder + '\\' + previewEntry.name;
-      const ddsRes = await window.electronAPI.invoke('dds-to-dataurl', { filePath: ddsPath });
-      if (ddsRes?.success && ddsRes.dataUrl) setPreviewImageData(ddsRes.dataUrl);
-    } catch (e) {
-      console.warn('[Emitter] preview load failed:', e);
-    } finally {
-      setPreviewLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    setPreviewImageData(null);
-    const name   = (mapName || '').trim();
-    const folder = (mapsFolderPath || settings?.mapsFolder || '').trim();
-    if (!name || !folder) return;
-    const finalName     = /\.v\d{4}$/.test(name) ? name : name + '.v0001';
-    const mapFolderPath = folder + '\\' + finalName;
-    loadPreviewFromScmap(mapFolderPath);
-  }, [mapName, mapsFolderPath, settings?.mapsFolder]);
-
   // ── Image Upload ──────────────────────────────────────────────────────────────
 
   const handleImageUpload = (e) => {
@@ -943,6 +747,44 @@ TypeClass = ${pairName}`;
     { color: '#FFFFFF', glow: 'rgba(255,255,255,0.35)' },
     { color: '#FF69B4', glow: 'rgba(255,105,180,0.35)' },
   ];
+
+  // ── Section Props ───────────────────────────────────────────────────────────
+
+  const configProps = {
+    mapName, setMapName, mapInfo,
+    globalRandomness, setGlobalRandomness,
+    maskFileInputRef, maskImageData, handleMaskUpload,
+    maskScanMode, setMaskScanMode, maskPreviewUrl, maskWidth, maskHeight,
+    onRemoveMask: () => {
+      setMaskImageData(null); setMaskWidth(0); setMaskHeight(0);
+      setMaskPreviewUrl(null);
+      if (maskFileInputRef.current) maskFileInputRef.current.value = '';
+    },
+    emitterPaths, updateEmitterPath, resolveEmitterPath, deleteEmitterPath,
+    onAddEmitter: addEmitterPath,
+    onOpenLibrary: () => setShowEmitterLibrary(true),
+  };
+
+  const emittersProps = {
+    emitterCards, selectedCard, setSelectedCard,
+    availableColors, showColorPicker, setShowColorPicker,
+    coordsOpen, setCoordsOpen,
+    deleteAllEmitterCards, addEmitterCard, deleteEmitterCard, updateCard,
+    addEmitterCardCategory, updateEmitterCardCategory, deleteEmitterCardCategory,
+    updateCardRandomness, handleGenerateGrid,
+    addManualCoordinate, updateCoordinate, deleteCoordinate, clearCoordinates,
+  };
+
+  const matchingProps = {
+    emitterMatchingMode, setEmitterMatchingMode,
+    onConfigure: () => setShowEmitterCategoryConfig(true),
+  };
+
+  const exportProps = {
+    ready: emitterCards.some(c => c.coordinates.some(coord => coord.x && coord.z)),
+    handleGenerate,
+    generateReadme, setGenerateReadme, exportRawLua, setExportRawLua,
+  };
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -1024,10 +866,12 @@ TypeClass = ${pairName}`;
         railStorageKey="em-rail-pinned"
         navLabel="Emitter console navigation"
         bootMs={280}
+
         mirrorSlot={
-          <>
+          <div className="preview-panel-head-controls">
             <select
               className="field-select"
+              style={{ width: 'auto' }}
               value={mirrorMode}
               onChange={e => setMirrorMode(e.target.value)}
             >
@@ -1039,6 +883,7 @@ TypeClass = ${pairName}`;
             {previewImageData && (
               <button
                 className="action-button action-button--danger"
+                style={{ padding: '4px 10px', fontSize: '0.62rem' }}
                 onClick={() => {
                   setPreviewImageData(null);
                   if (fileInputRef.current) fileInputRef.current.value = '';
@@ -1047,7 +892,7 @@ TypeClass = ${pairName}`;
                 Delete Preview
               </button>
             )}
-          </>
+          </div>
         }
         previewSlot={
           <MapPreview
@@ -1075,304 +920,16 @@ TypeClass = ${pairName}`;
         }
       >
         {/* ── 01 CONFIG ── */}
-        {activeSection === 'config' && (
-          <>
-            <div className="form-group">
-              <label className="field-label">Map Name</label>
-              <input
-                type="text"
-                className="field-input"
-                placeholder="e.g. Hades_Dust.v0002"
-                value={mapName}
-                onChange={e => setMapName(e.target.value)}
-              />
-              {mapInfo && (
-                <div className="ec-map-info">
-                  {mapInfo.ok ? (<>
-                    <span className="ec-map-info-tag">Map</span>
-                    <span className="ec-map-info-size">{mapInfo.mapSize} × {mapInfo.mapSize}</span>
-                    <span className="ec-map-info-sep">·</span>
-                    <span>{mapInfo.km} km</span>
-                    {mapInfo.playableSize !== mapInfo.mapSize && (<>
-                      <span className="ec-map-info-sep">·</span>
-                      <span>playable {mapInfo.playableKm} km</span>
-                    </>)}
-                  </>) : (
-                    <span className="ec-map-info-err">{mapInfo.error}</span>
-                  )}
-                </div>
-              )}
-              {mapName && (
-                <div className="ec-path-hint">
-                  {`Saves to: /maps/${mapName.match(/\.v\d{4}$/) ? mapName : mapName + '.v0001'}/`}
-                </div>
-              )}
-            </div>
-
-            {/* Global Randomness */}
-            <div className="subsection-head">
-              <span className="subsection-head-title">Global Randomness</span>
-            </div>
-            <div className="form-group">
-              <label className="field-label">Poisson Min. Distance</label>
-              <input
-                type="number"
-                min="0"
-                className="field-input"
-                placeholder="0"
-                value={globalRandomness.poissonRadius}
-                onChange={e => setGlobalRandomness(prev => ({ ...prev, poissonRadius: e.target.value }))}
-              />
-            </div>
-
-            {/* Area Mask */}
-            <div className="subsection-head">
-              <span className="subsection-head-title">Area Mask</span>
-            </div>
-            <div className="em-mask-upload" onClick={() => maskFileInputRef.current?.click()}>
-              <span>{maskImageData ? 'Mask loaded — click to replace' : 'Click to upload mask image (B/W)'}</span>
-              <input
-                ref={maskFileInputRef}
-                type="file"
-                style={{ display: 'none' }}
-                accept="image/*"
-                onChange={handleMaskUpload}
-              />
-            </div>
-            <div className="form-group">
-              <label className="field-label">Dark Pixel Behaviour</label>
-              <select
-                className="field-select"
-                value={maskScanMode}
-                onChange={e => setMaskScanMode(e.target.value)}
-              >
-                <option value="right">Slide Right — shift emitter rightward to next white pixel</option>
-                <option value="left">Slide Left — shift emitter leftward to next white pixel</option>
-                <option value="ignore">Ignore — skip emitter entirely on dark pixels</option>
-              </select>
-            </div>
-            {maskPreviewUrl && (
-              <div className="em-mask-preview">
-                <img
-                  src={maskPreviewUrl}
-                  alt="Area Mask Preview"
-                  className="em-mask-img"
-                />
-                <div className="em-mask-dim">{maskWidth} × {maskHeight} px</div>
-              </div>
-            )}
-            {maskImageData && (
-              <button
-                className="action-button action-button--danger action-button--full"
-                style={{ marginBottom: 'var(--space-md)' }}
-                onClick={() => {
-                  setMaskImageData(null); setMaskWidth(0); setMaskHeight(0);
-                  setMaskPreviewUrl(null);
-                  if (maskFileInputRef.current) maskFileInputRef.current.value = '';
-                }}
-              >Remove Mask</button>
-            )}
-
-            {/* Emitter Paths */}
-            <div className="subsection-head" style={{ marginTop: 'var(--space-xl)' }}>
-              <span className="subsection-head-title">Emitter Paths</span>
-            </div>
-            <div className="form-group">
-              <label className="field-label">Emitters (_emit.bp)</label>
-              {emitterPaths.map((path, pi) => (
-                <div key={pi} className="ec-input-row">
-                  <input
-                    type="text"
-                    className="field-input field-input--mono"
-                    placeholder="/effects/emitters/weather_sand_01_emit.bp"
-                    value={path}
-                    onChange={e => updateEmitterPath(pi, e.target.value)}
-                    onBlur={e => resolveEmitterPath(pi, e.target.value)}
-                  />
-                  <button className="delete-button" onClick={() => deleteEmitterPath(pi)}>×</button>
-                </div>
-              ))}
-              <button className="action-button action-button--full" style={{ marginBottom: 'var(--space-xs)' }} onClick={addEmitterPath}>
-                Add Emitter
-              </button>
-              <button className="action-button action-button--full" onClick={() => setShowEmitterLibrary(true)}>
-                Library
-              </button>
-            </div>
-          </>
-        )}
+        {activeSection === 'config' && <EmitterConfiguration {...configProps} />}
 
         {/* ── 02 EMITTERS ── */}
-        {activeSection === 'emitters' && (
-          <>
-            <div className="trace-section-head" style={{ marginBottom: 'var(--space-md)' }}>
-              <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
-                {emitterCards.length >= 1 && (
-                  <button className="action-button action-button--danger" onClick={deleteAllEmitterCards}>
-                    Delete All
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <EntityCardGrid>
-              {emitterCards.map((card, ci) => (
-                <EntityCard
-                  key={card.id}
-                  index={ci}
-                  color={card.color}
-                  selected={ci === selectedCard}
-                  onSelect={() => setSelectedCard(ci)}
-                  onDelete={() => deleteEmitterCard(ci)}
-                  title={card.label ? card.label.toUpperCase() : `Emitter ${ci + 1}`}
-                  availableColors={availableColors}
-                  showColorPicker={showColorPicker === ci}
-                  onToggleColorPicker={() => setShowColorPicker(showColorPicker === ci ? null : ci)}
-                  onPickColor={(c) => { updateCard(ci, 'color', c); setShowColorPicker(null); }}
-                >
-                  {ci === selectedCard && (<>
-                    {/* Label */}
-                    <div className="form-group">
-                      <label className="field-label">Label</label>
-                      <input
-                        type="text"
-                        className="field-input"
-                        placeholder="e.g. Fire Emitters"
-                        value={card.label}
-                        onChange={e => { e.stopPropagation(); updateCard(ci, 'label', e.target.value); }}
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-
-                    {/* Categories */}
-                    <div className="form-group">
-                      <label className="field-label">Emitter Categories (optional)</label>
-                      {(card.emitterCategories || []).map((cat, catIdx) => (
-                        <div key={catIdx} className="ec-input-row">
-                          <input
-                            type="text"
-                            className="field-input"
-                            value={cat}
-                            onChange={e => { e.stopPropagation(); updateEmitterCardCategory(ci, catIdx, e.target.value); }}
-                            onClick={e => e.stopPropagation()}
-                            placeholder={`Category ${catIdx + 1} (e.g. Smoke, Fog)`}
-                          />
-                          <button className="delete-button" onClick={e => { e.stopPropagation(); deleteEmitterCardCategory(ci, catIdx); }}>×</button>
-                        </div>
-                      ))}
-                      <button
-                        className="action-button action-button--full"
-                        onClick={e => { e.stopPropagation(); addEmitterCardCategory(ci); }}
-                      >
-                        Add Category
-                      </button>
-                    </div>
-
-                    {/* Grid Placement */}
-                    <div className="subsection-head">
-                      <span className="subsection-head-title">Grid Placement</span>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)' }}>
-                      <div className="form-group">
-                        <label className="field-label" style={{ fontSize: '0.72rem' }}>X Step</label>
-                        <input
-                          type="number" min="1"
-                          className="field-input field-input--sm"
-                          placeholder="64"
-                          value={card.gridStepX}
-                          onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepX', e.target.value); }}
-                          onClick={e => e.stopPropagation()}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="field-label" style={{ fontSize: '0.72rem' }}>Z Step</label>
-                        <input
-                          type="number" min="1"
-                          className="field-input field-input--sm"
-                          placeholder="64"
-                          value={card.gridStepZ}
-                          onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepZ', e.target.value); }}
-                          onClick={e => e.stopPropagation()}
-                        />
-                      </div>
-                    </div>
-                    <button
-                      className="action-button action-button--full"
-                      style={{ marginBottom: 'var(--space-lg)' }}
-                      disabled={!card.gridStepX || !card.gridStepZ}
-                      onClick={e => { e.stopPropagation(); handleGenerateGrid(ci); }}
-                    >Generate Grid</button>
-
-                    {/* Per-card randomness */}
-                    <div className="subsection-head">
-                      <span className="subsection-head-title">Card Randomness Override</span>
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 'var(--space-lg)' }}>
-                      <label className="field-label" style={{ fontSize: '0.72rem' }}>Poisson Min. Distance</label>
-                      <input
-                        type="number" min="0"
-                        className="field-input field-input--sm"
-                        placeholder="0"
-                        value={card.randomness.poissonRadius}
-                        onChange={e => { e.stopPropagation(); updateCardRandomness(ci, 'poissonRadius', e.target.value); }}
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </div>
-
-                    {/* Coordinates */}
-                    <CoordinateList
-                      coordinates={card.coordinates}
-                      fields={[[
-                        { key: 'x', label: 'X', placeholder: '256' },
-                        { key: 'z', label: 'Z', placeholder: '256' },
-                      ]]}
-                      open={!!coordsOpen[ci]}
-                      onToggle={() => setCoordsOpen(prev => ({ ...prev, [ci]: !prev[ci] }))}
-                      labelFor={(coord, coordIdx) => `Point ${coordIdx + 1}${coord.isMirrored ? ' · mirror' : ''}`}
-                      onUpdate={(coordIdx, key, val) => updateCoordinate(ci, coordIdx, key, val)}
-                      onDelete={(coordIdx) => deleteCoordinate(ci, coordIdx)}
-                      onAdd={() => addManualCoordinate(ci)}
-                      hasPlaced={card.coordinates.some(c => c.x && c.z)}
-                      onDeleteAll={async () => {
-                        const ok = await luxuryConfirm('Delete all coordinates for this card?', 'Confirm Delete', 'Delete All', 'Cancel');
-                        if (ok) clearCoordinates(ci);
-                      }}
-                    />
-                  </>)}
-                </EntityCard>
-              ))}
-              <AddTile label="Add Emitter Card" onClick={addEmitterCard} />
-            </EntityCardGrid>
-          </>
-        )}
+        {activeSection === 'emitters' && <EmitterEmitters {...emittersProps} />}
 
         {/* ── 03 MATCHING ── */}
-        {activeSection === 'matching' && (
-          <MatchingMode
-            value={emitterMatchingMode}
-            onChange={setEmitterMatchingMode}
-            onConfigure={() => setShowEmitterCategoryConfig(true)}
-            modes={[
-              { key: 'smart',        label: 'Smart Combination (3-Tier)', desc: 'Perfect Match → Partial Match → Fallback',  note: 'Card ["Smoke", "Dense"] gets only emitters active for BOTH categories first' },
-              { key: 'simple',       label: 'Simple Union',               desc: 'Use ALL emitters active for ANY category',  note: 'Card ["Smoke", "Dense"] gets all emitters active for Smoke OR Dense' },
-              { key: 'lastCategory', label: 'Last Category Only',         desc: 'Match only the last category in the list',  note: 'Card ["Smoke", "Dense"] → matches "Dense" only' },
-            ]}
-          />
-        )}
+        {activeSection === 'matching' && <EmitterMatching {...matchingProps} />}
 
         {/* ── 04 EXPORT ── */}
-        {activeSection === 'export' && (
-          <OutputChecklist
-            ready={emitterCards.some(c => c.coordinates.some(coord => coord.x && coord.z))}
-            onCommit={handleGenerate}
-            commitLabel="Generate Files"
-            commitAriaLabel="Generate emitter files"
-            items={[
-              { label: 'Generate README file',       checked: generateReadme, onToggle: () => setGenerateReadme(!generateReadme) },
-              { label: 'Export props.lua (no SCMAP)', checked: exportRawLua,  onToggle: () => setExportRawLua(!exportRawLua) },
-            ]}
-          />
-        )}
+        {activeSection === 'export' && <EmitterExport {...exportProps} />}
       </WorkspaceConsole>
     </div>
   );

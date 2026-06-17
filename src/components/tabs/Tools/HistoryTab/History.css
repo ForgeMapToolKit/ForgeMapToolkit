@@ -6,9 +6,9 @@
 
 /* ── Variables ────────────────────────────────────────────────────── */
 .hist-tab {
-  --hist-color:             #FF8AFF;
-  --hist-glow:              rgba(255, 138, 255, 0.35);
-  --hist-glow-strong:       rgba(255, 138, 255, 0.6);
+  --hist-color:             var(--history-color);
+  --hist-glow:              var(--history-glow);
+  --hist-glow-strong:       var(--history-glow-strong);
   --hist-bg:                #0a0a0a;
   --hist-bg-card:           #141414;
   --hist-bg-hover:          #1f1f1f;

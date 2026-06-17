@@ -6,7 +6,8 @@
  *  - ForgeMapToolkit.jsx (mega navbar config, header accent resolution)
  *
  * Adding a new tool:
- *  1. Add its accent variables to root.css (--<id>-color / -glow / -glow-strong)
+ *  1. Add its accent variables to the design-system SSOT
+ *     shared/design-system/tokens.css (--<id>-color / -glow / -glow-strong)
  *  2. Add one entry to TOOLS below — home screen and navbar pick it up automatically
  *  3. Register its component + route in ForgeMapToolkit.jsx
  *

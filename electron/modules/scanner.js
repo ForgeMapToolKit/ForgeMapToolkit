@@ -627,7 +627,7 @@ async function checkPreviewCoverage(units) {
     const req = https.get({
       hostname: 'api.github.com',
       path: '/repos/timmasalme/ForgeMapToolkit-Assets/contents/units',
-      headers: { 'User-Agent': 'map-tool-suite' },
+      headers: { 'User-Agent': 'forgemaptoolkit' },
     }, res => {
       let data = '';
       res.on('data', c => data += c);

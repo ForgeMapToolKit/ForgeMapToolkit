@@ -8,9 +8,9 @@
   --amh-text:               #ffffff;
   --amh-text-sec:           #b0b0b0;
   --amh-text-muted:         #666666;
-  --tab-color:              #ff8c00;
-  --tab-glow:               rgba(255, 140, 0, 0.35);
-  --tab-glow-strong:        rgba(255, 140, 0, 0.6);
+  --tab-color:              var(--adaptivemaphelper-color);
+  --tab-glow:               var(--adaptivemaphelper-glow);
+  --tab-glow-strong:        var(--adaptivemaphelper-glow-strong);
 
   color:       var(--amh-text);
   font-family: 'Poppins', sans-serif;

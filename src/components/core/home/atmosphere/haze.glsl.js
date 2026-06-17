@@ -67,7 +67,7 @@ export const HAZE_FRAG = /* glsl */ `
   float fbm(vec2 p) {
     float v = 0.0;
     float amp = 0.5;
-    for (int i = 0; i < 3; i++) {                // 3 octaves — cheap, low-freq
+    for (int i = 0; i < 4; i++) {                // 3 octaves — cheap, low-freq
       v += amp * vnoise(p);
       p = p * 2.02 + 7.0;
       amp *= 0.5;
@@ -114,10 +114,10 @@ export const HAZE_FRAG = /* glsl */ `
     float x = clamp(uv.x, 0.0, 1.0);
     float centerY = mix(0.42, 0.56, x) - uFront * 0.02;
     float halfH   = mix(0.30, 0.42, x) * (1.0 - uFront * 0.25);
-    float band    = 1.0 - smoothstep(halfH * 0.35, halfH, abs(uv.y - centerY));
+    float band = 1.0 - smoothstep(halfH * 0.10, halfH * 1.3, abs(uv.y - centerY));
 
     float rightCut = mix(1.0, 0.80, uFront);
-    float hEnv = smoothstep(0.0, 0.05, x) * (1.0 - smoothstep(rightCut, rightCut + 0.18, x));
+    float hEnv = smoothstep(0.0, 0.12, x) * (1.0 - smoothstep(rightCut, rightCut + 0.32, x));
     // Gentle leftward bias: full density at the left, easing to ~55% at the
     // right so the focus leans left while the haze stays present across.
     float hFocus = mix(1.0, 0.55, smoothstep(0.0, 0.9, x));

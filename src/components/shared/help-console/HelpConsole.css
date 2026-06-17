@@ -184,17 +184,20 @@
   clip-path: inset(0 100% 0 0);
   animation: hc-print 0.22s var(--ease-out) 0.05s both;
 }
+/* type comes from the .title-main primitive; .hc-hero adds only the
+   carriage-print layout + animation */
 .hc-hero {
   flex-shrink: 0;
   margin: 0;
-  font-size: clamp(2rem, 4.5vw, 3rem);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.02em;
-  line-height: 0.9;
-  text-transform: uppercase;
-  color: var(--ink-100);
   clip-path: inset(0 100% 0 0);
   animation: hc-print 0.34s var(--ease-out) 0.08s both;
+}
+/* the first section in a content area follows the register head directly —
+   it needs no neutral divider of its own (later sections keep theirs). */
+.hc-section > .hs-section:first-child > .title-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 @keyframes hc-print { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 
@@ -252,6 +255,19 @@
 .hc-content::-webkit-scrollbar-track { background: transparent; }
 .hc-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
 .hc-content::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+/* ── Bare section ─────────────────────────────────────────────────────
+   The register head folds INTO the scroll area so the content runs the
+   full height up to the rail. Whatever scrolls up under the tab bar is
+   dissolved by a top fade-mask — the line vanishes AT the rail, with no
+   hard cut partway down the stage. */
+.hc-stage--bare { padding-top: 0; }
+.hc-content--bare {
+  padding-top: var(--space-2xl);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 34px, #000 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 34px, #000 100%);
+}
+.hc-bare-head { margin-bottom: var(--space-md); }
 
 /* ── HelpButton — the right-edge pull-tab (Help ⇄ Close) ─────────── */
 .help-tab {

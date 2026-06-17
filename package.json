@@ -16,6 +16,7 @@
   "dependencies": {
     "@uiw/react-color": "^2.9.6",
     "adm-zip": "^0.5.16",
+    "framer-motion": "^12.40.0",
     "highlight.js": "^11.11.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.263.1",

@@ -159,7 +159,7 @@ export default function MediaSection({
 }) {
   return (
     <div className="hs-section hs-media">
-      {label && <div className="hs-section-label">{label}</div>}
+      {label && <div className="title-section">{label}</div>}
 
       {(layout === 'image-left' || layout === 'image-right') && (
         <SplitLayout src={src} alt={alt} title={title} body={body} layout={layout} />

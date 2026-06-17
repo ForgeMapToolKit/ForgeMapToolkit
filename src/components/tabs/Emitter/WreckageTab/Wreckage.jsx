@@ -9,9 +9,18 @@ import EmitterLibraryOverlay from '../../Libraries/EmitterLibrary/EmitterLibrary
 import { WreckageHelp, WreckageHelpButton } from './Wreckage_help';
 import WorkspaceConsole from '../../../shared/WorkspaceConsole/WorkspaceConsole.jsx';
 import {
-  EntityCard, EntityCardGrid, AddTile, CoordinateList,
-  MatchingMode, OutputChecklist, EmitterAssignmentOverlay, MapPreview,
+  EmitterAssignmentOverlay, MapPreview,
 } from '../../../shared/entity-console/EntityConsole.jsx';
+import {
+  getMirroredCoords, kmLabel,
+  ensureDir, writeFile, injectPropsLua,
+  drawPlacementCanvas,
+  usePersistentState, useMapInfo, useScmapPreview, useEmitterCategories,
+} from '../../../shared/map-logic';
+import WreckageConfiguration from './Wreckage_Configuration.jsx';
+import WreckageUnits from './Wreckage_Units.jsx';
+import WreckageMatching from './Wreckage_Matching.jsx';
+import WreckageExport from './Wreckage_Export.jsx';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
@@ -63,86 +72,23 @@ const WreckageTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecor
 
   // ── Shared State ──────────────────────────────────────────────────────────────
 
-  const [mapSize,             setMapSizeState]             = useState(s.wr_mapSize             ?? settings?.defaultMapSize ?? '1024');
-  const [mapName,             setMapNameState]             = useState(s.wr_mapName             ?? '');
-  const [mapsFolderPath,      setMapsFolderPathState]      = useState(s.wr_mapsFolderPath      ?? settings?.mapsFolder     ?? '');
-  const [mapInfo,              setMapInfo]              = useState(null);
-  const [mapOffsetX,           setMapOffsetX]           = useState(0);
-  const [mapOffsetY,           setMapOffsetY]           = useState(0);
+  const [mapName,             setMapName]             = usePersistentState(s, 'wr_mapName', '', onSharedChange);
+  const [mapsFolderPath,      setMapsFolderPath]      = usePersistentState(s, 'wr_mapsFolderPath', settings?.mapsFolder ?? '', onSharedChange);
+  const [emitterBpFolderPath, setEmitterBpFolderPath] = usePersistentState(s, 'wr_emitterBpFolderPath', '', onSharedChange);
+  const [emitters,            setEmitters]            = usePersistentState(s, 'wr_emitters', [''], onSharedChange);
+  const [blueprintPaths,      setBlueprintPaths]      = usePersistentState(s, 'wr_blueprintPaths', [''], onSharedChange);
+  const [blueprintPublicPaths, setBlueprintPublicPaths] = usePersistentState(s, 'wr_blueprintPublicPaths', {}, onSharedChange);
+  const [units,               setUnits]               = usePersistentState(s, 'wr_units', [{ ...DEFAULT_UNIT, id: Date.now() }], onSharedChange);
+  const [emitterCategories,   setEmitterCategories]   = usePersistentState(s, 'wr_emitterCategories', {}, onSharedChange);
+  const [emitterMatchingMode, setEmitterMatchingMode] = usePersistentState(s, 'wr_emitterMatchingMode', 'smart', onSharedChange);
+  const [generateReadme,      setGenerateReadme]      = usePersistentState(s, 'wr_generateReadme', settings?.generateReadme !== false, onSharedChange);
+  const [exportRawLua,        setExportRawLua]        = usePersistentState(s, 'wr_exportRawLua', false, onSharedChange);
+  const [mirrorMode,          setMirrorMode]          = usePersistentState(s, 'wr_mirrorMode', settings?.defaultMirrorMode ?? 'diagonal', onSharedChange);
 
-  useEffect(() => {
-    const name   = (mapName || '').trim();
-    const folder = (mapsFolderPath || settings?.mapsFolder || '').trim();
-    if (!name || !folder) { setMapInfo(null); setMapSize('1024'); setMapOffsetX(0); setMapOffsetY(0); return; }
-    const finalName     = /\.v\d{4}$/.test(name) ? name : name + '.v0001';
-    const mapFolderPath = folder + '\\' + finalName;
-    window.electronAPI.invoke('read-map-info', { mapFolderPath }).then(res => {
-      if (res?.success) {
-        setMapInfo({ ok: true, mapSize: res.mapSize, km: res.km, playableSize: res.playableSize, playableKm: res.playableKm });
-        setMapSize(String(res.playableSize));
-        setMapOffsetX(res.x1); setMapOffsetY(res.y1);
-        onSharedChange('wr_mapSize', String(res.playableSize));
-      } else {
-        setMapInfo({ ok: false, error: 'save.lua not found' });
-        setMapSize('1024'); setMapOffsetX(0); setMapOffsetY(0);
-      }
-    }).catch(() => { setMapInfo(null); setMapSize('1024'); });
-
-    // Auto-load preview image from .scmap when map name is entered
-    loadPreviewFromScmap(mapFolderPath);
-  }, [mapName, mapsFolderPath, settings?.mapsFolder]);
-
-  const loadPreviewFromScmap = async (mapFolderPath) => {
-    try {
-      setPreviewLoading(true);
-      const dirRes = await window.electronAPI.invoke('list-dir', { dirPath: mapFolderPath });
-      if (!dirRes?.success) return;
-      const scmapEntry = dirRes.entries.find(e => !e.isDirectory && e.name.toLowerCase().endsWith('.scmap'));
-      if (!scmapEntry) return;
-      const scmapPath = mapFolderPath + '\\' + scmapEntry.name;
-      const unpackRes = await window.electronAPI.invoke('scmap-unpack', { scmapPath });
-      if (!unpackRes?.success) return;
-      const unpackDir = await window.electronAPI.invoke('list-dir', { dirPath: unpackRes.outputFolder });
-      if (!unpackDir?.success) return;
-      const previewEntry = unpackDir.entries.find(e => /^previewimage/i.test(e.name));
-      if (!previewEntry) return;
-      const ddsPath = unpackRes.outputFolder + '\\' + previewEntry.name;
-      const ddsRes = await window.electronAPI.invoke('dds-to-dataurl', { filePath: ddsPath });
-      if (ddsRes?.success && ddsRes.dataUrl) {
-        setPreviewImageData(ddsRes.dataUrl);
-      }
-    } catch (e) {
-      console.warn('[WR] preview load from scmap failed:', e);
-    } finally {
-      setPreviewLoading(false);
-    }
-  };
-  const [emitterBpFolderPath, setEmitterBpFolderPathState] = useState(s.wr_emitterBpFolderPath ?? '');
-  const [emitters,            setEmittersState]            = useState(s.wr_emitters            ?? ['']);
-  const [blueprintPaths,      setBlueprintPathsState]      = useState(s.wr_blueprintPaths      ?? ['']);
-  const [blueprintPublicPaths, setBlueprintPublicPathsState] = useState(s.wr_blueprintPublicPaths ?? {});
-  const [units,               setUnitsState]               = useState(s.wr_units               ?? [{ ...DEFAULT_UNIT, id: Date.now() }]);
-  const [emitterCategories,   setEmitterCategoriesState]   = useState(s.wr_emitterCategories   ?? {});
-  const [emitterMatchingMode, setEmitterMatchingModeState] = useState(s.wr_emitterMatchingMode ?? 'smart');
-  const [generateReadme,      setGenerateReadmeState]      = useState(s.wr_generateReadme      ?? (settings?.generateReadme !== false));
-  const [exportRawLua,        setExportRawLuaState]        = useState(s.wr_exportRawLua        ?? false);
-  const [mirrorMode,          setMirrorModeState]          = useState(s.wr_mirrorMode          ?? settings?.defaultMirrorMode ?? 'diagonal');
-
-  // ── Shared State Setters ──────────────────────────────────────────────────────
-
-  const setMapSize             = v => { setMapSizeState(v);             onSharedChange('wr_mapSize', v); };
-  const setMapName             = v => { setMapNameState(v);             onSharedChange('wr_mapName', v); };
-  const setMapsFolderPath      = v => { setMapsFolderPathState(v);      onSharedChange('wr_mapsFolderPath', v); };
-  const setEmitterBpFolderPath = v => { setEmitterBpFolderPathState(v); onSharedChange('wr_emitterBpFolderPath', v); };
-  const setEmitters            = v => { setEmittersState(prev      => { const next = typeof v === 'function' ? v(prev) : v; onSharedChange('wr_emitters', next); return next; }); };
-  const setBlueprintPaths      = v => { setBlueprintPathsState(prev => { const next = typeof v === 'function' ? v(prev) : v; onSharedChange('wr_blueprintPaths', next); return next; }); };
-  const setBlueprintPublicPaths = v => { setBlueprintPublicPathsState(prev => { const next = typeof v === 'function' ? v(prev) : v; onSharedChange('wr_blueprintPublicPaths', next); return next; }); };
-  const setUnits               = v => { setUnitsState(prev          => { const next = typeof v === 'function' ? v(prev) : v; onSharedChange('wr_units', next); return next; }); };
-  const setEmitterCategories   = v => { setEmitterCategoriesState(prev => { const next = typeof v === 'function' ? v(prev) : v; onSharedChange('wr_emitterCategories', next); return next; }); };
-  const setEmitterMatchingMode = v => { setEmitterMatchingModeState(v); onSharedChange('wr_emitterMatchingMode', v); };
-  const setGenerateReadme      = v => { setGenerateReadmeState(v);      onSharedChange('wr_generateReadme', v); };
-  const setExportRawLua        = v => { setExportRawLuaState(v);        onSharedChange('wr_exportRawLua', v); };
-  const setMirrorMode          = v => { setMirrorModeState(v);          onSharedChange('wr_mirrorMode', v); };
+  const { mapInfo, mapSize, mapOffsetX, mapOffsetY } = useMapInfo({
+    mapName, mapsFolderPath, settings,
+    onMapSize: v => onSharedChange('wr_mapSize', v),
+  });
 
   // ── Settings Sync ─────────────────────────────────────────────────────────────
 
@@ -157,9 +103,8 @@ const WreckageTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecor
 
   const [selectedUnit, setSelectedUnit] = useState(0);
   const [coordsOpen, setCoordsOpen] = useState({});
-  const [previewImage, setPreviewImage] = useState(null);
-  const [previewImageData, setPreviewImageData] = useState(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
+  const { previewImage, previewImageData, setPreviewImageData, previewLoading } =
+    useScmapPreview({ mapName, mapsFolderPath, settings });
 
   const [showColorPicker, setShowColorPicker] = useState(null);
   const [showUnitLibrary, setShowUnitLibrary] = useState(false);
@@ -591,14 +536,6 @@ const loadUnitLibrary = loadLibrariesFromIPC;
     setSelectedCategory(null);
   };
 
-  useEffect(() => {
-    if (previewImageData) {
-      const img = new Image();
-      img.onload = () => setPreviewImage(img);
-      img.src = previewImageData;
-    }
-  }, [previewImageData]);
-
   // ── Unit Name Migration ───────────────────────────────────────────────────────
 
 useEffect(() => {
@@ -636,93 +573,18 @@ useEffect(() => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    const width = 1024;
-    const height = 1024;
-
-    ctx.clearRect(0, 0, width, height);
-
-    if (previewImage && previewImage.complete) {
-      ctx.drawImage(previewImage, 0, 0, width, height);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-      ctx.fillRect(0, 0, width, height);
-    } else {
-      ctx.fillStyle = '#0a0a0a';
-      ctx.fillRect(0, 0, width, height);
-      
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 1;
-      const gridSize = width / 8;
-      for (let i = 0; i <= 8; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * gridSize, 0);
-        ctx.lineTo(i * gridSize, height);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, i * gridSize);
-        ctx.lineTo(width, i * gridSize);
-        ctx.stroke();
-      }
-    }
-
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([10, 10]);
-    
-    if (mirrorMode === 'diagonal' || mirrorMode === 'vertical') {
-      ctx.beginPath();
-      ctx.moveTo(width / 2, 0);
-      ctx.lineTo(width / 2, height);
-      ctx.stroke();
-    }
-    
-    if (mirrorMode === 'diagonal' || mirrorMode === 'horizontal') {
-      ctx.beginPath();
-      ctx.moveTo(0, height / 2);
-      ctx.lineTo(width, height / 2);
-      ctx.stroke();
-    }
-
-    ctx.setLineDash([]);
-
-    units.forEach((unit, unitIdx) => {
-      unit.coordinates.forEach((coord) => {
-        if (!coord.x || !coord.z) return;
-
-        const x = ((parseFloat(coord.x) - mapOffsetX) / parseFloat(mapSize)) * width;
-        const z = ((parseFloat(coord.z) - mapOffsetY) / parseFloat(mapSize)) * height;
-
-        ctx.fillStyle = unit.color;
-        ctx.shadowColor = unit.color;
-        ctx.shadowBlur = unitIdx === selectedUnit ? 20 : 15;
-        
-        ctx.beginPath();
-        ctx.arc(x, z, unitIdx === selectedUnit ? 8 : 6, 0, Math.PI * 2);
-        ctx.fill();
-        
-        if (unitIdx === selectedUnit) {
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = 3;
-          ctx.stroke();
-        }
-
-        if (coord.isMirrored) {
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(x - 6, z - 6);
-          ctx.lineTo(x - 6, z + 6);
-          ctx.lineTo(x + 6, z - 6);
-          ctx.stroke();
-        }
-
-        ctx.shadowBlur = 0;
-      });
+    drawPlacementCanvas(ctx, {
+      width: 1024, height: 1024,
+      mapSize: parseFloat(mapSize) || 1024,
+      mapOffsetX, mapOffsetY,
+      previewImage, mirrorMode,
+      entities: units, selectedIdx: selectedUnit,
+      getColor: unit => unit.color,
+      getCoords: unit => unit.coordinates,
     });
-  }, [units, selectedUnit, previewImage, mapSize, mirrorMode]);
+  }, [units, selectedUnit, previewImage, mapSize, mirrorMode, mapOffsetX, mapOffsetY]);
 
   // ── Emitter Management ───────────────────────────────────────────────────────
 
@@ -918,84 +780,20 @@ const deleteUnit = (index) => {
 
   // ── Category Logic ────────────────────────────────────────────────────────────
 
-const getAllUniqueCategories = () => {
-  const categoriesSet = new Set();
-  units.forEach(unit => {
-    if (unit.unitCategories && unit.unitCategories.length > 0) {
-      unit.unitCategories.forEach(cat => {
-        if (cat && cat.trim()) {
-          categoriesSet.add(cat.trim());
-        }
-      });
-    }
-  });
-  return Array.from(categoriesSet).sort();
-};
-const getEmittersForUnit = (unit) => {
-  const validEmitters = blueprintPaths.filter(p => p.trim());
-  
-  if (!unit.unitCategories || unit.unitCategories.length === 0) {
-    return validEmitters; // Fallback: all emitters
-  }
-  
-  const activeCategories = unit.unitCategories.filter(c => c.trim());
-  
-  if (activeCategories.length === 0) {
-    return validEmitters; // Fallback: all emitters
-  }
-  
-  if (emitterMatchingMode === 'smart') {
-    const perfectMatch = validEmitters.filter(path => {
-      return activeCategories.every(category => 
-        isEmitterActiveForCategory(path, category.trim())
-      );
-    });
-    
-    if (perfectMatch.length > 0) {
-      return perfectMatch;
-    }
-    
-    const partialMatch = validEmitters.filter(path => {
-      return activeCategories.some(category => 
-        isEmitterActiveForCategory(path, category.trim())
-      );
-    });
-    
-    if (partialMatch.length > 0) {
-      return partialMatch;
-    }
-    
-    return validEmitters;
-    
-  } else if (emitterMatchingMode === 'simple') {
-    const unionMatch = validEmitters.filter(path => {
-      return activeCategories.some(category => 
-        isEmitterActiveForCategory(path, category.trim())
-      );
-    });
-    
-    if (unionMatch.length > 0) {
-      return unionMatch;
-    }
-    
-    return validEmitters;
-    
-  } else if (emitterMatchingMode === 'lastCategory') {
-    const lastCategory = activeCategories[activeCategories.length - 1].trim();
-    
-    const lastCategoryMatch = validEmitters.filter(path => {
-      return isEmitterActiveForCategory(path, lastCategory);
-    });
-    
-    if (lastCategoryMatch.length > 0) {
-      return lastCategoryMatch;
-    }
-    
-    return validEmitters;
-  }
-  
-  return validEmitters;
-};
+const {
+  getAllUniqueCategories,
+  isEmitterActiveForCategory,
+  toggleEmitterCategory,
+  getEmitterNameFromPath,
+  getEmittersForEntity: getEmittersForUnit,
+} = useEmitterCategories({
+  entities: units,
+  getCategories: unit => unit.unitCategories,
+  emitters: blueprintPaths,
+  emitterCategories,
+  setEmitterCategories,
+  matchingMode: emitterMatchingMode,
+});
 
   // ── Coordinate CRUD ───────────────────────────────────────────────────────────
 
@@ -1012,7 +810,7 @@ const getEmittersForUnit = (unit) => {
         const newZ = parseFloat(newUnits[unitIndex].coordinates[coordIndex].z);
         
         if (!isNaN(newX) && !isNaN(newZ)) {
-          const newMirrored = getMirroredCoords(newX, newZ, mapSize, mirrorMode);
+          const newMirrored = getMirroredCoords(newX, newZ, mapSize, mirrorMode, mapOffsetX);
           
           if (newMirrored) {
             let mirrorIndex = -1;
@@ -1150,57 +948,6 @@ const getEmittersForUnit = (unit) => {
     setUnits(newUnits);
   };
 
-  // ── Mirror Coords ─────────────────────────────────────────────────────────────
-
-  const getMirroredCoords = (x, z, mapSize, mode) => {
-    const mapSizeNum = parseFloat(mapSize) || 1024;
-    const far = 2 * mapOffsetX + mapSizeNum; 
-    switch (mode) {
-      case 'diagonal':
-        return { x: far - x, z: far - z };
-      case 'horizontal':
-        return { x, z: far - z };
-      case 'vertical':
-        return { x: far - x, z };
-      default:
-        return null;
-    }
-  };
-
-    // ── Emitter Category Logic ────────────────────────────────────────────────────
-
-const toggleEmitterCategory = (emitterPath, category) => {
-  setEmitterCategories(prev => {
-    const newConfig = { ...prev };
-    
-    if (!newConfig[emitterPath]) {
-      newConfig[emitterPath] = [];
-    }
-    
-    const index = newConfig[emitterPath].indexOf(category);
-    if (index > -1) {
-      newConfig[emitterPath] = newConfig[emitterPath].filter(c => c !== category);
-    } else {
-      newConfig[emitterPath] = [...newConfig[emitterPath], category];
-    }
-    
-    return newConfig;
-  });
-};
-
-const isEmitterActiveForCategory = (emitterPath, category) => {
-  if (!emitterCategories[emitterPath]) {
-    return true;
-  }
-  return !emitterCategories[emitterPath].includes(category);
-};
-
-const getEmitterNameFromPath = (path) => {
-  const pathParts = path.split('/');
-  const filename = pathParts[pathParts.length - 1];
-  return filename.replace('_emit.bp', '').replace(/_/g, ' ');
-};
-
   // ── Canvas Click ──────────────────────────────────────────────────────────────
 
   const handleCanvasClick = (e) => {
@@ -1273,9 +1020,9 @@ const getEmitterNameFromPath = (path) => {
       
       setUnits(newUnits);
     } else {
-      const mirrored = getMirroredCoords(worldX, worldZ, mapSize, mirrorMode);
+      const mirrored = getMirroredCoords(worldX, worldZ, mapSize, mirrorMode, mapOffsetX);
       const pairId = `mirror_${Date.now()}_${Math.random()}`;
-      
+
       const mirroredRotation = getMirroredRotation('math.pi', '0.0', 'math.pi', mirrorMode);
       
       const emptyCoordIndex = newUnits[selectedUnit].coordinates.findIndex(c => !c.x && !c.z);
@@ -1368,8 +1115,6 @@ const handleImageUpload = async (e) => {
 
   // ── IPC File Helpers ──────────────────────────────────────────────────────────
 
-  const writeFile   = async (filePath, content) => { const r = await window.electronAPI.invoke('write-file',  { filePath, content }); if (!r?.success) throw new Error(r?.error || 'write-file failed'); };
-  const ensureDir   = async (dirPath)           => { const r = await window.electronAPI.invoke('ensure-dir',  { dirPath });           if (!r?.success) throw new Error(r?.error || 'ensure-dir failed'); };
   const copyFile    = async (src, dest)          => { const r = await window.electronAPI.invoke('copy-file',   { src, dest });         if (!r?.success) throw new Error(r?.error || 'copy-file failed'); };
   const listDir     = async (dirPath)            => { const r = await window.electronAPI.invoke('list-dir',    { dirPath });           if (!r?.success) throw new Error(r?.error || 'list-dir failed'); return r.entries; };
 
@@ -1513,68 +1258,7 @@ const handleImageUpload = async (e) => {
           
 let emitterPath = '/effects/emitters/destruction_explosion_concussion_ring_03_emit.bp';
 if (validEmitterPaths.length > 0) {
-  let availableEmitters = validEmitterPaths;
-  
-  if (unit.unitCategories && unit.unitCategories.length > 0) {
-    const activeCategories = unit.unitCategories.filter(c => c.trim());
-    
-    if (activeCategories.length > 0) {
-      
-      if (emitterMatchingMode === 'smart') {
-        
-        const perfectMatch = validEmitterPaths.filter(path => {
-          return activeCategories.every(category => 
-            isEmitterActiveForCategory(path, category.trim())
-          );
-        });
-        
-        if (perfectMatch.length > 0) {
-          availableEmitters = perfectMatch;
-        } else {
-          const partialMatch = validEmitterPaths.filter(path => {
-            return activeCategories.some(category => 
-              isEmitterActiveForCategory(path, category.trim())
-            );
-          });
-          
-          if (partialMatch.length > 0) {
-            availableEmitters = partialMatch;
-          } else {
-            availableEmitters = validEmitterPaths;
-          }
-        }
-        
-      } else if (emitterMatchingMode === 'simple') {
-        
-        const unionMatch = validEmitterPaths.filter(path => {
-          return activeCategories.some(category => 
-            isEmitterActiveForCategory(path, category.trim())
-          );
-        });
-        
-        if (unionMatch.length > 0) {
-          availableEmitters = unionMatch;
-        } else {
-          availableEmitters = validEmitterPaths;
-        }
-      
-        } else if (emitterMatchingMode === 'lastCategory') {
-  
-  const lastCategory = activeCategories[activeCategories.length - 1].trim();
-  
-  const lastCategoryMatch = validEmitterPaths.filter(path => {
-    return isEmitterActiveForCategory(path, lastCategory);
-  });
-  
-  if (lastCategoryMatch.length > 0) {
-    availableEmitters = lastCategoryMatch;
-  } else {
-    availableEmitters = validEmitterPaths;
-  }
-}
-    }
-  }
-  
+  const availableEmitters = getEmittersForUnit(unit);
   const randomIndex = Math.floor(Math.random() * availableEmitters.length);
   emitterPath = availableEmitters[randomIndex];
 }
@@ -1707,54 +1391,13 @@ TypeClass = ${instanceName}`;
       }
       propsLuaContent += '}\n';
 
-      // ── Nächsten freien props-Dateinamen bestimmen ────────────────────────
-      const existingEntries = await window.electronAPI.invoke('list-dir', { dirPath: mapFolderPath });
-      let maxIdx = 0;
-      let hasSingle = false;
-      for (const e of (existingEntries?.entries || [])) {
-        if (e.name === 'props.lua') hasSingle = true;
-        const m = e.name.match(/^props(\d+)\.lua$/);
-        if (m) maxIdx = Math.max(maxIdx, parseInt(m[1]));
-      }
-      const propsLuaFileName = maxIdx > 0 ? `props${maxIdx + 1}.lua`
-                             : hasSingle  ? `props1.lua`
-                             : `props.lua`;
-
-      // ── Schreiben & ggf. SCMAP-Repack ─────────────────────────────────────
-      let scmapEntry = { name: `${finalMapName} (no SCMAP modified)` };
-      if (exportRawLua) {
-        // no-SCMAP: direkt ins Map-Root schreiben, fertig
-        await writeFile(`${mapFolderPath}\\${propsLuaFileName}`, propsLuaContent);
-      } else {
-        // SCMAP-Modus: unpack → direkt in unpack-Ordner schreiben → repack
-        const dirEntries = existingEntries?.entries || [];
-        const scmapFile = dirEntries.find(e => !e.isDirectory && e.name.toLowerCase().endsWith('.scmap'));
-        if (!scmapFile) throw new Error(`No .scmap file found in ${mapFolderPath}`);
-        const scmapPath = `${mapFolderPath}\\${scmapFile.name}`;
-        scmapEntry = scmapFile;
-
-        const unpackRes = await window.electronAPI.invoke('scmap-unpack', { scmapPath });
-        if (!unpackRes.success) throw new Error(`Unpack failed: ${unpackRes.error}`);
-        const unpackedFolder = unpackRes.outputFolder;
-
-        await writeFile(`${unpackedFolder}\\${propsLuaFileName}`, propsLuaContent);
-
-        const mapNameForPack = unpackedFolder.split(/[\\\/]/).pop();
-        const packRes = await window.electronAPI.invoke('scmap-pack', { mapName: mapNameForPack });
-        if (!packRes.success) throw new Error(`Pack failed: ${packRes.error}`);
-
-        const copyBackRes = await window.electronAPI.invoke('copy-file', {
-          src:  packRes.outputPath,
-          dest: scmapPath,
-        });
-        if (!copyBackRes?.success) throw new Error('Failed to copy repacked .scmap back to map folder');
-      }
-      // scmapEntry wird in der Success-Message verwendet
+      // ── props.lua schreiben (raw oder via SCMAP-Repack) ───────────────────
+      const { propsLuaFileName } = await injectPropsLua({
+        mapFolderPath, content: propsLuaContent, exportRawLua,
+      });
 
       if (generateReadme) {
-        const kmPerUnit = 20 / 1024;
-        const km        = (parseFloat(mapSize) || 1024) * kmPerUnit;
-        const kmStr     = Number.isInteger(km) ? `${km}×${km}` : `${km.toFixed(1)}×${km.toFixed(1)}`;
+        const kmStr = kmLabel(mapSize);
 
         const outputSummaryLines = [];
         outputSummaryLines.push(`  Total placements : ${propsLuaEntries.length}`);
@@ -1995,264 +1638,39 @@ TypeClass = ${instanceName}`;
 
   // ── Section content map — each section's JSX ────────────────────────────────
 
+  const configProps = {
+    mapName, setMapName, mapInfo,
+    blueprintPaths, updateBlueprintPath, deleteBlueprintPath, resolveEmitterPath,
+    emittersRef,
+    onAddEmitter: () => setBlueprintPaths(prev => [...prev, '']),
+    onOpenLibrary: () => setShowEmitterLibrary(true),
+  };
+
+  const unitsProps = {
+    units, selectedUnit, setSelectedUnit,
+    availableColors, showColorPicker, setShowColorPicker,
+    coordsOpen, setCoordsOpen,
+    handleImportFromMap, deleteAllUnits, addUnit, deleteUnit, updateUnit,
+    onOpenUnitLibrary: (i) => { setSelectedUnit(i); setShowUnitLibrary(true); loadUnitLibrary(); },
+    addUnitCategory, updateUnitCategory, deleteUnitCategory,
+    addCoordinate, updateCoordinate, deleteCoordinate, deleteAllCoordinates,
+  };
+
+  const matchingProps = {
+    emitterMatchingMode, setEmitterMatchingMode,
+    onConfigure: () => setShowEmitterCategoryConfig(true),
+  };
+
+  const exportProps = {
+    isReady, generateFiles,
+    generateReadme, setGenerateReadme, exportRawLua, setExportRawLua,
+  };
+
   const sectionContent = {
-
-    config: (
-      <>
-        <div style={{ marginBottom: '20px' }}>
-          <label className="field-label">Map Name</label>
-          <input
-            type="text"
-            className="field-input"
-            value={mapName}
-            onChange={(e) => setMapName(e.target.value)}
-            placeholder="e.g. Hades_Dust.v0002"
-          />
-          {mapInfo && (
-            <div className="ec-map-info">
-              {mapInfo.ok ? (<>
-                <span className="ec-map-info-tag">Map</span>
-                <span className="ec-map-info-size">{mapInfo.mapSize} × {mapInfo.mapSize}</span>
-                <span className="ec-map-info-sep">·</span>
-                <span>{mapInfo.km} km</span>
-                {mapInfo.playableSize !== mapInfo.mapSize && (<>
-                  <span className="ec-map-info-sep">·</span>
-                  <span>playable {mapInfo.playableKm} km</span>
-                </>)}
-              </>) : (
-                <span className="ec-map-info-err">{mapInfo.error}</span>
-              )}
-            </div>
-          )}
-          {mapName && (
-            <div className="ec-path-hint">
-              {`Saves to: /maps/${mapName.match(/\.v\d{4}$/) ? mapName : mapName + '.v0001'}/`}
-            </div>
-          )}
-        </div>
-
-        <div ref={emittersRef}>
-          <label className="field-label">Emitters</label>
-          {blueprintPaths.map((path, idx) => {
-            let displayPath = path;
-            if (mapName && path &&
-                !path.startsWith('/maps/') &&
-                !path.startsWith('/effects/') &&
-                !path.startsWith('/env/') &&
-                !path.startsWith('/textures/') &&
-                !path.startsWith('/units/') &&
-                !path.startsWith('/projectiles/')) {
-              let finalMapName = mapName.trim();
-              if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) {
-                finalMapName += '.v0001';
-              }
-              const relativePath = path.startsWith('/') ? path.substring(1) : path;
-              displayPath = `/maps/${finalMapName}/${relativePath}`;
-            }
-            return (
-              <div key={idx} className="ec-input-row">
-                <input
-                  type="text"
-                  className="field-input"
-                  value={displayPath}
-                  onChange={(e) => {
-                    let newPath = e.target.value;
-                    if (mapName && newPath.startsWith('/maps/')) {
-                      let finalMapName = mapName.trim();
-                      if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) {
-                        finalMapName += '.v0001';
-                      }
-                      const prefix = `/maps/${finalMapName}/`;
-                      if (newPath.startsWith(prefix)) {
-                        newPath = '/' + newPath.substring(prefix.length);
-                      }
-                    }
-                    updateBlueprintPath(idx, newPath);
-                  }}
-                  onBlur={(e) => {
-                    let val = e.target.value;
-                    if (mapName && val.startsWith('/maps/')) {
-                      let finalMapName = mapName.trim();
-                      if (finalMapName && !finalMapName.match(/\.v\d{4}$/)) finalMapName += '.v0001';
-                      const prefix = `/maps/${finalMapName}/`;
-                      if (val.startsWith(prefix)) val = '/' + val.substring(prefix.length);
-                    }
-                    resolveEmitterPath(idx, val);
-                  }}
-                  placeholder="/effects/emitters/weather_sand_01_emit.bp"
-                />
-                <button className="delete-button" onClick={() => deleteBlueprintPath(idx)}>×</button>
-              </div>
-            );
-          })}
-
-          <button
-            onClick={() => { const newPaths = [...blueprintPaths]; newPaths.push(''); setBlueprintPaths(newPaths); }}
-            className="action-button action-button--full"
-            style={{ marginBottom: '8px' }}
-          >
-            Add Emitter
-          </button>
-
-          <button
-            onClick={() => setShowEmitterLibrary(true)}
-            className="action-button action-button--full"
-          >
-            Library
-          </button>
-        </div>
-      </>
-    ),
-
-    units: (
-      <>
-        <div className="trace-section-head" style={{ marginBottom: '16px' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              className="action-button"
-              onClick={handleImportFromMap}
-              title="Import wreckages from the current map's _script.lua and _save.lua"
-            >
-              Import from Map
-            </button>
-            {units.length >= 1 && (
-              <button className="action-button action-button--danger" onClick={deleteAllUnits}>Delete All</button>
-            )}
-          </div>
-        </div>
-
-        <EntityCardGrid>
-          {units.map((unit, unitIdx) => (
-            <EntityCard
-              key={unit.id}
-              index={unitIdx}
-              color={unit.color}
-              selected={unitIdx === selectedUnit}
-              onSelect={() => setSelectedUnit(unitIdx)}
-              onDelete={() => deleteUnit(unitIdx)}
-              title={unit.unitName ? `${unit.unitName} (${unit.unitType})` : unit.unitType || `Unit ${unitIdx + 1}`}
-              availableColors={availableColors}
-              showColorPicker={showColorPicker === unitIdx}
-              onToggleColorPicker={() => setShowColorPicker(showColorPicker === unitIdx ? null : unitIdx)}
-              onPickColor={(color) => { updateUnit(unitIdx, 'color', color); setShowColorPicker(null); }}
-            >
-              <div style={{ marginBottom: '8px' }}>
-                <div className="ec-input-row">
-                  <input
-                    type="text"
-                    className="field-input"
-                    value={unit.unitType}
-                    onChange={(e) => updateUnit(unitIdx, 'unitType', e.target.value)}
-                    placeholder="UEL0203"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ textTransform: 'uppercase' }}
-                  />
-                  <button
-                    className="action-button"
-                    style={{ flexShrink: 0 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedUnit(unitIdx);
-                      setShowUnitLibrary(true);
-                      loadUnitLibrary();
-                    }}
-                  >
-                    Library
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ marginTop: '8px' }}>
-                <label className="field-label" style={{ marginBottom: '10px' }}>Unit Categories (optional)</label>
-                {unit.unitCategories && unit.unitCategories.map((category, catIdx) => (
-                  <div key={catIdx} className="ec-input-row">
-                    <input
-                      type="text"
-                      className="field-input"
-                      value={category}
-                      onChange={(e) => updateUnitCategory(unitIdx, catIdx, e.target.value)}
-                      placeholder={`Category ${catIdx + 1} (e.g., Land, T2)`}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <button
-                      className="delete-button"
-                      onClick={(e) => { e.stopPropagation(); deleteUnitCategory(unitIdx, catIdx); }}
-                    >×</button>
-                  </div>
-                ))}
-                <button
-                  className="action-button action-button--full"
-                  onClick={(e) => { e.stopPropagation(); addUnitCategory(unitIdx); }}
-                >Add Category</button>
-              </div>
-
-              {unit.unitCategories && unit.unitCategories.length > 0 && (
-                <div className="ec-cat-path">
-                  wreckages/{unit.unitCategories.filter(c => c.trim()).join('/')}/{unit.unitType || 'unit_id'}
-                </div>
-              )}
-
-              {unitIdx === selectedUnit && (
-                <CoordinateList
-                  coordinates={unit.coordinates}
-                  fields={[
-                    [
-                      { key: 'x', label: 'X', placeholder: '256' },
-                      { key: 'y', label: 'Y', placeholder: '26' },
-                      { key: 'z', label: 'Z', placeholder: '256' },
-                    ],
-                    [
-                      { key: 'heading', label: 'Heading', placeholder: 'math.pi' },
-                      { key: 'pitch', label: 'Pitch', placeholder: '0.0' },
-                      { key: 'roll', label: 'Roll', placeholder: 'math.pi' },
-                    ],
-                  ]}
-                  open={!!coordsOpen[unitIdx]}
-                  onToggle={() => setCoordsOpen(prev => ({ ...prev, [unitIdx]: !prev[unitIdx] }))}
-                  labelFor={(coord, ci) => `Point ${ci + 1}${coord.isMirrored ? ' · mirror' : ''}`}
-                  onUpdate={(ci, key, value) => updateCoordinate(unitIdx, ci, key, value)}
-                  onDelete={(ci) => deleteCoordinate(unitIdx, ci)}
-                  onAdd={() => addCoordinate(unitIdx)}
-                  hasPlaced={unit.coordinates.some(c => c.x && c.z)}
-                  onDeleteAll={async () => {
-                    const confirmed = await luxuryConfirm('Delete all coordinates for this unit?', 'Confirm Delete', 'Delete All', 'Cancel');
-                    if (confirmed) deleteAllCoordinates(unitIdx);
-                  }}
-                />
-              )}
-            </EntityCard>
-          ))}
-
-          <AddTile label="Add Unit Type" onClick={addUnit} />
-        </EntityCardGrid>
-      </>
-    ),
-
-    matching: (
-      <MatchingMode
-        value={emitterMatchingMode}
-        onChange={setEmitterMatchingMode}
-        onConfigure={() => setShowEmitterCategoryConfig(true)}
-        modes={[
-          { key: 'smart',        label: 'Smart Combination (3-Tier)', desc: 'Perfect Match → Partial Match → Fallback',  note: 'Unit ["Land","T3"] gets emitters active for BOTH first' },
-          { key: 'simple',       label: 'Simple Union',               desc: 'Use ALL emitters active for ANY category',  note: 'Unit ["Land","T3"] gets all emitters active for Land OR T3' },
-          { key: 'lastCategory', label: 'Last Category Only',         desc: 'Match only the last category in the list',  note: 'Unit ["Land","T2","Heavy"] → matches "Heavy" only' },
-        ]}
-      />
-    ),
-
-    output: (
-      <OutputChecklist
-        ready={isReady}
-        onCommit={generateFiles}
-        commitLabel="Generate Wreckage"
-        commitAriaLabel="Generate wreckage files"
-        items={[
-          { label: 'Generate README file', checked: generateReadme, onToggle: () => setGenerateReadme(!generateReadme) },
-          { label: 'Export props.lua (no SCMAP)', checked: exportRawLua, onToggle: () => setExportRawLua(!exportRawLua) },
-        ]}
-      />
-    ),
+    config:   <WreckageConfiguration {...configProps} />,
+    units:    <WreckageUnits {...unitsProps} />,
+    matching: <WreckageMatching {...matchingProps} />,
+    output:   <WreckageExport {...exportProps} />,
   };
 
   // ── Preview slot — map canvas, markers, legend, hint ─────────────────────────
@@ -2309,7 +1727,6 @@ TypeClass = ${instanceName}`;
           onClick={() => {
             localStorage.removeItem('shared_preview_image');
             setPreviewImageData(null);
-            setPreviewImage(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
           }}
         >

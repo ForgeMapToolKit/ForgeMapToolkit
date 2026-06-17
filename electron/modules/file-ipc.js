@@ -203,7 +203,7 @@ ipcMain.handle('check-update', async () => {
     const req = https.get({
       hostname: 'api.github.com',
       path: `/repos/${GITHUB_REPO}/releases/latest`,
-      headers: { 'User-Agent': 'map-tool-suite' },
+      headers: { 'User-Agent': 'forgemaptoolkit' },
     }, res => {
       let data = '';
       res.on('data', c => data += c);

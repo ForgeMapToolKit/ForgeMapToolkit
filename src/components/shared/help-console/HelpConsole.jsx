@@ -41,6 +41,26 @@ const HelpConsole = ({
   if (!open) return null;
 
   const active = sections.find((s) => s.id === activeSection) || sections[0];
+  const bare = !!active?.bare;
+
+  // The register head — eyebrow + hero + traceline. In a normal section it
+  // is FIXED above the scroll area. A `bare` section folds it INTO the
+  // scroll content instead, so the content runs the full height up to the
+  // rail: scrolling carries the head (and the section) up to the tab bar
+  // and the top fade dissolves it there — no hard cut mid-stage.
+  const head = (
+    <>
+      <div className="hc-eyebrow" key={`eb-${active?.id}`}>
+        {eyebrowPrefix} — {active?.index} — {String(active?.label || '').toUpperCase()}
+      </div>
+      <h2 className="hc-hero title-main" key={`hero-${active?.id}`}>{active?.label}</h2>
+      <div className="hc-trace" key={`tr-${active?.id}`} aria-hidden="true">
+        <div className="hc-trace-bloom" />
+        <div className="hc-trace-core" />
+        <div className="hc-trace-hot" />
+      </div>
+    </>
+  );
 
   return (
     <div className="hc-overlay">
@@ -61,19 +81,20 @@ const HelpConsole = ({
         ))}
       </nav>
 
-      <div className="hc-stage">
-        <div className="hc-eyebrow" key={`eb-${active?.id}`}>
-          {eyebrowPrefix} — {active?.index} — {String(active?.label || '').toUpperCase()}
-        </div>
-        <h2 className="hc-hero" key={`hero-${active?.id}`}>{active?.label}</h2>
-        <div className="hc-trace" key={`tr-${active?.id}`} aria-hidden="true">
-          <div className="hc-trace-bloom" />
-          <div className="hc-trace-core" />
-          <div className="hc-trace-hot" />
-        </div>
-        <div className="hc-content" key={`ct-${active?.id}`}>
-          {children}
-        </div>
+      <div className={`hc-stage${bare ? ' hc-stage--bare' : ''}`}>
+        {bare ? (
+          <div className="hc-content hc-content--bare" key={`ct-${active?.id}`}>
+            <div className="hc-bare-head">{head}</div>
+            {children}
+          </div>
+        ) : (
+          <>
+            {head}
+            <div className="hc-content" key={`ct-${active?.id}`}>
+              {children}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

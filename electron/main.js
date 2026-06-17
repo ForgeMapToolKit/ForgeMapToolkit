@@ -200,7 +200,7 @@ function openLogWindow() {
 
 // __GUIDE_HASHES_START__
 const GUIDE_SCRIPT_HASHES = [
-  "'sha256-FFSS8Bf1a2XU04Nv79y2kuip49sN9dFjjSgFdS6I/eI='"
+  "'sha256-SkyHWqt/tu92X+9LTbZZPWihvymkUPvIH7Ar4pQy1Zw='"
 ];
 // __GUIDE_HASHES_END__
 

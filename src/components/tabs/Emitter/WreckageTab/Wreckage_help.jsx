@@ -19,6 +19,7 @@ import React, { useState } from 'react';
 import HelpConsole, { HelpButton } from '../../../shared/help-console/HelpConsole.jsx';
 import {
   WorkflowSection,
+  ShortcutsSection,
   TroubleshootSection,
 } from '../../../shared/help-console/sections/index.js';
 
@@ -62,33 +63,7 @@ function Tag({ children }) {
    SECTIONS
    ════════════════════════════════════════════════════════════════ */
 
-/* 01 — TAB REPLICA */
-function SectionReplica() {
-  return (
-    <Section>
-      <Block title="Interface Replica">
-        <p style={{ fontStyle: 'italic', opacity: 0.5 }}>
-          The interactive UI replica will be embedded here. It reflects the
-          Wreckage WorkspaceConsole layout for quick visual reference.
-        </p>
-        <div style={{
-          border: '1px dashed rgba(255,255,255,0.1)',
-          borderRadius: 3,
-          padding: '40px 24px',
-          textAlign: 'center',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 10,
-          letterSpacing: '0.14em',
-          color: 'rgba(255,255,255,0.18)',
-        }}>
-          REPLICA COMPONENT SLOT
-        </div>
-      </Block>
-    </Section>
-  );
-}
-
-/* 02 — OVERVIEW */
+/* 01 — OVERVIEW */
 function SectionOverview() {
   return (
     <Section>
@@ -102,20 +77,9 @@ function SectionOverview() {
         <p>
           Each wreckage type is configured as a <Tag>Unit</Tag> entry. Units are
           combined into a placement run and written to the map's scenario script.
+          The <Tag>Workflow</Tag> tab walks the full run end to end.
         </p>
       </Block>
-
-      <WorkflowSection
-        label="Typical Workflow"
-        steps={[
-          { title: 'Select a brush zone',       body: 'Pick a RECT, POLY, or FULL brush on the Canvas. FULL covers the entire map.' },
-          { title: 'Add Unit entries',           body: 'Open the unit library and click a row to add it to the current run.' },
-          { title: 'Configure per-unit props',   body: 'Set density, scale range, rotation range, and cluster radius for each unit.' },
-          { title: 'Choose a mirror mode',       body: 'Pick NONE, X, Y, XY, POINT, or QUAD_ROT to match your map\'s symmetry.' },
-          { title: 'Assign an Emitter',          body: 'Optional — link a height-map layer to bias placement by terrain elevation.' },
-          { title: 'Preview, iterate, generate', body: 'Check the canvas preview, adjust settings, then click GENERATE to write output files.' },
-        ]}
-      />
 
       <Block title="Key Concepts">
         <KV rows={[
@@ -126,6 +90,47 @@ function SectionOverview() {
           ['Seed',    'RNG seed. Same seed + same config = reproducible layout.'],
         ]} />
       </Block>
+    </Section>
+  );
+}
+
+/* 02 — WORKFLOW — the centerpiece route */
+function SectionWorkflow() {
+  return (
+    <Section>
+      <WorkflowSection
+        duration={5}
+        steps={[
+          { title: 'Select a brush zone',       body: 'Pick a RECT, POLY, or FULL brush on the Canvas. FULL covers the entire map.' },
+          { title: 'Add Unit entries',           body: 'Open the unit library and click a row to add it to the current run.' },
+          { title: 'Configure per-unit props',   body: 'Set density, scale, rotation, and cluster radius for each unit.' },
+          { title: 'Choose a mirror mode',       body: "Pick NONE, X, Y, XY, POINT, or QUAD_ROT to match your map's symmetry." },
+          { title: 'Assign an Emitter',          body: 'Optional — link a height-map layer to bias placement by elevation.' },
+          { title: 'Preview & generate',         body: 'Check the canvas preview, tune, then GENERATE to write the output files.' },
+        ]}
+      />
+    </Section>
+  );
+}
+
+/* 09 — SHORTCUTS */
+function SectionShortcuts() {
+  return (
+    <Section>
+      <ShortcutsSection
+        label="Canvas & Keys"
+        items={[
+          { action: 'Zoom in / out',      keys: 'Scroll' },
+          { action: 'Pan the view',       keys: ['Click', 'Drag'] },
+          { action: 'Draw RECT brush',    keys: ['R-Click', 'Drag'] },
+          { action: 'Add POLY vertex',    keys: ['Shift', 'Click'] },
+          { action: 'Close POLY brush',   keys: 'Dbl-Click' },
+          { action: 'Toggle grid',        keys: 'G' },
+          { action: 'Reset zoom & pan',   keys: 'R' },
+          { action: 'Generate run',       keys: ['Ctrl', 'G'] },
+          { action: 'Close help',         keys: 'Esc' },
+        ]}
+      />
     </Section>
   );
 }
@@ -357,14 +362,15 @@ function SectionExport() {
    ════════════════════════════════════════════════════════════════ */
 
 const SECTIONS = [
-  { id: 'replica',       index: '01', label: 'Tab Replica',     render: () => <SectionReplica /> },
-  { id: 'overview',      index: '02', label: 'Overview',        render: () => <SectionOverview /> },
+  { id: 'overview',      index: '01', label: 'Overview',        render: () => <SectionOverview /> },
+  { id: 'workflow',      index: '02', label: 'Workflow',  bare: true, render: () => <SectionWorkflow /> },
   { id: 'configuration', index: '03', label: 'Configuration',   render: () => <SectionConfiguration /> },
   { id: 'units',         index: '04', label: 'Units & Markers', render: () => <SectionUnits /> },
   { id: 'canvas',        index: '05', label: 'Canvas',          render: () => <SectionCanvas /> },
   { id: 'mirror',        index: '06', label: 'Mirror Modes',    render: () => <SectionMirror /> },
   { id: 'emitter',       index: '07', label: 'Emitter Link',    render: () => <SectionEmitter /> },
   { id: 'export',        index: '08', label: 'Export',          render: () => <SectionExport /> },
+  { id: 'shortcuts',     index: '09', label: 'Shortcuts',       render: () => <SectionShortcuts /> },
 ];
 
 /* ════════════════════════════════════════════════════════════════

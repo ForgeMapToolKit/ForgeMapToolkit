@@ -29,16 +29,21 @@ import './HomeScreen.css';
  *  - libraryScanned: boolean
  *  - scanning:       boolean
  *  - settings:       settings object (for mapsPath)
+ *  - onFocusChange(id|null): reports the hovered/focused tool so the banner
+ *                            can preview its hue (lifted to ForgeMapToolkit)
  */
 
 const COMMIT_MS = 380; // shutter sweep duration before navigation (matches CSS)
 
-const HomeScreen = ({ onNavigate, appVersion, libraryScanned, scanning, settings, mapName }) => {
+const HomeScreen = ({ onNavigate, appVersion, libraryScanned, scanning, settings, mapName, onFocusChange }) => {
   const [focusedToolId, setFocusedToolId] = useState(null);
   const [commitToolId,  setCommitToolId]  = useState(null);
   const commitRef = useRef(null);
 
   useEffect(() => () => clearTimeout(commitRef.current), []);
+
+  const handleToolFocus = (id) => { setFocusedToolId(id); onFocusChange?.(id); };
+  const handleToolBlur  = ()   => { setFocusedToolId(null); onFocusChange?.(null); };
 
   const handleSelect = (id) => {
     if (commitToolId) return; // a commit is already in flight
@@ -78,8 +83,8 @@ const HomeScreen = ({ onNavigate, appVersion, libraryScanned, scanning, settings
       <ToolRail
         activeToolId={commitToolId ?? focusedToolId}
         onSelect={handleSelect}
-        onToolFocus={setFocusedToolId}
-        onToolBlur={() => setFocusedToolId(null)}
+        onToolFocus={handleToolFocus}
+        onToolBlur={handleToolBlur}
       />
 
       {/* Film grain — the instrument's surface, above everything */}

@@ -612,3 +612,43 @@
   background: var(--tab-color);
   box-shadow: 0 0 4px var(--tab-glow);
 }
+
+/* ── Title hierarchy ──────────────────────────────────────────────────
+   title-main:    the surface / tab name — the biggest heading.
+   title-section: a section within a surface (e.g. "Common Errors").
+
+   Distinction is carried by SIZE, WEIGHT and SPACING. The structural
+   separator is a NEUTRAL hairline (so any number of sections can stack
+   calmly); the ONE accent is a short red lead-tick. Red stays a signal,
+   never the scaffolding — a stack of red rules would drown orientation. */
+.title-main {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+  line-height: 0.9;
+  text-transform: uppercase;
+  color: var(--ink-100);
+}
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-2xl) 0 var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--line-medium);   /* neutral structure */
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-100);
+}
+.title-section::before {                        /* the single sparse accent */
+  content: '';
+  flex-shrink: 0;
+  width: 20px;
+  height: 2px;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow);
+}

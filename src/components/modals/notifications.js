@@ -242,7 +242,7 @@ const THEME_COLORS = {
 
 /* ── Helpers ─────────────────────────────────────────── */
 function detectActiveTheme() {
-  const el = document.querySelector('.map-tool-suite');
+  const el = document.querySelector('.forgemaptoolkit');
   return el?.getAttribute('data-active-theme') || 'default';
 }
 

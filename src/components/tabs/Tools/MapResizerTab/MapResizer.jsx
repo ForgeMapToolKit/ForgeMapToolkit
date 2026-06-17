@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import '../../../shared/shared.css';
+import React, { useState, useEffect } from 'react';
+import WorkspaceConsole from '../../../shared/WorkspaceConsole/WorkspaceConsole.jsx';
 import './MapResizer.css';
 import { luxuryAlert, luxuryConfirm } from '../../../modals/notifications';
 import MapResizerHelpModal from '../../HelpModals/MapResizer_help.jsx';
@@ -7,31 +7,13 @@ import MapResizerHelpModal from '../../HelpModals/MapResizer_help.jsx';
 // ── Size Options ───────────────────────────────────────────────────────────────
 
 const SIZE_OPTIONS = [
-  { value: 128,  label: '128',  km: '2.5 km',  desc: 'Tiny'    },
+  { value: 128,  label: '128',  km: '2.5 km',  desc: 'Tiny'     },
   { value: 256,  label: '256',  km: '5 km',    desc: 'Small'    },
   { value: 512,  label: '512',  km: '10 km',   desc: 'Standard' },
   { value: 1024, label: '1024', km: '20 km',   desc: 'Large'    },
   { value: 2048, label: '2048', km: '40 km',   desc: 'Huge'     },
-  { value: 4096, label: '4096', km: '80 km',   desc: 'Enormous'     },  
+  { value: 4096, label: '4096', km: '80 km',   desc: 'Enormous' },
 ];
-
-// ── Checkbox ───────────────────────────────────────────────────────────────────
-
-const Checkbox = ({ checked, disabled, onClick, label, hint }) => (
-  <label className="checkbox-label" onClick={() => !disabled && onClick()}>
-    <div className={`checkbox${checked ? ' checked' : ''}`}>
-      {checked && (
-        <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      )}
-    </div>
-    <div>
-      <span className="checkbox-text">{label}</span>
-      {hint && <p className="form-help" style={{ marginTop: 3, marginBottom: 0 }}>{hint}</p>}
-    </div>
-  </label>
-);
 
 // ── SizeButton ─────────────────────────────────────────────────────────────────
 
@@ -79,29 +61,29 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
   // ── Shared State ──────────────────────────────────────────────────────────────
 
-  const [mapName,        setMapNameState]       = useState(s.mr_mapName        ?? '');
-  const [mapsFolderPath, setMapsFolderPathState] = useState(s.mr_mapsFolderPath ?? settings?.mapsFolder ?? '');
-  const [targetSize,     setTargetSizeState]     = useState(s.mr_targetSize     ?? 512);
-  const [scaleProps,     setScalePropsState]     = useState(s.mr_scaleProps     ?? true);
-  const [scaleDecals,    setScaleDecalsState]    = useState(s.mr_scaleDecals    ?? true);
-  const [scaleMarkers,   setScaleMarkersState]   = useState(s.mr_scaleMarkers   ?? true);
-  const [scaleAreas,     setScaleAreasState]     = useState(s.mr_scaleAreas     ?? true);
-  const [scaleTextures,  setScaleTexturesState]  = useState(s.mr_scaleTextures  ?? true);
-  const [scaleSkybox,    setScaleSkyboxState]    = useState(s.mr_scaleSkybox    ?? true);
-  const [scaleFog,       setScaleFogState]       = useState(s.mr_scaleFog       ?? true);
-  const [createNewVersion, setCreateNewVersion]   = useState(s.mr_createNewVersion ?? true);
+  const [mapName,          setMapNameState]          = useState(s.mr_mapName          ?? '');
+  const [mapsFolderPath,   setMapsFolderPathState]   = useState(s.mr_mapsFolderPath   ?? settings?.mapsFolder ?? '');
+  const [targetSize,       setTargetSizeState]       = useState(s.mr_targetSize       ?? 512);
+  const [scaleProps,       setScalePropsState]       = useState(s.mr_scaleProps       ?? true);
+  const [scaleDecals,      setScaleDecalsState]      = useState(s.mr_scaleDecals      ?? true);
+  const [scaleMarkers,     setScaleMarkersState]     = useState(s.mr_scaleMarkers     ?? true);
+  const [scaleAreas,       setScaleAreasState]       = useState(s.mr_scaleAreas       ?? true);
+  const [scaleTextures,    setScaleTexturesState]    = useState(s.mr_scaleTextures    ?? true);
+  const [scaleSkybox,      setScaleSkyboxState]      = useState(s.mr_scaleSkybox      ?? true);
+  const [scaleFog,         setScaleFogState]         = useState(s.mr_scaleFog         ?? true);
+  const [createNewVersion, setCreateNewVersionState] = useState(s.mr_createNewVersion ?? true);
 
-  const setMapName        = v => { setMapNameState(v);        onSharedChange('mr_mapName', v); };
-  const setMapsFolderPath = v => { setMapsFolderPathState(v); onSharedChange('mr_mapsFolderPath', v); };
-  const setTargetSize     = v => { setTargetSizeState(v);     onSharedChange('mr_targetSize', v); };
-  const setScaleProps     = v => { setScalePropsState(v);     onSharedChange('mr_scaleProps', v); };
-  const setScaleDecals    = v => { setScaleDecalsState(v);    onSharedChange('mr_scaleDecals', v); };
-  const setScaleMarkers   = v => { setScaleMarkersState(v);   onSharedChange('mr_scaleMarkers', v); };
-  const setScaleAreas     = v => { setScaleAreasState(v);     onSharedChange('mr_scaleAreas', v); };
-  const setScaleTextures  = v => { setScaleTexturesState(v);  onSharedChange('mr_scaleTextures', v); };
-  const setScaleSkybox    = v => { setScaleSkyboxState(v);    onSharedChange('mr_scaleSkybox', v); };
-  const setScaleFog       = v => { setScaleFogState(v);       onSharedChange('mr_scaleFog', v); };
-  const setCreateNewVersionState = v => { setCreateNewVersion(v); onSharedChange('mr_createNewVersion', v); };
+  const setMapName          = v => { setMapNameState(v);          onSharedChange('mr_mapName', v); };
+  const setMapsFolderPath   = v => { setMapsFolderPathState(v);   onSharedChange('mr_mapsFolderPath', v); };
+  const setTargetSize       = v => { setTargetSizeState(v);       onSharedChange('mr_targetSize', v); };
+  const setScaleProps       = v => { setScalePropsState(v);       onSharedChange('mr_scaleProps', v); };
+  const setScaleDecals      = v => { setScaleDecalsState(v);      onSharedChange('mr_scaleDecals', v); };
+  const setScaleMarkers     = v => { setScaleMarkersState(v);     onSharedChange('mr_scaleMarkers', v); };
+  const setScaleAreas       = v => { setScaleAreasState(v);       onSharedChange('mr_scaleAreas', v); };
+  const setScaleTextures    = v => { setScaleTexturesState(v);    onSharedChange('mr_scaleTextures', v); };
+  const setScaleSkybox      = v => { setScaleSkyboxState(v);      onSharedChange('mr_scaleSkybox', v); };
+  const setScaleFog         = v => { setScaleFogState(v);         onSharedChange('mr_scaleFog', v); };
+  const setCreateNewVersion = v => { setCreateNewVersionState(v); onSharedChange('mr_createNewVersion', v); };
 
   // ── Settings Sync ─────────────────────────────────────────────────────────────
 
@@ -111,6 +93,7 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
   // ── Local UI State ────────────────────────────────────────────────────────────
 
+  const [activeSection,   setActiveSection]   = useState('map-setup');
   const [mapInfo,         setMapInfo]         = useState(null);
   const [running,         setRunning]         = useState(false);
   const [showHelp,        setShowHelp]        = useState(false);
@@ -161,7 +144,6 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
     setRunning(true);
 
     try {
-      // ── Optionally duplicate the map folder to a new version ─────────────
       let activeMapFolder = mapFolder;
       let newVersionName  = null;
 
@@ -203,9 +185,7 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
       setMapInfo(prev => ({ ...prev, fromSize: targetSize }));
 
-      // If a new version was created, update the map name input to point to it
       if (newVersionName) {
-        const baseName = mapName.replace(/\.v\d{4}$/, '');
         setMapName(newVersionName);
       }
 
@@ -224,7 +204,7 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
     }
   };
 
-  // ── Scale option groups (right column) ────────────────────────────────────────
+  // ── Scale option groups ───────────────────────────────────────────────────────
 
   const SCALE_GROUPS = [
     {
@@ -251,26 +231,75 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
     },
   ];
 
+  // ── Sections ──────────────────────────────────────────────────────────────────
+
+  const mapSetupDone = mapInfo?.ok && !sameSize;
+
+  const SECTIONS = [
+    {
+      id:    'map-setup',
+      index: '01',
+      label: 'Map & Size',
+      desc:  'Select the map and choose a target resolution.',
+      done:  mapSetupDone,
+    },
+    {
+      id:    'scale-options',
+      index: '02',
+      label: 'Scale Options',
+      desc:  'Choose which map layers are scaled proportionally.',
+    },
+  ];
+
+  // ── Preview slot — size preview widget ───────────────────────────────────────
+
+  const previewSlot = (
+    <div className="mr-size-preview">
+      <div className="mr-size-preview-side">
+        <span className="mr-size-preview-label">Current</span>
+        <span className="mr-size-preview-value">{mapInfo?.ok ? mapInfo.fromSize : '—'}</span>
+        {mapInfo?.ok && <span className="mr-size-preview-km">{mapInfo.km}</span>}
+      </div>
+      <ScaleArrow fromSize={mapInfo?.ok ? mapInfo.fromSize : null} toSize={targetSize} />
+      <div className="mr-size-preview-side">
+        <span className="mr-size-preview-label">Target</span>
+        <span className="mr-size-preview-value">{targetSize}</span>
+        <span className="mr-size-preview-km">{SIZE_OPTIONS.find(o => o.value === targetSize)?.km ?? ''}</span>
+      </div>
+    </div>
+  );
+
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="map-resizer-tab tab-root tab-scrollbar">
+    <div
+      className="map-resizer-tab"
+      style={{
+        '--tab-color':       'var(--mapresizer-color)',
+        '--tab-glow':        'var(--mapresizer-glow)',
+        '--tab-glow-strong': 'var(--mapresizer-glow-strong)',
+      }}
+    >
+      <WorkspaceConsole
+        sections={SECTIONS}
+        activeSection={activeSection}
+        onSelect={setActiveSection}
+        ghostLabel="RESIZE"
+        renderEyebrow={(s) => `MAP RESIZER — ${s.index} — ${s.label.toUpperCase()} CONSOLE`}
+        railStorageKey="mapresizer-rail-pinned"
+        navLabel="Map resizer navigation"
+        previewSlot={previewSlot}
+      >
 
-      <div className="tab-grid">
+        {/* ── Section 01: Map & Size ── */}
+        {activeSection === 'map-setup' && (
+          <div className="mr-section-body">
 
-        {/* ════ LEFT: Map + Size ════ */}
-        <div className="tab-col-config">
-
-          {/* Map Selection */}
-          <div className="section-card">
-            <h3 className="section-title">
-              Map Selection
-            </h3>
-
+            {/* Map Name */}
             <div className="form-group">
-              <label className="form-label">Map Name</label>
+              <label className="field-label">Map Name</label>
               <input
-                className="form-input"
+                className="field-input"
                 value={mapName}
                 onChange={e => setMapName(e.target.value)}
                 placeholder="Hades_Dust.v0002"
@@ -278,42 +307,25 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
               />
             </div>
 
+            {/* Map info badge */}
             {mapInfo && (
               <div className={`mr-map-badge ${mapInfo.ok ? 'ok' : 'error'}`}>
                 <span className="mr-map-badge-icon">{mapInfo.ok ? '✓' : '✗'}</span>
-{mapInfo.ok
-  ? <span>
-      Map size: <strong>{mapInfo.fromSize} × {mapInfo.fromSize}</strong>
-      {mapInfo.playableSize && mapInfo.playableSize !== mapInfo.fromSize &&
-        <span className="mr-map-badge-km"> (playable: {mapInfo.playableSize})</span>
-      }
-    </span>
+                {mapInfo.ok
+                  ? <span>
+                      Map size: <strong>{mapInfo.fromSize} × {mapInfo.fromSize}</strong>
+                      {mapInfo.playableSize && mapInfo.playableSize !== mapInfo.fromSize &&
+                        <span className="mr-map-badge-km"> (playable: {mapInfo.playableSize})</span>
+                      }
+                    </span>
                   : <span>{mapInfo.error}</span>
                 }
               </div>
             )}
-          </div>
 
-          {/* Target Size */}
-          <div className="section-card">
-            <h3 className="section-title">
-              Target Size
-            </h3>
+            <div className="divider" style={{ margin: '20px 0' }} />
 
-            <div className="mr-size-preview">
-              <div className="mr-size-preview-side">
-                <span className="mr-size-preview-label">Current</span>
-                <span className="mr-size-preview-value">{mapInfo?.ok ? mapInfo.fromSize : '—'}</span>
-                {mapInfo?.ok && <span className="mr-size-preview-km">{mapInfo.km}</span>}
-              </div>
-              <ScaleArrow fromSize={mapInfo?.ok ? mapInfo.fromSize : null} toSize={targetSize} />
-              <div className="mr-size-preview-side">
-                <span className="mr-size-preview-label">Target</span>
-                <span className="mr-size-preview-value">{targetSize}</span>
-                <span className="mr-size-preview-km">{SIZE_OPTIONS.find(o => o.value === targetSize)?.km ?? ''}</span>
-              </div>
-            </div>
-
+            {/* Size grid */}
             <div className="mr-size-grid">
               {SIZE_OPTIONS.map(opt => (
                 <SizeButton
@@ -332,61 +344,72 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
                 Target equals current size — choose a different size.
               </div>
             )}
+
+            <div className="divider" style={{ margin: '20px 0' }} />
+
+            {/* Create new version */}
+            <label className="checkbox-label" onClick={() => !running && setCreateNewVersion(!createNewVersion)}>
+              <div className={`checkbox${createNewVersion ? ' checked' : ''}`}>
+                {createNewVersion && (
+                  <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+              <div>
+                <span className="checkbox-text">Create new version</span>
+                <p className="field-hint" style={{ marginTop: 3, marginBottom: 0 }}>
+                  {createNewVersion
+                    ? 'A new versioned folder (e.g. map.v0007) is created — original is untouched.'
+                    : 'The existing map folder is overwritten in place. Back up first.'}
+                </p>
+              </div>
+            </label>
+
+            {/* Resize CTA */}
+            <button
+              className="button-solid button-solid--accent button-solid--full"
+              onClick={handleResize}
+              disabled={!canResize}
+              style={{ marginTop: 20 }}
+            >
+              {running ? 'Resizing…' : 'Resize Map'}
+            </button>
+
           </div>
+        )}
 
-          {/* Create New Version + Resize Button */}
-          <div className="section-card" style={{ marginBottom: 0 }}>
-            <Checkbox
-              checked={createNewVersion}
-              disabled={running}
-              onClick={() => setCreateNewVersionState(!createNewVersion)}
-              label="Create new version"
-              hint={createNewVersion
-                ? "A new versioned folder (e.g. map.v0007) is created — original is untouched."
-                : "The existing map folder is overwritten in place. Back up first."}
-            />
-          </div>
-
-          <button
-            className="btn-primary btn-lg"
-            onClick={handleResize}
-            disabled={!canResize}
-            style={{ marginTop: 12 }}
-          >
-            {running ? 'Resizing…' : 'Resize Map'}
-          </button>
-
-        </div>
-
-        {/* ════ RIGHT: Scale Options ════ */}
-        <div className="tab-col-detail">
-
-          <div className="section-card">
-            <h3 className="section-title">
-              Scale Options
-            </h3>
-
+        {/* ── Section 02: Scale Options ── */}
+        {activeSection === 'scale-options' && (
+          <div className="mr-section-body">
             {SCALE_GROUPS.map(({ group, items }, gi) => (
               <div key={group}>
-                <div className="subsection-title" style={gi > 0 ? { marginTop: 20 } : {}}>{group}</div>
+                <div className="subsection-head" style={gi > 0 ? { marginTop: 28 } : {}}>
+                  <span className="subsection-head-title">{group}</span>
+                </div>
                 <div className="mr-options-stack">
                   {items.map(({ key, val, set, label, hint }) => (
-                    <Checkbox
-                      key={key}
-                      checked={val}
-                      disabled={running}
-                      onClick={() => set(!val)}
-                      label={label}
-                      hint={hint}
-                    />
+                    <label key={key} className="checkbox-label" onClick={() => !running && set(!val)}>
+                      <div className={`checkbox${val ? ' checked' : ''}`}>
+                        {val && (
+                          <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <span className="checkbox-text">{label}</span>
+                        <p className="field-hint" style={{ marginTop: 3, marginBottom: 0 }}>{hint}</p>
+                      </div>
+                    </label>
                   ))}
                 </div>
               </div>
             ))}
           </div>
+        )}
 
-        </div>
-      </div>
+      </WorkspaceConsole>
 
       {/* ── Help Button ── */}
       <button className="help-btn" onClick={() => setShowHelp(true)} title="Help">?</button>
@@ -403,7 +426,6 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
           setActiveAdvSubTab={setActiveAdvSubTab}
         />
       )}
-
     </div>
   );
 };

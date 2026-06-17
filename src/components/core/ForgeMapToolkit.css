@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 /* =====================================================
-   MAP TOOL SUITE - ULTRA LUXURIOUS DESIGN
+   FORGEMAPTOOLKIT - ULTRA LUXURIOUS DESIGN
    Modern Navigation Bar with Dynamic Theming
    Inspired by FAF Teams Premium Aesthetic
    ===================================================== */
@@ -14,91 +14,91 @@
    DYNAMIC THEME SWITCHING
    ===================================================== */
 
-.map-tool-suite[data-active-theme="emitter"] {
+.forgemaptoolkit[data-active-theme="emitter"] {
   --current-accent: var(--emitter-color);
   --current-glow: var(--emitter-glow);
   --current-glow-strong: var(--emitter-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="wreckages"] {
+.forgemaptoolkit[data-active-theme="wreckages"] {
   --current-accent: var(--wreckages-color);
   --current-glow: var(--wreckages-glow);
   --current-glow-strong: var(--wreckages-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="props"] {
+.forgemaptoolkit[data-active-theme="props"] {
   --current-accent: var(--props-color);
   --current-glow: var(--props-glow);
   --current-glow-strong: var(--props-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="customprops"] {
+.forgemaptoolkit[data-active-theme="customprops"] {
   --current-accent: var(--customprops-color);
   --current-glow: var(--customprops-glow);
   --current-glow-strong: var(--customprops-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="treemap"] {
+.forgemaptoolkit[data-active-theme="treemap"] {
   --current-accent: var(--treemap-color);
   --current-glow: var(--treemap-glow);
   --current-glow-strong: var(--treemap-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="rockerosion"] {
+.forgemaptoolkit[data-active-theme="rockerosion"] {
   --current-accent: var(--rockerosion-color);
   --current-glow: var(--rockerosion-glow);
   --current-glow-strong: var(--rockerosion-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="stars"] {
+.forgemaptoolkit[data-active-theme="stars"] {
   --current-accent: var(--stars-color);
   --current-glow: var(--stars-glow);
   --current-glow-strong: var(--stars-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="skybox-generator"] {
+.forgemaptoolkit[data-active-theme="skybox-generator"] {
   --current-accent: var(--skybox-generator-color);
   --current-glow: var(--skybox-generator-glow);
   --current-glow-strong: var(--skybox-generator-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="contributions"] {
+.forgemaptoolkit[data-active-theme="contributions"] {
   --current-accent: var(--contributions-color);
   --current-glow: var(--contributions-glow);
   --current-glow-strong: var(--contributions-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="settings"] {
+.forgemaptoolkit[data-active-theme="settings"] {
   --current-accent: var(--settings-color);
   --current-glow: var(--settings-glow);
   --current-glow-strong: var(--settings-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="civilians"] {
+.forgemaptoolkit[data-active-theme="civilians"] {
   --current-accent: var(--civilians-color);
   --current-glow: var(--civilians-glow);
   --current-glow-strong: var(--civilians-glow-strong);
 }
 
-.map-tool-suite[data-active-theme="scmaptool"] {
+.forgemaptoolkit[data-active-theme="scmaptool"] {
   --current-accent:      #FFFA00;
   --current-glow:        rgba(255, 250, 0, 0.35);
   --current-glow-strong: rgba(255, 250, 0, 0.6);
 }
 
-.map-tool-suite[data-active-theme="previewimage"] {
+.forgemaptoolkit[data-active-theme="previewimage"] {
   --current-accent:      #FF007A;
   --current-glow:        rgba(255, 0, 122, 0.25);
   --current-glow-strong: rgba(255, 0, 122, 0.55);
 }
 
-.map-tool-suite[data-active-theme="history"] {
+.forgemaptoolkit[data-active-theme="history"] {
   --current-accent:      #FF8AFF;
   --current-glow:        rgba(255, 138, 255, 0.35);
   --current-glow-strong: rgba(255, 138, 255, 0.6);
 }
 
-.map-tool-suite[data-active-theme="mapresizer"] {
+.forgemaptoolkit[data-active-theme="mapresizer"] {
   --current-accent:      #00E5CC;
   --current-glow:        rgba(0, 229, 204, 0.20);
   --current-glow-strong: rgba(0, 229, 204, 0.45);
@@ -108,7 +108,7 @@
 }
 
 /* DEFAULT THEME (Orange) */
-.map-tool-suite {
+.forgemaptoolkit {
   --current-accent:      var(--accent-primary, #ff8c00);
   --current-glow:        var(--accent-glow, rgba(255,140,0,0.12));
   --current-glow-strong: var(--accent-glow-strong, rgba(255,140,0,0.7));
@@ -132,11 +132,39 @@ body {
   transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.map-tool-suite {
+.forgemaptoolkit {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ── Suite chrome — banner + navbar as one retractable body ──────────
+   Banner (z 5) and navbar (z 100) are positioned siblings of the tab
+   content, so they paint OVER any in-tab fixed overlay at their top
+   band — which buries the help console's section rail. Grouping them
+   lets the whole header carriage slide up out of the way the moment a
+   help overlay (.hc-overlay) mounts anywhere in the suite. Keyed off
+   presence with :has() — no React state plumbing. */
+.forgemaptoolkit-chrome {
+  position: relative;
+  z-index: 100;            /* preserve the prior banner/navbar stacking */
+  flex-shrink: 0;
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.forgemaptoolkit:has(.hc-overlay) .forgemaptoolkit-chrome {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+/* the footer is the same kind of later-in-DOM sibling that paints over the
+   in-tab overlay — retract it downward in sympathy with the chrome. */
+.forgemaptoolkit-footer {
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s linear;
+}
+.forgemaptoolkit:has(.hc-overlay) .forgemaptoolkit-footer {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* =====================================================
@@ -630,7 +658,7 @@ body {
    active accent over a soft bloom that glows upward. Recolors
    with the active tool via --current-accent / --current-glow.
    ===================================================== */
-.suite-footer {
+.forgemaptoolkit-footer {
   position: relative;
   flex-shrink: 0;
   margin-top: auto;
@@ -1177,7 +1205,7 @@ button:focus-visible {
 /* =====================================================
    THEME TRANSITION ANIMATIONS
    ===================================================== */
-.map-tool-suite,
+.forgemaptoolkit,
 .luxury-navbar,
 .nav-item {
   transition-property: all;
@@ -1186,7 +1214,7 @@ button:focus-visible {
 }
 
 /* =====================================================
-   MAP TOOL SUITE - ULTRA LUXURIOUS DESIGN
+   FORGEMAPTOOLKIT - ULTRA LUXURIOUS DESIGN
    Modern Navigation Bar with Dynamic Theming
    Inspired by FAF Teams Premium Aesthetic
    ===================================================== */
@@ -1202,56 +1230,56 @@ button:focus-visible {
    ===================================================== */
 
 /* WRECKAGES THEME (White Diamond) */
-.map-tool-suite[data-active-theme="wreckages"] {
+.forgemaptoolkit[data-active-theme="wreckages"] {
   --current-accent: var(--wreckages-color);
   --current-glow: var(--wreckages-glow);
   --current-glow-strong: var(--wreckages-glow-strong);
 }
 
 /* PROPS THEME (Electric Lime) */
-.map-tool-suite[data-active-theme="props"] {
+.forgemaptoolkit[data-active-theme="props"] {
   --current-accent: var(--props-color);
   --current-glow: var(--props-glow);
   --current-glow-strong: var(--props-glow-strong);
 }
 
 /* EMITTER THEME (Orange) */
-.map-tool-suite[data-active-theme="emitter"] {
+.forgemaptoolkit[data-active-theme="emitter"] {
   --current-accent: var(--emitter-color);
   --current-glow: var(--emitter-glow);
   --current-glow-strong: var(--emitter-glow-strong);
 }
 
 /* CIVILIANS THEME (Red) */
-.map-tool-suite[data-active-theme="civilians"] {
+.forgemaptoolkit[data-active-theme="civilians"] {
   --current-accent: var(--civilians-color);
   --current-glow: var(--civilians-glow);
   --current-glow-strong: var(--civilians-glow-strong);
 }
 
 /* STARS THEME (Royal Purple) */
-.map-tool-suite[data-active-theme="stars"] {
+.forgemaptoolkit[data-active-theme="stars"] {
   --current-accent: var(--stars-color);
   --current-glow: var(--stars-glow);
   --current-glow-strong: var(--stars-glow-strong);
 }
 
 /* SKYBOX GENERATOR THEME (Cyan) */
-.map-tool-suite[data-active-theme="skybox-generator"] {
+.forgemaptoolkit[data-active-theme="skybox-generator"] {
   --current-accent: var(--skybox-generator-color);
   --current-glow: var(--skybox-generator-glow);
   --current-glow-strong: var(--skybox-generator-glow-strong);
 }
 
 /* CUSTOM PROPS THEME (#ff8aff) */
-.map-tool-suite[data-active-theme="customprops"] {
+.forgemaptoolkit[data-active-theme="customprops"] {
   --current-accent: var(--customprops-color);
   --current-glow: var(--customprops-glow);
   --current-glow-strong: var(--customprops-glow-strong);
 }
 
 /* DEFAULT THEME (Orange) */
-.map-tool-suite {
+.forgemaptoolkit {
   --current-accent:      var(--accent-primary, #ff8c00);
   --current-glow:        var(--accent-glow, rgba(255,140,0,0.12));
   --current-glow-strong: var(--accent-glow-strong, rgba(255,140,0,0.7));
@@ -1275,7 +1303,7 @@ body {
   transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.map-tool-suite {
+.forgemaptoolkit {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -2108,7 +2136,7 @@ button:focus-visible {
 /* =====================================================
    THEME TRANSITION ANIMATIONS
    ===================================================== */
-.map-tool-suite,
+.forgemaptoolkit,
 .luxury-navbar,
 .nav-item {
   transition-property: all;
