@@ -40,16 +40,14 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background: #070708;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background: var(--surface-deep-veil);
   font-family: 'Space Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 /* ── Atmosphere — volumetric substrate in two depth layers ─────────
    Full-bleed canvas wrappers, never interactive, transparent so the
-   #070708 backdrop + dot-grid show through. The BACK layer (z 0) is the
+   var(--surface-stage) backdrop + dot-grid show through. The BACK layer (z 0) is the
    broad mist body behind the hero title; the FRONT layer (z 6) is a
    sparse veil that drifts in front of it — the title sits between them,
    reading as embedded in the volume. Front stays below the header (z 10)
@@ -95,7 +93,7 @@
   padding: 0 32px;
   height: 44px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid var(--line-medium);
   z-index: 10;
 }
 
@@ -106,7 +104,7 @@
   font-weight: 600;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.13);
+  color: var(--ink-13);
   user-select: none;
 }
 
@@ -122,9 +120,9 @@
   font-weight: 400;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.17);
+  color: var(--ink-17);
   padding: 0 10px;
-  border-right: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid var(--line-faint);
 }
 
 .hs-status-part:last-child {
@@ -133,7 +131,7 @@
 }
 
 .hs-status-part--ok {
-  color: rgba(0,200,100,0.42);
+  color: var(--status-ok-dim);
 }
 
 
@@ -157,8 +155,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 70% at 50% 115%, rgba(255,255,255,0.028), transparent 60%),
-    linear-gradient(0deg, rgba(255,255,255,0.014), transparent 26%);
+    radial-gradient(120% 70% at 50% 115%, var(--sheen-028), transparent 60%),
+    linear-gradient(0deg, var(--sheen-014), transparent 26%);
 }
 
 /* Cards fill the stage. Content is composed into the UPPER field —
@@ -195,7 +193,7 @@
   font-weight: 700;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.045);
+  color: var(--sheen-045);
   line-height: 1;
   user-select: none;
   margin-bottom: 22px;
@@ -205,15 +203,15 @@
 }
 
 @keyframes hs-boot-settle {
-  from { color: rgba(255,255,255,0.4); }
-  to   { color: rgba(255,255,255,0.045); }
+  from { color: var(--ink-40); }
+  to   { color: var(--sheen-045); }
 }
 
 /* Boot line — draws full width with the wordmark, then yields */
 .hs-standby-bootline {
   width: 100%;
   height: 1px;
-  background: rgba(255,255,255,0.3);
+  background: var(--ink-30);
   transform: scaleX(0);
   transform-origin: left center;
   animation: hs-bootline 1.8s var(--hs-out) 0.25s forwards;
@@ -230,7 +228,7 @@
 .hs-standby-rule {
   width: 28px;
   height: 1px;
-  background: rgba(255,255,255,0.07);
+  background: var(--line-medium);
   margin-top: -1px;
   margin-bottom: 16px;
   animation: hs-fade-in 0.6s linear 1.6s both;
@@ -249,14 +247,14 @@
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.12);
+  color: var(--ink-12);
   animation: hs-print 0.5s var(--hs-out) 0.9s both;
 }
 
 .hs-meta-item {
   padding-right: 10px;
   margin-right: 10px;
-  border-right: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid var(--line-faint);
 }
 
 .hs-meta-item:last-child {
@@ -268,7 +266,7 @@
   display: inline-block;
   width: 7px;
   height: 11px;
-  background: rgba(255,255,255,0.28);
+  background: var(--ink-28);
   animation: hs-cursor-blink 1.2s step-end infinite;
 }
 
@@ -311,7 +309,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #000;
+  background: var(--shade-pure);
   opacity: 0;
   animation: hs-power-draw 0.5s linear forwards;
 }
@@ -399,7 +397,7 @@
   font-weight: 600;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.16);
+  color: var(--ink-16);
   margin-bottom: 14px;
   user-select: none;
   clip-path: inset(0 100% 0 0);
@@ -416,7 +414,7 @@
   letter-spacing: 0.01em;
   line-height: 0.85;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.93);
+  color: var(--ink-100);
   user-select: none;
   clip-path: inset(0 100% 0 0);
   animation: hs-print 0.32s var(--hs-out) 0.08s forwards;
@@ -477,7 +475,7 @@
 .trace-hot {
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.95);
+  background: var(--ink-95);
   opacity: 0;
   transform: scaleX(0);
   transform-origin: left center;
@@ -499,7 +497,7 @@
   font-size: 0.82rem;
   font-weight: 300;
   letter-spacing: 0.02em;
-  color: rgba(255,255,255,0.3);
+  color: var(--ink-30);
   line-height: 1.65;
   max-width: 600px;
   user-select: none;
@@ -516,7 +514,7 @@
   font-weight: 400;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.11);
+  color: var(--ink-11);
   display: flex;
   align-items: center;
   clip-path: inset(0 100% 0 0);
@@ -526,7 +524,7 @@
 .hs-proj-data-item {
   padding-right: 10px;
   margin-right: 10px;
-  border-right: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid var(--line-faint);
 }
 
 .hs-proj-data-item:last-child {
@@ -534,7 +532,7 @@
 }
 
 .hs-proj-soon {
-  color: rgba(200,111,255,0.5);
+  color: var(--home-soon);
 }
 
 /* ── Unprint — the carriage returns, the surface is erased ── */
@@ -592,7 +590,7 @@
 .hs-commit-curtain {
   position: absolute;
   inset: 0;
-  background: #070708;
+  background: var(--surface-stage);
 }
 
 .hs-commit-veil {
@@ -637,13 +635,13 @@
 
   flex-shrink: 0;
   height: 184px;
-  border-top: 1px solid rgba(255,255,255,0.09);
+  border-top: 1px solid var(--ink-09);
   /* darker band at the top — the recess reads as depth, not padding */
   background: linear-gradient(
     180deg,
-    rgba(2,2,3,0.85) 0,
-    rgba(4,4,5,0.62) var(--rail-recess),
-    rgba(4,4,5,0.62) 100%
+    var(--home-rail-top) 0,
+    var(--home-rail-body) var(--rail-recess),
+    var(--home-rail-body) 100%
   );
   display: flex;
   align-items: stretch;
@@ -665,7 +663,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.13) 20%, rgba(255,255,255,0.13) 80%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--ink-13) 20%, var(--ink-13) 80%, transparent 100%);
   pointer-events: none;
   z-index: 3;
 }
@@ -675,7 +673,7 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-right: 1px solid rgba(255,255,255,0.055);
+  border-right: 1px solid var(--sheen-055);
   position: relative;
 }
 
@@ -691,7 +689,7 @@
   font-weight: 600;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.08);
+  color: var(--line-ghost-border);
   user-select: none;
   pointer-events: none;
   white-space: nowrap;
@@ -700,7 +698,7 @@
 }
 
 .hs-rail-group:hover .hs-rail-group-label {
-  color: rgba(255,255,255,0.2);
+  color: var(--ink-20);
   transition-duration: 0.1s;
 }
 
@@ -731,7 +729,7 @@
 }
 
 .hs-slat:focus-visible {
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  box-shadow: inset 0 0 0 1px var(--ink-18);
 }
 
 .hs-slat-soon {
@@ -756,12 +754,12 @@
   /* machined face — lit faintly from above */
   background: linear-gradient(
     180deg,
-    rgba(255,255,255,0.028) 0%,
-    rgba(255,255,255,0.009) 45%,
-    rgba(255,255,255,0.004) 100%
+    var(--sheen-028) 0%,
+    var(--sheen-009) 45%,
+    var(--sheen-004) 100%
   );
-  border-top: 1px solid rgba(255,255,255,0.07);
-  border-right: 1px solid rgba(255,255,255,0.04);
+  border-top: 1px solid var(--line-medium);
+  border-right: 1px solid var(--sheen-040);
   transform: translateY(0);
   box-shadow: none;
   transition:
@@ -793,13 +791,13 @@
     180deg,
     color-mix(in srgb, var(--slat-color) 14%, transparent) 0%,
     color-mix(in srgb, var(--slat-color) 4%, transparent) 38%,
-    rgba(255,255,255,0.012) 70%,
-    rgba(255,255,255,0.006) 100%
+    var(--sheen-012) 70%,
+    var(--sheen-006) 100%
   );
-  border-top-color: color-mix(in srgb, var(--slat-color) 45%, rgba(255,255,255,0.16));
+  border-top-color: color-mix(in srgb, var(--slat-color) 45%, var(--ink-16));
   /* the risen block clears the bed — it casts back into the recess */
   box-shadow:
-    0 14px 24px -12px rgba(0,0,0,0.85),
+    0 14px 24px -12px var(--shade-85),
     0 0 32px -6px color-mix(in srgb, var(--slat-color) 14%, transparent);
   transition:
     transform 0.26s var(--hs-rise),
@@ -818,7 +816,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--slat-color, var(--accent-primary, #ff8c00));
+  background: var(--slat-color, var(--accent-primary, var(--accent-primary)));
   opacity: 0.35;
   transform: scaleX(0.22);
   transform-origin: left center;
@@ -843,9 +841,9 @@
   opacity: 1;
   transform: scaleX(1);
   box-shadow:
-    0 0 14px 0 var(--slat-glow, rgba(255,140,0,0.4)),
-    0 0 4px var(--slat-color, #ff8c00),
-    0 3px 18px -2px var(--slat-glow, rgba(255,140,0,0.4));
+    0 0 14px 0 var(--slat-glow, var(--accent-primary-glow)),
+    0 0 4px var(--slat-color, var(--accent-primary)),
+    0 3px 18px -2px var(--slat-glow, var(--accent-primary-glow));
   transition-duration: 0.06s; /* ignite */
 }
 
@@ -865,7 +863,7 @@
   font-size: 0.55rem;
   font-weight: 600;
   letter-spacing: 0.22em;
-  color: rgba(255,255,255,0.14);
+  color: var(--ink-14);
   user-select: none;
   transition: color 0.45s var(--hs-decay);
 }
@@ -878,7 +876,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.28);
+  color: var(--ink-28);
   user-select: none;
   white-space: nowrap;
   line-height: 1.2;
@@ -897,13 +895,54 @@
 
 .hs-slat:not(.hs-slat-soon):hover .hs-slat-label,
 .hs-slat-active .hs-slat-label {
-  color: rgba(255,255,255,0.93);
+  color: var(--ink-100);
   letter-spacing: 0.16em;
   transition:
     color 0.08s linear 0.04s,
     letter-spacing 0.26s var(--hs-rise);
 }
 
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT-MODE DEPTH OVERRIDES
+   Dark mode gets depth for free (dark surfaces on darker canvas).
+   Light mode needs explicit shadows and stronger borders to recreate
+   the same physical read — recessed bed, raised columns, carved block.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Rail top border: --ink-09 (#D0D4DA) is too faint on Canvas (#F3F6F9).
+   Switch to --line-medium which has enough contrast to read as an edge. */
+html[data-theme="light"] .hs-rail {
+  border-top-color: var(--line-medium);
+}
+
+/* Rail group dividers: --sheen-055 (even boosted) is a hairline.
+   Use --line-soft so the category columns are visibly delineated.      */
+html[data-theme="light"] .hs-rail-group {
+  border-right-color: var(--line-soft);
+}
+
+/* Resting slat column: add a subtle card shadow so the machined blocks
+   read as physical objects sitting in the bed, not painted rectangles. */
+html[data-theme="light"] .hs-slat-column {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Engaged column: deeper shadow + accent glow cast downward into the
+   recess — the risen block clears the bed and earns its own shadow.    */
+html[data-theme="light"] .hs-slat:not(.hs-slat-soon):hover .hs-slat-column,
+html[data-theme="light"] .hs-slat-active .hs-slat-column {
+  box-shadow:
+    0 10px 24px -8px rgba(20,28,44,0.22),
+    0  2px  8px -2px rgba(20,28,44,0.10),
+    0  0   28px -4px color-mix(in srgb, var(--slat-color) 20%, transparent);
+}
+
+/* Neighbour fade: 0.45 opacity on dark surfaces reads as "receded".
+   On light, drop further to 0.35 so the engaged column truly pops.    */
+html[data-theme="light"] .hs-rail:has(.hs-slat:not(.hs-slat-soon):hover) .hs-slat:not(:hover) .hs-slat-column {
+  opacity: 0.32;
+}
 
 /* ══════════════════════════════════════════════════════════════════
    REDUCED MOTION

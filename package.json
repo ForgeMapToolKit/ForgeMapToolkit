@@ -3,6 +3,9 @@
   "version": "0.1.0-beta.1",
   "description": "Advanced Mapping Toolkit",
   "main": "electron/main.js",
+  "bin": {
+  "fmt": "electron/cli.js"
+},
   "scripts": {
     "dev": "vite",
     "prebuild": "node utils/generate-csp-hashes.js",

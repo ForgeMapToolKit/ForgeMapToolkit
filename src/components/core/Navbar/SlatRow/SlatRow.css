@@ -1,0 +1,141 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SLAT ROW — Core/Navbar/NavbarPanel/SlatRow/SlatRow.css
+
+   Individual sub-item line in the left panel zone. §5 "Linke Zone".
+
+   Structure: [ tick ] [ index ] [ label ]
+   Tick: 3px vertical bar in the item's own --tab-color (via --sr-color).
+   At rest: label at --ink-28, tick invisible.
+   Hover: tick ignites, label steps to --ink-92.
+   Active: tick held at reduced brightness, label at --ink-92.
+   Soon: full row dimmed, inert.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Row container ───────────────────────────────────────────────────────── */
+
+.sr-row {
+  display: block;
+  /* No border top or bottom per spec */
+}
+
+/* ── Button ──────────────────────────────────────────────────────────────── */
+
+.sr-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);     /* breathing room between tick / index / label */
+  width: 100%;
+  padding: var(--space-md) 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  text-align: left;
+  transition: none; /* transitions live on individual children */
+}
+
+.sr-row--soon .sr-btn {
+  cursor: default;
+}
+
+/* ── Tick ────────────────────────────────────────────────────────────────── */
+
+.sr-tick {
+  flex-shrink: 0;
+  display: block;
+  width: 3px;
+  height: 24px;
+  border-radius: 1.5px;
+  background: var(--sr-color, var(--tab-color));
+  box-shadow: 0 0 6px 1px var(--sr-glow, var(--tab-color));
+  opacity: 0;
+  transition:
+    opacity    60ms  linear,
+    box-shadow 60ms  linear;
+}
+
+/* Hover: tick ignites */
+.sr-btn:hover .sr-tick,
+.sr-btn:focus-visible .sr-tick {
+  opacity: 1;
+  transition:
+    opacity    60ms  linear,
+    box-shadow 60ms  linear;
+}
+
+/* Active: tick held at structural-signal level */
+.sr-row--active .sr-tick {
+  opacity: 0.65;
+}
+
+/* ── Index ───────────────────────────────────────────────────────────────── */
+
+.sr-index {
+  font-size: var(--text-sm);      /* 0.68rem — recessive, but legible at the new row size */
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  color: var(--ink-22);
+  opacity: 0.7;
+  transition: opacity var(--dur-base) var(--ease-out);
+  user-select: none;
+}
+
+.sr-btn:hover .sr-index,
+.sr-btn:focus-visible .sr-index {
+  opacity: 1;
+}
+
+.sr-row--active .sr-index {
+  opacity: 0.9;
+}
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+
+.sr-label {
+  font-size: var(--text-teaser);   /* 18px — bigger, primary nav text, not a caption */
+  font-weight: var(--weight-semi); /* 600 */
+  letter-spacing: var(--track-wide); /* 0.16em — slightly tighter than before at this size */
+  text-transform: uppercase;
+  color: var(--ink-28);
+  transition: color var(--dur-base) var(--ease-out);
+  user-select: none;
+}
+
+.sr-btn:hover .sr-label,
+.sr-btn:focus-visible .sr-label {
+  color: var(--ink-92);
+}
+
+.sr-row--active .sr-label {
+  color: var(--ink-92);
+}
+
+/* ── Coming-soon state ───────────────────────────────────────────────────── */
+
+.sr-row--soon .sr-btn {
+  pointer-events: none;
+  opacity: 0.38;
+}
+
+.sr-soon-badge {
+  margin-left: var(--space-xs);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.12em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: var(--line-soft);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-40);
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-tick,
+  .sr-index,
+  .sr-label {
+    transition-duration: 0.01ms !important;
+  }
+}

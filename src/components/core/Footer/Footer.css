@@ -1,0 +1,291 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTER — Core/Footer/Footer.css
+   Root bar + panel chrome only. Nav → Nav/FooterNav.css | Logo → FafLogo/FafLogo.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root bar ─────────────────────────────────────────────────────────────── */
+
+.ftr-root {
+  position: relative;
+  flex-shrink: 0;
+  height: var(--space-4xl);   /* 72px — same bar height as the navbar */
+  display: flex;
+  align-items: stretch;
+  background: var(--surface-deep);
+  border-top: 1px solid var(--line-faint);
+  cursor: pointer;
+  transition:
+    background    0.5s ease,
+    border-color  0.4s ease,
+    box-shadow    0.4s ease,
+    transform     0.4s var(--ease-out),
+    opacity       0.34s linear;
+  z-index: 40;
+  overflow: visible;
+}
+
+.ftr-root--expanded {
+  cursor: default;
+}
+
+/* ── Trace line (collapsed bar) ───────────────────────────────────────────── */
+
+.ftr-trace {
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: var(--line-faint);
+  transition: background var(--dur-slow) ease, box-shadow var(--dur-slow) ease;
+  z-index: 2;
+}
+
+.ftr-root--expanded .ftr-trace {
+  display: none;
+}
+
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
+
+.ftr-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--surface-scrim);
+  z-index: 39;
+  cursor: default;
+  animation: ftr-backdrop-in var(--dur-base) ease forwards;
+}
+
+@keyframes ftr-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Status register (collapsed) ─────────────────────────────────────────── */
+
+.ftr-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 var(--space-xl);
+  transition: opacity var(--dur-fast) ease;
+}
+
+.ftr-root--expanded .ftr-status {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ftr-seg {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-lg);
+}
+
+.ftr-seg span {
+  font-family: var(--font-display);
+  font-size: var(--text-status);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-22);
+}
+
+.ftr-seg--tool span {
+  color: var(--tab-color);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wider);
+  transition: text-shadow var(--dur-slow) ease;
+}
+
+.ftr-seg--ver   { padding-left: 0; }
+.ftr-seg--suite { padding-right: 0; }
+
+.ftr-sep {
+  width: 1px;
+  height: var(--space-sm);
+  background: var(--line-medium);
+  flex-shrink: 0;
+}
+
+/* ── Expanded panel ───────────────────────────────────────────────────────── */
+
+.ftr-panel {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 70vh;
+  background: var(--surface-deep);
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-direction: column;
+  z-index: 41;
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.38s var(--ease-out),
+    opacity   var(--dur-base) ease;
+  overflow: hidden;
+}
+
+.ftr-root--expanded .ftr-panel {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Traceline across the top of the expanded panel */
+.ftr-panel-trace {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--tab-color, var(--ink-30));
+  opacity: 0;
+  box-shadow:
+    0 0 var(--space-sm)  2px var(--tab-color, var(--ink-30)),
+    0 0 var(--space-2xl) var(--space-2xs) var(--tab-color, var(--ink-15));
+  transition: opacity var(--dur-slow) ease 0.15s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ftr-root--expanded .ftr-panel-trace {
+  opacity: 0.8;
+}
+
+/* ── Panel inner layout: nav left (60%), logo right (40%) ──────────────────── */
+
+.ftr-panel-inner {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.ftr-left {
+  flex: 0 0 60%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ── Panel header ─────────────────────────────────────────────────────────── */
+
+.ftr-panel-header {
+  flex: 0 0 auto;
+  padding: var(--space-2xl) var(--space-2xl) 0 var(--space-4xl);
+}
+
+.ftr-panel-headline {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.ftr-panel-index {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  color: var(--ink-16);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ftr-panel-designation {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4.2vw, 3.5rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-100);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* One-shot trace sweep above the column titles */
+.ftr-header-trace {
+  flex: 0 0 auto;
+  height: 2px;
+  margin: var(--space-xl) var(--space-2xl) 0 var(--space-4xl);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--tab-color, var(--ink-50)) 20%,
+    var(--tab-color, var(--ink-50)) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 var(--space-md) 1px var(--tab-color, var(--ink-30));
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ftr-header-trace.is-animating {
+  animation: ftr-trace-sweep 1.8s var(--ease-out) 0.2s forwards;
+}
+
+@keyframes ftr-trace-sweep {
+  0%   { opacity: 0; transform: scaleX(0); }
+  8%   { opacity: 1; }
+  40%  { transform: scaleX(1); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+/* ── Stage wrapper (swaps between nav / preview) ──────────────────────────── */
+
+.ftr-stage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: ftr-stage-in var(--dur-fast) ease;
+}
+
+@keyframes ftr-stage-in {
+  from { opacity: 0; transform: translateY(var(--space-xs)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Meta strip (bottom of left column) ─────────────────────────────────────── */
+
+.ftr-meta {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-2xl) var(--space-xl) var(--space-4xl);
+  border-top: 1px solid var(--line-soft);
+}
+
+.ftr-meta-item {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: var(--track-snug);
+  color: var(--ink-16);
+}
+
+.ftr-meta-sep {
+  color: var(--ink-16);
+  font-size: var(--text-meta);
+}
+
+/* ── HelpModal / overlay must clear footer stack ─────────────────────────── */
+
+.hc-overlay,
+.help-modal-overlay,
+[data-help-modal] {
+  z-index: 9999 !important;
+}
+
+/* ── Chrome-overlay retraction when HelpConsole is open ─────────────────── */
+
+.forgemaptoolkit:has(.hc-overlay) .ftr-root,
+.forgemaptoolkit:has(.hc-overlay) .ftr-panel,
+.forgemaptoolkit:has(.hc-overlay) .ftr-backdrop {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}

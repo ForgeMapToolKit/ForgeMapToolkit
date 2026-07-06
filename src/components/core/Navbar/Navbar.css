@@ -1,0 +1,218 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAVBAR — Core/Navbar/Navbar.css
+   The navigation register of the suite. Pendant to the footer:
+   both Navbar-bottom and Footer-top carry --tab-color as a glowing hairline,
+   framing the active workspace between them.
+
+   Token contract:
+   - --nav-accent / --nav-glow-strong are GONE.
+   - Everything reads --tab-color, resolved from the active tool's colorVar
+     and synced onto .nb-bar via inline style in Navbar.jsx.
+   - Fallback: var(--tab-color) defaults to var(--ink-60) on :root.
+
+   Three states:
+   A) Rest     — quiet strip, labels at --ink-28, active underline in --tab-color
+   B) Interact — proximity-wash on bottom edge (JS-driven via useNavbarProximity)
+   C) Open     — panel rendered by NavbarPanel, backdrop dims workspace
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Easings (local aliases matching the system family) ─────────────────────
+   Not re-declared on :root — scoped to the navbar. */
+.nb-bar {
+  /* mechanical settle — same family as the banner */
+  --nb-out:   var(--ease-out);
+  /* phosphor decay — ignite fast, cool slow */
+  --nb-decay: var(--ease-decay);
+
+  position: relative;
+  z-index: var(--z-rail);           /* 10 — below overlays, above workspace */
+  flex-shrink: 0;
+  height: var(--space-4xl);         /* 72px — unchanged from previous navbar */
+  padding: 0 var(--space-3xl);      /* 64px horizontal padding */
+  display: flex;
+  align-items: stretch;
+
+  background: var(--surface-deep);
+  background-size: 28px 28px;
+
+  /* Top hairline: structural border, no color. */
+  border-top:    1px solid var(--line-medium);
+  /* Bottom hairline: starts structural, ignites in --tab-color via JS proximity. */
+  border-bottom: 1px solid var(--line-faint);
+
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+
+  /* JS proximity hook mutates background / border-bottom-color / box-shadow.
+     Transitions allow the values to ease when JS clears them on mouse-leave. */
+  transition:
+    background        var(--dur-slow)  ease,
+    border-bottom-color var(--dur-slow) ease,
+    box-shadow        var(--dur-slow)  ease;
+}
+
+/* Architectural top-light — faint wash from the top edge.
+   Same as the footer; the strip is lit from above, not decorated. */
+.nb-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    var(--sheen-014) 0%,
+    transparent 60%
+  );
+}
+
+/* ── Bottom trace line ──────────────────────────────────────────────────────
+   Sits on the bottom hairline. At rest: invisible (same as the border).
+   Proximity hook ignites it in --tab-color via inline style.
+   The transition allows it to ease back to transparent on mouse-leave. */
+.nb-trace {
+  position: absolute;
+  bottom: -1px;     /* sits on top of the bottom border */
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: transparent;
+  transition:
+    background  var(--dur-slow) ease,
+    box-shadow  var(--dur-slow) ease;
+  z-index: 2;
+}
+
+/* ── Track — the row of nav items ──────────────────────────────────────────*/
+
+.nb-track {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* ── Nav item ───────────────────────────────────────────────────────────────*/
+
+.nb-item {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Active underline — sits on the bar's bottom hairline, carries --tab-color.
+   Structural signal: color belongs to the line, not the label type.
+   Prints in when the group becomes active. */
+.nb-item--active::after {
+  content: '';
+  position: absolute;
+  left: var(--space-2xl);   /* 36px — inset matches label padding */
+  right: var(--space-2xl);
+  bottom: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--tab-color);
+  box-shadow:
+    0 0 8px  var(--tab-glow-strong),
+    0 0 2px  var(--tab-color);
+  transform-origin: center;
+  animation: nb-underline-in var(--dur-base) var(--nb-out) both;
+}
+
+@keyframes nb-underline-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* ── Top label button ───────────────────────────────────────────────────────*/
+
+.nb-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  height: 100%;
+  padding: 0 var(--space-2xl);      /* 36px — generous, instrument-panel spacing */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-lg);        /* 0.8rem — a touch larger, more present */
+  font-weight: var(--weight-semi);  /* 600 */
+  letter-spacing: var(--track-wide); /* 0.16em — eased so the larger type still fits */
+  text-transform: uppercase;
+  color: var(--ink-28);
+  white-space: nowrap;
+  transition: color var(--dur-base) var(--nb-decay);
+}
+
+.nb-label-text { position: relative; }
+
+/* Hover and open: label steps to white — color belongs to the underline. */
+.nb-item:hover > .nb-label,
+.nb-item--open  > .nb-label {
+  color: var(--ink-92);
+}
+
+/* Active label: full white, no color — restraint contract. */
+.nb-item--active > .nb-label {
+  color: var(--ink-92);
+}
+
+/* Coming-soon: dimmed, inert, badged */
+.nb-label--soon {
+  cursor: default;
+  color: var(--ink-22);
+}
+.nb-label--soon:hover { color: var(--ink-22); }
+
+.nb-label-soon {
+  font-size: var(--text-3xs);       /* 0.54rem */
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.12em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: var(--line-soft);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-40);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────*/
+
+@media (max-width: 1200px) {
+  .nb-bar   { padding: 0 var(--space-xl); }
+  .nb-label { padding: 0 var(--space-lg); letter-spacing: var(--track-wide); }
+}
+
+@media (max-width: 960px) {
+  .nb-label { padding: 0 var(--space-md); font-size: var(--text-xs); letter-spacing: var(--track-base); }
+}
+
+@media (max-width: 760px) {
+  .nb-label { padding: 0 var(--space-sm); font-size: 0.62rem; letter-spacing: 0.1em; }
+}
+
+/* ── Light-mode overrides ───────────────────────────────────────────────────
+   The navbar in dark mode sits on a near-black plate — depth is axiomatic.
+   In light mode, the bar needs a downward shadow to separate the chrome
+   carriage from the content well beneath it, and a stronger top border to
+   mark the seam between banner (white) and navbar (--surface-deep / #ECF0F3). */
+
+html[data-theme="light"] .nb-bar {
+  border-top-color: var(--line-medium);
+  box-shadow: 0 3px 12px rgba(20,28,44,0.08);
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────────*/
+
+@media (prefers-reduced-motion: reduce) {
+  .nb-bar *,
+  .nb-bar *::before,
+  .nb-bar *::after {
+    animation-duration:   0.01ms !important;
+    animation-delay:      0ms    !important;
+    transition-duration:  0.01ms !important;
+  }
+  .nb-item--active::after { transform: scaleX(1); opacity: 1; }
+}

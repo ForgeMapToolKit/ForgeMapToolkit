@@ -22,7 +22,7 @@
 
 export const CATEGORIES = [
   { key: 'emitter',   homeLabel: 'Emitter Tools', navLabel: 'Emitter',   navDefaultDesc: 'Place and configure particle emitters on the map with full control over type, frequency and output.' },
-  { key: 'generator', homeLabel: 'Generators',    navLabel: 'Generator', navDefaultDesc: 'Generate and distribute props, trees and terrain features procedurally using masks and erosion maps.' },
+  { key: 'generator', homeLabel: 'Scenery',        navLabel: 'Scenery',   navDefaultDesc: 'Generate and distribute props, trees and terrain features procedurally using masks and erosion maps.' },
   { key: 'skybox',    homeLabel: 'Skybox',        navLabel: 'Skybox',    navDefaultDesc: 'Design realistic star distributions and full skyboxes for immersive map atmospheres.' },
   { key: 'tools',     homeLabel: 'Tools',         navLabel: 'Tools',     navDefaultDesc: 'Unpack, edit and analyse map files — resize, adapt and preview your maps.' },
   { key: 'community', homeLabel: 'Community' },
@@ -197,6 +197,19 @@ export const TOOLS = [
     colorVar: '--previewimage-color',
     description: 'Generate and export a preview image for your map.',
     navDescription: 'Generate and export a preview image for your map.',
+    status: 'active',
+  },
+  {
+    id: 'cliterminal',
+    label: 'CLI Terminal',
+    category: 'tools',
+    index: '17',
+    color: 'var(--cliterminal-color)',
+    glow: 'var(--cliterminal-glow)',
+    glowStrong: 'var(--cliterminal-glow-strong)',
+    colorVar: '--cliterminal-color',
+    description: 'Run map editor CLI commands with live output — render preview, unpack and pack .scmap.',
+    navDescription: 'Run map editor CLI commands with live streaming output. Registry keys are set automatically before every render.',
     status: 'active',
   },
   {

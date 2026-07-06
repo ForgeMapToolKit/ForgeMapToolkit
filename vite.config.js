@@ -13,7 +13,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main:        path.resolve(__dirname, 'index.html'),
-        'scmap-popout': path.resolve(__dirname, 'src/components/tabs/Tools/ScmapTab/Pop-Out/scmap-popout.html'),
+        'scmap-popout': path.resolve(__dirname, 'src/components/Tabs/Tools/Scmap/PopOut/scmapPopout.html'),
       },
       output: {
         manualChunks(id) {
@@ -37,7 +37,17 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    fs: { strict: false }
+    // Fail loudly if 5173 is occupied instead of silently moving to 5174.
+    // Electron hard-loads http://localhost:5173 and the dev CSP only allows
+    // ws://localhost:5173, so a drifted port silently breaks HMR (the renderer
+    // loads a stale/zombie server and live updates never arrive). strictPort
+    // surfaces a lingering process immediately so it can be killed.
+    strictPort: true,
+    fs: { strict: false },
+    hmr: {
+      host: 'localhost',
+      port: 5173,
+    },
   },
   optimizeDeps: {
     include: [

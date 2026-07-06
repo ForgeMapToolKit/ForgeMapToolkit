@@ -1,0 +1,585 @@
+/* Variables: root.css @ C:\ForgeMapToolkit\src\components\modals\root.css */
+
+.acpo-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  animation: acpoFadeIn 0.25s cubic-bezier(0.23,1,0.32,1);
+}
+@keyframes acpoFadeIn { from { opacity:0 } to { opacity:1 } }
+
+/* ── Panel ── */
+.acpo-panel {
+  background: linear-gradient(155deg, #141414 0%, var(--surface-face-a) 60%, var(--surface-rail) 100%);
+  border: 1px solid rgba(62,163,135,0.22);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 40px 120px rgba(0,0,0,0.9), 0 0 80px rgba(62,163,135,0.07);
+  width: 960px;
+  max-width: 95vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: acpoPanelIn 0.35s cubic-bezier(0.23,1,0.32,1);
+}
+.acpo-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--customprops-color) 30%, var(--customprops-color) 70%, transparent);
+}
+@keyframes acpoPanelIn {
+  from { opacity:0; transform: translateY(24px) scale(0.97) }
+  to   { opacity:1; transform: translateY(0)    scale(1)    }
+}
+
+/* ── Header ── */
+.acpo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 40px 26px;
+  border-bottom: 1px solid var(--line-faint);
+  flex-shrink: 0;
+}
+.acpo-header-title {
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.acpo-header-icon {
+  color: var(--customprops-color);
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 12px rgba(62,163,135,0.7));
+}
+.acpo-btn-close {
+  background: none;
+  border: 1px solid var(--ink-16);
+  color: var(--ink-35);
+  width: 40px; height: 40px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+}
+.acpo-btn-close:hover {
+  border-color: rgba(255,80,80,0.5);
+  color: rgba(255,80,80,0.8);
+  background: rgba(255,80,80,0.06);
+}
+
+/* ── Body ── */
+.acpo-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+.acpo-body::-webkit-scrollbar { width: 4px; }
+.acpo-body::-webkit-scrollbar-track { background: transparent; }
+.acpo-body::-webkit-scrollbar-thumb { background: rgba(62,163,135,0.2); }
+
+/* ── Section ── */
+.acpo-section { display: flex; flex-direction: column; gap: 14px; }
+.acpo-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(62,163,135,0.7);
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+}
+
+/* ── Type switcher ── */
+.acpo-type-switcher {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--line-ghost-border);
+  width: fit-content;
+}
+.acpo-type-btn {
+  padding: 13px 36px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line-ghost-border);
+  color: var(--ink-30);
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.acpo-type-btn:last-child { border-right: none; }
+.acpo-type-btn:hover { color: var(--ink-65); background: var(--surface-ghost); }
+.acpo-type-btn.active {
+  background: rgba(62,163,135,0.1);
+  color: var(--customprops-color);
+  box-shadow: inset 0 -2px 0 var(--customprops-color);
+}
+
+/* ── Name input ── */
+.acpo-name-input {
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--sheen-040);
+  border: 1px solid var(--ink-16);
+  color: #fff;
+  font-size: 1.05rem;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+.acpo-name-input:focus {
+  border-color: var(--customprops-color);
+  background: var(--surface-code);
+  box-shadow: 0 0 0 1px var(--customprops-color), 0 0 24px rgba(62,163,135,0.14);
+}
+.acpo-name-input::placeholder { color: var(--ink-18); }
+.acpo-path-preview {
+  font-family: monospace;
+  font-size: 0.76rem;
+  color: rgba(62,163,135,0.5);
+  padding: 9px 12px;
+  background: rgba(62,163,135,0.03);
+  border: 1px solid rgba(62,163,135,0.08);
+}
+
+/* ── Dropzones ── */
+.acpo-dropzones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+/* Single-file slots now render via EntityConsole's <DropSlot> (ec-drop-slot
+   classes, entity-console.css) — only the "optional" dimming is local. */
+.ec-drop-slot.acpo-drop-optional { opacity: 0.7; }
+.ec-drop-slot.acpo-drop-optional:hover { opacity: 1; }
+
+/* DropSlot's eyebrow label is absolutely positioned at top:0/left:0, which
+   collides with the corner bracket at this overlay's tight widths. Pull it
+   into normal flow instead — it prints as its own centered line above the
+   slot content, with no overlap, and a touch larger for legibility. */
+.acpo-body .ec-drop-slot-label {
+  position: static;
+  display: block;
+  width: 100%;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.3;
+  font-size: 0.66rem;
+  margin-bottom: 6px;
+}
+.acpo-body .ec-drop-slot-inner {
+  height: auto;
+  flex: 0 0 auto;
+  padding-top: 0;
+}
+
+/* The three asset slots (Mesh LOD0 / Albedo / Normal Map) sit in a tight
+   3-up row — DropSlot's default 2:1 aspect-ratio is far too short there
+   once the label prints above the content, so give them a fixed height
+   instead and a slightly larger primary/hint type. */
+.ec-drop-slot.acpo-drop-compact {
+  aspect-ratio: unset;
+  min-height: 118px;
+}
+.ec-drop-slot.acpo-drop-compact .ec-drop-slot-text { font-size: 0.76rem; }
+.ec-drop-slot.acpo-drop-compact .ec-drop-slot-hint { font-size: 0.62rem; }
+
+/* ── Extra LODs ── */
+
+.acpo-lod-extra { margin-top: 6px; }
+.acpo-lod-add-btn {
+  background: none;
+  border: 1px dashed rgba(62,163,135,0.2);
+  color: rgba(62,163,135,0.45);
+  padding: 9px 18px;
+  font-size: 0.75rem;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.acpo-lod-add-btn:hover {
+  border-color: rgba(62,163,135,0.5);
+  color: rgba(62,163,135,0.8);
+  background: rgba(62,163,135,0.04);
+}
+.acpo-lod-extra-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── Blueprint tabs ── */
+.acpo-bp-tabs {
+  display: flex;
+  border: 1px solid var(--line-ghost-border);
+}
+.acpo-bp-tab {
+  flex: 1;
+  padding: 11px 16px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line-ghost-border);
+  color: var(--ink-30);
+  font-size: 0.78rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.acpo-bp-tab:last-child { border-right: none; }
+.acpo-bp-tab:hover { color: var(--ink-60); background: var(--surface-ghost); }
+.acpo-bp-tab.active {
+  background: rgba(62,163,135,0.08);
+  color: var(--customprops-color);
+  box-shadow: inset 0 -2px 0 var(--customprops-color);
+}
+
+.acpo-bp-upload { margin-top: 6px; }
+
+/* ── BP fields ── */
+.acpo-bp-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  background: var(--surface-ghost);
+  border: 1px solid var(--line-soft);
+  margin-top: 6px;
+}
+.acpo-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.acpo-field { display: flex; flex-direction: column; gap: 7px; }
+.acpo-field-full { grid-column: 1 / -1; }
+.acpo-field-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-35);
+  font-family: 'Poppins', sans-serif;
+}
+.acpo-field-input {
+  padding: 11px 14px;
+  background: var(--sheen-040);
+  border: 1px solid var(--line-ghost-border);
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.acpo-field-input:focus {
+  border-color: rgba(62,163,135,0.5);
+  box-shadow: 0 0 0 1px rgba(62,163,135,0.25);
+}
+.acpo-field-input::-webkit-inner-spin-button,
+.acpo-field-input::-webkit-outer-spin-button { opacity: 0.35; }
+
+/* ── BP preview ── */
+.acpo-toggle-field { margin-top: 8px; }
+.acpo-bp-preview { display: flex; flex-direction: column; gap: 6px; }
+.acpo-bp-preview-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-18);
+  font-family: 'Poppins', sans-serif;
+}
+.acpo-bp-preview-code {
+  background: rgba(0,0,0,0.55);
+  border: 1px solid var(--line-soft);
+  padding: 12px 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.66rem;
+  color: rgba(62,163,135,0.5);
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0;
+}
+.acpo-bp-preview-code::-webkit-scrollbar { width: 3px; height: 3px; }
+.acpo-bp-preview-code::-webkit-scrollbar-thumb { background: rgba(62,163,135,0.18); }
+
+/* ── Footer ── */
+.acpo-footer {
+  padding: 22px 40px 28px;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-shrink: 0;
+}
+.acpo-footer-hint {
+  font-size: 0.76rem;
+  color: var(--ink-25);
+  font-family: 'Poppins', sans-serif;
+  font-style: italic;
+  flex: 1;
+  line-height: 1.5;
+}
+.acpo-footer-actions { display: flex; gap: 12px; flex-shrink: 0; }
+
+.acpo-btn-cancel {
+  padding: 13px 28px;
+  background: transparent;
+  border: 1px solid var(--ink-16);
+  color: var(--ink-35);
+  font-size: 0.82rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.acpo-btn-cancel:hover { border-color: var(--ink-20); color: var(--ink-60); }
+
+.acpo-btn-save {
+  padding: 13px 32px;
+  background: rgba(62,163,135,0.05);
+  border: 1px solid rgba(62,163,135,0.15);
+  color: rgba(62,163,135,0.3);
+  font-size: 0.82rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: not-allowed;
+  transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+}
+.acpo-btn-save.ready {
+  background: rgba(62,163,135,0.1);
+  border-color: rgba(62,163,135,0.45);
+  color: var(--customprops-color);
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(62,163,135,0.14);
+}
+.acpo-btn-save.ready:hover {
+  background: rgba(62,163,135,0.18);
+  border-color: var(--customprops-color);
+  box-shadow: 0 0 32px rgba(62,163,135,0.28);
+  transform: translateY(-1px);
+}
+.acpo-btn-save:disabled { cursor: not-allowed; opacity: 0.55; }
+/* ── Folder Drop Zone ─────────────────────────────────────────────────────── */
+/* FolderDropZone now renders on the same ec-drop-slot frame as the single
+   DropSlots (entity-console.css) — these are just its local overrides:
+   more room for folder content, and status tints for warn/error. */
+.ec-drop-slot.acpo-folder-slot {
+  aspect-ratio: unset;
+  min-height: 200px;
+}
+.ec-drop-slot.acpo-folder-slot.done {
+  min-height: 140px;
+}
+.ec-drop-slot.acpo-folder-slot.status-warn .ec-drop-slot-corner {
+  border-color: rgba(255,190,50,0.5);
+}
+.ec-drop-slot.acpo-folder-slot.status-warn::before {
+  background: rgba(255,190,50,0.8);
+  box-shadow: 0 0 8px rgba(255,190,50,0.5);
+}
+.ec-drop-slot.acpo-folder-slot.status-error .ec-drop-slot-corner {
+  border-color: rgba(255,80,80,0.5);
+}
+.ec-drop-slot.acpo-folder-slot.status-error::before {
+  background: rgba(255,80,80,0.8);
+  box-shadow: 0 0 8px rgba(255,80,80,0.5);
+}
+
+.acpo-folder-slot-inner { gap: 8px; }
+
+.acpo-folder-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Space Grotesk', monospace;
+  letter-spacing: 0.04em;
+}
+.acpo-folder-filelist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  max-width: 100%;
+  margin-top: 4px;
+}
+.acpo-folder-file-chip {
+  font-size: 0.62rem;
+  font-family: monospace;
+  color: var(--ink-30);
+  background: var(--sheen-040);
+  border: 1px solid var(--line-medium);
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.acpo-folder-file-chip.highlight {
+  color: rgba(62,163,135,0.8);
+  background: rgba(62,163,135,0.07);
+  border-color: rgba(62,163,135,0.2);
+}
+.acpo-folder-status {
+  font-size: 0.73rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ── Parsed BP values grid ───────────────────────────────────────────────── */
+.acpo-bp-parsed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+.acpo-bp-val {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 11px;
+  background: var(--surface-ghost);
+  border: 1px solid var(--line-faint);
+}
+.acpo-bp-val.wide {
+  grid-column: 1 / -1;
+}
+.acpo-bp-val-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(62,163,135,0.45);
+  font-family: 'Poppins', sans-serif;
+}
+.acpo-bp-val-value {
+  font-size: 0.82rem;
+  font-family: monospace;
+  color: var(--ink-72);
+}
+
+/* ── BP raw details/summary ──────────────────────────────────────────────── */
+.acpo-bp-raw-details {
+  margin-top: 8px;
+}
+.acpo-bp-raw-summary {
+  font-size: 0.68rem;
+  color: rgba(62,163,135,0.45);
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  padding: 4px 0;
+  list-style: none;
+  user-select: none;
+}
+.acpo-bp-raw-summary:hover { color: rgba(62,163,135,0.7); }
+.acpo-bp-raw-summary::marker { display: none; }
+.acpo-bp-raw-summary::before { content: '▶ '; font-size: 0.6rem; }
+details[open] .acpo-bp-raw-summary::before { content: '▼ '; }
+
+/* ── Detected type note ──────────────────────────────────────────────────── */
+.acpo-folder-type-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: var(--sheen-028);
+  border: 1px solid var(--line-faint);
+  font-size: 0.75rem;
+  color: var(--ink-45);
+  font-family: 'Poppins', sans-serif;
+}
+.acpo-folder-type-note strong { color: var(--ink-72); }
+/* ── Pack Together toggle ──────────────────────────────────────────────────── */
+.acpo-pack-together {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(62,163,135,0.04);
+  border: 1px solid rgba(62,163,135,0.12);
+}
+.acpo-pack-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: color 0.15s;
+}
+.acpo-pack-btn.on  { color: var(--customprops-color); }
+.acpo-pack-btn.off { color: var(--ink-35); }
+.acpo-pack-btn:hover { color: rgba(62,163,135,0.7);}
+.acpo-pack-checkbox { font-size: 1rem; line-height: 1; }
+.acpo-pack-hint {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.68rem;
+  color: var(--ink-35);
+  line-height: 1.4;
+}
+
+/* ── Edited indicator on prop tabs ──────────────────────────────────────────── */
+.acpo-bp-tab.edited {
+  border-color: rgba(62,163,135,0.4);
+}
+.acpo-edited-dot {
+  color: var(--customprops-color);
+  font-size: 0.55rem;
+  margin-left: 4px;
+  vertical-align: super;
+}
+
+/* ── Reset edits button ──────────────────────────────────────────────────────── */
+.acpo-reset-edits-btn {
+  background: none;
+  border: 1px solid rgba(62,163,135,0.25);
+  color: rgba(62,163,135,0.6);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.62rem;
+  padding: 2px 8px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+.acpo-reset-edits-btn:hover {
+  border-color: rgba(62,163,135,0.6);
+  color: var(--customprops-color);
+  background: rgba(62,163,135,0.06);
+}

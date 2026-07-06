@@ -1,14 +1,16 @@
-import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import '../modals/root.css';
 import { commitHistoryEntry } from '../../../utils/ScmapHistoryTracker.js';
-import HomeScreen from './home/HomeScreen.jsx';
+import HomeScreen from './Home/HomeScreen.jsx';
+import { getTool } from './Home/Data/toolRegistry.js';
 import Banner from './banner/Banner.jsx';
-import MegaNavbar from './navbar/MegaNavbar.jsx';
-import FirstRunModal from './chrome/FirstRunModal.jsx';
-import UpdateModal from './chrome/UpdateModal.jsx';
-import ScanProgressBanner from './chrome/ScanProgressBanner.jsx';
+import MegaNavbar from './Navbar/Navbar.jsx';
+import FirstRunModal from './Chrome/FirstRunModal.jsx';
+import UpdateModal from './Chrome/UpdateModal.jsx';
+import ScanProgressBanner from './Chrome/ScanProgressBanner.jsx';
 import { renderTab, CHROMELESS_SECTIONS } from './tabRoutes.jsx';
-import { loadPersistedShared, persistShared, projectMapName } from './sharedState.js';
+import { loadPersistedShared, persistShared, projectMapName } from './SharedState.js';
+import Footer from './Footer/Footer.jsx';
 import './ForgeMapToolkit.css';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -38,6 +40,27 @@ const ForgeMapToolkit = () => {
   const [settings,     setSettings]       = useState(null);
   const [appVersion,   setAppVersion]     = useState('');
 
+  // ── Footer-article back-navigation ──────────────────────────────────────
+  // previousSectionRef captures whatever tab was active right before a
+  // footer article opened, so Back returns there instead of falling back to
+  // Home. footerReopenToken is bumped on every Back press -- Footer.jsx's
+  // expanded/collapsed state lives in its own local useFooterPanelState
+  // hook, unreachable from here directly, so this is the side-channel that
+  // tells it "re-open" without lifting that whole hook up.
+  const previousSectionRef = useRef(null);
+  const [footerReopenToken, setFooterReopenToken] = useState(null);
+
+  const handleOpenFooterArticle = useCallback((slug) => {
+    previousSectionRef.current = activeSection;
+    setActiveSection(`footer:${slug}`);
+  }, [activeSection]);
+
+  const handleBackFromFooterArticle = useCallback(() => {
+    setActiveSection(previousSectionRef.current ?? null);
+    setFooterReopenToken(Date.now());
+  }, []);
+
+
   const [library,    setLibrary]    = useState({ emitters: [], props: [], units: [], scanned: false });
   const [scanning,   setScanning]   = useState(false);
   const [scanCounts, setScanCounts] = useState(null);
@@ -45,6 +68,14 @@ const ForgeMapToolkit = () => {
   useEffect(() => {
     window.electronAPI.invoke('settings-get-version').then(v => setAppVersion(v)).catch(() => {});
   }, []);
+
+  // Interface theme — single source of truth lives on <html data-theme>, read
+  // by tokens-light.css. Re-asserted whenever settings load or a Settings-tab
+  // commit lands (onSave → setSettings), so it's correct from first paint and
+  // never depends on the Settings tab having been opened this session.
+  useEffect(() => {
+    document.documentElement.dataset.theme = settings?.colorTheme === 'light' ? 'light' : 'dark';
+  }, [settings?.colorTheme]);
 
   useEffect(() => {
     window.electronAPI.invoke('settings-load').then(s => {
@@ -99,6 +130,27 @@ window.electronAPI.invoke('check-update').then(res => {
 
   const isHomepage = activeSection === null;
 
+  // ─── Last real tool — single source of truth for the accent carry-over ────
+  // "footer:<slug>" article tabs have no toolRegistry entry by design, so
+  // getTool() returns null while one is open. Banner and Footer used to each
+  // track this with their own useRef (duplicated logic); now it's computed
+  // once here and handed down, so FooterArticleTab can use the exact same
+  // value to theme --tab-color on .fat-root.
+  const currentTool = getTool(activeSection);
+  const lastToolRef = useRef(null);
+  if (currentTool) lastToolRef.current = currentTool;
+  const isFooterArticle = typeof activeSection === 'string' && activeSection.startsWith('footer:');
+  const lastRealTool = currentTool ?? (isFooterArticle ? lastToolRef.current : null);
+
+  // --current-accent (read by ForgeMapToolkit.css's [data-active-theme="..."]
+  // rules, e.g. the mega navbar's indicator) used to go blind whenever a
+  // footer article was open: activeSection was the literal "footer:<slug>"
+  // string, which never matches any [data-active-theme] selector, so the
+  // app idled on the default theme while Banner/Footer/FooterArticleTab
+  // already carried lastRealTool's hue via their own --tab-color props.
+  // Resolving to lastRealTool.id here keeps both theming layers in sync.
+  const activeThemeKey = isFooterArticle ? (lastRealTool?.id ?? 'home') : (activeSection || 'home');
+
   // Tool currently hovered on the home screen — lets the banner preview its hue.
   const [homeHoverId, setHomeHoverId] = useState(null);
 
@@ -138,12 +190,14 @@ const tabProps = {
   shared: sharedState,
   onSharedChange: updateShared,
   onNavigateTab: setActiveSection,
-  onRecordSnapshot: handleRecordSnapshot, 
+  onNavigateBack: handleBackFromFooterArticle,
+  onRecordSnapshot: handleRecordSnapshot,
+  lastRealTool,
 };
 
   return (
     <LibraryContext.Provider value={libraryContextValue}>
-      <div className="forgemaptoolkit" data-active-theme={activeSection || 'home'}>
+      <div className="forgemaptoolkit" data-active-theme={activeThemeKey}>
 
         {showFirstRun && (
           <FirstRunModal
@@ -158,7 +212,7 @@ const tabProps = {
         {/* Suite chrome — banner + navbar retract as one body when a help
             overlay mounts (see .forgemaptoolkit-chrome rule), clearing the help rail. */}
         <div className="forgemaptoolkit-chrome">
-          <Banner activeSection={activeSection} previewSection={isHomepage ? homeHoverId : null} />
+          <Banner activeSection={activeSection} previewSection={isHomepage ? homeHoverId : null} lastRealTool={lastRealTool} />
 
           {(scanning || scanCounts) && (
             <ScanProgressBanner counts={scanning ? null : scanCounts} />
@@ -190,19 +244,17 @@ const tabProps = {
           </div>
         )}
 
-        {!isHomepage && !CHROMELESS_SECTIONS.has(activeSection) && (
-          <div className="forgemaptoolkit-footer">
-            <p className="footer-credit">
-              <span className="footer-part footer-part--ver">v{appVersion || '1.0'}</span>
-              <span className="footer-part">Seraphim-Noob</span>
-              <span className="footer-part">Forged Alliance Forever</span>
-            </p>
-            <div className="footer-trace" aria-hidden="true">
-              <div className="footer-trace-bloom" />
-              <div className="footer-trace-line" />
-            </div>
-          </div>
-        )}
+{!isHomepage && !CHROMELESS_SECTIONS.has(activeSection) && (
+  <Footer
+    activeSection={activeSection}
+    appVersion={appVersion}
+    mapName={settings?.mapName || null}
+    quickLinks={!!settings?.footerQuickLinks}
+    onOpenArticle={handleOpenFooterArticle}
+    footerReopenToken={footerReopenToken}
+    lastRealTool={lastRealTool}
+  />
+)}
 
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>

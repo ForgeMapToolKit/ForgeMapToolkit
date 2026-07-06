@@ -1,0 +1,181 @@
+<div class="fcv-content">
+
+<h1>Keyboard Shortcuts</h1>
+
+<p>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+  tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+  quis nostrud exercitation ullamco laboris.
+</p>
+
+<div class="fcv-callout">
+  <p>Callout-Box: Most bindings use <kbd>Ctrl</kbd> on Windows / Linux and <kbd>Cmd</kbd> on macOS.
+  Inline <code>code</code> inside a callout also renders here.</p>
+</div>
+
+<h2>Section heading h2 — Global Bindings</h2>
+
+<div class="fcv-shortcuts">
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Open / close footer panel</span>
+    <span class="fcv-shortcuts__combo"><kbd>F</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Search within article</span>
+    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>F</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Close article / collapse panel</span>
+    <span class="fcv-shortcuts__combo"><kbd>Esc</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Next search result</span>
+    <span class="fcv-shortcuts__combo"><kbd>Enter</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Previous search result</span>
+    <span class="fcv-shortcuts__combo"><kbd>Shift</kbd><kbd>Enter</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Undo last action</span>
+    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>Z</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Generate output files</span>
+    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>G</kbd></span>
+  </div>
+</div>
+
+<h3>Subsection heading h3 — Notes on conflicts</h3>
+
+<p>
+  Paragraph text: lorem ipsum dolor sit amet, consectetur adipiscing elit.
+  Inline <code>code snippet</code> mid-sentence. Link to
+  <a href="#">external reference</a> with tab-color underline.
+</p>
+
+<ul>
+  <li>Unordered list item one — lorem ipsum dolor</li>
+  <li>Unordered list item two — consectetur adipiscing</li>
+  <li>Unordered list item three — sed do eiusmod tempor</li>
+  <li>Item with inline <code>code</code> and a <kbd>Ctrl</kbd> key reference</li>
+</ul>
+
+<ol>
+  <li>Ordered list item one</li>
+  <li>Ordered list item two</li>
+  <li>Ordered list item three — ut labore et dolore magna aliqua</li>
+</ol>
+
+<blockquote>
+  <p>Blockquote: lorem ipsum dolor sit amet, consectetur adipiscing elit,
+  sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+</blockquote>
+
+<hr>
+
+<h2>Section heading h2 — Table Example</h2>
+
+<p>Paragraph before a table. Lorem ipsum dolor sit amet.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Windows / Linux</th>
+      <th>macOS</th>
+      <th>Context</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Place coordinate</td>
+      <td><kbd>Click</kbd></td>
+      <td><kbd>Click</kbd></td>
+      <td>Emitter Tool</td>
+    </tr>
+    <tr>
+      <td>Generate files</td>
+      <td><kbd>Ctrl</kbd><kbd>G</kbd></td>
+      <td><kbd>Cmd</kbd><kbd>G</kbd></td>
+      <td>Global</td>
+    </tr>
+    <tr>
+      <td>Clear all coordinates</td>
+      <td><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>Del</kbd></td>
+      <td><kbd>Cmd</kbd><kbd>Shift</kbd><kbd>Del</kbd></td>
+      <td>Emitter Tool</td>
+    </tr>
+    <tr>
+      <td>Export Lua script</td>
+      <td><kbd>Ctrl</kbd><kbd>E</kbd></td>
+      <td><kbd>Cmd</kbd><kbd>E</kbd></td>
+      <td>Wreckages Tool</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Section heading h2 — Code Block</h2>
+
+<p>Paragraph before a <code>pre</code> block. Lorem ipsum dolor sit amet,
+consectetur adipiscing elit, sed do eiusmod.</p>
+
+<div class="fcv-code">
+  <div class="fcv-code__header">
+    <span class="fcv-code__label">unit-placement.lua</span>
+    <span class="fcv-code__lang">Lua</span>
+  </div>
+  <pre class="fcv-code__pre"><code><span class="fcv-tok-comment">-- Lua example: unit placement configuration</span>
+<span class="fcv-tok-keyword">local</span> <span class="fcv-tok-ident">config</span> <span class="fcv-tok-operator">=</span> <span class="fcv-tok-operator">{</span>
+  <span class="fcv-tok-ident">density</span>    <span class="fcv-tok-operator">=</span> <span class="fcv-tok-number">0.5</span><span class="fcv-tok-operator">,</span>
+  <span class="fcv-tok-ident">spread</span>     <span class="fcv-tok-operator">=</span> <span class="fcv-tok-number">120</span><span class="fcv-tok-operator">,</span>
+  <span class="fcv-tok-ident">category</span>   <span class="fcv-tok-operator">=</span> <span class="fcv-tok-string">"LAND"</span><span class="fcv-tok-operator">,</span>
+  <span class="fcv-tok-ident">randomSeed</span> <span class="fcv-tok-operator">=</span> <span class="fcv-tok-number">42</span><span class="fcv-tok-operator">,</span>
+<span class="fcv-tok-operator">}</span>
+
+<span class="fcv-tok-keyword">for</span> <span class="fcv-tok-ident">i</span><span class="fcv-tok-operator">,</span> <span class="fcv-tok-ident">pos</span> <span class="fcv-tok-keyword">in</span> <span class="fcv-tok-ident">ipairs</span><span class="fcv-tok-operator">(</span><span class="fcv-tok-ident">coordinates</span><span class="fcv-tok-operator">)</span> <span class="fcv-tok-keyword">do</span>
+  <span class="fcv-tok-ident">PlaceUnit</span><span class="fcv-tok-operator">(</span><span class="fcv-tok-ident">config</span><span class="fcv-tok-operator">,</span> <span class="fcv-tok-ident">pos</span><span class="fcv-tok-operator">.</span><span class="fcv-tok-ident">x</span><span class="fcv-tok-operator">,</span> <span class="fcv-tok-ident">pos</span><span class="fcv-tok-operator">.</span><span class="fcv-tok-ident">z</span><span class="fcv-tok-operator">)</span>  <span class="fcv-tok-comment">-- z is vertical in FA</span>
+<span class="fcv-tok-keyword">end</span></code></pre>
+</div>
+
+<p>Paragraph after the code block. Lorem ipsum dolor sit amet.</p>
+
+<div class="fcv-code">
+  <div class="fcv-code__header">
+    <span class="fcv-code__label">Export example</span>
+    <span class="fcv-code__lang">Bash</span>
+  </div>
+  <pre class="fcv-code__pre"><code><span class="fcv-tok-cmd">fmtk</span> <span class="fcv-tok-plain">export</span> <span class="fcv-tok-flag">--map</span> <span class="fcv-tok-plain">mymap</span> <span class="fcv-tok-flag">--output</span> <span class="fcv-tok-plain">./out</span> <span class="fcv-tok-flag">--format</span> <span class="fcv-tok-plain">lua</span></code></pre>
+</div>
+
+<hr>
+
+<h2>Section heading h2 — Second Shortcuts Block</h2>
+
+<div class="fcv-shortcuts">
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Rotate selected wreck</span>
+    <span class="fcv-shortcuts__combo"><kbd>R</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Delete selected</span>
+    <span class="fcv-shortcuts__combo"><kbd>Del</kbd></span>
+  </div>
+  <div class="fcv-shortcuts__row">
+    <span class="fcv-shortcuts__action">Select all in view</span>
+    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>A</kbd></span>
+  </div>
+</div>
+
+<div class="fcv-notes">
+  <span class="fcv-notes__label">Notes</span>
+  <p>Second callout at the bottom. Lorem ipsum dolor sit amet, consectetur
+  adipiscing elit. Sed do eiusmod tempor incididunt ut labore.</p>
+</div>
+
+<p>Final paragraph. Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+
+</div>

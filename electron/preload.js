@@ -86,6 +86,12 @@ const INVOKE_CHANNELS = new Set([
   'skybox-library-load',
   'submit-contribution-pr',
   'write-file',
+  'bridge-connect',
+  'bridge-disconnect',
+  'bridge-send-snapshot',
+  'read-footer-article',
+  'cli-run',
+  'cli-abort',
 ]);
 
 const SEND_CHANNELS = new Set([
@@ -99,6 +105,8 @@ const LISTEN_CHANNELS = new Set([
   'library-scan-started',
   'scmap-progress',
   'settings-updated',
+  'bridge-state-changed',
+  'cli-output',
 ]);
 
 // ─── Expose secure API to renderer ──────────────────────────────────────────

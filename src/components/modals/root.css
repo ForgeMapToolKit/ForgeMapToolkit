@@ -1,12 +1,13 @@
 /* The per-tab accent registry now lives in the design-system SSOT.
    Imported here so the values are available app-wide (root.css is loaded
    by the app shell), independent of which tab is mounted. */
-@import '../shared/design-system/tokens.css';
+@import '../Shared/DesignSystem/tokens.css';
+@import '../Shared/Ui/Notifications/notifications.css';
 
 :root {
   /* ── Shared Backgrounds ─────────────────────────── */
-  --bg-primary:   #0a0a0a;
-  --bg-secondary: #111111;
+  --bg-primary:   var(--surface-rail);
+  --bg-secondary: var(--surface-face-a);
   --bg-tertiary:  #1a1a1a;
   --bg-card:      #141414;
   --bg-hover:     #1f1f1f;

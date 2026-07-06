@@ -42,11 +42,11 @@
 .section-card {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.01) 50%,
+    var(--line-soft) 0%,
+    var(--surface-ghost) 50%,
     rgba(0,   0,   0,   0.20) 100%
   );
-  border:          1px solid rgba(255, 255, 255, 0.08);
+  border:          1px solid var(--line-ghost-border);
   backdrop-filter: blur(16px);
   border-radius:   0;
   padding:         40px 35px;
@@ -81,19 +81,19 @@
 }
 
 .section-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--ink-15);
   transform:    translateY(-3px) scale(1.005);
   z-index:      1;
   background:   linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.02) 50%,
+    var(--line-ghost-border) 0%,
+    var(--surface-ghost) 50%,
     rgba(0,   0,   0,   0.25) 100%
   );
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.6),
     0 0 50px var(--tab-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    inset 0 1px 0 var(--ink-12);
 }
 
 /*
@@ -214,8 +214,8 @@
 .form-input-sm {
   width:         100%;
   padding:       16px 20px;
-  background:    rgba(255, 255, 255, 0.04);
-  border:        1px solid rgba(255, 255, 255, 0.12);
+  background:    var(--sheen-040);
+  border:        1px solid var(--ink-12);
   border-radius: 0;
   color:         var(--text-primary);
   font-size:     0.95rem;
@@ -233,7 +233,7 @@
 .form-input-sm:focus {
   outline:      none;
   border-color: var(--tab-color);
-  background:   rgba(255, 255, 255, 0.06);
+  background:   var(--surface-code);
   box-shadow:   0 0 0 1px var(--tab-color),
                 0 0 25px var(--tab-glow);
   transform:    translateY(-1px);
@@ -269,7 +269,8 @@
 }
 
 .input-row .form-input,
-.input-row .form-input-sm {
+.input-row .form-input-sm,
+.input-row .field-input {
   flex:          1;
   margin-bottom: 0;
 }
@@ -319,7 +320,7 @@
   content:    '';
   position:   absolute;
   inset:      0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(135deg, var(--ink-30), transparent);
   transform:  translateX(-100%);
   transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -358,7 +359,7 @@
 .btn-secondary {
   background:      transparent;
   color:           var(--text-primary);
-  border:          1px solid rgba(255, 255, 255, 0.18);
+  border:          1px solid var(--ink-18);
   padding:         14px 30px;
   border-radius:   0;
   cursor:          pointer;
@@ -438,9 +439,9 @@
  * Replaces: st-btn-ghost, sgst-btn-ghost and similar small utility buttons.
  */
 .btn-ghost {
-  background:     rgba(255, 255, 255, 0.04);
+  background:     var(--sheen-040);
   color:          var(--text-muted);
-  border:         1px solid rgba(255, 255, 255, 0.08);
+  border:         1px solid var(--line-ghost-border);
   padding:        9px 18px;
   border-radius:  0;
   cursor:         pointer;
@@ -454,7 +455,7 @@
 }
 
 .btn-ghost:hover {
-  background:   rgba(255, 255, 255, 0.08);
+  background:   var(--line-ghost-border);
   border-color: var(--tab-color);
   color:        var(--tab-color);
   box-shadow:   0 0 12px var(--tab-glow);
@@ -482,8 +483,8 @@
 .btn-delete-sm-alt,
 .btn-delete-xs {
   background:      none;
-  border:          1px solid rgba(255, 255, 255, 0.1);
-  color:           rgba(255, 255, 255, 0.35);
+  border:          1px solid var(--ink-16);
+  color:           var(--ink-35);
   width:           40px;
   height:          40px;
   font-size:       1.4rem;
@@ -526,8 +527,8 @@
  */
 .btn-delete-text {
   background:      none;
-  border:          1px solid rgba(255, 255, 255, 0.1);
-  color:           rgba(255, 255, 255, 0.35);
+  border:          1px solid var(--ink-16);
+  color:           var(--ink-35);
   width:           auto;
   height:          45px;
   padding:         0 18px;
@@ -563,8 +564,8 @@
  *   </div>
  */
 .item-card {
-  background:  rgba(255, 255, 255, 0.03);
-  border:      2px solid rgba(255, 255, 255, 0.08);
+  background:  var(--surface-ghost);
+  border:      2px solid var(--line-ghost-border);
   border-radius: 0;
   padding:     20px;
   transition:  all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -585,14 +586,14 @@
 }
 
 .item-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background:   rgba(255, 255, 255, 0.05);
+  border-color: var(--ink-15);
+  background:   var(--line-soft);
   transform:    translateX(3px);
 }
 
 .item-card.selected {
   border-color: var(--tab-color);
-  background:   rgba(255, 255, 255, 0.05);
+  background:   var(--line-soft);
   box-shadow:   0 0 30px var(--tab-glow);
 }
 
@@ -624,7 +625,7 @@
 .item-card-details {
   margin-top:  20px;
   padding-top: 20px;
-  border-top:  1px solid rgba(255, 255, 255, 0.1);
+  border-top:  1px solid var(--ink-16);
 }
 
 /* Color dot */
@@ -632,7 +633,7 @@
   width:         24px;
   height:        24px;
   border-radius: 50%;
-  border:        2px solid rgba(255, 255, 255, 0.3);
+  border:        2px solid var(--ink-30);
   cursor:        pointer;
   transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   flex-shrink:   0;
@@ -640,7 +641,7 @@
 
 .item-card-color-indicator:hover {
   transform:    scale(1.2);
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: var(--ink-60);
   box-shadow:   0 0 15px currentColor;
 }
 
@@ -649,7 +650,7 @@
   margin-top:      15px;
   padding:         15px;
   background:      rgba(0, 0, 0, 0.4);
-  border:          1px solid rgba(255, 255, 255, 0.1);
+  border:          1px solid var(--ink-16);
   backdrop-filter: blur(12px);
 }
 
@@ -663,21 +664,21 @@
   width:         35px;
   height:        35px;
   border-radius: 50%;
-  border:        2px solid rgba(255, 255, 255, 0.2);
+  border:        2px solid var(--ink-20);
   cursor:        pointer;
   transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .item-card-color-option:hover {
   transform:    scale(1.15);
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: var(--ink-60);
   box-shadow:   0 0 20px currentColor;
 }
 
 /* "Add …" placeholder card */
 .item-card-add {
   background:      transparent;
-  border:          3px dashed rgba(255, 255, 255, 0.15);
+  border:          3px dashed var(--ink-15);
   border-radius:   0;
   padding:         40px 20px;
   cursor:          pointer;
@@ -760,15 +761,15 @@
 }
 
 .btn-toggle.off {
-  background:  rgba(255, 255, 255, 0.07);
+  background:  var(--line-medium);
   color:       var(--text-muted);
   box-shadow:  none;
-  border:      1px solid rgba(255, 255, 255, 0.1);
+  border:      1px solid var(--ink-16);
 }
 
 .btn-toggle.off:hover {
-  background:  rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background:  var(--ink-12);
+  border-color: var(--ink-20);
   transform:   translateY(-1px);
 }
 
@@ -838,8 +839,8 @@
 
 .lib-window {
   position:   relative;
-  background: #111111;
-  border:     1px solid rgba(255, 255, 255, 0.1);
+  background: var(--surface-face-a);
+  border:     1px solid var(--ink-16);
   display:    flex;
   flex-direction: column;
   max-height: 90vh;
@@ -848,8 +849,8 @@
 
 .lib-close-btn {
   background:    transparent;
-  border:        1px solid rgba(255, 255, 255, 0.12);
-  color:         rgba(255, 255, 255, 0.5);
+  border:        1px solid var(--ink-12);
+  color:         var(--ink-50);
   width:         30px;
   height:        30px;
   font-size:     1.1rem;
@@ -871,8 +872,8 @@
 
 .lib-reload-btn {
   background:    transparent;
-  border:        1px solid rgba(255, 255, 255, 0.1);
-  color:         rgba(255, 255, 255, 0.4);
+  border:        1px solid var(--ink-16);
+  color:         var(--ink-40);
   padding:       6px 10px;
   font-size:     0.72rem;
   letter-spacing: 0.08em;
@@ -894,7 +895,7 @@
   justify-content: space-between;
   align-items:     center;
   padding:         14px 20px;
-  border-top:      1px solid rgba(255, 255, 255, 0.07);
+  border-top:      1px solid var(--line-medium);
   background:      rgba(0, 0, 0, 0.3);
   flex-shrink:     0;
   gap:             12px;
@@ -950,7 +951,7 @@
   width:        20px;
   height:       20px;
   flex-shrink:  0;
-  border:       2px solid rgba(255, 255, 255, 0.25);
+  border:       2px solid var(--ink-25);
   background:   transparent;
   position:     relative;
   transition:   border-color 0.2s ease, background 0.2s ease,
@@ -999,7 +1000,7 @@
 .checkbox-text {
   font-size:   0.85rem;
   font-weight: 500;
-  color:       rgba(255, 255, 255, 0.4);
+  color:       var(--ink-40);
   transition:  color 0.2s ease;
 }
 
@@ -1060,12 +1061,12 @@
   cursor:      pointer;
   padding:     10px 12px;
   transition:  all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  background:  rgba(255, 255, 255, 0.03);
+  background:  var(--surface-ghost);
   border:      1px solid transparent;
 }
 
 .preview-legend-item:hover {
-  background:   rgba(255, 255, 255, 0.08);
+  background:   var(--line-ghost-border);
   border-color: color-mix(in srgb, var(--tab-color) 15%, transparent);
   transform:    translateX(5px);
 }
@@ -1074,7 +1075,7 @@
   width:       26px;
   height:      26px;
   border-radius: 50%;
-  border:      2px solid rgba(255, 255, 255, 0.35);
+  border:      2px solid var(--ink-35);
   flex-shrink: 0;
   transition:  all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -1095,7 +1096,7 @@
   color:       var(--text-muted);
   font-size:   0.8rem;
   font-family: monospace;
-  background:  rgba(255, 255, 255, 0.05);
+  background:  var(--line-soft);
   padding:     4px 10px;
 }
 
@@ -1230,7 +1231,7 @@
 /* ── Header ── */
 .help-modal-header {
   padding:         30px 40px 20px;
-  border-bottom:   1px solid rgba(255, 255, 255, 0.07);
+  border-bottom:   1px solid var(--line-medium);
   display:         flex;
   justify-content: space-between;
   align-items:     center;
@@ -1251,9 +1252,9 @@
 
 /* ── Close button ── */
 .help-modal-close {
-  background:    rgba(255, 255, 255, 0.05);
-  border:        1px solid rgba(255, 255, 255, 0.2);
-  color:         rgba(255, 255, 255, 0.7);
+  background:    var(--line-soft);
+  border:        1px solid var(--ink-20);
+  color:         var(--ink-70);
   padding:       8px 16px;
   cursor:        pointer;
   font-size:     0.9rem;
@@ -1266,8 +1267,8 @@
 }
 
 .help-modal-close:hover {
-  background:  rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.3);
+  background:  var(--line-ghost-border);
+  border-color: var(--ink-30);
   color:       #fff;
   box-shadow:  inset 0 0 50px color-mix(in srgb, var(--tab-color) 40%, transparent);
 }
@@ -1277,7 +1278,7 @@
   display:      flex;
   padding:      0 40px;
   background:   rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--line-medium);
   gap:          4px;
   flex-shrink:  0;
 }
@@ -1286,7 +1287,7 @@
   padding:        16px 24px;
   background:     transparent;
   border:         none;
-  color:          rgba(255, 255, 255, 0.5);
+  color:          var(--ink-50);
   font-family:    'Poppins', sans-serif;
   font-size:      0.85rem;
   font-weight:    600;
@@ -1299,8 +1300,8 @@
 }
 
 .help-modal-tab:hover {
-  color:      rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.04);
+  color:      var(--ink-85);
+  background: var(--sheen-040);
 }
 
 .help-modal-tab.active {
@@ -1318,7 +1319,7 @@
 }
 
 .help-modal-content::-webkit-scrollbar { width: 6px; }
-.help-modal-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); }
+.help-modal-content::-webkit-scrollbar-track { background: var(--surface-ghost); }
 .help-modal-content::-webkit-scrollbar-thumb {
   background:    linear-gradient(180deg, var(--tab-color), color-mix(in srgb, var(--tab-color) 40%, transparent));
   border-radius: 3px;
@@ -1358,7 +1359,7 @@
   padding:       50px 40px;
   background:    linear-gradient(135deg,
     color-mix(in srgb, var(--tab-color) 6%, transparent) 0%,
-    rgba(255,255,255,0.02) 50%,
+    var(--surface-ghost) 50%,
     rgba(0,0,0,0.25) 100%
   );
   border:    1px solid color-mix(in srgb, var(--tab-color) 15%, transparent);
@@ -1448,7 +1449,7 @@
   text-transform: uppercase;
   color:          var(--text-primary);
   padding-bottom: 20px;
-  border-bottom:  2px solid rgba(255, 255, 255, 0.12);
+  border-bottom:  2px solid var(--ink-12);
 }
 
 .help-adv-section-num {
@@ -1472,9 +1473,9 @@
   margin-bottom: 36px;
   flex-wrap:     wrap;
   padding:       8px;
-  background:    rgba(255, 255, 255, 0.03);
+  background:    var(--surface-ghost);
   border-radius: 0;
-  border:        1px solid rgba(255, 255, 255, 0.1);
+  border:        1px solid var(--ink-16);
 }
 
 .help-adv-subtab {
@@ -1491,8 +1492,8 @@
   align-items:    center;
   justify-content: center;
   font-family:    'Poppins', sans-serif;
-  background:     rgba(255, 255, 255, 0.05);
-  color:          rgba(255, 255, 255, 0.6);
+  background:     var(--line-soft);
+  color:          var(--ink-60);
   border:         2px solid transparent;
 }
 
@@ -1504,8 +1505,8 @@
 }
 
 .help-adv-subtab:not(.active):hover {
-  background: rgba(255, 255, 255, 0.08);
-  color:      rgba(255, 255, 255, 0.85);
+  background: var(--line-ghost-border);
+  color:      var(--ink-85);
 }
 
 /* Step timeline — horizontal */
@@ -1516,7 +1517,7 @@
   margin-top: 24px;
   padding:    40px 30px;
   background: rgba(0, 0, 0, 0.3);
-  border:     1px solid rgba(255, 255, 255, 0.08);
+  border:     1px solid var(--line-ghost-border);
   overflow-x: auto;
   margin-bottom: 60px;
 }
@@ -1524,15 +1525,15 @@
 .help-adv-step {
   flex:       1;
   min-width:  220px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-  border:     1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, var(--surface-ghost) 100%);
+  border:     1px solid var(--ink-16);
   padding:    25px 20px;
   position:   relative;
   transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
 }
 
 .help-adv-step:hover {
-  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 6%, transparent) 0%, rgba(255,255,255,0.02) 100%);
+  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 6%, transparent) 0%, var(--surface-ghost) 100%);
   border-color: color-mix(in srgb, var(--tab-color) 30%, transparent);
   transform:    translateY(-5px);
   box-shadow:   0 10px 30px rgba(0,0,0,0.5), 0 0 30px var(--tab-glow);
@@ -1580,7 +1581,7 @@
 }
 
 .help-adv-step-content li {
-  color:       rgba(255,255,255,0.35);
+  color:       var(--ink-35);
   font-size:   0.78rem;
   line-height: 1.6;
 }
@@ -1595,23 +1596,23 @@
 }
 
 .help-adv-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-  border:     1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, var(--sheen-040) 0%, var(--surface-ghost) 100%);
+  border:     1px solid var(--ink-16);
   overflow:   hidden;
   transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
 }
 
 .help-adv-card:hover {
-  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 5%, transparent) 0%, rgba(255,255,255,0.01) 100%);
+  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 5%, transparent) 0%, var(--surface-ghost) 100%);
   border-color: color-mix(in srgb, var(--tab-color) 25%, transparent);
   transform:    translateY(-4px);
   box-shadow:   0 10px 30px rgba(0,0,0,0.5), 0 0 30px var(--tab-glow);
 }
 
 .help-adv-card-header {
-  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 7%, transparent) 0%, rgba(255,255,255,0.03) 100%);
+  background:   linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 7%, transparent) 0%, var(--surface-ghost) 100%);
   padding:      18px 22px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--ink-16);
   display:      flex;
   align-items:  center;
   gap:          14px;
@@ -1679,15 +1680,15 @@
 .help-adv-ts-grid { margin-bottom: 60px; }
 
 .help-adv-ts-item {
-  background:    linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-  border:        1px solid rgba(255, 255, 255, 0.08);
+  background:    linear-gradient(135deg, var(--surface-ghost) 0%, var(--surface-ghost) 100%);
+  border:        1px solid var(--line-ghost-border);
   overflow:      hidden;
   transition:    all 0.4s cubic-bezier(0.23,1,0.32,1);
   margin-bottom: 16px;
 }
 
 .help-adv-ts-item:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--line-strong);
   box-shadow:   0 6px 20px rgba(0,0,0,0.4);
 }
 
@@ -1735,14 +1736,14 @@
 
 .help-adv-practice-card {
   padding:     22px;
-  background:  linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-  border:      1px solid rgba(255, 255, 255, 0.1);
+  background:  linear-gradient(135deg, var(--sheen-040) 0%, var(--surface-ghost) 100%);
+  border:      1px solid var(--ink-16);
   border-top:  3px solid var(--tab-color);
   transition:  all 0.4s cubic-bezier(0.23,1,0.32,1);
 }
 
 .help-adv-practice-card:hover {
-  background:       linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 5%, transparent) 0%, rgba(255,255,255,0.01) 100%);
+  background:       linear-gradient(135deg, color-mix(in srgb, var(--tab-color) 5%, transparent) 0%, var(--surface-ghost) 100%);
   border-top-width: 4px;
   transform:        translateY(-4px);
   box-shadow:       0 8px 25px rgba(0,0,0,0.5), 0 0 30px var(--tab-glow);
@@ -1786,7 +1787,7 @@
 /* Code block */
 .help-adv-code-block {
   background: rgba(0, 0, 0, 0.5);
-  border:     1px solid rgba(255, 255, 255, 0.1);
+  border:     1px solid var(--ink-16);
   padding:    10px 14px;
   overflow-x: auto;
   margin-top: 8px;
@@ -1795,7 +1796,7 @@
 .help-adv-code-block code {
   font-family: 'Courier New', monospace;
   font-size:   0.78rem;
-  color:       rgba(255, 255, 255, 0.85);
+  color:       var(--ink-85);
 }
 
 /* File tree */
@@ -1822,7 +1823,7 @@
   font-size:   0.79rem;
 }
 
-.help-adv-file-item.file   { color: rgba(255, 255, 255, 0.55); }
+.help-adv-file-item.file   { color: var(--ink-55); }
 .help-adv-file-item.folder { color: color-mix(in srgb, var(--tab-color) 40%, transparent); }
 .help-adv-file-item.highlight { color: var(--tab-color); font-weight: 600; }
 
@@ -1838,7 +1839,7 @@
 .help-adv-file-size {
   margin-left: auto;
   font-size:   0.68rem;
-  color:       rgba(255, 255, 255, 0.22);
+  color:       var(--ink-22);
 }
 
 /* Code sample (inline in technical cards) */
@@ -1896,8 +1897,8 @@
 }
 
 .help-info-details-box {
-  background: rgba(255,255,255,0.02);
-  border:     1px solid rgba(255,255,255,0.08);
+  background: var(--surface-ghost);
+  border:     1px solid var(--line-ghost-border);
   padding:    24px 28px;
   margin-bottom: 24px;
 }
@@ -1926,7 +1927,7 @@
 }
 
 .help-info-details-list li span {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--ink-60);
 }
 
 .help-info-note {
@@ -1973,8 +1974,8 @@
 
 /* ── Selectable item card ───────────────────────────────────────────────────── */
 .unit-card {
-  background:    rgba(255, 255, 255, 0.03);
-  border:        2px solid rgba(255, 255, 255, 0.08);
+  background:    var(--surface-ghost);
+  border:        2px solid var(--line-ghost-border);
   border-radius: 0;
   padding:       20px;
   transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -1994,14 +1995,14 @@
 }
 
 .unit-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background:   rgba(255, 255, 255, 0.05);
+  border-color: var(--ink-15);
+  background:   var(--line-soft);
   transform:    translateX(3px);
 }
 
 .unit-card.selected {
   border-color: var(--tab-color);
-  background:   rgba(255, 255, 255, 0.05);
+  background:   var(--line-soft);
   box-shadow:   0 0 30px var(--tab-glow);
 }
 
@@ -2027,7 +2028,7 @@
 /* ── Add-card placeholder ───────────────────────────────────────────────────── */
 .add-unit-card {
   background:      transparent;
-  border:          3px dashed rgba(255, 255, 255, 0.15);
+  border:          3px dashed var(--ink-15);
   border-radius:   0;
   padding:         40px 20px;
   cursor:          pointer;
@@ -2053,7 +2054,7 @@
 
 .add-unit-card:hover {
   border-color: var(--tab-color);
-  background:   rgba(255, 255, 255, 0.03);
+  background:   var(--surface-ghost);
   transform:    scale(1.02);
 }
 
@@ -2082,14 +2083,14 @@
 
 /* ── Upload area ────────────────────────────────────────────────────────────── */
 .upload-area {
-  border:        2px dashed rgba(255, 255, 255, 0.25);
+  border:        2px dashed var(--ink-25);
   border-radius: 0;
   padding:       50px 35px;
   text-align:    center;
   cursor:        pointer;
   margin-bottom: 25px;
   transition:    all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  background:    rgba(255, 255, 255, 0.03);
+  background:    var(--surface-ghost);
   position:      relative;
   overflow:      hidden;
 }
@@ -2105,7 +2106,7 @@
 
 .upload-area:hover {
   border-color: var(--tab-color);
-  background:   rgba(255, 255, 255, 0.06);
+  background:   var(--surface-code);
   transform:    translateY(-3px);
   box-shadow:   0 8px 30px rgba(0, 0, 0, 0.4), 0 0 40px var(--tab-glow);
 }
@@ -2127,8 +2128,8 @@
 
 /* ── Hint / info box ────────────────────────────────────────────────────────── */
 .hint-box {
-  background:    rgba(255, 255, 255, 0.08);
-  border:        1px solid rgba(255, 255, 255, 0.25);
+  background:    var(--line-ghost-border);
+  border:        1px solid var(--ink-25);
   border-radius: 0;
   padding:       18px 24px;
   color:         var(--tab-color);
@@ -2185,7 +2186,7 @@
   padding:         25px;
   background:      rgba(0, 0, 0, 0.4);
   border-radius:   0;
-  border:          1px solid rgba(255, 255, 255, 0.08);
+  border:          1px solid var(--line-ghost-border);
   backdrop-filter: blur(12px);
 }
 
@@ -2214,19 +2215,19 @@
   padding:       10px 12px;
   border-radius: 0;
   transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  background:    rgba(255, 255, 255, 0.03);
+  background:    var(--surface-ghost);
   border:        1px solid transparent;
 }
 
 .legend-item:hover {
-  background:   rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
+  background:   var(--line-ghost-border);
+  border-color: var(--ink-15);
   transform:    translateX(5px);
 }
 
 .legend-item.active {
   border-color: var(--tab-color);
-  background:   rgba(255, 255, 255, 0.05);
+  background:   var(--line-soft);
   box-shadow:   0 0 15px var(--tab-glow);
 }
 
@@ -2234,7 +2235,7 @@
   width:         26px;
   height:        26px;
   border-radius: 50%;
-  border:        2px solid rgba(255, 255, 255, 0.35);
+  border:        2px solid var(--ink-35);
   flex-shrink:   0;
   transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -2262,7 +2263,7 @@
   width:         24px;
   height:        24px;
   border-radius: 50%;
-  border:        2px solid rgba(255, 255, 255, 0.3);
+  border:        2px solid var(--ink-30);
   cursor:        pointer;
   transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   flex-shrink:   0;
@@ -2270,7 +2271,7 @@
 
 .color-indicator:hover {
   transform:    scale(1.2);
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: var(--ink-60);
   box-shadow:   0 0 15px currentColor;
 }
 
@@ -2279,7 +2280,7 @@
   margin-top:      15px;
   padding:         15px;
   background:      rgba(0, 0, 0, 0.4);
-  border:          1px solid rgba(255, 255, 255, 0.1);
+  border:          1px solid var(--ink-16);
   border-radius:   0;
   backdrop-filter: blur(12px);
 }
@@ -2294,21 +2295,21 @@
   width:         35px;
   height:        35px;
   border-radius: 50%;
-  border:        2px solid rgba(255, 255, 255, 0.2);
+  border:        2px solid var(--ink-20);
   cursor:        pointer;
   transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .color-option:hover {
   transform:    scale(1.15);
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: var(--ink-60);
   box-shadow:   0 0 20px currentColor;
 }
 
 /* ── Coordinate entry card ──────────────────────────────────────────────────── */
 .coordinate-entry {
   background:    rgba(0, 0, 0, 0.35);
-  border:        1px solid rgba(255, 255, 255, 0.1);
+  border:        1px solid var(--ink-16);
   border-radius: 0;
   padding:       18px;
   margin-bottom: 18px;
@@ -2328,7 +2329,7 @@
 }
 
 .coordinate-entry:hover {
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: var(--ink-18);
   background:   rgba(0, 0, 0, 0.45);
   box-shadow:   0 4px 20px rgba(0, 0, 0, 0.3);
   transform:    translateX(3px);
@@ -2361,7 +2362,7 @@
 
 /* ── Tab scrollbar (scoped to any .X-tab root) ──────────────────────────────── */
 .tab-scrollbar ::-webkit-scrollbar       { width: 10px; height: 10px; }
-.tab-scrollbar ::-webkit-scrollbar-track { background: var(--bg-primary); border-left: 1px solid rgba(255,255,255,0.05); }
+.tab-scrollbar ::-webkit-scrollbar-track { background: var(--bg-primary); border-left: 1px solid var(--line-soft); }
 .tab-scrollbar ::-webkit-scrollbar-thumb {
   background:  linear-gradient(180deg, var(--tab-color), color-mix(in srgb, var(--tab-color) 60%, transparent));
   border-left: 2px solid color-mix(in srgb, var(--tab-color) 25%, transparent);
@@ -2403,7 +2404,7 @@ select.form-input {
 select.form-input:focus {
   outline:          none;
   border-color:     var(--tab-color);
-  background-color: rgba(255, 255, 255, 0.06);
+  background-color: var(--surface-code);
   box-shadow:       0 0 0 1px var(--tab-color), 0 0 25px var(--tab-glow);
 }
 
@@ -2411,4 +2412,59 @@ select.form-input option {
   background: #0d1117;
   color:      var(--text-primary);
   padding:    10px 16px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT-MODE CONTRAST OVERRIDES — shared.css
+   Section cards, item cards and pickers all use dark-mode gradients
+   with near-transparent backgrounds that collapse on light surfaces.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Section card — dark gradient (rgba 0,0,0 stops) renders as a murky
+   tint on light canvas. Replace with a white face card + card shadow. */
+html[data-theme="light"] .section-card {
+  background:   var(--surface-face-a);
+  border-color: var(--line-medium);
+  box-shadow:   var(--shadow-sm);
+}
+html[data-theme="light"] .section-card:hover {
+  background:   var(--surface-face-hover);
+  border-color: var(--line-strong);
+  box-shadow:   var(--shadow-md), 0 0 32px var(--tab-glow);
+  transform:    translateY(-2px);
+}
+
+/* Item card — surface-ghost (4% ink) is invisible; border-ghost (20%)
+   is faint. Give each card a real white face with visible border.    */
+html[data-theme="light"] .item-card {
+  background:   var(--surface-face-a);
+  border-color: var(--line-medium);
+  box-shadow:   var(--shadow-sm);
+}
+html[data-theme="light"] .item-card:hover {
+  background:   var(--surface-face-hover);
+  border-color: var(--tab-color);
+  box-shadow:   var(--shadow-md);
+}
+html[data-theme="light"] .item-card.selected {
+  background:   var(--surface-sunk-focus);
+  border-color: var(--tab-color);
+  box-shadow:   var(--shadow-md), 0 0 18px var(--tab-glow);
+}
+
+/* Color picker — rgba(0,0,0,0.4) is hardcoded dark and renders as a
+   dark box floating in the light card. Swap to a sunken surface.    */
+html[data-theme="light"] .item-card-color-picker {
+  background:   var(--surface-sunk);
+  border-color: var(--line-medium);
+  backdrop-filter: none;
+}
+
+/* Select dropdown arrow — hardcoded white rgba stroke, invisible on light */
+html[data-theme="light"] select.form-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(20%2C28%2C44%2C0.45)' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] select.form-input option {
+  background: var(--surface-face-a);
+  color:      var(--ink-72);
 }

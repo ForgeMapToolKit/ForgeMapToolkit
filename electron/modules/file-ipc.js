@@ -6,7 +6,8 @@
  *         load-config, backup-file, civilians-load/save-presets, check-update,
  *         open-external, write-file, read-file, read-file-base64, ensure-dir,
  *         list-dir, download-file, copy-file, delete-file,
- *         resolve-prop-to-emit, read-scenario-size, read-map-info.
+ *         resolve-prop-to-emit, read-scenario-size, read-map-info,
+ *         read-guide, read-footer-article.
  *
  * Exports:
  *   register(deps) — registers all IPC handlers in this module
@@ -270,6 +271,42 @@ ipcMain.handle('read-guide', async (event, mdFile) => {
     return fs.readFileSync(filePath, 'utf8');
   } catch (e) {
     log.warn('[read-guide] File not found:', filePath);
+    return null;
+  }
+});
+
+// ── read-footer-article ───────────────────────────────────────────────────────
+// Reads a pre-rendered HTML article from src/components/Core/Footer/content/.
+// Mirrors the security model of 'read-guide': only bare filenames allowed,
+// no path separators, must end in .html.
+//
+// Args:    htmlFile  — bare filename, e.g. 'about-fmt.html'
+// Returns: string (file contents) | null (not found or blocked)
+ipcMain.handle('read-footer-article', async (event, htmlFile) => {
+  // Sanitise: only simple filenames — no path traversal
+  if (!htmlFile || /[/\\]/.test(htmlFile) || !htmlFile.endsWith('.html')) {
+    log.warn('[read-footer-article] Blocked unsafe htmlFile:', htmlFile);
+    return null;
+  }
+
+  const contentDir = path.join(
+    app.getAppPath(),
+    'src', 'components', 'Core', 'Footer', 'content'
+  );
+  const filePath = path.join(contentDir, htmlFile);
+
+  // Double-check resolved path is still inside contentDir
+  if (!filePath.startsWith(contentDir)) {
+    log.warn('[read-footer-article] Path traversal attempt:', filePath);
+    return null;
+  }
+
+  try {
+    const text = fs.readFileSync(filePath, 'utf8');
+    log.debug('[read-footer-article] Loaded:', filePath);
+    return text;
+  } catch (e) {
+    log.warn('[read-footer-article] File not found:', filePath);
     return null;
   }
 });

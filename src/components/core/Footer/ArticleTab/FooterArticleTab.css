@@ -1,0 +1,69 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTER ARTICLE TAB — Core/Footer/ArticleTab/FooterArticleTab.css
+
+   ─── LAYOUT D — DOCUMENT ─────────────────────────────────────────────────
+   One of five tab-layout patterns alongside TabLayout's X/Y/Z/W (see
+   shared/ui/TabLayout/TabLayout.jsx). X/Y/Z/W all assume a multi-section
+   tool: a rail to switch sections, a controls column, an aside/canvas.
+   Layout D is for the opposite case — a single static document with no
+   sections to switch between, no controls-vs-preview split. Just a header
+   band + a scrollable, centered reading column. NOT a TabLayout consumer
+   by design, not an oversight.
+
+   Escape hatch: `.tab-content:has(.fat-root)` un-does ForgeMapToolkit.css's
+   default centered-1400px-column `.tab-content` rule, going edge-to-edge
+   so FooterContentViewer's own header+scrollable-body has full height to
+   work with. GuideSection's `.gs-layout` uses the identical
+   `.tab-content:has(...)` escape hatch (ForgeMapToolkit.css) — it's the
+   historical reason this technique exists in the app. GuideSection itself
+   is legacy (its own `--gs-*` token namespace, pre-dates design-system/
+   tokens.css) and should NOT be used as a styling reference going forward.
+   FooterArticleTab/FooterContentViewer is the current, token-based
+   reference implementation for any future Layout D tab.
+
+   One shared component for all 11 footer articles (no per-article tab) —
+   see footerContentRegistry.js.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tab-content:has(.fat-root) {
+  padding: 0;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fat-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Defensive fallback: slug with no footerContentRegistry entry ───────── */
+
+.fat-missing {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  font-family: var(--font-display);
+  text-align: center;
+  padding: var(--space-3xl) var(--space-lg);
+}
+
+.fat-missing-title {
+  font-size: 1.1rem; /* ‹intentional› between --text-lg and h2-level, no token maps here */
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--ink-72);
+}
+
+.fat-missing-slug {
+  font-size: var(--text-lg);
+  color: var(--ink-35);
+}

@@ -1,0 +1,221 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAVBAR PANEL — Core/Navbar/NavbarPanel/NavbarPanel.css
+
+   Rendered via createPortal into document.body — positioned fixed so it
+   spans the full viewport width regardless of parent stacking contexts.
+   `top` is set inline from panelTop (bar's bottom edge in viewport px).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
+
+/* Starts at the bar's bottom edge (inline `top: panelTop`), NOT inset:0 —
+   the navbar bar lives inside .forgemaptoolkit-chrome (its own stacking
+   context at z-index var(--z-base)), so a full-viewport backdrop here paints
+   OVER the whole bar and eats its hover/click events. Covering only the
+   workspace below keeps the bar live, so the cursor can slide tab-to-tab and
+   switch panels fluidly instead of needing a click. */
+.nbp-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: calc(var(--z-rail) - 1);
+  background: var(--shade-46);
+  animation: nbp-backdrop-in var(--dur-slow) ease both;
+}
+
+@keyframes nbp-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Panel background ─────────────────────────────────────────────────────── */
+/* The opaque surface. Deliberately a separate element from .nbp-panel below:
+   it sits BELOW the atmosphere haze layer (Atmosphere/NavbarAtmosphereLayer,
+   z-index var(--z-rail)+2), while the content layer sits ABOVE it — so the
+   haze reads in front of the panel surface but behind the text. */
+
+.nbp-panel-bg {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-rail) + 1);
+
+  min-height: 32vh;
+  max-height: 46vh;
+
+  background-color: var(--surface-deep);
+
+  border-bottom: 1px solid var(--line-medium);
+  overflow: hidden;
+  pointer-events: none;
+
+  animation: nbp-panel-in 320ms var(--ease-out) both;
+}
+
+.nbp-panel-bg--instant {
+  animation: none;
+}
+
+/* ── Panel edge tracelines ──────────────────────────────────────────────── */
+/* Top: glowing hairline flush against the navbar bottom edge.
+   Bottom: same, fading downward into the workspace.
+   Both in --tab-color so they pulse with the active tool hue. */
+
+.nbp-panel-bg::before,
+.nbp-panel-bg::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: var(--tab-color);
+  z-index: 2;
+}
+
+/* Top traceline — glows upward toward the navbar */
+.nbp-panel-bg::before {
+  top: 0;
+  box-shadow:
+    0 0 8px  2px var(--tab-glow-strong),
+    0 0 2px  1px var(--tab-color);
+}
+
+/* Bottom traceline — glow fades downward into workspace */
+.nbp-panel-bg::after {
+  bottom: 0;
+  box-shadow:
+    0  4px 16px  4px var(--tab-glow-strong),
+    0  8px 32px  8px color-mix(in srgb, var(--tab-color) 20%, transparent),
+    0  0px  2px  1px var(--tab-color);
+}
+
+/* ── Panel content ────────────────────────────────────────────────────────── */
+
+.nbp-panel {
+  /* fixed — portal-rendered, positioned flush below bar via inline `top` */
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-rail) + 3);
+
+  min-height: 32vh;
+  max-height: 46vh;
+
+  overflow: hidden;
+
+  animation: nbp-panel-in 320ms var(--ease-out) both;
+}
+
+@keyframes nbp-panel-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0% 0);
+  }
+}
+
+.nbp-panel--instant {
+  animation: none;
+}
+
+/* ── Traceline sweep ─────────────────────────────────────────────────────── */
+
+.nbp-traceline-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--tab-color);
+  box-shadow:
+    0 0 12px 2px var(--tab-color),
+    0 0  4px 1px var(--tab-color);
+  z-index: 10;
+  pointer-events: none;
+  animation: nbp-sweep 340ms var(--ease-out) both;
+}
+
+@keyframes nbp-sweep {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0   0% 0 0); }
+}
+
+/* ── Inner layout ─────────────────────────────────────────────────────────── */
+
+.nbp-inner {
+  display: grid;
+  /* Left column flexes, right column gets a guaranteed floor (440px) so
+     the eyebrow/name/trace always have real room to live in — no more
+     negative-margin/transform tricks fighting a fixed 60/40 split for
+     space that isn't there. column-gap is the actual, honest divider
+     between the two zones. */
+  grid-template-columns: minmax(0, 1.4fr) minmax(440px, 0.95fr);
+  column-gap: var(--space-3xl);
+  height: 100%;
+  min-height: inherit;
+  max-height: inherit;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* ── Left zone — SlatRow column ──────────────────────────────────────────── */
+
+.nbp-left {
+  position: relative;
+  min-width: 0; /* allow grid track to shrink below content's intrinsic width */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-2xl) var(--space-3xl);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-scrollbar) transparent;
+}
+
+.nbp-left::-webkit-scrollbar {
+  width: 4px;
+}
+.nbp-left::-webkit-scrollbar-thumb {
+  background: var(--surface-scrollbar);
+  border-radius: 2px;
+}
+
+.nbp-slat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* ── Right zone — Register ───────────────────────────────────────────────── */
+
+.nbp-right {
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* visible (not hidden): the Register traceline bleeds past this column's
+     own edge and fades out further right (see Register.css .reg-trace).
+     The panel itself (.nbp-panel, overflow: hidden) remains the real clip
+     boundary, plenty far away. */
+  overflow: visible;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .nbp-panel,
+  .nbp-backdrop,
+  .nbp-traceline-sweep {
+    animation-duration: 0.01ms !important;
+    animation-delay:    0ms    !important;
+  }
+}

@@ -1,0 +1,264 @@
+/* ── 1. TAB ROOT & THEME ──────────────────────────────────────────────────── */
+
+/* Theme variables only — safe to apply to any container */
+.pi-theme {
+  --tab-color:       var(--preview-color,      #00ddff);
+  --tab-glow:        var(--preview-glow,        rgba(0, 221, 255, 0.25));
+  --tab-glow-strong: var(--preview-glow-strong, rgba(0, 221, 255, 0.55));
+
+  --theme-accent:       var(--tab-color);
+  --theme-glow:         var(--tab-glow);
+  --theme-glow-strong:  var(--tab-glow-strong);
+
+  color:       var(--text-primary);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Standalone full-page layout (help modal replica) */
+.pi-tab {
+  --tab-color:       var(--preview-color,      #00ddff);
+  --tab-glow:        var(--preview-glow,        rgba(0, 221, 255, 0.25));
+  --tab-glow-strong: var(--preview-glow-strong, rgba(0, 221, 255, 0.55));
+
+  --theme-accent:       var(--tab-color);
+  --theme-glow:         var(--tab-glow);
+  --theme-glow-strong:  var(--tab-glow-strong);
+
+  color:       var(--text-primary);
+  font-family: 'Poppins', sans-serif;
+  background:  var(--bg-primary);
+  min-height:  100vh;
+  padding:     40px 20px;
+  animation:   piTabFadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes piTabFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── 2. RESOLUTION GRID ───────────────────────────────────────────────────── */
+
+.pi-resolution-grid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   10px;
+  margin-top:            4px;
+}
+
+.pi-res-btn {
+  background:     var(--sheen-040);
+  border:         1px solid var(--ink-12);
+  color:          var(--text-secondary);
+  padding:        14px 10px;
+  font-family:    'Poppins', sans-serif;
+  font-size:      0.85rem;
+  font-weight:    500;
+  letter-spacing: 0.06em;
+  cursor:         pointer;
+  transition:     all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  text-align:     center;
+  border-radius:  0;
+}
+
+.pi-res-btn:hover:not(:disabled) {
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  background:   var(--line-medium);
+  box-shadow:   0 0 18px var(--tab-glow);
+  transform:    translateY(-2px);
+}
+
+.pi-res-btn.active {
+  background:  color-mix(in srgb, var(--tab-color) 18%, transparent);
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  box-shadow:   0 0 24px var(--tab-glow), inset 0 0 10px color-mix(in srgb, var(--tab-color) 10%, transparent);
+  font-weight:  700;
+}
+
+.pi-res-btn:disabled {
+  opacity: 0.4;
+  cursor:  not-allowed;
+}
+
+/* ── 3. PIPELINE STEPS ────────────────────────────────────────────────────── */
+
+.pi-steps {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.pi-step {
+  display:     flex;
+  align-items: center;
+  gap:         16px;
+  padding:     14px 18px;
+  border:      1px solid var(--line-medium);
+  background:  var(--surface-ghost);
+  transition:  all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  position:    relative;
+  overflow:    hidden;
+}
+
+.pi-step::before {
+  content:    '';
+  position:   absolute;
+  left: 0; top: 0; bottom: 0;
+  width:      3px;
+  background: transparent;
+  transition: background 0.35s ease, box-shadow 0.35s ease;
+}
+
+.pi-step--running { border-color: var(--tab-color); background: color-mix(in srgb, var(--tab-color) 6%, transparent); }
+.pi-step--running::before { background: var(--tab-color); box-shadow: 0 0 12px var(--tab-glow); }
+
+.pi-step--done { border-color: rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.05); }
+.pi-step--done::before { background: #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.5); }
+
+.pi-step--error { border-color: rgba(255, 77, 77, 0.4); background: rgba(255, 77, 77, 0.06); }
+.pi-step--error::before { background: #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5); }
+
+.pi-step-num {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           32px;
+  height:          32px;
+  flex-shrink:     0;
+  border:          2px solid var(--ink-15);
+  font-size:       0.85rem;
+  font-weight:     700;
+  color:           var(--text-muted);
+  background:      var(--sheen-040);
+  transition:      all 0.35s ease;
+}
+
+.pi-step--running .pi-step-num { border-color: var(--tab-color); color: var(--tab-color); background: color-mix(in srgb, var(--tab-color) 12%, transparent); }
+.pi-step--done    .pi-step-num { border-color: #34d399; color: #34d399; background: rgba(52, 211, 153, 0.12); }
+.pi-step--error   .pi-step-num { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255, 77, 77, 0.12); }
+
+.pi-step-label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 400; }
+.pi-step--running .pi-step-label { color: var(--tab-color); font-weight: 500; }
+.pi-step--done    .pi-step-label { color: #34d399; }
+.pi-step--error   .pi-step-label { color: #ff4d4d; }
+
+/* ── 4. SPINNER ───────────────────────────────────────────────────────────── */
+
+.pi-spinner {
+  display:       inline-block;
+  width:         14px;
+  height:        14px;
+  border:        2px solid color-mix(in srgb, var(--tab-color) 30%, transparent);
+  border-top:    2px solid var(--tab-color);
+  border-radius: 50%;
+  animation:     piSpin 0.7s linear infinite;
+}
+
+@keyframes piSpin { to { transform: rotate(360deg); } }
+
+.pi-big-spinner {
+  width:         56px;
+  height:        56px;
+  border:        4px solid color-mix(in srgb, var(--tab-color) 20%, transparent);
+  border-top:    4px solid var(--tab-color);
+  border-radius: 50%;
+  animation:     piSpin 0.8s linear infinite;
+}
+
+/* ── 5. WARN BOX ──────────────────────────────────────────────────────────── */
+
+.pi-warn-box {
+  margin-top:  18px;
+  padding:     16px 20px;
+  background:  rgba(255, 170, 0, 0.07);
+  border:      1px solid rgba(255, 170, 0, 0.3);
+  border-left: 4px solid #ffaa00;
+  color:       #ffd070;
+  font-size:   0.88rem;
+  line-height: 1.7;
+}
+
+.pi-warn-box strong { color: #ffaa00; }
+
+/* ── 6. PREVIEW AREA ──────────────────────────────────────────────────────── */
+
+.pi-preview-card { height: fit-content; }
+
+.pi-preview-area {
+  width:           100%;
+  aspect-ratio:    1 / 1;
+  background:      rgba(0, 0, 0, 0.5);
+  border:          1px solid var(--line-ghost-border);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  position:        relative;
+  overflow:        hidden;
+}
+
+.pi-preview-img {
+  width:      100%;
+  height:     100%;
+  object-fit: contain;
+  display:    block;
+  animation:  piFadeIn 0.5s ease;
+}
+
+@keyframes piFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+.pi-preview-placeholder {
+  position:   static;
+  transform:  none;
+  padding:    20px;
+  text-align: center;
+}
+
+.pi-overlay-spinner {
+  position:        absolute;
+  inset:           0;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+/* ── 7. BADGES ────────────────────────────────────────────────────────────── */
+
+.pi-badge {
+  font-size:      0.75rem;
+  font-weight:    700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding:        5px 14px;
+  border:         1px solid;
+}
+
+.pi-badge--success { color: #34d399; border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.1); }
+.pi-badge--error   { color: #ff7b72; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.08); }
+
+/* ── 8. ERROR BOX ─────────────────────────────────────────────────────────── */
+
+.pi-error-box {
+  margin-top:  18px;
+  padding:     16px 20px;
+  background:  rgba(255, 77, 77, 0.07);
+  border:      1px solid rgba(255, 77, 77, 0.3);
+  border-left: 4px solid #ff4d4d;
+  color:       #ff7b72;
+  font-size:   0.88rem;
+  line-height: 1.7;
+}
+
+.pi-error-box strong { color: #ff4d4d; }
+
+/* ── 9. RESPONSIVE ────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .tab-grid { grid-template-columns: 1fr; }
+}

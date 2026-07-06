@@ -1,0 +1,19 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — single import point
+   Import this once in a tab to inherit the full gold-standard language:
+
+     import '../../../shared/design-system/index.css';
+
+   Then set ONE thing on the tab root to theme it:
+     style={{ '--tab-color': '#FE1818',
+              '--tab-glow': 'rgba(254,24,24,0.25)',
+              '--tab-glow-strong': 'rgba(254,24,24,0.55)' }}
+
+   Order matters: tokens first (define vars), then primitives + layout
+   (consume them).
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import './tokens.css';
+@import './tokens-light.css';
+@import './primitives.css';
+@import './layout.css';

@@ -34,7 +34,7 @@ const FRONT_INTENSITY = 0.55;
 // the shader. Kept slow so the motion reads as a subtle, living haze.
 const TIME_SCALE = 1.0;
 
-export function createAtmosphereEngine(mount, { quality = 'fast', layer = 'back' } = {}) {
+export function createAtmosphereEngine(mount, { quality = 'fast', layer = 'back', rightBias = 0, diagShift = 0, detailScale = 1, warp = 1, lean = 0 } = {}) {
   const isFront = layer === 'front';
   const prefersReducedMotion =
     window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -74,6 +74,11 @@ export function createAtmosphereEngine(mount, { quality = 'fast', layer = 'back'
     uIntensity:  { value: isFront ? FRONT_INTENSITY : BACK_INTENSITY },
     uFront:      { value: isFront ? 1 : 0 },
     uDebug:      { value: DEBUG ? 1 : 0 },
+    uRightBias:  { value: rightBias },
+    uDiagShift:  { value: diagShift },
+    uDetailScale:{ value: detailScale },
+    uWarp:       { value: warp },
+    uLean:       { value: lean },
   };
 
   const material = new THREE.ShaderMaterial({
@@ -153,6 +158,41 @@ export function createAtmosphereEngine(mount, { quality = 'fast', layer = 'back'
     setQuality(q) {
       dprCap = q === 'performant' ? 1.5 : 1;
       resize();
+    },
+
+    // Navbar-only knob: 0 = home's left-leaning focus, 1 = fully right.
+    setRightBias(v) {
+      uniforms.uRightBias.value = Math.min(1, Math.max(0, v));
+      if (isStatic) renderFrame(0);
+    },
+
+    // Navbar-only knob: lifts the haze centerY linearly from left→right.
+    // 0 = flat band (home default, unaffected), ~0.5 follows the diagonal arc.
+    setDiagShift(v) {
+      uniforms.uDiagShift.value = Math.max(0, v);
+      if (isStatic) renderFrame(0);
+    },
+
+    // Feature-density knob: 1 = default, >1 = finer internal structure.
+    // Used to give the home's large canvas navbar-like sharpness. Live-
+    // tunable from the console: engine.setDetailScale(2.4).
+    setDetailScale(v) {
+      uniforms.uDetailScale.value = Math.max(0.1, v);
+      if (isStatic) renderFrame(0);
+    },
+
+    // Domain-warp strength: 1 = default, >1 = more billowing smoke curl
+    // (less even-grain heat-shimmer). Live-tunable: engine.setWarp(1.8).
+    setWarp(v) {
+      uniforms.uWarp.value = Math.max(0, v);
+      if (isStatic) renderFrame(0);
+    },
+
+    // Diagonal/right lean: 0 = none, ~0.35 = gentle up-right drift.
+    // Live-tunable: engine.setLean(0.35).
+    setLean(v) {
+      uniforms.uLean.value = Math.max(0, v);
+      if (isStatic) renderFrame(0);
     },
 
     dispose() {

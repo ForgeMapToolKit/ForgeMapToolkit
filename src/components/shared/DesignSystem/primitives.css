@@ -1,0 +1,944 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — primitives.css  (v3 · rebuilt 2026-06)
+   Tab-controls column building blocks. All classes are tab-agnostic;
+   colour comes from --tab-color which each tab root sets. Consumed via
+   index.css → available in every tab without a second import.
+
+   CLASSES
+     §1  Column shell       .ctrl-col, .ctrl-section, .ctrl-block
+     §2  Staircase          .ctrl-subtitle
+     §3  Fields             .ctrl-field, .ctrl-label, .ctrl-input
+     §4  Rows               .ctrl-row, .ctrl-row-gap
+     §5  Buttons            .ctrl-btn-add, .ctrl-btn-library, .ctrl-btn-delete
+     §6  Meta / disclosure  .ctrl-mapinfo, .ctrl-path-hint, .ctrl-badge
+     §7  Station            .station  (selection tile — lift + ignite mechanic)
+     §8  Content structure  .subsection-head, .field-hint
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══ §1  COLUMN SHELL ═══════════════════════════════════════════════
+
+   .ctrl-col      — wraps the entire section-content area; sets edge padding
+   .ctrl-section  — optional semantic wrapper; no visual rules
+   .ctrl-block    — one logical block (one Subtitle + its content).
+                    Spacing between blocks is the separator — no lines.    */
+
+.ctrl-col {
+  /* No left padding — the column edge IS the staircase origin (Title sits
+     here too). Right padding keeps content clear of the divider + scrollbar. */
+  padding: var(--space-md) var(--space-xl) var(--space-4xl) 0;
+}
+
+.ctrl-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+
+.ctrl-block + .ctrl-block {
+  margin-top: var(--space-3xl);
+}
+
+.ctrl-block--tight {
+  gap: var(--space-xs);
+}
+
+
+/* ═══ §2  STAIRCASE ══════════════════════════════════════════════════
+
+   Subtitle — staircase step 2.
+   Larger than content, smaller than section title.
+   --tab-color text + leading phosphor tick.                              */
+
+.ctrl-subtitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-left: var(--stair-subtitle);   /* staircase step 1 */
+  font-family: var(--font-display);
+  /* Grown so the Subtitle leads the column (§2: dominant readable element)
+     and its right edge clears the Title's — closes the size jump to ~1.7:1. */
+  font-size: clamp(1.2rem, 1.7vw, 1.5rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--tab-color);
+  text-shadow: 0 0 18px var(--tab-glow);
+}
+
+/* Leading phosphor tick — vertical, never horizontal */
+.ctrl-subtitle::before {
+  content: '';
+  flex-shrink: 0;
+  width: 2px;
+  height: 1.5em;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow-strong);
+}
+
+/* Content indented one more step right of Subtitle */
+.ctrl-content {
+  padding-left: var(--stair-content);   /* staircase step 2 — strong indent */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Flush variant — cancels the staircase indent back to column edge.
+   Use when content (e.g. a full-width canvas) must not be indented. */
+.ctrl-content--flush {
+  padding-left: 0;
+  margin-left: calc(-1 * var(--stair-content));
+}
+
+/* Subtitle flush — removes staircase padding-left for narrow contexts
+   (e.g. aside panel). The phosphor tick via ::before is preserved. */
+.ctrl-subtitle--flush {
+  padding-left: 0;
+}
+
+
+/* ═══ §3  FIELDS ════════════════════════════════════════════════════
+
+   .ctrl-field    — wrapper; stacks label + input + optional meta
+   .ctrl-label    — Leise label above the field (track-eyebrow, ink-28)
+   .ctrl-input    — text riding a T2 functional baseline; never boxed     */
+
+.ctrl-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.ctrl-label {
+  font-family: var(--font-display);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-28);
+}
+
+.ctrl-input {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.09);   /* T2 functional */
+  padding: var(--space-xs) 0;
+  color: var(--ink-72);
+  font-family: var(--font-mono);
+  font-size: var(--text-input);
+  letter-spacing: 0.025em;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-bottom-color var(--dur-base) linear,
+              color var(--dur-base) linear;
+}
+
+/* Text variant — display font for non-path fields (map name, labels).
+   Font-size is inherited from .ctrl-input so all inputs stay at the same size. */
+.ctrl-input--text {
+  font-family: var(--font-display);
+  letter-spacing: var(--track-tight);
+}
+
+.ctrl-input:not(:placeholder-shown) {
+  border-bottom-color: color-mix(in srgb, var(--tab-color) 55%, rgba(255,255,255,0.15));
+}
+.ctrl-input:focus {
+  border-bottom-color: color-mix(in srgb, var(--tab-color) 75%, rgba(255,255,255,0.45));
+}
+/* Placeholder = UI hint text, not data → standard display font, upright.
+   Keeps the field to one fewer distinct element (no mono/italic variant). */
+.ctrl-input::placeholder {
+  color: var(--ink-16);
+  font-family: var(--font-display);
+  font-style: normal;
+}
+.ctrl-input:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Select — same baseline language as .ctrl-input, native chevron replaced
+   by a custom SVG glyph. Wrap with .ctrl-select-wrap to get the chevron.
+   §5 law: "a select is not a dropdown box — it is a field with a chevron." */
+
+.ctrl-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ctrl-select {
+  appearance: none;
+  -webkit-appearance: none;
+  /* No width: 100% by default — wrap sets width when needed. */
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line-ghost-border);
+  /* Generous horizontal breathing room; right side clears chevron + its margin. */
+  padding: var(--space-sm) var(--space-2xl) var(--space-sm) var(--space-sm);
+  /* Negative left margin pulls the select flush with its surroundings while
+     the internal padding still gives the text room to breathe. */
+  margin-left: calc(-1 * var(--space-sm));
+  color: var(--ink-40);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-bottom-color var(--dur-fast) linear,
+    color              var(--dur-fast) linear;
+}
+.ctrl-select:hover {
+  color: var(--ink-55);
+  border-bottom-color: var(--line-strong);
+}
+.ctrl-select:focus {
+  border-bottom-color: color-mix(in srgb, var(--tab-color) 70%, rgba(255,255,255,0.35));
+  color: var(--ink-72);
+}
+
+/* Native option list — dark surface, generous line height for readability. */
+.ctrl-select option {
+  background: var(--surface-face-a);
+  color: var(--ink-72);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  line-height: 2;
+}
+/* Selected option — tab-color text + underline only. No background fill:
+   the colour signal alone is enough; a full row fill is too loud here. */
+.ctrl-select option:checked {
+  background: var(--surface-face-a);
+  color: var(--tab-color);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--tab-color) 50%, transparent);
+}
+
+/* Custom chevron — sits right of the select, pointer-events:none so clicks
+   pass through to the <select>. Inherits color from the wrap so a single
+   CSS selector drives both idle and focused states. */
+.ctrl-chevron {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--ink-16);
+  display: flex;
+  align-items: center;
+  transition: color var(--dur-fast) linear;
+}
+/* Brighten chevron when the select is hovered or focused — :has() targets the
+   wrap, which contains both the select and the chevron span. */
+.ctrl-select-wrap:has(.ctrl-select:hover) .ctrl-chevron { color: var(--ink-28); }
+.ctrl-select-wrap:has(.ctrl-select:focus) .ctrl-chevron { color: var(--tab-color); }
+
+
+/* ═══ §4  ROWS ══════════════════════════════════════════════════════
+
+   .ctrl-row      — flex row: input + action (delete, browse).
+                    Input takes remaining space; button aligns to baseline.
+   .ctrl-row-gap  — same but with explicit gap between peer rows           */
+
+.ctrl-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.ctrl-row .ctrl-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.ctrl-row-gap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+
+/* ═══ §5  BUTTONS ═══════════════════════════════════════════════════
+
+   Three levels — dosed deliberately, never all at once.
+
+   .ctrl-btn-add      Normal    — text + stub-line grows on hover. No box.
+   .ctrl-btn-library  Secondary — 1px solid tab-color border, no fill.
+   .ctrl-btn-delete   Leise     — bare ×, barely visible, red on hover.    */
+
+/* Normal (§5) — Add / utility action. Boxless: a leading stub-line that grows
+   on hover IS the affordance, no border, no fill. Auto width so it can sit
+   beside the one Secondary-CTA in a block. */
+.ctrl-btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  padding: var(--space-xs) 0;
+  color: var(--ink-55);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur-base) linear;
+}
+/* The stub — short line, grows rightward on hover (vertical-safe, no full line) */
+.ctrl-btn-add::before {
+  content: '';
+  width: var(--space-md);
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  transition: width var(--dur-base) var(--ease-out);
+}
+.ctrl-btn-add:hover { color: var(--ink-92); }
+.ctrl-btn-add:hover::before { width: var(--space-2xl); }
+
+/* Leise disclosure — metadata toggle. Boxless bare text (§5), sits tight under
+   the input baseline as a quiet sub-affordance of the field — not a loose chip. */
+.ctrl-btn-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--ink-38);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: color var(--dur-base) linear;
+}
+.ctrl-btn-meta:hover {
+  color: var(--ink-55);
+}
+
+/* Secondary CTA — canonical. Matches .ftr-preview-readmore in the footer.
+   One button. Same class. Used everywhere a primary overlay is triggered. */
+.ftr-preview-readmore {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  align-self: flex-start;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--tab-color, var(--ink-30));
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-display);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--tab-color, var(--ink-85));
+  cursor: pointer;
+  transition:
+    color        var(--dur-base) var(--ease-out),
+    box-shadow   var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform    var(--dur-fast) var(--ease-out);
+}
+
+/* Accent fill — wipes in left→right on hover (TRACE sweep), instead of an
+   instant flood. Sits behind the label (z-index below content via isolation). */
+.ftr-preview-readmore::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--tab-color, var(--ink-30));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-out),
+              background var(--dur-fast) linear;
+}
+.ftr-preview-readmore:hover {
+  border-color: var(--tab-color, var(--ink-60));
+  color: var(--text-on-accent);
+  transform: translateY(-1px);
+  /* Neutral depth only — no colored bloom (§7: accent isn't flooded/glowed). */
+  box-shadow: 0 var(--space-2xs) var(--space-md) calc(var(--space-2xs) * -1) rgba(0,0,0,0.7);
+}
+.ftr-preview-readmore:hover::before {
+  transform: scaleX(1);          /* fill wipes in left→right */
+}
+.ftr-preview-readmore:active {
+  /* Press into near-black — colour recedes, only a hint of accent remains. */
+  border-color: color-mix(in srgb, var(--tab-color) 50%, transparent);
+  color: var(--tab-color);
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
+}
+.ftr-preview-readmore:active::before {
+  background: color-mix(in srgb, var(--tab-color) 20%, #000);
+}
+.ftr-preview-readmore svg {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  flex-shrink: 0;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.ftr-preview-readmore:hover svg {
+  transform: translateX(var(--space-2xs));
+}
+
+/* Leise DESTRUCTIVE TEXT — block-level destructive action with a label (e.g.
+   "Delete All"). Same visual weight as .ctrl-btn-add but the hover accent is
+   muted red instead of ink-92. Stub-line intentionally omitted — the word
+   itself carries the danger signal. */
+.ctrl-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  padding: var(--space-xs) 0;
+  color: var(--ink-22);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur-base) linear;
+}
+.ctrl-btn-danger:hover { color: rgba(255,30,30,0.95); }
+
+/* Leise DESTRUCTIVE — inline delete/remove. Boxless bare × (§5); affordance is
+   position + glyph + hover. Colour appears only at intent: muted red on hover. */
+.ctrl-btn-delete {
+  flex-shrink: 0;
+  width: calc(var(--space-xl) * 1.5);
+  height: calc(var(--space-xl) * 1.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--ink-22);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: color var(--dur-fast) linear;
+  user-select: none;
+}
+.ctrl-btn-delete:hover {
+  color: rgba(255,30,30,0.95);
+}
+
+/* Leise NON-DESTRUCTIVE — close / dismiss (overlays, panels, collapses).
+   Boxless neutral glyph (§5): affordance = position (top-right) + glyph + the
+   hover-brighten that proves it responds. Stays NEUTRAL on hover — never red,
+   never tab-color (§7). Generous invisible hit area, small glyph. */
+.ctrl-btn-close {
+  flex-shrink: 0;
+  width: calc(var(--space-xl) * 1.5);
+  height: calc(var(--space-xl) * 1.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--ink-28);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--dur-base) linear;
+}
+.ctrl-btn-close:hover { color: var(--ink-72); }
+.ctrl-btn-close:focus-visible {
+  outline: 1px solid var(--ink-55);
+  outline-offset: 2px;
+}
+
+/* Action row — groups a block's actions on one line. Holds the single
+   Secondary-CTA box (§5 dosage) beside lighter Normal/Leise actions, their
+   differing weight carrying the hierarchy instead of stacking equal buttons. */
+.ctrl-action-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-sm);
+}
+
+
+/* ═══ §5b  OPTION PICKER ════════════════════════════════════════════
+   Exclusive-select rows — same station language as .ec-add-tile.
+   Active row holds the top-edge glow permanently; inactive rows show
+   it on hover. No radio dot — the energized edge IS the selection. */
+
+.ctrl-option-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ctrl-option {
+  position: relative;
+  padding: var(--space-md) var(--space-lg);
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  cursor: pointer;
+  user-select: none;
+  transform: translateY(0);
+  transition:
+    background var(--dur-slow) var(--ease-decay),
+    transform  var(--dur-slow) var(--ease-decay);
+}
+
+/* Top-edge glow line — identical mechanic to .ec-add-tile::before */
+.ctrl-option::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity   var(--dur-slow) var(--ease-decay),
+    transform var(--dur-slow) var(--ease-decay),
+    box-shadow var(--dur-slow) var(--ease-decay);
+}
+
+/* Hover — brief energize */
+.ctrl-option:hover::before {
+  opacity: 0.55;
+  transform: scaleX(1);
+  box-shadow: 0 0 8px var(--tab-glow);
+  transition-duration: 0.07s;
+}
+.ctrl-option:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 8%, transparent),
+    rgba(255,255,255,0.006));
+  transition-duration: 0.07s;
+}
+
+/* Active — glow held open */
+.ctrl-option.active {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 12%, rgba(255,255,255,0.02)),
+    rgba(255,255,255,0.005));
+  transform: translateY(-1px);
+}
+.ctrl-option.active::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 14px var(--tab-glow-strong), 0 0 4px var(--tab-color);
+  transition-duration: 0.07s;
+}
+
+.ctrl-option-label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  margin-bottom: var(--space-2xs);
+  transition: color var(--dur-base) linear;
+}
+.ctrl-option.active .ctrl-option-label { color: var(--tab-color); }
+
+.ctrl-option-desc {
+  font-family: var(--font-display);
+  font-size: 0.70rem;
+  font-weight: var(--weight-regular);
+  letter-spacing: 0.05em;
+  color: var(--ink-22);
+  transition: color var(--dur-base) linear;
+}
+.ctrl-option.active .ctrl-option-desc { color: var(--ink-35); }
+
+
+/* ── §5c TOGGLE — machined on/off switch ────────────────────────────
+   Rectangular track, sharp corners, a square pole that travels with a
+   mechanical actuate (no bounce). OFF rests in ink; ON ignites in
+   --tab-color with the same phosphor glow as the rest of the ctrl family.
+   Markup:
+     <button class="ctrl-toggle-row [on]" role="switch" aria-checked>
+       <span class="ctrl-toggle"><span class="ctrl-toggle-pole"/></span>
+       <span class="ctrl-toggle-text">
+         <span class="ctrl-toggle-label">…</span>
+         <span class="ctrl-toggle-sub">…</span>   // optional
+       </span>
+     </button>
+   The whole row toggles; `.on` lives on .ctrl-toggle-row. */
+
+.ctrl-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ctrl-toggle {
+  flex-shrink: 0;
+  position: relative;
+  width: 38px;
+  height: 18px;
+  border: 1px solid var(--ink-14);
+  /* Same recessed surface family as .ctrl-option — a machined slot. */
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.40);
+  transition:
+    border-color var(--dur-base) var(--ease-decay),
+    background   var(--dur-base) var(--ease-decay),
+    box-shadow   var(--dur-base) var(--ease-decay);
+}
+.ctrl-toggle-row:hover .ctrl-toggle { border-color: var(--ink-30); }
+
+/* ON — the slot ignites in --tab-color, phosphor glow held open, exactly
+   like .ctrl-option.active. */
+.ctrl-toggle-row.on .ctrl-toggle {
+  border-color: color-mix(in srgb, var(--tab-color) 55%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 18%, rgba(255,255,255,0.02)),
+    color-mix(in srgb, var(--tab-color) 5%, transparent));
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.25), 0 0 10px var(--tab-glow);
+}
+
+/* The pole — a square block that travels with a mechanical actuate. */
+.ctrl-toggle-pole {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  background: var(--ink-25);
+  transition:
+    left       var(--dur-base) var(--ease-rise),
+    background var(--dur-base) var(--ease-decay),
+    box-shadow var(--dur-base) var(--ease-decay);
+}
+.ctrl-toggle-row.on .ctrl-toggle-pole {
+  left: 23px;
+  background: var(--tab-color);
+  box-shadow: 0 0 10px var(--tab-glow-strong), 0 0 4px var(--tab-color);
+}
+
+.ctrl-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.ctrl-toggle-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-55);
+  transition: color var(--dur-base) linear;
+}
+.ctrl-toggle-row.on .ctrl-toggle-label { color: var(--tab-color); }
+
+.ctrl-toggle-sub {
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  font-weight: var(--weight-regular);
+  letter-spacing: 0.04em;
+  color: var(--ink-28);
+  line-height: 1.5;
+}
+
+
+/* ── §5d COMMIT-BUTTON — the signature primary action ────────────────
+   The one primary CTA of the system. No filled box: a label over a
+   dormant baseline that ignites the full three-layer TraceLine on hover
+   and sweeps once on commit. State lives in the mono readout
+   (Ready / Not Ready), never in a fill colour.
+   Markup:
+     <button class="commit-button" disabled?>
+       <span class="commit-button-label">Generate …</span>
+       <span class="commit-button-status">Ready</span>
+       <span class="commit-button-bloom" aria-hidden/>
+       <span class="commit-button-line"  aria-hidden/>
+     </button> */
+.commit-button {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  width: 100%;
+  margin-top: var(--space-sm);
+  padding: var(--space-md) var(--space-2xs) 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  user-select: none;
+}
+.commit-button:disabled { cursor: default; }
+.commit-button-label {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-55);
+  transition: color var(--dur-slow) var(--ease-decay), letter-spacing var(--dur-slow) var(--ease-decay);
+}
+.commit-button:disabled .commit-button-label { color: var(--ink-28); }
+.commit-button-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--status-ok);
+  white-space: nowrap;
+}
+.commit-button:disabled .commit-button-status { color: rgba(255,140,0,0.6); }
+/* Dormant baseline */
+.commit-button::after {
+  content: '';
+  position: absolute;
+  left: var(--space-2xs); right: var(--space-2xs); bottom: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+.commit-button-bloom {
+  position: absolute;
+  left: var(--space-2xs); right: 100%; bottom: -3px;
+  height: 4px;
+  background: var(--tab-color);
+  filter: blur(3px);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: right var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.commit-button-line {
+  position: absolute;
+  left: var(--space-2xs); right: 100%; bottom: 0;
+  height: 1px;
+  background: var(--tab-color);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 6px var(--tab-glow);
+  transition: right var(--dur-slow) var(--ease-out), opacity var(--dur-base) linear;
+}
+.commit-button:not(:disabled):hover .commit-button-label {
+  color: var(--ink-100);
+  letter-spacing: 0.26em;
+}
+.commit-button:not(:disabled):hover .commit-button-bloom { right: var(--space-2xs); opacity: 0.6; }
+.commit-button:not(:disabled):hover .commit-button-line  { right: var(--space-2xs); opacity: 1; }
+.commit-button:not(:disabled):active .commit-button-line { animation: ds-commit-sweep 0.5s var(--ease-out); }
+@keyframes ds-commit-sweep {
+  0%   { box-shadow: 0 0 6px var(--tab-glow); }
+  50%  { box-shadow: 0 0 22px 2px var(--tab-glow-strong), 0 0 5px var(--tab-color); }
+  100% { box-shadow: 0 0 6px var(--tab-glow); }
+}
+
+
+/* Card-internal section break — same tick language as ctrl-subtitle but
+   scaled for card body: smaller font, no glow, ink-40 base color.
+   "(optional)" follows as a leise suffix in ink-22. */
+.ctrl-card-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-72);
+}
+.ctrl-card-section-opt {
+  color: var(--ink-22);
+  font-weight: var(--weight-regular);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--text-2xs);
+}
+
+/* ═══ §6  META / PROGRESSIVE DISCLOSURE ═════════════════════════════
+
+   .ctrl-mapinfo    — single Leise status line (map size, km, error)
+   .ctrl-path-hint  — barely visible save-path hint
+   .ctrl-badge      — inline status chip (ok / err / warn)               */
+
+.ctrl-mapinfo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  color: var(--ink-22);
+  letter-spacing: var(--track-snug);
+}
+
+.ctrl-mapinfo-sep {
+  color: var(--ink-16);
+}
+
+.ctrl-mapinfo-err {
+  color: var(--status-err-muted);
+}
+
+.ctrl-path-hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-16);
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+.ctrl-badge {
+  font-family: var(--font-display);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-28);
+  padding: 1px 6px;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.ctrl-badge--ok   { color: var(--status-ok);        border-color: rgba(0,200,100,0.20); }
+.ctrl-badge--err  { color: var(--status-err-muted); border-color: rgba(255,80,80,0.20); }
+.ctrl-badge--warn { color: var(--status-warn);       border-color: rgba(255,140,0,0.20); }
+
+/* ═══ §7  STATION — selection tile with lift + ignite mechanic ═══════
+   The core toggle-select tile used in the emitter-category matrix and
+   any future grid-style picker. No opinionated inner structure — the
+   host composes whatever label/content it needs. Two states:
+     (rest)  quiet dark face, phosphor tick hidden
+     .active top-edge tick glows in --tab-color, face tints, slight lift
+   Hover previews the active state at half intensity.                   */
+
+.station {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  transform: translateY(0);
+  transition:
+    background   var(--dur-base) var(--ease-decay),
+    transform    var(--dur-base) var(--ease-decay);
+}
+
+/* Top-edge phosphor tick */
+.station::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  opacity: 0;
+  transform: scaleX(0.25);
+  transform-origin: left center;
+  pointer-events: none;
+  transition:
+    opacity    0.9s var(--ease-decay),
+    transform  0.9s var(--ease-decay),
+    box-shadow 0.9s var(--ease-decay);
+}
+
+/* Hover — brief energize at half intensity */
+.station:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 8%, transparent),
+    rgba(255,255,255,0.006));
+}
+.station:hover::before {
+  opacity: 0.5;
+  transform: scaleX(1);
+  box-shadow: 0 0 8px var(--tab-glow);
+  transition-duration: 0.07s;
+}
+
+/* Active — tick glows, face tints, slight lift */
+.station.active {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 13%, rgba(255,255,255,0.02)),
+    rgba(255,255,255,0.005));
+  transform: translateY(-1px);
+}
+.station.active::before {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 14px var(--tab-glow-strong), 0 0 4px var(--tab-color);
+  transition-duration: 0.07s;
+}
+
+/* ═══ §8  CONTENT STRUCTURE — section dividers + guidance text ════════
+
+   .subsection-head      — labelled group divider inside content columns
+   .subsection-head-title — primary label (left-aligned)
+   .field-hint           — dim guidance text below empty states / inputs  */
+
+/* Subsection head — a faint horizontal rule with an eyebrow label.
+   Used to separate named groups within an overlay or panel column.     */
+.subsection-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-bottom: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--line-faint, rgba(255,255,255,0.06));
+}
+
+/* Left phosphor tick — same two-pixel vertical accent as ctrl-subtitle */
+.subsection-head::before {
+  content: '';
+  flex-shrink: 0;
+  width: 2px;
+  height: 10px;
+  background: var(--tab-color);
+  box-shadow: 0 0 6px var(--tab-glow);
+  opacity: 0.7;
+}
+
+.subsection-head-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+
+/* Field hint — small guidance text, one step above invisible */
+.field-hint {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+  color: var(--ink-22);
+  letter-spacing: var(--track-snug);
+  line-height: 1.55;
+}

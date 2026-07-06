@@ -1,19 +1,21 @@
 import React from 'react';
-import Wreckage        from '../tabs/Emitter/WreckageTab/Wreckage.jsx';
-import Props           from '../tabs/Emitter/PropsTab/Props.jsx';
-import CustomProps     from '../tabs/Generator/CustomPropsTab/CustomProps.jsx';
-import Trees           from '../tabs/Generator/TreesTab/Trees.jsx';
-import RockErosion     from '../tabs/Generator/RockErosionTab/RockErosion.jsx';
-import Stars           from '../tabs/Skybox/StarsTab/Stars.jsx';
-import Emitter         from '../tabs/Emitter/EmitterTab/Emitter.jsx';
-import SkyboxGenerator from '../tabs/Skybox/SkyboxGeneratorTab/SkyboxGenerator.jsx';
-import Contributions   from '../tabs/Community/ContributionsTab/Contributions.jsx';
-import Settings        from '../tabs/Config/SettingsTab/Settings.jsx';
-import ScmapTool       from '../tabs/Tools/ScmapTab/Scmap.jsx';
-import AdaptiveMapHelper from '../tabs/Tools/AdaptiveMapHelperTab/AdaptiveMapHelper.jsx';
-import HistoryTab      from '../tabs/Tools/HistoryTab/History.jsx';
-import MapResizerTab   from '../tabs/Tools/MapResizerTab/MapResizer.jsx';
-import PreviewImageTab from '../tabs/Tools/PreviewImageTab/PreviewImage.jsx';
+import Wreckage          from '../Tabs/Placement/Wreckage/Wreckage.jsx';
+import Props             from '../Tabs/Placement/Props/Props.jsx';
+import Emitter           from '../Tabs/Placement/Emitter/Emitter.jsx';
+import CustomProps       from '../Tabs/Scenery/CustomProps/CustomProps.jsx';
+import Trees             from '../Tabs/Scenery/Trees/Trees.jsx';
+import RockErosion       from '../Tabs/Scenery/RockErosion/RockErosion.jsx';
+import Stars             from '../Tabs/Skybox/Stars/Stars.jsx';
+import SkyboxGenerator   from '../Tabs/Skybox/SkyboxGenerator/SkyboxGenerator.jsx';
+import Contributions     from '../Tabs/Community/Contributions/Contributions.jsx';
+import Settings          from '../Tabs/Config/Settings/Settings.jsx';
+import ScmapTool         from '../Tabs/Tools/Scmap/Scmap.jsx';
+import AdaptiveMapHelper from '../Tabs/Tools/AdaptiveMapHelper/AdaptiveMapHelper.jsx';
+import HistoryTab        from '../Tabs/Tools/History/History.jsx';
+import MapResizerTab     from '../Tabs/Tools/MapResizer/MapResizer.jsx';
+import PreviewImageTab   from '../Tabs/Tools/PreviewImage/PreviewImage.jsx';
+import CliTerminalTab    from '../Tabs/Tools/CliTerminal/CliTerminal.jsx';
+import FooterArticleTab  from './Footer/ArticleTab/FooterArticleTab.jsx';
 
 /**
  * tabRoutes — single render registry for the suite's tabs.
@@ -21,6 +23,9 @@ import PreviewImageTab from '../tabs/Tools/PreviewImageTab/PreviewImage.jsx';
  * Keyed by the same section ids used for navigation (see home/data/toolRegistry.js).
  * Each entry is a renderer `(ctx) => element`, where ctx exposes everything a tab
  * may need; most tabs spread the common `tabProps`, a few take bespoke props.
+ *
+ * Footer articles are not listed individually -- ids of the form "footer:<slug>"
+ * are caught in renderTab() below and routed to FooterArticleTab.
  *
  *   ctx = { tabProps, settings, setSettings, sharedState }
  */
@@ -62,6 +67,7 @@ export const TAB_ROUTES = {
   history:            (c) => <HistoryTab settings={c.settings} shared={c.sharedState} />,
   mapresizer:         (c) => <MapResizerTab   {...c.tabProps} />,
   previewimage:       (c) => <PreviewImageTab {...c.tabProps} />,
+  cliterminal:        (c) => <CliTerminalTab  {...c.tabProps} />,
   contributions:      (c) => <Contributions   {...c.tabProps} />,
   guides:             () => <GuidesPlaceholder />,
   settings:           (c) => <Settings onSave={c.setSettings} />,
@@ -70,4 +76,17 @@ export const TAB_ROUTES = {
 /** Section ids that render their own full-bleed chrome (no suite footer). */
 export const CHROMELESS_SECTIONS = new Set(['settings', 'guides']);
 
-export const renderTab = (id, ctx) => TAB_ROUTES[id]?.(ctx) ?? null;
+// Footer articles aren't entered in TAB_ROUTES individually -- one entry per
+// id (about-fmt, changelog, licenses, ...) would just duplicate the list
+// already in footerContentRegistry.js. Instead any id of the form
+// "footer:<slug>" is recognised here and routed to a single shared component,
+// which looks up its own title/teaser from the registry by slug.
+const FOOTER_PREFIX = 'footer:';
+
+export const renderTab = (id, ctx) => {
+  if (typeof id === 'string' && id.startsWith(FOOTER_PREFIX)) {
+    const slug = id.slice(FOOTER_PREFIX.length);
+    return <FooterArticleTab slug={slug} {...ctx.tabProps} />;
+  }
+  return TAB_ROUTES[id]?.(ctx) ?? null;
+};

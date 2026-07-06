@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTER NAV — Core/Footer/Nav/FooterNav.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 4-column nav grid ────────────────────────────────────────────────────── */
+
+.ftr-nav {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns:
+    max-content 1fr
+    max-content 1fr
+    max-content 1fr
+    max-content 1fr;
+  align-content: center;
+  padding: var(--space-2xl) var(--space-2xl) 0 var(--space-4xl);
+}
+
+.ftr-col {
+  grid-row: 1;
+  position: relative;
+}
+
+/* Divider: sits in the 1fr spacer track between content columns */
+.ftr-col-divider {
+  grid-row: 1;
+  justify-self: center;
+  align-self: stretch;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--line-medium) 25%,
+    var(--line-medium) 75%,
+    transparent 100%
+  );
+}
+
+/* ── Column label ──────────────────────────────────────────────────────────── */
+
+.ftr-col-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-nav-label);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--ink-72);
+  margin-bottom: var(--space-2xl);
+}
+
+.ftr-col-label::before {
+  content: '';
+  width: var(--size-nav-tick);
+  height: var(--size-nav-tick-h);
+  flex-shrink: 0;
+  background: var(--tab-color, var(--ink-40));
+}
+
+/* ── Link list ─────────────────────────────────────────────────────────────── */
+
+.ftr-col-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.ftr-link {
+  font-family: var(--font-display);
+  font-size: var(--text-nav-link);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-22);
+  text-decoration: none;
+  transition: color var(--dur-fast) ease;
+  cursor: pointer;
+}
+
+.ftr-link:hover { color: var(--tab-color); }
+
+/* Button variant — reset browser defaults */
+.ftr-link--btn {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-size: var(--text-nav-link);
+}

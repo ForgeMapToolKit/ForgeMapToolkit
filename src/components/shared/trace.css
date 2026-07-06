@@ -34,9 +34,9 @@
 }
 
 @keyframes trace-lamp {
-  0%   { background: rgba(255,255,255,0.08); }
+  0%   { background: var(--line-ghost-border); }
   35%  { background: var(--tab-color); box-shadow: 0 0 10px var(--tab-glow-strong); }
-  100% { background: rgba(255,255,255,0.08); }
+  100% { background: var(--line-ghost-border); }
 }
 
 @keyframes trace-bloom-settle {
@@ -101,7 +101,7 @@
 .trace-tick {
   width: 2px;
   height: 14px;
-  background: rgba(255,255,255,0.08);
+  background: var(--line-ghost-border);
   transform: scaleY(0.4);
   transform-origin: center;
   flex-shrink: 0;
@@ -147,7 +147,7 @@
 
 .trace-hot {
   position: absolute; inset: 0;
-  background: rgba(255,255,255,0.95);
+  background: var(--ink-95);
   opacity: 0;
   transform: scaleX(0); transform-origin: left center;
   animation: trace-print 0.32s var(--trace-out) both,
@@ -164,7 +164,7 @@
   gap: 10px;
   padding: 13px 32px;
   background: linear-gradient(180deg, var(--tc-face-a, #18181c), var(--tc-face-b, #101013));
-  border: 1px solid rgba(255,255,255,0.18);
+  border: 1px solid var(--ink-18);
   border-radius: 2px;
   color: #ffffff;
   font-family: 'Space Grotesk', system-ui, sans-serif;
@@ -186,7 +186,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 42%, transparent 70%);
+  background: linear-gradient(135deg, var(--ink-16) 0%, var(--surface-ghost) 42%, transparent 70%);
   opacity: 0;
   transition: opacity 0.35s var(--trace-out);
   pointer-events: none;
@@ -195,14 +195,14 @@
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  background: linear-gradient(90deg, transparent, var(--ink-50), transparent);
   opacity: 0;
   transition: opacity 0.3s;
 }
 .btn-action > * { position: relative; z-index: 1; }
 .btn-action:hover:not(:disabled) {
   background:   linear-gradient(180deg, var(--tc-face-hover, #1d1d22), var(--tc-face-a, #18181c));
-  border-color: rgba(255,255,255,0.40);
+  border-color: var(--ink-40);
   box-shadow:   0 0 24px rgba(255,255,255,0.08), 0 6px 22px -6px rgba(0,0,0,0.7);
   transform:    translateY(-1px);
 }
@@ -212,7 +212,7 @@
 .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .btn-action--accent {
-  border-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.18));
+  border-color: color-mix(in srgb, var(--tab-color) 60%, var(--ink-18));
   background:   linear-gradient(180deg,
     color-mix(in srgb, var(--tab-color) 20%, var(--tc-face-a, #18181c)),
     color-mix(in srgb, var(--tab-color) 7%, var(--tc-face-b, #101013)));
@@ -239,9 +239,9 @@
   gap: 8px;
   padding: 10px 22px;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid var(--ink-16);
   border-radius: 2px;
-  color: rgba(255,255,255,0.45);
+  color: var(--ink-45);
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 500;
@@ -258,9 +258,9 @@
   user-select: none;
 }
 .btn-ghost-trace:hover {
-  border-color: rgba(255,255,255,0.28);
-  color: rgba(255,255,255,0.85);
-  background: rgba(255,255,255,0.04);
+  border-color: var(--ink-28);
+  color: var(--ink-85);
+  background: var(--sheen-040);
   transform: translateY(-1px);
   box-shadow: 0 5px 16px -8px rgba(0,0,0,0.7);
 }
@@ -306,9 +306,9 @@
   width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
   background: none;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--line-ghost-border);
   border-radius: 0;
-  color: rgba(255,255,255,0.28);
+  color: var(--ink-28);
   font-size: 1.1rem;
   cursor: pointer;
   flex-shrink: 0;
@@ -327,11 +327,11 @@
 .trace-input {
   width: 100%;
   background: var(--tc-sunk, #0a0a0d);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-bottom-color: rgba(255,255,255,0.14);
+  border: 1px solid var(--line-medium);
+  border-bottom-color: var(--line-strong);
   border-radius: 0;
   padding: 10px 12px;
-  color: rgba(255,255,255,0.82);
+  color: var(--ink-80);
   font-size: 11px;
   font-family: 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
   letter-spacing: 0.025em;
@@ -344,13 +344,13 @@
     box-shadow   0.2s linear;
 }
 .trace-input:focus {
-  border-color: rgba(255,255,255,0.16);
-  border-bottom-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.5));
+  border-color: var(--ink-16);
+  border-bottom-color: color-mix(in srgb, var(--tab-color) 60%, var(--ink-50));
   background: var(--tc-sunk-focus, #111116);
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.4), 0 0 0 1px color-mix(in srgb, var(--tab-color) 14%, transparent);
 }
 .trace-input.is-set { border-bottom-color: rgba(0,200,100,0.35); }
-.trace-input::placeholder { color: rgba(255,255,255,0.18); }
+.trace-input::placeholder { color: var(--ink-18); }
 
 .trace-input--text {
   font-family: 'Space Grotesk', system-ui, sans-serif;
@@ -366,10 +366,10 @@
 .trace-select {
   width: 100%;
   background: var(--tc-sunk, #0a0a0d);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--line-ghost-border);
   border-radius: 0;
   padding: 10px 36px 10px 12px;
-  color: rgba(255,255,255,0.82);
+  color: var(--ink-80);
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 11.5px;
   font-weight: 500;
@@ -381,9 +381,9 @@
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
   transition: border-color 0.2s linear, background 0.2s linear;
 }
-.trace-select:hover { border-color: rgba(255,255,255,0.16); }
+.trace-select:hover { border-color: var(--ink-16); }
 .trace-select:focus {
-  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.16));
+  border-color: color-mix(in srgb, var(--tab-color) 45%, var(--ink-16));
   background: var(--tc-sunk-focus, #111116);
 }
 .trace-select option { background: #111114; color: rgba(255,255,255,0.85); }
@@ -395,7 +395,7 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.72);
+  color: var(--ink-72);
   margin-bottom: 8px;
 }
 
@@ -404,7 +404,7 @@
   font-size: 0.64rem;
   font-weight: 400;
   letter-spacing: 0.03em;
-  color: rgba(255,255,255,0.28);
+  color: var(--ink-28);
   line-height: 1.6;
 }
 
@@ -412,7 +412,7 @@
 
 .trace-chip {
   padding: 9px 18px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--line-ghost-border);
   background: var(--tc-rail, #0d0d10);
   border-radius: 0;
   font-family: 'Space Grotesk', system-ui, sans-serif;
@@ -420,7 +420,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.30);
+  color: var(--ink-30);
   cursor: pointer;
   transition:
     color        0.2s linear,
@@ -429,12 +429,12 @@
   user-select: none;
 }
 .trace-chip:hover {
-  border-color: rgba(255,255,255,0.22);
-  color: rgba(255,255,255,0.65);
+  border-color: var(--ink-22);
+  color: var(--ink-65);
   background: var(--tc-face-b, #101013);
 }
 .trace-chip.active {
-  border-color: color-mix(in srgb, var(--tab-color) 50%, rgba(255,255,255,0.45));
+  border-color: color-mix(in srgb, var(--tab-color) 50%, var(--ink-45));
   color: #ffffff;
   background: color-mix(in srgb, var(--tab-color) 14%, var(--tc-face-a, #18181c));
   box-shadow: inset 0 -2px 0 -1px var(--tab-color);
@@ -443,7 +443,7 @@
 .trace-switch {
   flex-shrink: 0;
   width: 38px; height: 18px;
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid var(--line-strong);
   background: var(--tc-sunk, #0a0a0d);
   position: relative;
   cursor: pointer;
@@ -451,14 +451,14 @@
   transition: border-color 0.25s linear, background 0.25s linear;
 }
 .trace-switch.on {
-  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.40));
+  border-color: color-mix(in srgb, var(--tab-color) 45%, var(--ink-40));
   background: color-mix(in srgb, var(--tab-color) 16%, var(--tc-sunk, #0a0a0d));
 }
 .trace-switch-pole {
   position: absolute;
   top: 3px; left: 3px;
   width: 10px; height: 10px;
-  background: rgba(255,255,255,0.25);
+  background: var(--ink-25);
   transition:
     left       0.26s var(--trace-rise),
     background 0.26s linear;
@@ -474,14 +474,14 @@
 .trace-plate {
   position: relative;
   padding: 28px 0 32px;
-  border-bottom: 1px solid rgba(255,255,255,0.055);
+  border-bottom: 1px solid var(--sheen-055);
 }
 
 .trace-plate--bordered {
   position: relative;
   padding: 28px 32px;
   background: linear-gradient(180deg, var(--tc-face-a, #18181c), var(--tc-face-b, #101013));
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid var(--line-medium);
 }
 .trace-plate--bordered + .trace-plate--bordered { margin-top: 12px; }
 
@@ -492,7 +492,7 @@
   justify-content: space-between;
   min-height: 44px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid var(--line-medium);
   margin-bottom: 20px;
   padding-bottom: 14px;
 }
@@ -515,7 +515,7 @@
   font-weight: 600;
   letter-spacing: 0.30em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.13);
+  color: var(--ink-13);
 }
 
 .trace-section-title {
@@ -527,7 +527,7 @@
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.62);
+  color: var(--ink-60);
   margin: 0;
 }
 /* Leading phosphor tick on every section title */
@@ -547,7 +547,7 @@
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.22);
+  color: var(--ink-22);
   margin: 22px 0 12px;
   gap: 12px;
   cursor: pointer;
@@ -567,10 +567,10 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent 85%);
+  background: linear-gradient(90deg, var(--line-ghost-border), transparent 85%);
 }
 .trace-subsection:hover {
-  color: rgba(255,255,255,0.5);
+  color: var(--ink-50);
 }
 .trace-subsection:hover::before {
   opacity: 1;
@@ -586,8 +586,8 @@
     var(--tc-face-a) 0%,
     color-mix(in srgb, var(--tc-face-a) 55%, var(--tc-face-b)) 42%,
     var(--tc-face-b) 100%);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-top-color: rgba(255,255,255,0.11);
+  border: 1px solid var(--line-ghost-border);
+  border-top-color: var(--ink-11);
   border-radius: 0;
   transform: translateY(0);
   box-shadow: 0 2px 6px -3px rgba(0,0,0,0.7);
@@ -620,8 +620,8 @@
 /* Engaged: the block rises and the tool's hue washes down the face
    from the lit top edge — solid, electrically alive, never see-through */
 .trace-item:hover {
-  border-color: color-mix(in srgb, var(--tab-color) 22%, rgba(255,255,255,0.10));
-  border-top-color: color-mix(in srgb, var(--tab-color) 60%, rgba(255,255,255,0.16));
+  border-color: color-mix(in srgb, var(--tab-color) 22%, var(--ink-16));
+  border-top-color: color-mix(in srgb, var(--tab-color) 60%, var(--ink-16));
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--tab-color) 26%, var(--tc-face-hover)) 0%,
     color-mix(in srgb, var(--tab-color) 8%, var(--tc-face-a)) 40%,
@@ -644,8 +644,8 @@
 }
 
 .trace-item.selected {
-  border-color: color-mix(in srgb, var(--tab-color) 45%, rgba(255,255,255,0.12));
-  border-top-color: color-mix(in srgb, var(--tab-color) 72%, rgba(255,255,255,0.16));
+  border-color: color-mix(in srgb, var(--tab-color) 45%, var(--ink-12));
+  border-top-color: color-mix(in srgb, var(--tab-color) 72%, var(--ink-16));
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--tab-color) 24%, var(--tc-face-hover)) 0%,
     color-mix(in srgb, var(--tab-color) 7%, var(--tc-face-a)) 45%,
@@ -677,7 +677,7 @@
 .trace-badge--ok   { color: rgba(0,200,100,0.75);  border-color: rgba(0,200,100,0.25);  }
 .trace-badge--warn { color: rgba(255,140,0,0.80);  border-color: rgba(255,140,0,0.25);  }
 .trace-badge--err  { color: rgba(255,80,80,0.80);  border-color: rgba(255,80,80,0.25);  }
-.trace-badge--soon { color: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.12); }
+.trace-badge--soon { color: var(--ink-35); border-color: var(--ink-12); }
 .trace-badge--accent {
   color: var(--tab-color);
   border-color: color-mix(in srgb, var(--tab-color) 35%, transparent);
@@ -687,24 +687,24 @@
 
 .trace-scroll::-webkit-scrollbar { width: 4px; }
 .trace-scroll::-webkit-scrollbar-track { background: transparent; }
-.trace-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
-.trace-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+.trace-scroll::-webkit-scrollbar-thumb { background: var(--ink-18); }
+.trace-scroll::-webkit-scrollbar-thumb:hover { background: var(--ink-35); }
 
 /* ── Focus / selection ───────────────────────────────────────────── */
 
 .trace-tab *:focus-visible {
-  outline: 1px solid rgba(255,255,255,0.7);
+  outline: 1px solid var(--ink-70);
   outline-offset: 2px;
 }
 .trace-tab ::selection {
-  background: rgba(255,255,255,0.85);
+  background: var(--ink-85);
   color: #000;
 }
 
 /* ── Tab root ────────────────────────────────────────────────────── */
 
 /* Full-bleed: a TRACE tab claims the whole content area (no centered
-   max-width box, no gray gutter, no double padding) — the #070708 plate
+   max-width box, no gray gutter, no double padding) — the var(--surface-stage) plate
    runs edge to edge, continuous with the banner and navbar above it. */
 .tab-content:has(.trace-tab) {
   padding: 0;
@@ -717,9 +717,9 @@
 }
 
 .trace-tab {
-  --tab-color:       rgba(255,255,255,0.6);
-  --tab-glow:        rgba(255,255,255,0.2);
-  --tab-glow-strong: rgba(255,255,255,0.35);
+  --tab-color:       var(--ink-60);
+  --tab-glow:        var(--ink-20);
+  --tab-glow-strong: var(--ink-35);
 
   /* ── Solid surface palette (no transparency, no dots) ──────────────
      The bed is a recessed near-black; the cards are solid machined
@@ -727,7 +727,7 @@
   --tc-bed-a:       #050507;   /* bed, recessed top band */
   --tc-bed-b:       #0b0b0e;   /* bed, floor */
   --tc-face-a:      #18181c;   /* card face — lit top edge */
-  --tc-face-b:      #101013;   /* card face — shaded foot */
+  --tc-face-b:      var(--surface-face-b);   /* card face — shaded foot */
   --tc-face-hover:  #1d1d22;   /* card face on engage (pre-hue) */
   --tc-sunk:        #0a0a0d;   /* recessed channel (inputs, wells) */
   --tc-sunk-focus:  #111116;   /* channel, focused */

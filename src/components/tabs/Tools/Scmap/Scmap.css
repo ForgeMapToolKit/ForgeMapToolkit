@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SCMAP TOOL — Scmap.css
+   Migrated to the FABLE5 design system. The tab is a WorkspaceConsole
+   (rail → working column → preview), so layout/typography/controls all
+   come from design-system primitives. This file only adds the few
+   SCMAP-specific instruments: the drop well, the map register rows, the
+   console log readout, the global drag overlay and the credits line.
+   Accent = the yellow --scmaptool-* tokens, surfaced as --tab-color.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.scmap-tab {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  --tab-color:       var(--scmaptool-color);
+  --tab-glow:        var(--scmaptool-glow);
+  --tab-glow-strong: var(--scmaptool-glow-strong);
+}
+
+/* ── Hint line — derived output path ──────────────────────────────── */
+.scmap-hint {
+  margin-top: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  letter-spacing: 0.01em;
+  color: var(--ink-28);
+  word-break: break-all;
+}
+.scmap-hint b {
+  font-weight: var(--weight-medium);
+  color: color-mix(in srgb, var(--tab-color) 80%, #fff);
+}
+
+/* ── Count badge on a subsection head — quiet mono ────────────────── */
+.scmap-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  color: var(--ink-22);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Map register — boxless rows, hairline separated ──────────────── */
+.scmap-list { display: flex; flex-direction: column; margin-top: var(--space-xs); }
+.scmap-map-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 13px var(--space-2xs);
+  border-bottom: 1px solid var(--line-soft);
+  transition: background var(--dur-base) linear;
+}
+.scmap-map-row:last-child { border-bottom: none; }
+.scmap-map-row:hover { background: var(--sheen-014); }
+.scmap-map-row.is-packing { background: color-mix(in srgb, var(--tab-color) 6%, transparent); }
+.scmap-map-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.scmap-map-name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.scmap-map-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-22);
+}
+.scmap-empty {
+  padding: var(--space-2xl) 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--ink-22);
+}
+
+/* ── Console log — the live readout inside the preview panel ───────── */
+.scmap-preview { display: flex; flex-direction: column; height: 100%; }
+.scmap-console-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-14) transparent;
+}
+.scmap-console-scroll::-webkit-scrollbar { width: 3px; }
+.scmap-console-scroll::-webkit-scrollbar-thumb { background: var(--ink-14); }
+.scmap-console {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  line-height: 1.75;
+  color: var(--ink-38);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.scmap-line { display: block; }
+.scmap-line-ok   { color: var(--status-ok); }
+.scmap-line-err  { color: var(--status-err); }
+.scmap-line-info { color: color-mix(in srgb, var(--tab-color) 75%, #fff); }
+.scmap-console-empty {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-tight);
+  line-height: 1.6;
+  color: var(--ink-28);
+  font-style: italic;
+}
+
+/* ── Credits — quiet attribution, pinned under the console ────────── */
+.scmap-credits {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--font-display);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--ink-22);
+}
+.scmap-credits a {
+  color: color-mix(in srgb, var(--tab-color) 70%, #fff);
+  text-decoration: none;
+  font-weight: var(--weight-semi);
+  transition: color var(--dur-base) linear, text-shadow var(--dur-base) linear;
+}
+.scmap-credits a:hover { color: var(--tab-color); text-shadow: 0 0 12px var(--tab-glow); }
+
+/* ── Status line — compact ok/err feedback below drop zone or pack list */
+.scmap-status {
+  margin-top:  var(--space-md);
+  padding:     8px 12px;
+  font-family: var(--font-mono);
+  font-size:   var(--text-md);
+  line-height: 1.4;
+  word-break:  break-all;
+  border-left: 2px solid;
+}
+.scmap-status--ok  { color: var(--status-ok);  border-color: var(--status-ok);  background: rgba(0, 220, 130, 0.04); }
+.scmap-status--err { color: var(--status-err); border-color: var(--status-err); background: rgba(255, 70, 70, 0.04); }
+
+/* ── Global drag overlay — a hue-led shutter on the plate ─────────── */
+.scmap-drag-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay, 1000);
+  background: rgba(5,5,7,0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: trace-fade-in 0.18s linear;
+}
+.scmap-drag-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-3xl) var(--space-4xl);
+  border: 1px solid color-mix(in srgb, var(--tab-color) 40%, transparent);
+  box-shadow: 0 0 60px -10px var(--tab-glow), inset 0 0 40px -22px var(--tab-glow);
+}
+.scmap-drag-frame::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--tab-color);
+  box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color);
+}
+.scmap-drag-label {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-100);
+}
+.scmap-drag-sub {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-38);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scmap-drag-overlay { animation: none !important; }
+}

@@ -3,7 +3,7 @@
    The monumental identity register. One register above the TRACE
    home screen, cut from the same plate:
 
-   - surface:  #070708 + 28px dot grid + film grain (hs-root grammar)
+   - surface:  var(--surface-stage) + 28px dot grid + film grain (hs-root grammar)
    - column:   72px content register — designation, trace and data
                line sit on the same x as the projection stage below
    - type:     monumental Space Grotesk, white at stepped opacities;
@@ -25,15 +25,18 @@
   height: 240px;
   display: flex;
   align-items: center;
-  background: #070708;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px);
-  background-size: 28px 28px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  /* Light mode: --surface-banner (#FFF) lifts the banner one tonal step
+     above the navbar (--surface-deep / #ECF0F3), creating a clear carved
+     header block with visible depth instead of a flat white plane.
+     Dark mode: --surface-banner is undefined, falls through to --surface-deep
+     (same-plate behaviour unchanged). */
+  background: var(--surface-banner, var(--surface-deep));
+  border-bottom: 1px solid var(--line-faint);
   font-family: 'Space Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   user-select: none;
   overflow: hidden;
-  z-index: 5;
+  z-index: 2;
 }
 
 /* Architectural light — a faint wash from the top edge; the plate is
@@ -44,8 +47,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 50% -20%, rgba(255,255,255,0.03), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,0.012), transparent 30%);
+    radial-gradient(120% 90% at 50% -20%, var(--sheen-028), transparent 60%),
+    linear-gradient(180deg, var(--sheen-012), transparent 30%);
 }
 
 /* ── Film grain — the instrument's surface, above everything ─────── */
@@ -53,7 +56,7 @@
 .bnr-grain {
   position: absolute;
   inset: -100%;
-  z-index: 40;
+  z-index: 10;
   pointer-events: none;
   opacity: 0.05;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0"/></filter><rect width="320" height="320" filter="url(%23g)"/></svg>');
@@ -95,11 +98,11 @@
 
 /* Eyebrow — mono index line, resolves first */
 .bnr-eyebrow {
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.32em;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
   text-transform: uppercase;
-  color: rgba(255,255,255,0.16);
+  color: var(--ink-16);
   margin-bottom: 16px;
   white-space: nowrap;
   clip-path: inset(0 100% 0 0);
@@ -115,7 +118,7 @@
   display: flex;
   align-items: baseline;
   font-size: clamp(2.5rem, 5.2vw, 4.4rem);
-  font-weight: 300;
+  font-weight: var(--weight-light);
   letter-spacing: 0.07em;
   line-height: 0.92;
   text-transform: uppercase;
@@ -125,8 +128,8 @@
 }
 
 .bnr-wm-forge {
-  color: rgba(255,255,255,0.92);
-  font-weight: 300;
+  color: var(--ink-92);
+  font-weight: var(--weight-light);
 }
 
 .bnr-wm-map {
@@ -138,8 +141,8 @@
 }
 
 .bnr-wm-toolkit {
-  color: rgba(255,255,255,0.15);
-  font-weight: 300;
+  color: var(--ink-15);
+  font-weight: var(--weight-light);
   margin-left: 0.22em;
 }
 
@@ -194,7 +197,7 @@
 .bnr-trace-hot {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(255,255,255,0.5), transparent 70%);
+  background: linear-gradient(90deg, var(--ink-50), transparent 70%);
   opacity: 0;
   transform: scaleX(0);
   transform-origin: left center;
@@ -220,11 +223,11 @@
 }
 
 .bnr-caption {
-  font-size: 0.56rem;
-  font-weight: 400;
-  letter-spacing: 0.3em;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-eyebrow);
   text-transform: uppercase;
-  color: rgba(255,255,255,0.15);
+  color: var(--ink-15);
   white-space: nowrap;
 }
 
@@ -243,17 +246,17 @@
 }
 
 .bnr-reg-index {
-  font-size: 0.56rem;
-  font-weight: 600;
-  letter-spacing: 0.3em;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
   text-transform: uppercase;
-  color: rgba(255,255,255,0.16);
+  color: var(--ink-16);
 }
 
 .bnr-reg-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wider);
   text-transform: uppercase;
   color: var(--current-accent);
   text-shadow: 0 0 18px var(--current-glow);
@@ -325,6 +328,22 @@
   .bnr-mark    { display: none; }
   .bnr-eyebrow { display: none; }
   .bnr-caption { letter-spacing: 0.18em; }
+}
+
+/* ── Light-mode overrides ─────────────────────────────────────────── */
+
+html[data-theme="light"] .bnr-mark-aura {
+  /* 7% color-mix is imperceptible on white — bump to 20% so the logo
+     aura reads as light filling the corner, not nothing.               */
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    color-mix(in srgb, var(--current-accent) 20%, transparent),
+    transparent 70%
+  );
+}
+
+html[data-theme="light"] .bnr-trace-bloom {
+  opacity: 0.22;
 }
 
 /* ── Reduced motion ───────────────────────────────────────────────── */

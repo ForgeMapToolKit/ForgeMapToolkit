@@ -3,7 +3,7 @@
 // main.js — Electron entry point
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem, safeStorage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem, safeStorage, shell } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 const https  = require('https');
@@ -30,6 +30,7 @@ const {
   SETTINGS_FILE, LIBRARIES_FILE, CIVILIANS_FILE, SCMAP_DIR, GITHUB_REPO,
   readSettings, writeSettings, scheduleAutosave,
   copyDirSync, getRunnerPath, getNodeExe, getGamedataPaths,
+  register: registerSettingsIpc,
 } = require('./modules/settings');
 
 const { readLibraries, writeLibraries, runFullScan, notifyRenderer } = require('./modules/scanner');
@@ -42,6 +43,9 @@ require('./modules/community');
 require('./modules/scmap');
 require('./modules/map-resizer');
 require('./modules/preview');
+require('./modules/cli-runner');
+require('./modules/editor-bridge').register();
+registerSettingsIpc();
 
 // ── withPathGuard: inject readSettings + log ──────────────────────────────────
 function withPathGuard(pathExtractor, handler) {
@@ -98,6 +102,20 @@ function createWindow() {
   });
 
   bridgeRendererConsole(mainWindow);
+
+  // ── External links → system browser, not an internal window ───────────────
+  // Without this, <a target="_blank"> (used by Footer.jsx's `extern: true`
+  // nav links -- GitHub, Discord, forum, etc.) makes Electron spawn its own
+  // BrowserWindow to load the URL in-process. That window still inherits the
+  // app-wide CSP from installCSP() (script-src/style-src/connect-src 'self'),
+  // so the external site's own scripts/styles/XHRs get blocked and it renders
+  // as broken, unstyled HTML. Denying the popup and handing the URL to
+  // shell.openExternal() instead opens it in the user's actual default
+  // browser, where it isn't subject to our CSP at all.
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
 
   if (process.env.NODE_ENV === 'development') {
     log.info('Loading dev server: http://localhost:5173');

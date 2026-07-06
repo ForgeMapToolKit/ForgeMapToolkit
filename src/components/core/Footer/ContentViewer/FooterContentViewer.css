@@ -1,0 +1,537 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTER CONTENT VIEWER — Core/Footer/ContentViewer/FooterContentViewer.css
+
+   In-app counterpart to ForgeMapToolkit-Assets/footer/viewer.css: same
+   typographic vocabulary (Space Grotesk, --tab-color accents), but instead
+   of a fixed dark background this inherits the App-Theme through the CSS
+   cascade -- it just fills .ftr-full (see Footer.css), which already sits
+   inside the themed footer panel.
+
+   Renders inside .ftr-full, which is flex:1, overflow:hidden, no padding --
+   this component owns all of its own spacing (back row + scrollable body).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.fcv-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* Local measure token: no global "reading width" token exists in
+     design-system/tokens.css yet (it covers spacing/type/color, not prose
+     measure). Declared once here so header/trace/body share one source
+     instead of three independently-guessed max-width literals. */
+  --fcv-measure: 950px;
+}
+
+/* ── Centered reading column ─────────────────────────────────────────────
+   Shared by the back-row and body so both align on the same edges.
+   Horizontal gutter uses --space-xl so the column never touches the
+   viewport edge on narrower windows; vertical rhythm stays with each
+   region since that differs per band. */
+.fcv-column {
+  width: 100%;
+  max-width: var(--fcv-measure);
+  margin: 0 auto;
+  padding-left: var(--space-xl);
+  padding-right: var(--space-xl);
+  box-sizing: border-box;
+}
+
+/* ── Back row ─────────────────────────────────────────────────────────────── */
+/* Replaces the old title+Close header. The title now lives solely in the
+   article's own <h1> (fcv-content h1 below) — duplicating it here read as
+   redundant. Reuses FooterArticlePreview's Back affordance (same markup,
+   same hover-to-accent behavior, see ArticlePreview/FooterArticlePreview.css
+   .ftr-preview-back) instead of inventing a separate Close icon-button, so
+   leaving an article always reads the same way regardless of which step
+   you're leaving from. */
+
+.fcv-back-row {
+  flex: 0 0 auto;
+  padding-top: var(--space-2xl);
+}
+
+.fcv-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-40);
+  cursor: pointer;
+  transition: color var(--dur-fast) ease;
+}
+
+.fcv-back-btn:hover { color: var(--tab-color); }
+
+.fcv-back-btn svg {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  flex-shrink: 0;
+}
+
+/* ── Body — scroll container for the rendered fragment ───────────────────── */
+
+.fcv-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-2xl);
+}
+
+.fcv-body::-webkit-scrollbar { width: var(--size-scrollbar); }
+.fcv-body::-webkit-scrollbar-thumb {
+  background: var(--surface-scrollbar);
+}
+.fcv-body::-webkit-scrollbar-thumb:hover {
+  background: var(--tab-color);
+}
+
+/* ── Loading / error states ──────────────────────────────────────────────── */
+
+.fcv-loading,
+.fcv-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--ink-40);
+}
+
+.fcv-spinner {
+  width: var(--size-spinner);
+  height: var(--size-spinner);
+  border: 2px solid var(--line-ghost-border);
+  border-top-color: var(--tab-color);
+  border-radius: 50%;
+  animation: fcv-spin 0.72s linear infinite;
+}
+
+@keyframes fcv-spin {
+  to { transform: rotate(360deg); }
+}
+
+.fcv-error code {
+  padding: var(--space-2xs) var(--space-xs);
+  background: var(--surface-code);
+  border-radius: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-code-rel);
+  color: var(--ink-60);
+}
+
+/* ── In-content search bar (Ctrl+F) ───────────────────────────────────────── */
+
+.fcv-search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--surface-ghost);
+  border: 1px solid var(--line-ghost-border);
+  max-width: var(--size-search-bar);
+}
+
+.fcv-search-icon {
+  width: var(--size-spinner);
+  height: var(--size-spinner);
+  flex-shrink: 0;
+  color: var(--ink-30);
+}
+
+.fcv-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-display);
+  font-size: var(--text-input);
+  color: var(--ink-86);
+}
+
+.fcv-search-input::placeholder { color: var(--ink-25); }
+
+.fcv-search-count {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-snug);
+  color: var(--ink-35);
+  white-space: nowrap;
+}
+
+.fcv-search-count--none { color: var(--status-err-muted); }
+
+.fcv-search-nav,
+.fcv-search-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
+  background: none;
+  border: none;
+  color: var(--ink-40);
+  cursor: pointer;
+  transition: color var(--dur-fast) ease;
+}
+
+.fcv-search-nav:hover   { color: var(--tab-color); }
+.fcv-search-close:hover { color: var(--status-err-bright); }
+
+.fcv-search-nav svg,
+.fcv-search-close svg {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FOOTER CONTENT SYSTEM — fcv-content typographic primitives
+   v1 · June 2026
+
+   This block defines the visual language for rendered footer articles.
+   It is separate from the FABLE5 tab system above.
+
+   Rules:
+   · Every value MUST reference a token from DesignSystem/tokens.css.
+     No hardcoded px, hex, rgba, or em values.
+   · Accent carrier is always --tab-color (inherited from .fat-root).
+   · Adding new selectors: append to this block, never above it.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.fcv-content {
+  line-height: 1.7;
+}
+
+/* ── Headings ──────────────────────────────────────────────────────────── */
+
+.fcv-content h1 {
+  margin: 0 0 var(--space-2xl);
+  font-family: var(--font-display);
+  /* Takes over the "you've arrived" register the removed component-rendered
+     header used to own (.fcv-header-title, same clamp/weight/case/color) --
+     now that the title only exists here, it needs to read at that scale. */
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+  line-height: 1.05;
+  color: var(--ink-100);
+}
+
+.fcv-content h2,
+.fcv-content h3 {
+  margin-top: var(--space-2xl);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-86);
+}
+
+.fcv-content h2 { font-size: 1.15rem; } /* ‹intentional› prose h2 between body and h1, no scale token maps here */
+.fcv-content h3 { font-size: 0.95rem; text-transform: uppercase; letter-spacing: var(--track-base); }
+
+/* ── Body text ─────────────────────────────────────────────────────────── */
+
+.fcv-content p {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-60);
+}
+
+.fcv-content a {
+  color: var(--tab-color);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-22);
+}
+
+.fcv-content ul,
+.fcv-content ol {
+  margin: 0 0 var(--space-md);
+  padding-left: var(--space-xl);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-60);
+}
+
+.fcv-content li + li {
+  margin-top: var(--space-2xs);
+}
+
+/* ── Inline code ───────────────────────────────────────────────────────── */
+
+.fcv-content code {
+  padding: var(--space-2xs) var(--space-xs);
+  background: var(--surface-code);
+  border-radius: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-code-rel);
+  color: var(--ink-80);
+}
+
+/* ── Blockquote ────────────────────────────────────────────────────────── */
+
+.fcv-content blockquote {
+  margin: 0 0 var(--space-md);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--tab-color);
+  color: var(--ink-50);
+}
+
+/* ── Horizontal rule ───────────────────────────────────────────────────── */
+
+.fcv-content hr {
+  border: none;
+  border-top: 1px solid var(--line-faint);
+  margin: var(--space-2xl) 0;
+}
+
+/* ── Code block (terminal-style) ──────────────────────────────────────────
+   Markup: <div class="fcv-code"><div class="fcv-code__header">…</div>
+   <pre class="fcv-code__pre"><code>…</code></pre></div> — opt-in wrapper
+   written by the article author, same convention as .fcv-callout.
+
+   Deliberately NOT given the left-accent-border-on-tinted-surface treatment
+   .fcv-callout already owns — a code block sharing that look just read as
+   "another callout." A near-black bordered box with its own title bar reads
+   as a distinct register instead: something you'd run, not something you'd
+   read. */
+
+.fcv-code {
+  margin: 0 0 var(--space-md);
+  background: var(--surface-canvas);
+  border: 1px solid var(--line-ghost-border);
+  border-radius: var(--space-2xs);
+  overflow: hidden;
+}
+
+/* Whole bar now wears the same filled-tab-color / on-accent-text / uppercase
+   font-display look as .ftr-preview-readmore (ArticlePreview/
+   FooterArticlePreview.css) -- at rest, not on hover, and without its glow
+   box-shadow (this is chrome, not a button inviting a click). Label and lang
+   differ only by weight/opacity now; a second pill nested inside an
+   already-filled bar would just be two accent layers stacked on each
+   other. */
+.fcv-code__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--tab-color);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--text-on-accent);
+}
+
+.fcv-code__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--text-body-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fcv-code__lang {
+  flex: 0 0 auto;
+  font-size: var(--text-xs);
+  opacity: 0.65;
+}
+
+.fcv-code__pre {
+  margin: 0;
+  padding: var(--space-md) var(--space-lg);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink-72);
+}
+
+.fcv-code__pre::-webkit-scrollbar { height: var(--size-scrollbar); }
+.fcv-code__pre::-webkit-scrollbar-thumb { background: var(--surface-scrollbar); }
+.fcv-code__pre::-webkit-scrollbar-thumb:hover { background: var(--tab-color); }
+
+.fcv-code__pre code {
+  /* Reset inline-code overrides — the terminal box owns its own surface. */
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Syntax tokens — same VS Code dark palette as Shared/Ui/HelpPanel/
+   Sections/sections.css's hs-tok-* classes, so a snippet reads consistently
+   whether it's this hand-authored static HTML or CodeSection.jsx's
+   tokenizer output. Apply by hand around words/strings/comments. */
+.fcv-tok-keyword  { color: var(--code-keyword); }
+.fcv-tok-string   { color: var(--code-string); }
+.fcv-tok-number   { color: var(--code-number); }
+.fcv-tok-comment  { color: var(--code-comment); font-style: italic; }
+.fcv-tok-operator { color: var(--code-default); }
+.fcv-tok-ident    { color: var(--code-ident); }
+.fcv-tok-plain    { color: var(--code-default); }
+.fcv-tok-cmd      { color: var(--code-cmd); }
+.fcv-tok-flag     { color: var(--code-number); }
+
+/* ── Keyboard key ──────────────────────────────────────────────────────── */
+
+.fcv-content kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2xs) var(--space-xs);
+  background: var(--surface-face-a);
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-snug);
+  color: var(--ink-72);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── Table ─────────────────────────────────────────────────────────────── */
+
+.fcv-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+}
+
+.fcv-content thead tr {
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.fcv-content th {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-38);
+}
+
+.fcv-content td {
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--ink-60);
+  border-bottom: 1px solid var(--line-faint);
+  vertical-align: top;
+}
+
+.fcv-content tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── Callout ───────────────────────────────────────────────────────────── */
+/* Opt-in class written by the article author: <div class="fcv-callout"> */
+
+.fcv-callout {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
+  background: var(--surface-ghost);
+  border-left: 2px solid var(--tab-color);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-55);
+}
+
+.fcv-callout p:last-child { margin-bottom: 0; }
+
+/* ── Notes (opt-in, distinct from Callout) ────────────────────────────── */
+/* Same box treatment as .fcv-callout on purpose — that look was already
+   working, the problem was never the callout. This only adds a small
+   eyebrow label so a "Notes" aside reads as its own semantic block instead
+   of a second, unlabeled callout sitting right next to one. */
+
+.fcv-notes {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
+  background: var(--surface-ghost);
+  border-left: 2px solid var(--tab-color);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-55);
+}
+
+.fcv-notes__label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--tab-color);
+}
+
+.fcv-notes p:last-child { margin-bottom: 0; }
+
+/* ── Shortcuts grid (used in shortcuts.html) ───────────────────────────── */
+/* A two-column action / key register. Written as a named class rather than
+   a bare element selector so it doesn't accidentally style unrelated tables
+   or dl elements in other articles. */
+
+.fcv-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0;
+  margin: 0 0 var(--space-md);
+}
+
+.fcv-shortcuts__row {
+  display: contents;
+}
+
+.fcv-shortcuts__action,
+.fcv-shortcuts__combo {
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--line-faint);
+  display: flex;
+  align-items: center;
+}
+
+.fcv-shortcuts__action {
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-60);
+}
+
+.fcv-shortcuts__combo {
+  gap: var(--space-2xs);
+  justify-content: flex-end;
+}
+
+/* ── Search-match highlighting ────────────────────────────────────────────── */
+
+.fcv-search-highlight {
+  background: var(--surface-highlight);
+  color: inherit;
+  border-radius: var(--space-2xs);
+}
+
+.fcv-search-highlight--active {
+  background: var(--tab-color);
+  color: var(--text-on-accent);
+}

@@ -8,14 +8,20 @@
  */
 
 const path = require('path');
-const { app } = require('electron');
+let _app = null;
+try { _app = require('electron').app; } catch (_) {}
 
-// ── Static allowed roots (never change at runtime) ────────────────────────────
-const _STATIC_ALLOWED_ROOTS = [
-  app.getPath('userData'), // app's own data directory
-  app.getPath('temp'),     // OS temp folder (preview render output)
-  app.getAppPath(),        // app bundle root — allows reading bundled assets (e.g. public/emitter/*.bp)
-];
+function _buildStaticRoots() {
+  if (!_app) return [];
+  try {
+    return [
+      _app.getPath('userData'),
+      _app.getPath('temp'),
+      _app.getAppPath(),
+    ];
+  } catch (_) { return []; }
+}
+const _STATIC_ALLOWED_ROOTS = _buildStaticRoots();
 
 /**
  * Returns true if `targetPath` is inside one of the allowed roots.

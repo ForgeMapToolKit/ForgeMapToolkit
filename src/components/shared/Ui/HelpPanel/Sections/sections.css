@@ -1,0 +1,627 @@
+/* ═══════════════════════════════════════════════════════════════════
+   HELP CONSOLE — sections.css
+   All shared section primitives in one file.
+   Every token is pulled from the design system; the one dynamic
+   accent is always --tab-color (inherited from the host tab root).
+
+   Primitives:
+     WorkflowSection   — journey map: self-drawing route + milestones
+     ShortcutsSection  — keyboard / interaction cheat-sheet
+     TroubleshootSection — FAQ list with separator lines
+     MediaSection      — image/slideshow layouts
+     CodeSection       — syntax-highlighted code block
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Shared section wrapper ─────────────────────────────────────── */
+.hs-section {
+  margin-bottom: var(--space-3xl);
+}
+.hs-section:last-child {
+  margin-bottom: 0;
+}
+/* Section headers use the design-system .title-section primitive. */
+
+
+/* ══════════════════════════════════════════════════════════════════
+   WORKFLOW SECTION — JOURNEY MAP
+   A full-width expedition: one route draws from station 01 downward;
+   tendrils branch organically out of the spine to outer cards, with
+   monumental ghost numerals threading the line. No hierarchy between
+   stations — depth is made of light: a warm bloom crowns the top and
+   falls into darkness toward the foot.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Capped + centred so stations never sprawl on ultra-wide displays.
+   width:100% is required: .hs-journey is a flex item of .hc-section, and
+   auto side-margins alone would suppress the stretch and shrink it to its
+   content. An explicit width gives it a definite (then capped) size so the
+   auto margins centre the leftover space instead. */
+.hs-journey {
+  position: relative;
+  width: 100%;
+  max-width: 1300px;
+  margin-inline: auto;
+}
+
+.hs-journey__stage {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Depth layer — monumental ghost numerals ─────────────────────── */
+.hs-journey__ghosts {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* depth pool — the column darkens toward the foot, but as a soft vignette
+   that dissolves on every edge (vertical gradient fades top & bottom; a
+   horizontal mask fades the sides) so the content box never reads as a
+   hard rectangle against the backdrop. */
+.hs-journey__ghosts::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    transparent 22%,
+    rgba(5,5,7,0.5) 72%,
+    rgba(5,5,7,0.5) 90%,
+    transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+}
+.hs-journey__numeral {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(1.18);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: clamp(120px, 13vw, 190px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--sheen-040);
+  opacity: 0;
+  transition:
+    opacity   1s var(--ease-out),
+    transform 1s var(--ease-out);
+}
+.hs-journey__numeral.is-on {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ── The route + tendrils ────────────────────────────────────────── */
+.hs-journey__svg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+.hs-journey__ghostline {
+  fill: none;
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.hs-journey__route {
+  fill: none;
+  stroke: url(#hsj-route);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px var(--tab-glow));
+}
+.hs-journey__spark {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px var(--tab-color));
+}
+.hs-journey__branch {
+  fill: none;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;       /* with pathLength=1 → whole branch is one dash */
+  stroke-dashoffset: 1;        /* hidden, then draws out as it's revealed */
+  transition: stroke-dashoffset 0.85s var(--ease-out);
+}
+.hs-journey__branch.is-on { stroke-dashoffset: 0; }
+.hs-journey__comet {
+  fill: #fff;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px var(--tab-color));
+}
+
+/* ── Cards — boxless type at the outer edges, every station equal ── */
+.hs-journey__cards {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+/* positioning wrapper — owns vertical centring (framer drives the inner) */
+.hs-journey__cardpos {
+  position: absolute;
+  width: clamp(220px, 30%, 360px);
+  transform: translateY(-50%);
+}
+.hs-journey__cardpos--left  { left: 0; }
+.hs-journey__cardpos--right { right: 0; }
+.hs-journey__card {
+  display: flex;
+  flex-direction: column;
+}
+.hs-journey__card--left  { text-align: left;  align-items: flex-start; }
+.hs-journey__card--right { text-align: right; align-items: flex-end; }
+
+/* index — editorial: a prominent accent numeral + a quiet tracked tag */
+.hs-journey__card-index {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+.hs-journey__card--right .hs-journey__card-index { flex-direction: row-reverse; }
+.hs-journey__card-no {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-tight);
+  line-height: 1;
+  color: var(--tab-color);
+}
+.hs-journey__card-tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-38);
+}
+.hs-journey__card-title {
+  margin-top: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+  line-height: 1.18;
+  color: var(--ink-100);
+}
+.hs-journey__card-rule {
+  height: 1px;
+  width: 48px;
+  margin: var(--space-sm) 0;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow);
+}
+.hs-journey__card--right .hs-journey__card-rule { margin-left: auto; }
+.hs-journey__card-body {
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: var(--weight-regular);
+  line-height: 1.65;
+  color: var(--ink-55);
+  max-width: 340px;
+}
+.hs-journey__card--right .hs-journey__card-body { margin-left: auto; }
+.hs-journey__card-body p { margin: 0 0 var(--space-2xs); }
+.hs-journey__card-body p:last-child { margin-bottom: 0; }
+
+/* ── Reduced motion — branches resolved, all cards present ────────── */
+.hs-journey.is-static .hs-journey__branch { stroke-dashoffset: 0; }
+
+/* ── Narrow stages — pull cards inward so they never clip ─────────── */
+@media (max-width: 720px) {
+  .hs-journey__cardpos { width: clamp(180px, 38%, 300px); }
+  .hs-journey__numeral { font-size: clamp(90px, 22vw, 150px); }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   SHORTCUTS SECTION — keyboard cheat-sheet
+   ══════════════════════════════════════════════════════════════════ */
+
+.hs-keys__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-2xl);
+}
+.hs-keys__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--tab-color) 12%, var(--line-soft));
+}
+.hs-keys__action {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--ink-55);
+  line-height: 1.4;
+}
+.hs-keys__combo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  flex-shrink: 0;
+}
+.hs-keys__kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 3px 7px;
+  border-radius: 3px;
+  background: var(--surface-sunk);
+  border: 1px solid var(--ink-12);
+  border-bottom-color: rgba(0,0,0,0.6);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  color: var(--ink-72);
+  line-height: 1.4;
+}
+@media (max-width: 640px) {
+  .hs-keys__grid { grid-template-columns: 1fr; column-gap: 0; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   TROUBLESHOOT SECTION — fault register
+   A diagnostic list: each entry carries a mono code, a symptom (the
+   question) and a resolution (the answer). Boxless, tokens only, accent
+   is the inherited --tab-color. A normal-flow .hs-section block, so it
+   stacks freely with other sections (Code, Media…) in one tab.
+   ══════════════════════════════════════════════════════════════════ */
+
+.hs-ts__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 104px 1fr;
+  gap: var(--space-lg);
+  padding: var(--space-lg) var(--space-sm) var(--space-lg) 0;
+  border-top: 1px solid var(--line-soft);   /* neutral structure */
+  transition: background 0.35s var(--ease-out);
+  opacity: 0;
+  animation: hs-ts-in 0.6s var(--ease-out) both;
+  animation-delay: calc(0.06s + var(--i, 0) * 0.07s);
+}
+@keyframes hs-ts-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* red accent appears only on the hovered entry — at rest the list is all
+   neutral hairlines, so a long fault list never becomes a wall of red. */
+.hs-ts__item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: -1px;
+  height: 1px;
+  width: 0;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow);
+  opacity: 0;
+  transition: width 0.45s var(--ease-out), opacity 0.3s linear;
+}
+.hs-ts__item:hover {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tab-color) 6%, transparent), transparent 55%);
+}
+.hs-ts__item:hover::before { width: 64px; opacity: 1; }
+
+.hs-ts__gutter { padding-top: 0; }
+.hs-ts__code {
+  display: block;
+  margin-top: -4px;                 /* nudges the code up off the symptom line */
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--tab-color);
+  white-space: nowrap;
+}
+.hs-ts__sym {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--ink-100);
+}
+.hs-ts__res {
+  margin-top: var(--space-sm);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-sm);
+  align-items: start;
+}
+.hs-ts__res-label {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-38);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+.hs-ts__res-text {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: var(--weight-regular);
+  line-height: 1.6;
+  color: var(--ink-55);
+  border-left: 1px solid color-mix(in srgb, var(--tab-color) 35%, transparent);
+  padding-left: var(--space-md);
+}
+.hs-ts__res-text p { margin: 0 0 var(--space-2xs); }
+.hs-ts__res-text p:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .hs-ts__item { grid-template-columns: 1fr; gap: var(--space-xs); }
+  .hs-ts__res { grid-template-columns: 1fr; gap: var(--space-2xs); }
+  .hs-ts__res-label { padding-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hs-ts__item { animation: none; opacity: 1; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MEDIA SECTION — image / slideshow
+   ══════════════════════════════════════════════════════════════════ */
+
+.hs-media {
+  /* container */
+}
+
+/* ── image-left / image-right ── */
+.hs-media--split {
+  display: grid;
+  gap: var(--space-xl);
+  align-items: start;
+}
+.hs-media--image-left  { grid-template-columns: 1fr 1fr; }
+.hs-media--image-right { grid-template-columns: 1fr 1fr; }
+.hs-media--image-right .hs-media__img-wrap { order: 2; }
+.hs-media--image-right .hs-media__text     { order: 1; }
+
+.hs-media__img-wrap {
+  background: var(--surface-sunk);
+  border: 1px solid var(--line-medium);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.hs-media__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.hs-media__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.hs-media__text-title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-snug);
+  color: var(--ink-100);
+  text-transform: uppercase;
+}
+.hs-media__text-body {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--ink-55);
+  line-height: 1.6;
+}
+
+/* ── comparison (two images side by side) ── */
+.hs-media--comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+.hs-media--comparison .hs-media__img-wrap {
+  /* individual img-wraps */
+}
+.hs-media__compare-label {
+  position: absolute;
+  top: var(--space-xs);
+  left: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-72);
+  background: rgba(0,0,0,0.6);
+  padding: 2px var(--space-xs);
+  border-radius: 2px;
+}
+
+/* ── description — always below, full width ── */
+.hs-media__desc {
+  margin-top: var(--space-md);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--ink-38);
+  line-height: 1.55;
+  font-style: italic;
+}
+
+/* ── slideshow ── */
+.hs-media--slideshow {
+  /* container */
+}
+.hs-media__slide-wrap {
+  position: relative;
+  background: var(--surface-sunk);
+  border: 1px solid var(--line-medium);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hs-media__slide {
+  display: none;
+  width: 100%;
+}
+.hs-media__slide.active {
+  display: block;
+}
+.hs-media__slide img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.hs-media__slide-caption {
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--ink-38);
+  border-top: 1px solid var(--line-faint);
+  min-height: 36px;
+}
+.hs-media__slide-ctrl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+.hs-media__dots {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+.hs-media__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink-22);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s linear, box-shadow 0.2s linear;
+}
+.hs-media__dot.active {
+  background: var(--tab-color);
+  box-shadow: 0 0 6px var(--tab-color);
+}
+.hs-media__arrow {
+  background: none;
+  border: 1px solid var(--ink-16);
+  border-radius: 2px;
+  color: var(--ink-38);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  line-height: 1.6;
+}
+.hs-media__arrow:hover {
+  color: var(--ink-100);
+  border-color: var(--ink-25);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   CODE SECTION — syntax-highlighted code
+   ══════════════════════════════════════════════════════════════════ */
+
+.hs-code {
+  /* container */
+}
+.hs-code__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xs);
+}
+.hs-code__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--tab-color);
+  opacity: 0.75;
+}
+.hs-code__lang-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-22);
+  margin-left: auto;
+}
+.hs-code__block {
+  background: #0c0c10;
+  border: 1px solid var(--line-medium);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.hs-code__block::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--tab-color) 40%, transparent);
+}
+.hs-code__scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-12) transparent;
+}
+.hs-code__scroll::-webkit-scrollbar { height: 4px; }
+.hs-code__scroll::-webkit-scrollbar-track { background: transparent; }
+.hs-code__scroll::-webkit-scrollbar-thumb { background: var(--ink-12); }
+.hs-code__pre {
+  margin: 0;
+  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-xl);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.75;
+  color: #d4d4d4;
+  white-space: pre;
+  tab-size: 2;
+  -webkit-font-smoothing: antialiased;
+}
+.hs-code__line {
+  display: flex;
+}
+.hs-code__line-num {
+  display: inline-block;
+  min-width: 28px;
+  color: var(--ink-15);
+  text-align: right;
+  margin-right: var(--space-lg);
+  user-select: none;
+  flex-shrink: 0;
+}
+.hs-code__line-body {
+  flex: 1;
+  min-width: 0;
+}
+/* syntax token colors — VS Code dark palette */
+.hs-tok-keyword  { color: #569cd6; }
+.hs-tok-string   { color: #ce9178; }
+.hs-tok-number   { color: #b5cea8; }
+.hs-tok-comment  { color: #6a9955; font-style: italic; }
+.hs-tok-operator { color: #d4d4d4; }
+.hs-tok-ident    { color: #9cdcfe; }
+.hs-tok-key      { color: #9cdcfe; }   /* JSON keys */
+.hs-tok-bool     { color: #569cd6; }   /* JSON booleans */
+.hs-tok-plain    { color: #d4d4d4; }
+.hs-tok-cmd      { color: #4ec9b0; }   /* bash commands */
+.hs-tok-flag     { color: #b5cea8; }   /* bash flags */

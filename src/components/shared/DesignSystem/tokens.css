@@ -1,0 +1,389 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — tokens.css  (greenfield, v2 · 2026-06)
+   The single source of truth for every reusable value: motion, spacing,
+   radius, elevation, typography, surfaces, ink, hairlines, accent.
+
+   This file declares tokens ONLY (no selectors with visual rules).
+   Primitives (primitives.css) and the layout shell (layout.css) consume
+   these — never hardcoded px / hex / easings. Footer + Navbar are the
+   gold-standard reference (0 hardcoded hex).
+
+   STRUCTURE
+     §1 Motion        §6 Surfaces
+     §2 Spacing       §7 Ink
+     §3 Radius        §8 Hairlines
+     §4 Elevation     §9 Status / on-accent
+     §5 Typography   §10 Z-index / Sizing
+     §11 Accent fallback + PER-TAB REGISTRY
+     §12 COMPAT BRIDGE — legacy names kept alive during migration.
+         Everything in §12 is a target for removal (plan Phase 1c):
+         migrate consumers onto the canonical token, then delete here.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ═══ §1 MOTION ══════════════════════════════════════════════════ */
+  /* easings */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);    /* settle / reveal      */
+  --ease-rise:  cubic-bezier(0.55, 0, 0.15, 1);   /* mechanical actuate   */
+  --ease-decay: cubic-bezier(0.2, 0.55, 0.35, 1); /* phosphor ignite→cool */
+
+  /* durations */
+  --dur-instant: 0.06s;  /* ignite — lights the instant you touch        */
+  --dur-fast:    0.18s;
+  --dur-base:    0.25s;
+  --dur-slow:    0.45s;
+  --dur-decay:   0.9s;   /* phosphor cool — long, never instant          */
+
+  /* ═══ §2 SPACING ═════════════════════════════════════════════════ */
+  --space-3xs: 3px;
+  --space-2xs: 4px;
+  --space-xs:  8px;
+  --space-sm:  12px;
+  --space-md:  16px;
+  --space-lg:  20px;
+  --space-xl:  28px;
+  --space-2xl: 36px;
+  --space-3xl: 64px;
+  --space-4xl: 72px;
+
+  /* ═══ §2b STAIRCASE — TAB_DESIGN_LAW §2 ══════════════════════════
+     One responsive step unit for the three-level positional hierarchy:
+       Title    = flush left  (step 0)
+       Subtitle = 1 × step    (step 1)
+       Content  = ~2.4 × step (step 2 — strong indent)
+     Relative/clamped, never fixed px (§8).                            */
+  --stair-step:    clamp(1.75rem, 3vw, 2.75rem);
+  /* Title sits at the column edge (step 0). Subtitle and Content step strongly
+     in from there, so the Title reads as the outermost-left level. Tuned to
+     stay input-safe down to the 1280px min target (§8). */
+  --stair-subtitle: clamp(8rem, 15vw, 15rem);
+  --stair-content:  calc(var(--stair-subtitle) + 4rem);
+
+  /* ═══ §3 RADIUS ══════════════════════════════════════════════════
+     The TRACE language is boxless — radius is intentionally tiny.       */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* ═══ §4 ELEVATION (shadow) ══════════════════════════════════════
+     Accent-free; accent glows are inlined at use sites (var(--tab-glow)). */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 6px 22px -6px rgba(0,0,0,0.7);
+  --shadow-lg: 0 14px 24px -12px rgba(0,0,0,0.85);
+
+  /* ═══ §5 TYPOGRAPHY ══════════════════════════════════════════════ */
+  /* families */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
+
+  /* size scale — UI chrome */
+  --text-3xs: 0.54rem;  /* eyebrows, captions                           */
+  --text-2xs: 0.56rem;
+  --text-xs:  0.62rem;
+  --text-sm:  0.68rem;
+  --text-md:  0.72rem;
+  --text-lg:  0.8rem;
+  --text-input: 15px;   /* control text (inputs / buttons)              */
+
+  /* semantic sizes — specific roles that don't map onto the chrome scale */
+  --text-wordmark:  9px;     /* logo wordmark under the FAF mark         */
+  --text-status:    10.5px;  /* footer status-bar segment text           */
+  --text-meta:      10px;    /* footer meta strip (version, build)        */
+  --text-nav-label: 36px;    /* footer nav column header                  */
+  --text-nav-link:  16px;    /* footer nav link items                     */
+  --text-body:      14px;    /* article prose (p, ul/ol) — reading text   */
+  --text-body-sm:   13px;    /* secondary prose (buttons, captions)       */
+  --text-teaser:    18px;    /* preview teaser paragraph                  */
+  --text-code-rel:  0.9em;   /* inline code — relative to surrounding     */
+
+  /* weights */
+  --weight-light:   300;
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semi:    600;
+  --weight-bold:    700;
+
+  /* letter-spacing (tracking) */
+  --track-tight:   0.02em;
+  --track-snug:    0.06em;
+  --track-base:    0.1em;
+  --track-wide:    0.16em;
+  --track-wider:   0.22em;
+  --track-eyebrow: 0.3em;   /* register lines / eyebrows                 */
+
+  /* ═══ §6 SURFACES — warm near-black, no blue cast ════════════════ */
+  /* opaque ladder */
+  --surface-canvas:     #060404;  /* deepest plate (workspace root)      */
+  --surface-deep:       #030304;  /* footer / panel bar — deeper, warm   */
+  --surface-stage:      #070708;  /* home projection-stage backdrop      */
+  --surface-rail:       #0a0a0a;  /* secondary panels / rows — neutral, de-blued */
+  --surface-face-a:     #18181c;  /* card face — lit top edge            */
+  --surface-face-b:     #101013;  /* card face — shaded foot             */
+  --surface-face-hover: #1d1d22;  /* card face on engage (pre-hue)       */
+  --surface-sunk:       #0a0807;  /* recessed channel (inputs, wells)    */
+  --surface-sunk-focus: #100c0b;  /* channel, focused                    */
+
+  /* functional surfaces (formerly ad-hoc in tabs — now official) */
+  --surface-control:      var(--surface-sunk);                       /* input/control well */
+  --surface-overlay:      rgba(8,8,11,0.92);                         /* modal / overlay bg */
+  --surface-accent-ghost: color-mix(in srgb, var(--tab-color) 8%, transparent); /* faint accent tint */
+
+  /* translucent surfaces (let backdrop / haze read through) */
+  --surface-deep-veil: rgba(3,3,4,0.85);    /* translucent surface-deep [Navbar panel] */
+  --surface-scrim:     rgba(0,0,0,0.75);    /* full-screen backdrop dimmer             */
+  --surface-ghost:     rgba(255,255,255,0.03); /* barely-visible well (search trough)   */
+  --surface-code:      rgba(255,255,255,0.06); /* inline code block background          */
+  --surface-scrollbar: rgba(255,255,255,0.10); /* scrollbar thumb at rest               */
+  --surface-highlight: rgba(255,255,255,0.16); /* passive search-match highlight        */
+
+  /* black / near-black overlays + recesses (exact) */
+  --shade-pure:      #000;               /* projection dimmer fill                  */
+  --shade-85:        rgba(0,0,0,0.85);   /* shutter / heavy overlay                 */
+  --shade-70:        rgba(0,0,0,0.7);    /* navbar proximity drop-shadow            */
+  --shade-46:        rgba(0,0,0,0.46);   /* navbar panel backdrop                   */
+  --home-rail-top:   rgba(2,2,3,0.85);   /* tool-rail recess — dark top band        */
+  --home-rail-body:  rgba(4,4,5,0.62);   /* tool-rail recess — body                 */
+
+  /* ═══ §7 INK — text on dark, white alphas ════════════════════════
+     CANONICAL scale (use these): 100 / 72 / 55 / 40 / 28 / 16.
+     EXTENDED steps exist for fine-grained legacy needs; prefer canonical
+     in new code. All steps below are live (referenced today).            */
+  /* canonical */
+  --ink-100: rgba(255,255,255,0.93);  /* titles                          */
+  --ink-72:  rgba(255,255,255,0.72);  /* primary body                    */
+  --ink-55:  rgba(255,255,255,0.55);  /* default body                    */
+  --ink-40:  rgba(255,255,255,0.40);  /* muted controls / state text     */
+  --ink-28:  rgba(255,255,255,0.28);  /* faint                           */
+  --ink-16:  rgba(255,255,255,0.16);  /* captions / ghost-bright         */
+  /* extended (compat — migrate toward canonical) */
+  --ink-95:  rgba(255,255,255,0.95);
+  --ink-92:  rgba(255,255,255,0.92);
+  --ink-86:  rgba(255,255,255,0.86);
+  --ink-85:  rgba(255,255,255,0.85);
+  --ink-84:  rgba(255,255,255,0.84);
+  --ink-80:  rgba(255,255,255,0.80);
+  --ink-70:  rgba(255,255,255,0.70);
+  --ink-65:  rgba(255,255,255,0.65);
+  --ink-60:  rgba(255,255,255,0.60);
+  --ink-50:  rgba(255,255,255,0.50);
+  --ink-45:  rgba(255,255,255,0.45);
+  --ink-38:  rgba(255,255,255,0.38);
+  --ink-35:  rgba(255,255,255,0.35);
+  --ink-30:  rgba(255,255,255,0.30);
+  --ink-25:  rgba(255,255,255,0.25);
+  --ink-22:  rgba(255,255,255,0.22);
+  --ink-20:  rgba(255,255,255,0.20);
+  --ink-18:  rgba(255,255,255,0.18);
+  --ink-17:  rgba(255,255,255,0.17);
+  --ink-15:  rgba(255,255,255,0.15);
+  --ink-14:  rgba(255,255,255,0.14);
+  --ink-13:  rgba(255,255,255,0.13);
+  --ink-12:  rgba(255,255,255,0.12);
+  --ink-11:  rgba(255,255,255,0.11);
+  --ink-09:  rgba(255,255,255,0.09);
+
+  /* ── Sheen — additive white gloss below ink range (gradient stops,
+     surface lighting). Named --sheen-<alpha×1000>. Not for text.        */
+  --sheen-055: rgba(255,255,255,0.055);
+  --sheen-045: rgba(255,255,255,0.045);
+  --sheen-040: rgba(255,255,255,0.04);
+  --sheen-028: rgba(255,255,255,0.028);
+  --sheen-022: rgba(255,255,255,0.022);
+  --sheen-014: rgba(255,255,255,0.014);
+  --sheen-012: rgba(255,255,255,0.012);
+  --sheen-009: rgba(255,255,255,0.009);
+  --sheen-006: rgba(255,255,255,0.006);
+  --sheen-004: rgba(255,255,255,0.004);
+
+  /* ═══ §8 HAIRLINES — structural borders ══════════════════════════ */
+  --line-soft:        rgba(255,255,255,0.05); /* lightest divider         */
+  --line-faint:       rgba(255,255,255,0.06); /* dividers, header borders */
+  --line-medium:      rgba(255,255,255,0.07); /* default structural edge  */
+  --line-ghost-border:rgba(255,255,255,0.08); /* search-bar / input edge  */
+  --line-strong:      rgba(255,255,255,0.14); /* emphasised edge          */
+
+  /* ═══ §9 STATUS + ON-ACCENT ══════════════════════════════════════ */
+  --status-ok:         rgba(0,200,100,0.6);
+  --status-ok-dim:     rgba(0,200,100,0.42); /* dimmed ok — home status strip */
+  --status-warn:       #ff8c00;
+  --status-err:        rgba(255,80,80,0.85);
+  --status-err-muted:  rgba(255,99,99,0.70);
+  --status-err-bright: rgba(255,99,99,0.85);
+  /* Near-black text for use on a fully-opaque tab-color fill (warm cast). */
+  --text-on-accent: #050505;
+
+  /* ═══ §9b CODE SYNTAX — VS Code dark palette (footer article snippets) ═ */
+  --code-keyword: #569cd6;
+  --code-string:  #ce9178;
+  --code-number:  #b5cea8;
+  --code-comment: #6a9955;
+  --code-default: #d4d4d4;   /* operators / plain text                    */
+  --code-ident:   #9cdcfe;
+  --code-cmd:     #4ec9b0;
+
+  /* ═══ §10 Z-INDEX + SIZING ═══════════════════════════════════════ */
+  --z-base:    1;
+  --z-rail:    10;
+  --z-grain:   40;
+  --z-overlay: 1000;
+
+  --size-footer-bar:  56px;   /* collapsed footer bar height             */
+  --size-icon-sm:     14px;   /* small inline SVG icon                   */
+  --size-icon-md:     18px;   /* medium SVG icon                         */
+  --size-icon-lg:     22px;   /* large inline SVG icon                   */
+  --size-spinner:     15px;   /* loading spinner diameter                */
+  --size-search-bar:  420px;  /* search widget max-width                 */
+  --size-scrollbar:   6px;    /* scrollbar thumb width                   */
+  --size-nav-tick:    20px;   /* accent tick width before nav col label  */
+  --size-nav-tick-h:  4px;    /* accent tick height                      */
+
+  /* ═══ §11 ACCENT — the ONLY per-tab variable ═════════════════════
+     A tab sets --tab-color / --tab-glow / --tab-glow-strong on its root;
+     the values below are just fallbacks. The design system references
+     var(--tab-color) DIRECTLY (a normally-inherited custom property), so
+     a tab root's hue flows down intact — never alias it at :root level. */
+  --tab-color:       rgba(255,255,255,0.6);
+  --tab-glow:        rgba(255,255,255,0.2);
+  --tab-glow-strong: rgba(255,255,255,0.35);
+
+  /* Default suite accent (orange) — the resting hue when no tool is active
+     (home lamp-test, banner idle, slat fallbacks). */
+  --accent-primary:            #ff8c00;
+  --accent-primary-glow:       rgba(255,140,0,0.4);
+  --accent-primary-glow-strong:rgba(255,140,0,0.7);
+  /* "Coming soon" hue on the home projection stage. */
+  --home-soon:           rgba(200,111,255,0.5);
+
+  /* ── PER-TAB ACCENT REGISTRY — single source of truth ──────────────
+     Each tab exposes --<id>-color / -glow / -glow-strong. A tab root maps
+     these onto --tab-color; the home tiles / banner read them via
+     Core/Home/Data/toolRegistry.js (color / glow / glowStrong / colorVar).
+     To add a tab: add ONE block here. (-glow-intense was dropped: it was
+     defined for every tab but referenced nowhere.)                      */
+
+  /* Emitter — Cyan */
+  --emitter-color:       #00DDFF;
+  --emitter-glow:        rgba(0, 221, 255, 0.35);
+  --emitter-glow-strong: rgba(0, 221, 255, 0.60);
+
+  /* Wreckages — Red */
+  --wreckages-color:       #FE1818;
+  --wreckages-glow:        rgba(254, 24, 24, 0.35);
+  --wreckages-glow-strong: rgba(254, 24, 24, 0.60);
+
+  /* Props — Dark green */
+  --props-color:       #538A33;
+  --props-glow:        rgba(83, 138, 51, 0.35);
+  --props-glow-strong: rgba(83, 138, 51, 0.60);
+
+  /* Custom Props — Teal */
+  --customprops-color:       #3EA387;
+  --customprops-glow:        rgba(62, 163, 135, 0.35);
+  --customprops-glow-strong: rgba(62, 163, 135, 0.60);
+
+  /* TreeMap — Green */
+  --treemap-color:       #18C748;
+  --treemap-glow:        rgba(24, 199, 72, 0.35);
+  --treemap-glow-strong: rgba(24, 199, 72, 0.60);
+
+  /* Rock Erosion — Orange-gold */
+  --rockerosion-color:       #FFAF00;
+  --rockerosion-glow:        rgba(255, 175, 0, 0.35);
+  --rockerosion-glow-strong: rgba(255, 175, 0, 0.60);
+
+  /* Stars — Purple */
+  --stars-color:       #8A12BD;
+  --stars-glow:        rgba(138, 18, 189, 0.35);
+  --stars-glow-strong: rgba(138, 18, 189, 0.60);
+
+  /* Skybox Generator — Blue */
+  --skybox-generator-color:       #3B76FF;
+  --skybox-generator-glow:        rgba(59, 118, 255, 0.35);
+  --skybox-generator-glow-strong: rgba(59, 118, 255, 0.60);
+
+  /* SCMAP Tool — Yellow */
+  --scmaptool-color:       #FFFA00;
+  --scmaptool-glow:        rgba(255, 250, 0, 0.35);
+  --scmaptool-glow-strong: rgba(255, 250, 0, 0.60);
+
+  /* Adaptive Map Helper — Orange */
+  --adaptivemaphelper-color:       #ff8c00;
+  --adaptivemaphelper-glow:        rgba(255, 140, 0, 0.35);
+  --adaptivemaphelper-glow-strong: rgba(255, 140, 0, 0.60);
+
+  /* History — Pink */
+  --history-color:       #FF8AFF;
+  --history-glow:        rgba(255, 138, 255, 0.35);
+  --history-glow-strong: rgba(255, 138, 255, 0.60);
+
+  /* Map Resizer — Turquoise */
+  --mapresizer-color:       #00E5CC;
+  --mapresizer-glow:        rgba(0, 229, 204, 0.20);
+  --mapresizer-glow-strong: rgba(0, 229, 204, 0.45);
+
+  /* Preview Image — Pink */
+  --previewimage-color:       #FF007A;
+  --previewimage-glow:        rgba(255, 0, 122, 0.25);
+  --previewimage-glow-strong: rgba(255, 0, 122, 0.55);
+
+  /* Contributions — Yellow-green */
+  --contributions-color:       #A5E801;
+  --contributions-glow:        rgba(165, 232, 1, 0.35);
+  --contributions-glow-strong: rgba(165, 232, 1, 0.60);
+
+  /* CLI Terminal — Electric green (terminal aesthetic, distinct from treemap) */
+  --cliterminal-color:       #22D65F;
+  --cliterminal-glow:        rgba(34, 214, 95, 0.30);
+  --cliterminal-glow-strong: rgba(34, 214, 95, 0.55);
+
+  /* Settings — White */
+  --settings-color:       #FFFFFF;
+  --settings-glow:        rgba(255, 255, 255, 0.15);
+  --settings-glow-strong: rgba(255, 255, 255, 0.30);
+
+  /* Co-Op Versioner — Indigo  [NEW — confirm hue]
+     Was referenced (--coop-versioner-color) but never defined → rendered
+     as nothing. Given a distinct hue here; adjust to taste. */
+  --coop-versioner-color:       #6C7BFF;
+  --coop-versioner-glow:        rgba(108, 123, 255, 0.35);
+  --coop-versioner-glow-strong: rgba(108, 123, 255, 0.60);
+
+  /* ═══ §12 COMPAT BRIDGE — legacy names, remove during migration ═══
+     Each maps a legacy/typo/short name onto a canonical token so nothing
+     breaks while consumers are migrated (plan Phase 1c). Goal: empty.    */
+
+  /* motion aliases */
+  --motion-fast:   var(--dur-fast);
+  --duration-base: var(--dur-base);
+  --duration-long: var(--dur-slow);
+
+  /* type aliases */
+  --weight-base: var(--weight-regular);   /* typo in Core/Navbar/Register */
+  --text-base:   var(--text-md);          /* Stars.css                    */
+
+  /* line aliases */
+  --line-sm:      var(--line-soft);
+  --line-md:      var(--line-medium);
+  --line-subtle:  var(--line-faint);
+
+  /* surface aliases */
+  --surface-2:   var(--surface-rail);     /* Props.jsx                    */
+
+  /* ink alias */
+  --ink-muted:   var(--ink-40);           /* SkyboxGenerator              */
+
+  /* per-tab name fixes / short aliases */
+  --tc: var(--tab-color);                 /* short alias [trace, libs]    */
+  --preview-color:       var(--previewimage-color);       /* PreviewImage */
+  --preview-glow:        var(--previewimage-glow);
+  --preview-glow-strong: var(--previewimage-glow-strong);
+  --civilians-color:       var(--scmaptool-color);        /* legacy yellow [ForgeMapToolkit] */
+  --civilians-glow:        var(--scmaptool-glow);
+  --civilians-glow-strong: var(--scmaptool-glow-strong);
+  --skybox-color: var(--skybox-generator-color); /* History.jsx typo      */
+  --gt-color:     var(--adaptivemaphelper-color);/* AdaptiveMapHelper      */
+  --amh-glow:        var(--adaptivemaphelper-glow);
+  --amh-glow-strong: var(--adaptivemaphelper-glow-strong);
+  --cpt-accent:   var(--customprops-color);      /* CustomProps            */
+}

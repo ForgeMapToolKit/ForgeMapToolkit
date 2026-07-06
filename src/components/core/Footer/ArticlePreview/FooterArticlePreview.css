@@ -1,0 +1,173 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTER ARTICLE PREVIEW — Core/Footer/ArticlePreview/FooterArticlePreview.css
+
+   Teaser card shown in .ftr-left in place of the nav columns. Reuses the
+   Footer panel's existing typographic vocabulary (Space Grotesk, the
+   --tab-color accent) so it reads as part of the same panel rather than a
+   bolted-on modal. Indented further right than .ftr-panel-header / .ftr-nav
+   / .ftr-meta (148px vs. their 72px) and given a wider content column, so
+   the preview reads as its own deliberate step rather than reusing the nav
+   grid's exact alignment.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ftr-preview {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* Left indent doubles --space-4xl (72px) to visually step deeper than
+     the panel header and nav — signals a drilldown, not a parallel surface. */
+  padding: var(--space-3xl) var(--space-2xl) 0 calc(var(--space-4xl) * 2 + var(--space-md));
+}
+
+/* The unifying element: Back + title + teaser + button live inside one
+   accent-bordered block. This is what ties the Back button to the article
+   content instead of it floating loose between the panel header and the
+   text -- and it's the color separation between this (tool-accented)
+   content and the plain white panel header above, without adding another
+   text label/eyebrow. */
+.ftr-preview-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: flex-start;
+  padding-left: var(--space-xl);
+  border-left: 2px solid var(--tab-color, var(--ink-40));
+}
+
+.ftr-preview-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  align-self: flex-start;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ink-40);
+  cursor: pointer;
+  transition: color var(--dur-fast) ease;
+}
+
+.ftr-preview-back:hover { color: var(--tab-color); }
+
+.ftr-preview-back svg {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  flex-shrink: 0;
+}
+
+.ftr-preview-body {
+  display: flex;
+  flex-direction: column;
+  max-width: 680px;
+}
+
+/* Echoes .ftr-col-label's accent-tick treatment at a quieter register --
+   this is the breadcrumb back to the nav column the article was opened
+   from ("SYSTEM", "HELP", ...), so the preview reads as a drilldown of
+   that column rather than an unrelated card dropped into the panel. */
+.ftr-preview-title {
+  margin: 0 0 var(--space-xl);
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+  color: var(--ink-84);
+}
+
+/* "ForgeMapToolkit" within a title picks up the tool accent, echoing the
+   hero wordmark treatment (FORGE / MAP / TOOLKIT) elsewhere in the app. */
+.ftr-preview-title-accent {
+  color: var(--tab-color, var(--ink-84));
+}
+
+.ftr-preview-teaser {
+  margin: 0 0 var(--space-2xl);
+  font-family: var(--font-display);
+  font-size: var(--text-teaser);
+  font-weight: var(--weight-regular);
+  line-height: 1.7;
+  letter-spacing: var(--track-tight);
+  color: var(--ink-50);
+}
+
+.ftr-preview-readmore {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  align-self: flex-start;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--tab-color, var(--ink-30));
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-display);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--tab-color, var(--ink-85));
+  cursor: pointer;
+  transition:
+    color        var(--dur-base) var(--ease-out),
+    box-shadow   var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform    var(--dur-fast) var(--ease-out);
+}
+
+/* Accent fill — wipes in left→right on hover (TRACE sweep), instead of an
+   instant flood. Sits behind the label (z-index below content via isolation). */
+.ftr-preview-readmore::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--tab-color, var(--ink-30));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-out),
+              background var(--dur-fast) linear;
+}
+
+.ftr-preview-readmore:hover {
+  border-color: var(--tab-color, var(--ink-60));
+  color: var(--text-on-accent);
+  transform: translateY(-1px);
+  /* Neutral depth only — no colored bloom (§7: accent isn't flooded/glowed). */
+  box-shadow: 0 var(--space-2xs) var(--space-md) calc(var(--space-2xs) * -1) rgba(0,0,0,0.7);
+}
+.ftr-preview-readmore:hover::before {
+  transform: scaleX(1);          /* fill wipes in left→right */
+}
+
+.ftr-preview-readmore:active {
+  /* Press into near-black — colour recedes, only a hint of accent remains. */
+  border-color: color-mix(in srgb, var(--tab-color) 50%, transparent);
+  color: var(--tab-color);
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
+}
+.ftr-preview-readmore:active::before {
+  background: color-mix(in srgb, var(--tab-color) 20%, #000);
+}
+
+.ftr-preview-readmore:hover svg {
+  transform: translateX(var(--space-2xs));
+}
+
+.ftr-preview-readmore svg {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  flex-shrink: 0;
+  transition: transform var(--dur-fast) var(--ease-out);
+}

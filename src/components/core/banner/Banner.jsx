@@ -2,6 +2,8 @@ import React from 'react';
 import { getTool } from '../home/data/toolRegistry.js';
 import './Banner.css';
 
+const FOOTER_PREFIX = 'footer:';
+
 /**
  * Banner — the monumental identity register of the suite.
  *
@@ -30,10 +32,24 @@ import './Banner.css';
  *                    Drives the accent/glow so the banner previews the hovered
  *                    tool's hue while idling on the homepage. The printed
  *                    register label stays tied to the *active* tool only.
+ *  - lastRealTool:   the last toolRegistry entry that was actually active,
+ *                     computed once in ForgeMapToolkit.jsx and shared with
+ *                     Footer and FooterArticleTab. Used as the fallback while
+ *                     a footer:<slug> article is open, so the banner keeps
+ *                     that tool's identity instead of idling to the default.
  */
-const Banner = ({ activeSection, previewSection = null }) => {
-  const tool      = getTool(activeSection);
-  const themeTool = tool ?? getTool(previewSection);
+const Banner = ({ activeSection, previewSection = null, lastRealTool = null }) => {
+  const isFooterArticle = typeof activeSection === 'string' && activeSection.startsWith(FOOTER_PREFIX);
+
+  const tool = getTool(activeSection);
+
+  // Footer articles ("footer:<slug>") have no toolRegistry entry by design,
+  // so getTool() returns null while one is open and the banner would idle
+  // back to its dark/default-orange home state. lastRealTool (passed down
+  // from ForgeMapToolkit.jsx) carries the last real tool forward instead.
+  const effectiveTool = tool ?? (isFooterArticle ? lastRealTool : null);
+
+  const themeTool = effectiveTool ?? getTool(previewSection);
 
   const accent     = themeTool?.color      ?? 'var(--accent-primary, #ff8c00)';
   const glow       = themeTool?.glow       ?? 'var(--accent-glow, rgba(255,140,0,0.12))';
@@ -73,10 +89,10 @@ const Banner = ({ activeSection, previewSection = null }) => {
         {/* Data line — caption left, active-tool register right */}
         <div className="bnr-meta">
           <span className="bnr-caption">PROFESSIONAL MAP CREATION TOOLKIT</span>
-          {tool && (
-            <span className="bnr-register" key={tool.id}>
-              <span className="bnr-reg-index">{tool.index}&nbsp;/</span>
-              <span className="bnr-reg-label">{tool.label.toUpperCase()}</span>
+          {effectiveTool && (
+            <span className="bnr-register" key={effectiveTool.id}>
+              <span className="bnr-reg-index">{effectiveTool.index}&nbsp;/</span>
+              <span className="bnr-reg-label">{effectiveTool.label.toUpperCase()}</span>
             </span>
           )}
         </div>
@@ -89,7 +105,7 @@ const Banner = ({ activeSection, previewSection = null }) => {
         <div className="bnr-mark-aura" />
         <img
           className="bnr-logo"
-          src="../public/assets/icons/App/icon.png"
+          src="/assets/icons/App/icon.png"
           alt=""
           draggable="false"
         />

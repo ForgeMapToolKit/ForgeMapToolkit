@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FAF LOGO — Core/Footer/FafLogo/FafLogo.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Logo zone (right 40% of panel) ────────────────────────────────────────── */
+
+.ftr-logo-zone {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: var(--space-2xl) var(--space-4xl) var(--space-2xl) 0;
+}
+
+/* Vertical divider between nav and logo */
+.ftr-logo-zone::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--line-faint) 30%,
+    var(--line-faint) 70%,
+    transparent 100%
+  );
+}
+
+.ftr-logo-svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+}
+
+/* Each shape: stroke in tab-color, animated draw-on via stroke-dashoffset */
+.ftr-logo-shape {
+  stroke: var(--tab-color, var(--ink-35));
+  fill: none;
+  stroke-width: 2.5;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  transition:
+    stroke-dashoffset 1.1s cubic-bezier(0.4, 0, 0.2, 1) var(--shape-delay, 0s);
+}
+
+/* Tip-glow: rides the leading edge; opacity driven per-frame from JS */
+.ftr-logo-tip {
+  fill: var(--tab-color, var(--ink-70));
+  filter: url(#ftr-tip-glow);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ftr-logo-wordmark {
+  margin-top: var(--space-2xl);
+  font-family: var(--font-display);
+  font-size: var(--text-wordmark);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-16);
+  opacity: 0;
+  transform: translateY(var(--space-2xs));
+  transition: opacity var(--dur-slow) ease 1.7s, transform var(--dur-slow) ease 1.7s;
+}
+
+.ftr-root--expanded .ftr-logo-wordmark {
+  opacity: 1;
+  transform: translateY(0);
+}

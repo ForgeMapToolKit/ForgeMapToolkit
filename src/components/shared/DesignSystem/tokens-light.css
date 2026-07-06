@@ -1,0 +1,294 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FABLE5 DESIGN SYSTEM — tokens-light.css  (v1 · 2026-06)
+   Light-mode override layer.  Import AFTER tokens.css in index.css:
+
+     @import './tokens.css';
+     @import './tokens-light.css';   ← add here
+     @import './primitives.css';
+     @import './layout.css';
+
+   Activated by:  document.documentElement.dataset.theme = 'light'
+   Deactivated:   document.documentElement.dataset.theme = 'dark'
+                  (or just delete the attribute)
+
+   WHAT CHANGES
+     §4  Elevation  — softer shadows (dark bg → light bg)
+     §6  Surfaces   — flipped to cold-white palette (Canvas/#F3F6F9 family)
+     §7  Ink        — white alphas → rgba(20,28,44,x) dark alphas (same x)
+     §7b Sheen      — white gloss → dark gloss (same x)
+     §8  Hairlines  — white alphas → rgba(20,28,44,x) dark alphas
+     §9b Code       — VS Code dark palette → VS Code light palette
+     §11 Accent     — all per-tab hues collapse to single glacier accent;
+                      glows use Steel (#2680C0) — darker than Glacier,
+                      reads correctly on light surfaces
+
+   WHAT STAYS UNCHANGED (tokens.css, untouched here)
+     §1 Motion · §2 Spacing · §3 Radius · §5 Typography
+     §9 Status colors (ok / warn / err — still legible on light)
+     §10 Z-index / sizing
+
+   GLACIER RAMP REFERENCE
+     Snow    #EFF7FC   Frost  #DCEEF8   Ice   #C2E3F3
+     Glacier #93CFEA   Mid    #4FA9DA   Steel #2680C0
+
+   NEUTRAL REFERENCE
+     Canvas  #F3F6F9   Sunk  #ECF0F3   Muted #69707A
+     Body    #3A424B   Ink   #14181D
+
+   KNOWN FOLLOW-UP (Phase 2)
+     primitives.css line ~392 uses color-mix(..., #000) which produces
+     a muddy dark mix on light bg — needs a light-mode-specific override
+     in a primitives-light.css patch or a tokens-driven replacement.
+   ═══════════════════════════════════════════════════════════════════ */
+
+html[data-theme="light"] {
+
+  /* ═══ §4 ELEVATION — softer shadows on light background ══════════
+     Dark mode used opaque-black rgba() and they were fine.
+     On white/grey surfaces those same values create harsh drop-shadows;
+     halve the alpha and use the dark-ink base instead of pure black.    */
+  --shadow-sm: 0 1px 2px  rgba(20,28,44,0.08);
+  --shadow-md: 0 6px 22px -6px  rgba(20,28,44,0.13);
+  --shadow-lg: 0 14px 24px -12px rgba(20,28,44,0.20);
+
+  /* ═══ §6 SURFACES ════════════════════════════════════════════════ */
+
+  /* opaque ladder — Canvas family, cold blue-tinted greys */
+  --surface-canvas:      #F3F6F9;   /* workspace root                    */
+  --surface-deep:        #ECF0F3;   /* footer / panel bar — Sunk         */
+  --surface-banner:      #FFFFFF;   /* banner plate — one step above navbar, creates tonal step */
+  --surface-stage:       #E8EDF1;   /* home projection-stage backdrop    */
+  --surface-rail:        #FFFFFF;   /* secondary panels / card rails     */
+  --surface-face-a:      #FFFFFF;   /* card face — lit top               */
+  --surface-face-b:      #F7F9FB;   /* card face — shaded foot           */
+  --surface-face-hover:  #EFF7FC;   /* hover — Snow glacier tint         */
+  --surface-sunk:        #ECF0F3;   /* recessed wells (inputs, channels) */
+  --surface-sunk-focus:  #DCEEF8;   /* focused channel — Frost tint      */
+
+  /* functional (var-based; auto-update from above) */
+  --surface-control:      var(--surface-sunk);
+  --surface-overlay:      rgba(243,246,249,0.96);  /* modal backdrop     */
+  /* --surface-accent-ghost already var(--tab-color)-based → auto-adapts */
+
+  /* translucent */
+  --surface-deep-veil:  rgba(236,240,243,0.90);  /* navbar panel         */
+  --surface-scrim:      rgba(20,28,44,0.30);      /* full-screen dimmer   */
+  --surface-ghost:      rgba(20,28,44,0.04);
+  --surface-code:       rgba(20,28,44,0.06);      /* inline code bg       */
+  --surface-scrollbar:  rgba(20,28,44,0.28);
+  --surface-highlight:  rgba(79,169,218,0.22);    /* search match — Glacier tint */
+
+  /* dark overlay shades — used for navebar proximity etc.
+     Dark-mode values were near-black; on light bg these still read well
+     but we dial back the opacity so they don't look like burnt vignettes. */
+  --shade-pure:   #000;
+  --shade-85:     rgba(20,28,44,0.52);
+  --shade-70:     rgba(20,28,44,0.34);
+  --shade-46:     rgba(20,28,44,0.22);
+
+  /* home tool-rail recess — stronger veil so the rail reads as a
+     recessed machine bed, not a featureless white strip.                  */
+  --home-rail-top:  rgba(20,28,44,0.09);
+  --home-rail-body: rgba(20,28,44,0.05);
+
+  /* ═══ §7 INK — perceptual grey hierarchy for light surfaces ══════
+     Strategy: opaque neutrals, NOT alpha-over-white.
+     Alpha-based ink on white canvas collapses contrast at low steps —
+     rgba(20,28,44,0.19) on #F3F6F9 is barely 1.5:1. Opaque greys give
+     precise, predictable contrast at every step.
+
+     HIERARCHY (5 semantic levels):
+       Ink     → #14181D  near-black  — active/selected/title       11.2:1
+       Body    → #3A424B  dark grey   — default readable text         7.1:1
+       Muted   → #69707A  mid grey    — labels, placeholders, meta    4.6:1
+       Faint   → #969CA5  light grey  — divider labels, ghost text    2.9:1
+       Ghost   → #B8BCC4  pale grey   — disabled, watermarks          2.0:1
+
+     Extended steps map onto this 5-level palette.
+     The dark-mode token names are kept identical — only values change. */
+
+  /* canonical */
+  --ink-100: #14181D;  /* near-black  — titles, active state         */
+  --ink-72:  #3A424B;  /* dark grey   — primary body text            */
+  --ink-55:  #3A424B;  /* dark grey   — default body (same level)    */
+  --ink-40:  #69707A;  /* mid grey    — muted controls, state text   */
+  --ink-28:  #969CA5;  /* light grey  — faint labels                 */
+  --ink-16:  #B8BCC4;  /* pale grey   — captions, ghost              */
+
+  /* extended — mapped to nearest semantic level */
+  --ink-95:  #14181D;
+  --ink-92:  #14181D;
+  --ink-86:  #14181D;
+  --ink-85:  #14181D;
+  --ink-84:  #14181D;
+  --ink-80:  #3A424B;
+  --ink-70:  #3A424B;
+  --ink-65:  #3A424B;
+  --ink-60:  #3A424B;
+  --ink-50:  #69707A;
+  --ink-45:  #69707A;
+  --ink-38:  #69707A;
+  --ink-35:  #69707A;
+  --ink-30:  #969CA5;
+  --ink-25:  #969CA5;
+  --ink-22:  #969CA5;
+  --ink-20:  #969CA5;
+  --ink-18:  #B8BCC4;
+  --ink-17:  #B8BCC4;
+  --ink-15:  #B8BCC4;
+  --ink-14:  #B8BCC4;
+  --ink-13:  #B8BCC4;
+  --ink-12:  #C4C8CF;
+  --ink-11:  #C4C8CF;
+  --ink-09:  #D0D4DA;
+
+  /* §7b Sheen — dark gloss, BOOSTED for light-mode readability.
+     Dark mode used additive white at low alpha — barely-there sparkle.
+     On light surfaces the same micro-alphas vanish completely, so we
+     scale every step up ~2.5× so gradients and machined faces read.
+     The relative ratios are preserved; only the floor is raised.        */
+  --sheen-055: rgba(20,28,44,0.11);
+  --sheen-045: rgba(20,28,44,0.09);
+  --sheen-040: rgba(20,28,44,0.08);
+  --sheen-028: rgba(20,28,44,0.068);
+  --sheen-022: rgba(20,28,44,0.054);
+  --sheen-014: rgba(20,28,44,0.044);
+  --sheen-012: rgba(20,28,44,0.036);
+  --sheen-009: rgba(20,28,44,0.026);
+  --sheen-006: rgba(20,28,44,0.018);
+  --sheen-004: rgba(20,28,44,0.012);
+
+  /* ═══ §8 HAIRLINES — dark alphas ════════════════════════════════
+     Dark mode used white alphas (0.05–0.14).  On light surfaces those
+     become invisible; swap base to dark ink, keep alpha levels.          */
+  --line-soft:         rgba(20,28,44,0.10);   /* lightest divider         */
+  --line-faint:        rgba(20,28,44,0.13);   /* dividers, header borders */
+  --line-medium:       rgba(20,28,44,0.16);   /* default structural edge  */
+  --line-ghost-border: rgba(20,28,44,0.20);   /* input / search-bar edge  */
+  --line-strong:       rgba(20,28,44,0.28);   /* emphasised edge          */
+
+  /* ═══ §9b CODE SYNTAX — VS Code light palette ════════════════════
+     Dark mode used VS Code dark.  On Canvas/#F3F6F9 those dark-bg-tuned
+     hues clash; swap to VS Code light equivalents.                       */
+  --code-keyword: #0000ff;
+  --code-string:  #a31515;
+  --code-number:  #098658;
+  --code-comment: #008000;
+  --code-default: #000000;
+  --code-ident:   #001080;
+  --code-cmd:     #267f99;
+
+  /* ═══ §11 ACCENT — single glacier ramp, Steel glows ═════════════
+
+     DESIGN DECISION: light mode collapses all per-tab hues to one cold-
+     blue accent (Mid #4FA9DA).  Glows use Steel (#2680C0) — darker than
+     Glacier, readable on the light surface, no phosphor-on-black look.
+
+     Strategy: override every --<tab>-color / glow / glow-strong to the
+     same values.  Since tab roots inherit from :root and then override
+     with their own vars, we need to redefine the source vars that each
+     tab's style prop reads through.  The two-level resolution is:
+       :root sets --emitter-color → tab root does --tab-color: var(--emitter-color)
+     So overriding --emitter-color here is sufficient.                    */
+
+  /* Canonical tab defaults */
+  --tab-color:        #4FA9DA;               /* Mid — single light accent */
+  --tab-glow:         rgba(38,128,192,0.22); /* Steel-based, soft         */
+  --tab-glow-strong:  rgba(38,128,192,0.44); /* Steel-based, punchy       */
+
+  /* On-accent text — glacier fill is light, needs deep navy for contrast */
+  --text-on-accent: #0E4A72;
+
+  /* Suite accent (orange → glacier in light; orange reads poorly on ice) */
+  --accent-primary:             #4FA9DA;
+  --accent-primary-glow:        rgba(38,128,192,0.25);
+  --accent-primary-glow-strong: rgba(38,128,192,0.48);
+
+  /* Per-tab registry — all remapped to glacier / Steel glow */
+  --emitter-color:              #4FA9DA;
+  --emitter-glow:               rgba(38,128,192,0.22);
+  --emitter-glow-strong:        rgba(38,128,192,0.44);
+
+  --wreckages-color:            #2680C0;
+  --wreckages-glow:             rgba(38,128,192,0.22);
+  --wreckages-glow-strong:      rgba(38,128,192,0.44);
+
+  --props-color:                #2680C0;
+  --props-glow:                 rgba(38,128,192,0.22);
+  --props-glow-strong:          rgba(38,128,192,0.44);
+
+  --customprops-color:          #4FA9DA;
+  --customprops-glow:           rgba(38,128,192,0.22);
+  --customprops-glow-strong:    rgba(38,128,192,0.44);
+
+  --treemap-color:              #4FA9DA;
+  --treemap-glow:               rgba(38,128,192,0.22);
+  --treemap-glow-strong:        rgba(38,128,192,0.44);
+
+  --rockerosion-color:          #4FA9DA;
+  --rockerosion-glow:           rgba(38,128,192,0.22);
+  --rockerosion-glow-strong:    rgba(38,128,192,0.44);
+
+  --stars-color:                #4FA9DA;
+  --stars-glow:                 rgba(38,128,192,0.22);
+  --stars-glow-strong:          rgba(38,128,192,0.44);
+
+  --skybox-generator-color:     #4FA9DA;
+  --skybox-generator-glow:      rgba(38,128,192,0.22);
+  --skybox-generator-glow-strong: rgba(38,128,192,0.44);
+
+  --scmaptool-color:            #4FA9DA;
+  --scmaptool-glow:             rgba(38,128,192,0.22);
+  --scmaptool-glow-strong:      rgba(38,128,192,0.44);
+
+  --adaptivemaphelper-color:    #4FA9DA;
+  --adaptivemaphelper-glow:     rgba(38,128,192,0.22);
+  --adaptivemaphelper-glow-strong: rgba(38,128,192,0.44);
+
+  --history-color:              #4FA9DA;
+  --history-glow:               rgba(38,128,192,0.22);
+  --history-glow-strong:        rgba(38,128,192,0.44);
+
+  --mapresizer-color:           #4FA9DA;
+  --mapresizer-glow:            rgba(38,128,192,0.22);
+  --mapresizer-glow-strong:     rgba(38,128,192,0.44);
+
+  --previewimage-color:         #4FA9DA;
+  --previewimage-glow:          rgba(38,128,192,0.22);
+  --previewimage-glow-strong:   rgba(38,128,192,0.44);
+
+  --contributions-color:        #4FA9DA;
+  --contributions-glow:         rgba(38,128,192,0.22);
+  --contributions-glow-strong:  rgba(38,128,192,0.44);
+
+  --cliterminal-color:          #4FA9DA;
+  --cliterminal-glow:           rgba(38,128,192,0.22);
+  --cliterminal-glow-strong:    rgba(38,128,192,0.44);
+
+  --settings-color:             #4FA9DA;
+  --settings-glow:              rgba(38,128,192,0.22);
+  --settings-glow-strong:       rgba(38,128,192,0.44);
+
+  --coop-versioner-color:       #4FA9DA;
+  --coop-versioner-glow:        rgba(38,128,192,0.22);
+  --coop-versioner-glow-strong: rgba(38,128,192,0.44);
+
+  /* ═══ §12 LEGACY COMPAT — root.css token overrides ════════════════
+     root.css defines --text-primary / --text-secondary / --text-muted
+     and --border-color as hardcoded dark-mode hex values on :root.
+     They must be overridden here so light mode gets proper contrast.   */
+  --text-primary:   #14181D;   /* was #ffffff  — near-black             */
+  --text-secondary: #3A424B;   /* was #b0b0b0  — dark grey body         */
+  --text-muted:     #69707A;   /* was #666666  — mid grey (already ok)  */
+  --border-color:   rgba(20,28,44,0.16);  /* was #2a2a2a — visible on light */
+  --border-light:   rgba(20,28,44,0.10);  /* was #333333                   */
+
+  /* root.css bg tokens — already point to surface vars, auto-correct  */
+  --bg-tertiary:    #E8EDF1;   /* was #1a1a1a */
+  --bg-card:        #FFFFFF;   /* was #141414 */
+  --bg-hover:       #EFF7FC;   /* was #1f1f1f */
+
+  /* modal secondary — distinct from primary (#FFF) so stacked surfaces
+     have visible depth instead of merging into one white plane           */
+  --bg-secondary:   var(--surface-sunk);
+}

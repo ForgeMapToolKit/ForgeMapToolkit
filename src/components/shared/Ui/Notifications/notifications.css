@@ -1,0 +1,203 @@
+/* ═══════════════════════════════════════════════════════════════════
+   NOTIFICATIONS — Shared/Ui/Notifications/notifications.css
+   Aligned with the TRACE design language (Wreckage/EntityPanel gold
+   standard). No glassmorphism, no blue-grey surfaces, no backdrop
+   blur. Background is near-black warm plate + dot grid, identical
+   to .eao-overlay. Accent flows from --modal-accent set by JS.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes (subset of trace.css — defined here so the modal works
+   in document.body outside any tab that imports trace.css) ──────── */
+
+@keyframes fmt-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fmt-rise-in {
+  from { opacity: 0; transform: translateY(14px); clip-path: inset(0 0 6% 0); }
+  to   { opacity: 1; transform: translateY(0);    clip-path: inset(0 0 0 0); }
+}
+
+/* ── Overlay ─────────────────────────────────────────────────────── */
+
+.fmt-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-scrim);
+  animation: fmt-fade-in var(--dur-base) linear both;
+}
+
+/* ── Modal shell — warm near-black plate, no glass ───────────────── */
+
+.fmt-modal {
+  position: relative;
+  width: 480px;
+  max-width: calc(100vw - var(--space-3xl));
+  font-family: var(--font-display);
+  overflow: hidden;
+
+  background: var(--surface-stage);
+  background-image: radial-gradient(circle, var(--sheen-022) 1px, transparent 1px);
+  background-size: 28px 28px;
+  border: 1px solid var(--line-medium);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 40px var(--modal-glow, var(--accent-primary-glow));
+
+  animation: fmt-rise-in var(--dur-slow) var(--ease-out) both;
+}
+
+/* ── Type overrides — Role 3 status tokens ───────────────────────── */
+
+.fmt-modal[data-type="error"] {
+  --modal-accent:      var(--status-err);
+  --modal-glow:        rgba(255, 80, 80, 0.18);
+  --modal-glow-strong: rgba(255, 80, 80, 0.45);
+}
+
+.fmt-modal[data-type="warning"] {
+  --modal-accent:      var(--status-warn);
+  --modal-glow:        rgba(255, 140, 0, 0.18);
+  --modal-glow-strong: rgba(255, 140, 0, 0.45);
+}
+
+.fmt-modal[data-type="success"] {
+  --modal-accent:      var(--status-ok);
+  --modal-glow:        rgba(0, 200, 100, 0.18);
+  --modal-glow-strong: rgba(0, 200, 100, 0.45);
+}
+
+/* ── Top accent line — T3 TraceLine language ─────────────────────── */
+
+.fmt-modal-accent-line {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--modal-accent, var(--accent-primary)) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 14px var(--modal-glow-strong, var(--accent-primary-glow-strong));
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+
+.fmt-modal-header {
+  padding: var(--space-2xl) var(--space-2xl) 0;
+}
+
+.fmt-modal-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--modal-accent, var(--accent-primary));
+  text-shadow: 0 0 14px var(--modal-glow, var(--accent-primary-glow));
+  margin: 0 0 var(--space-xs);
+}
+
+.fmt-modal-title-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--modal-accent, var(--accent-primary)) 0%,
+    transparent 70%
+  );
+  opacity: 0.3;
+}
+
+/* ── Body ────────────────────────────────────────────────────────── */
+
+.fmt-modal-body {
+  padding: var(--space-lg) var(--space-2xl) var(--space-xl);
+}
+
+.fmt-modal-message {
+  font-family: var(--font-display);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: 1.75;
+  letter-spacing: var(--track-tight);
+  color: var(--ink-55);
+  margin: 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+
+.fmt-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: 0 var(--space-2xl) var(--space-2xl);
+}
+
+/* ── Buttons — TRACE ctrl-btn language ───────────────────────────── */
+
+.fmt-modal-btn {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  padding: var(--space-sm) var(--space-xl);
+  border: none;
+  border-bottom: 1px solid var(--line-ghost-border);
+  background: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    color            var(--dur-fast) linear,
+    border-color     var(--dur-fast) linear,
+    box-shadow       var(--dur-fast) linear;
+}
+
+/* Primary — tab-color TraceLine treatment */
+.fmt-modal-btn-primary {
+  color: var(--modal-accent, var(--accent-primary));
+  border-bottom-color: color-mix(in srgb, var(--modal-accent, var(--accent-primary)) 45%, transparent);
+  text-shadow: 0 0 10px var(--modal-glow, var(--accent-primary-glow));
+}
+
+.fmt-modal-btn-primary:hover {
+  border-bottom-color: var(--modal-accent, var(--accent-primary));
+  box-shadow: 0 1px 0 var(--modal-accent, var(--accent-primary)),
+              0 0 12px var(--modal-glow, var(--accent-primary-glow));
+}
+
+.fmt-modal-btn-primary:focus-visible {
+  outline: 1px solid var(--modal-accent, var(--accent-primary));
+  outline-offset: 3px;
+}
+
+/* Secondary — ghost, leise */
+.fmt-modal-btn-secondary {
+  color: var(--ink-28);
+  border-bottom-color: var(--line-soft);
+}
+
+.fmt-modal-btn-secondary:hover {
+  color: var(--ink-40);
+  border-bottom-color: var(--line-medium);
+}
+
+.fmt-modal-btn-secondary:focus-visible {
+  outline: 1px solid var(--line-strong);
+  outline-offset: 3px;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .fmt-modal-overlay,
+  .fmt-modal { animation: none; }
+  .fmt-modal-btn { transition: none; }
+}

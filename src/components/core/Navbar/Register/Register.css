@@ -1,0 +1,239 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   REGISTER — Core/Navbar/NavbarPanel/Register/Register.css
+
+   Right projection stage of NavbarPanel. §5 "Rechte Zone".
+
+   Vertically centred content block — air above and below, the block floats.
+   No large ghost-index (spec §7: removed as too dominant for a nav instrument).
+
+   Print animation: clip-path reveal from left on each (keyed) mount.
+   This is the "clip-path-Animation" described in §5 for sub-item hover.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Stage wrapper ───────────────────────────────────────────────────────── */
+
+.reg-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;    /* vertical centre */
+  /* Left padding is gone — the grid's column-gap (NavbarPanel.css
+     .nbp-inner) is now the one real divider between left/right zones,
+     so reg-block already starts at its column's true left edge. */
+  padding: var(--space-2xl) var(--space-xl) var(--space-2xl) 0;
+  box-sizing: border-box;
+}
+
+/* ── Content block ───────────────────────────────────────────────────────── */
+
+.reg-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* controlled per-element via margins */
+  width: 100%;
+  /* Shared with .reg-index's margin-left below AND with the
+     reg-print-in clip-path's left inset (it has to clear this exact
+     distance or the eyebrow's leftward bleed gets clipped at x=0). */
+  --reg-eyebrow-pull: clamp(18px, 3vw, 50px);
+}
+
+/* ── Clip-path reveal (print animation) ─────────────────────────────────── */
+/* Applied to the entire block on mount when animate=true.
+   Keyed remount in NavbarPanel ensures this re-fires on each sub-item hover. */
+
+.reg-stage--animate .reg-block {
+  animation: reg-print-in 320ms var(--ease-out) both;
+}
+
+@keyframes reg-print-in {
+  from {
+    /* left inset is negative, not 0 — see note on .reg-index below.
+       Matches --reg-eyebrow-pull (plus a little headroom) so the
+       eyebrow's leftward bleed is never clipped at .reg-block's own
+       edge, the same fix already applied to the right inset. */
+    clip-path: inset(0 100% 0 calc(-1 * var(--reg-eyebrow-pull) - 4px));
+    opacity: 0.6;
+  }
+  to {
+    /* Was `inset(0 0% 0 0)` — that clips exactly at reg-block's own right
+       edge, which silently re-clipped the trace's right-side bleed (see
+       .reg-trace-bloom/.reg-trace-core below) on every keyed remount,
+       since clip-path ignores overflow:visible on any ancestor. The inset
+       below just needs to clear the bounded --reg-trace-bleed distance;
+       -100vw is generous overkill but costs nothing and never re-clips it. */
+    clip-path: inset(0 -100vw 0 calc(-1 * var(--reg-eyebrow-pull) - 4px));
+    opacity: 1;
+  }
+}
+
+/* ── Index-prefix (eyebrow) — index num + category name ─────────────────── */
+/* Category name lives ONLY here. The big reg-name below is always the
+   sub-item's own label, never the category. */
+
+.reg-index {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  user-select: none;
+  /* Optical alignment: the numeral's left side-bearing makes it sit
+     visibly indented relative to reg-name's flat cap-height edge below
+     it, even though both start at the same box edge. Pull it left to
+     bring the two into true visual alignment.
+     This used to get silently clipped to invisible: .reg-block's own
+     reg-print-in clip-path pins its left inset at 0, and clip-path
+     ignores overflow:visible on .nbp-right entirely. Fixed by giving
+     that clip-path a matching negative left inset (see --reg-eyebrow-pull
+     on .reg-block and the reg-print-in keyframes above) — the actual
+     ancestor chain past that point (.nbp-right, .nbp-panel) was never
+     the problem. */
+  margin-left: calc(-1 * var(--reg-eyebrow-pull));
+}
+
+.reg-index-num {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);      /* small, recessive — eyebrow only */
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  color: var(--ink-22);
+  /* Slight stagger off the category label's baseline — reads as two
+     distinct registers (a counter + a tag) instead of one run-on string. */
+  transform: translateY(-0.18em);
+}
+
+.reg-index-cat {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);      /* small, recessive — eyebrow only */
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-eyebrow); /* 0.3em — reads as a category tag */
+  text-transform: uppercase;
+  color: var(--ink-38);
+  transform: translateY(0.1em);
+}
+
+/* ── Tab name — large + dominant ─────────────────────────────────────────── */
+/* "genaue Größe wird im Kontext entschieden" (§9) — set here at a generous
+   default; can be overridden per-tab via parent context. */
+
+.reg-name {
+  margin: 0 0 var(--space-md) 0;
+  font-family: var(--font-display);
+  /* Noticeably larger than --text-nav-label (36px) — this is the dominant
+     element of the register, it should read as such at a glance. */
+  font-size: clamp(3.2rem, 4.2vw, 4.8rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink-92);
+  text-transform: uppercase;
+  user-select: none;
+  /* The column has a 440px floor, but the title shouldn't wrap there —
+     it should run on, the same way the traceline bleeds past the column
+     edge (.nbp-right is overflow:visible for exactly this reason). A
+     long label stays a single dominant line instead of breaking into two
+     and competing with the description below it for vertical space. */
+  white-space: nowrap;
+}
+
+/* ── Traceline ────────────────────────────────────────────────────────────── */
+
+.reg-trace {
+  /* Establishes the positioning context for the bleed layers below.
+     This was missing before, so their `right` resolved against
+     .nbp-right instead of this element — part of why the bleed fell
+     short of where the math intended it to land. */
+  position: relative;
+  width: 100%;       /* base width = reg-block's content width; the core/
+                         bloom layers bleed past this on the right (below) */
+  margin-bottom: var(--space-lg);
+  /* How far past the column the filament bleeds before it has to have
+     finished tapering to nothing. vw-based so it scales with viewport
+     width (more screen = more thread) — but clamped, because an
+     unbounded vw value is exactly what caused the original bug: on a
+     wide enough viewport the fade-out zone would again land past the
+     visible screen edge instead of inside it. */
+  --reg-trace-bleed: clamp(140px, 30vw, 620px);
+}
+
+/* Both layers share one gradient shape: fades in from nothing over the
+   first ~10%, holds solid through the column, then fades out again over
+   the last ~22% — a frayed thread at BOTH ends, not a hard cut at either.
+   `right` used to overshoot to -100vw on the theory that .nbp-panel's
+   overflow:hidden would clip it before anyone saw the seam — but that
+   panel spans the full viewport, so in practice the fade-out zone landed
+   far off past the visible screen and the line simply looked solid until
+   it vanished at the screen edge. Bounding the bleed keeps the whole
+   gradient — including its taper to transparent — inside the visible
+   area, so the line finishes as thread well short of the screen edge. */
+.reg-trace-bloom,
+.reg-trace-core {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: calc(-1 * var(--reg-trace-bleed));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.reg-trace-bloom {
+  top: -4px;
+  bottom: -4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--reg-accent, var(--tab-color)) 10%,
+    var(--reg-accent, var(--tab-color)) 78%,
+    transparent 100%
+  );
+  filter: blur(7px);
+  opacity: 0.4;
+  animation: trace-print 0.32s var(--trace-out) both,
+             trace-bloom-settle 1.2s linear both;
+}
+
+.reg-trace-core {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--reg-accent, var(--tab-color)) 10%,
+    var(--reg-accent, var(--tab-color)) 78%,
+    transparent 100%
+  );
+  opacity: 0.85;
+  animation: trace-print 0.32s var(--trace-out) forwards;
+}
+
+.reg-stage:not(.reg-stage--animate) .reg-trace-bloom,
+.reg-stage:not(.reg-stage--animate) .reg-trace-core {
+  animation: none;
+  transform: scaleX(1);
+}
+
+/* ── Description ─────────────────────────────────────────────────────────── */
+
+.reg-desc {
+  margin: 0;
+  font-family: var(--font-display);
+  /* Noticeably larger than --text-sm (0.68rem ≈ 11px) — kept readable at
+     a glance, same intent as the reg-name bump above. */
+  font-size: 1.05rem;
+  font-weight: var(--weight-base);
+  line-height: 1.55;
+  color: var(--ink-40);
+  letter-spacing: 0.01em;
+  max-width: 78ch;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .reg-stage--animate .reg-block {
+    animation-duration: 0.01ms !important;
+  }
+  .reg-trace-bloom,
+  .reg-trace-core {
+    animation-duration: 0.01ms !important;
+    transform: scaleX(1);
+  }
+}

@@ -13,7 +13,14 @@
 
 const path        = require('path');
 const fs          = require('fs');
-const { app, BrowserWindow } = require('electron');
+let _app = null;
+let _BrowserWindow = null;
+try {
+  const electron = require('electron');
+  _app           = electron.app;
+  _BrowserWindow = electron.BrowserWindow;
+} catch (_) {}
+
 
 // ── Log levels ────────────────────────────────────────────────────────────────
 const LOG_LEVELS = { all: 0, debug: 1, info: 2, warn: 3, error: 4, off: 99 };
@@ -23,7 +30,18 @@ let currentLogLevel = 'all';
 const logBuffer = [];
 
 // ── Session log folder — keeps last 15 sessions automatically ────────────────
-const LOG_DIR = path.join(app.getPath('userData'), 'logs');
+function resolveLogDir() {
+  if (_app) {
+    try { return path.join(_app.getPath('userData'), 'logs'); } catch (_) {}
+  }
+  // Headless-Fallback: FMT_USER_DATA env oder plattformspezifisch
+  const base = process.env.FMT_USER_DATA
+    || (process.platform === 'win32'
+        ? require('path').join(process.env.APPDATA || require('os').homedir(), 'AppData', 'Roaming', 'ForgeMapToolkit')
+        : require('path').join(require('os').homedir(), '.config', 'ForgeMapToolkit'));
+  return path.join(base, 'logs');
+}
+const LOG_DIR = resolveLogDir();
 try { fs.mkdirSync(LOG_DIR, { recursive: true }); } catch (_) {}
 
 // Prune: delete oldest files when >= 15 already exist
@@ -71,7 +89,8 @@ function appLog(level, ...args) {
   logStream.write(`[${line.time}] [${levelPad}] ${msg}\n`);
 
   // Forward to all open renderer windows (incl. log window)
-  for (const win of BrowserWindow.getAllWindows()) {
+for (const win of (_BrowserWindow?.getAllWindows() ?? [])) {
+
     try { if (!win.isDestroyed()) win.webContents.send('log-line', line); } catch (_) {}
   }
 
