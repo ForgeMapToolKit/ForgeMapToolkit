@@ -685,8 +685,14 @@
   height: 13px;
   cursor: inherit;
 }
-.ec-legend-card-name {
+.ec-legend-card-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ec-legend-card-name {
   min-width: 0;
   font-family: var(--font-display);
   font-size: var(--text-sm);
@@ -699,6 +705,16 @@
   transition: color var(--dur-base) var(--ease-decay);
 }
 .ec-legend-card.selected .ec-legend-card-name { color: var(--ink-92); }
+.ec-legend-card-meta {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-30);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .ec-legend-card-count {
   flex: none;
   font-family: var(--font-mono);
@@ -820,7 +836,7 @@
 
 .ec-drop-slot-label {
   position: absolute;
-  top: 0; left: 0;
+  top: 4px; left: 16px;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 0.56rem;
   font-weight: 600;

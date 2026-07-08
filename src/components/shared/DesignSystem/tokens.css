@@ -332,10 +332,11 @@
   --contributions-glow:        rgba(165, 232, 1, 0.35);
   --contributions-glow-strong: rgba(165, 232, 1, 0.60);
 
-  /* CLI Terminal — Electric green (terminal aesthetic, distinct from treemap) */
-  --cliterminal-color:       #22D65F;
-  --cliterminal-glow:        rgba(34, 214, 95, 0.30);
-  --cliterminal-glow-strong: rgba(34, 214, 95, 0.55);
+  /* CLI Terminal — light purple */
+--cliterminal-color:       #9461ff;
+--cliterminal-glow:        rgba(148, 97, 255, 0.30);
+--cliterminal-glow-strong: rgba(148, 97, 255, 0.55);
+--cliterminal-accent-2:    #ff8c00;
 
   /* Settings — White */
   --settings-color:       #FFFFFF;

@@ -1,13 +1,16 @@
-﻿/**
+/**
  * SkyboxGenerator_Cirrus.jsx — Sektion 02: Cirrus
  *
- * Rein präsentational. Enthält CirrusLayerDiagram lokal.
+ * Rein präsentational. `CirrusLayerDiagram` wird exportiert und im
+ * Cirrus-Section-Aside gerendert (siehe SkyboxGenerator.jsx), nicht mehr
+ * hier in der Hauptspalte.
  */
 import React from 'react';
+import { EntityCardGrid, EntityCard, AddTile } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 import { PLANET_UV_COLORS } from './utils.js';
 
-// ── CirrusLayerDiagram (nur hier genutzt) ─────────────────────────
-const CirrusLayerDiagram = ({ layers, cirrusMult }) => {
+// ── CirrusLayerDiagram ─────────────────────────────────────────────
+export const CirrusLayerDiagram = ({ layers, cirrusMult }) => {
   if (!layers.length) return null;
   const freqBar = (f) => {
     const v = parseFloat(f) || 0.0001;
@@ -43,15 +46,7 @@ const CirrusLayerDiagram = ({ layers, cirrusMult }) => {
             <div>
               <div style={{display:'flex',alignItems:'center',gap:'7px',marginBottom:'8px'}}>
                 <span style={{color:col,fontWeight:700,fontSize:'0.78rem',fontFamily:'monospace'}}>L{i+1}</span>
-                {i > 0 && (
-                  <span style={{fontSize:'0.6rem',color:S.muted,letterSpacing:'0.04em'}}>
-                    masked by&nbsp;
-                    {layers.slice(0,i).map((_,j) => (
-                      <span key={j} style={{color:PLANET_UV_COLORS[j%PLANET_UV_COLORS.length],fontWeight:700}}>L{j+1} </span>
-                    ))}
-                  </span>
-                )}
-                {i === 0 && <span style={{fontSize:'0.6rem',color:S.muted}}>base layer</span>}
+                <span style={{fontSize:'0.6rem',color:S.muted,letterSpacing:'0.04em'}}>channel {['R','G','B','A'][i] ?? i+1}</span>
               </div>
               <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px'}}>
                 <span style={{...S.label,width:'40px'}}>freq X</span>
@@ -125,142 +120,138 @@ const Cirrus = ({
   CIRRUS_BUILTIN_PRESETS,
 }) => {
   return (
-    <div className="skybox-section-stack">
+    <div className="ctrl-col">
 
-      {/* Presets */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Presets</h2>
-        <div className="sb-cirrus-preset-grid">
-          {CIRRUS_BUILTIN_PRESETS.map(preset => (
-            <button
-              key={preset.id}
-              className={`sb-cirrus-preset-btn${activePresetId === preset.id ? ' active' : ''}`}
-              onClick={() => onApplyPreset(preset)}
-            >
-              {preset.label}
-            </button>
-          ))}
-          {customPresets.map(preset => (
-            <div key={preset.id} className="sb-cirrus-preset-custom-row">
+      {/* Settings (presets are shortcuts for the fields below, not a separate feature) */}
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">Settings</div>
+        <div className="ctrl-content">
+          <div className="sb-cirrus-preset-grid">
+            {CIRRUS_BUILTIN_PRESETS.map(preset => (
               <button
-                className={`sb-cirrus-preset-btn custom${activePresetId === preset.id ? ' active' : ''}`}
+                key={preset.id}
+                className={`sb-cirrus-preset-btn${activePresetId === preset.id ? ' active' : ''}`}
                 onClick={() => onApplyPreset(preset)}
               >
-                ★ {preset.label}
+                {preset.label}
               </button>
-              <button className="btn-delete-xs" onClick={() => onDeleteCustomPreset(preset.id)}>×</button>
-            </div>
-          ))}
-        </div>
+            ))}
+            {customPresets.map(preset => (
+              <div key={preset.id} className="sb-cirrus-preset-custom-row">
+                <button
+                  className={`sb-cirrus-preset-btn custom${activePresetId === preset.id ? ' active' : ''}`}
+                  onClick={() => onApplyPreset(preset)}
+                >
+                  ★ {preset.label}
+                </button>
+                <button className="ctrl-btn-delete" onClick={() => onDeleteCustomPreset(preset.id)}>×</button>
+              </div>
+            ))}
+          </div>
 
-        {/* Save custom preset */}
-        <button className="btn-secondary" style={{marginTop:'10px',width:'100%'}}
-          onClick={() => setShowSavePreset(v=>!v)}>
-          {showSavePreset ? '▲ Cancel' : '+ Save Current as Preset'}
-        </button>
-        {showSavePreset && (
-          <div className="sb-cirrus-save-preset-panel">
-            <div className="skybox-form-group">
-              <label className="skybox-form-label">Preset Name</label>
-              <input className="skybox-input" value={newPresetName}
-                onChange={e=>setNewPresetName(e.target.value)}
-                placeholder="My Preset" onKeyDown={e=>e.key==='Enter'&&onSaveCustomPreset()}/>
+          <div className="sb-cfg-row">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Cirrus Multiplier</div>
+              <input className="ctrl-input" value={cirrusMult} onChange={e=>setCirrusMult(e.target.value)} placeholder="1.8"/>
             </div>
-            <div className="skybox-form-group">
-              <label className="skybox-form-label">Import from JSON / Lua (optional)</label>
-              <textarea className="skybox-input skybox-textarea" rows={4} value={importText}
-                onChange={e=>{setImportText(e.target.value);setImportError('');}}
-                onDragOver={e=>{e.preventDefault();setImportDragOver(true);}}
-                onDragLeave={()=>setImportDragOver(false)}
-                onDrop={e=>{
-                  e.preventDefault();setImportDragOver(false);
-                  const text=e.dataTransfer.getData('text');
-                  if(text){setImportText(text);const res=parseCirrusFromText(text);if(!res)setImportError('Could not parse.');}
-                }}
-                style={{outline:importDragOver?'1px solid var(--skybox-generator-color)':'none'}}
-                placeholder="Paste skybox JSON or Lua here…"/>
-              {importError && <p className="skybox-form-help" style={{color:'rgba(255,80,80,0.9)'}}>{importError}</p>}
+            <div className="ctrl-field">
+              <div className="ctrl-label">Cirrus Color</div>
+              <input className="ctrl-input" value={cirrusColor} onChange={e=>setCirrusColor(e.target.value)} placeholder="#ffffff"/>
             </div>
-            <button className="btn-primary" onClick={onSaveCustomPreset} disabled={!newPresetName.trim()}>
-              Save Preset
+          </div>
+          <div className="ctrl-field">
+            <div className="ctrl-label">Cirrus Texture</div>
+            <input className="ctrl-input ctrl-input--text" value={cirrusTexture} onChange={e=>setCirrusTexture(e.target.value)}/>
+          </div>
+
+          {/* Save custom preset */}
+          <div className="ctrl-action-row">
+            <button className="ctrl-btn-add" onClick={() => setShowSavePreset(v=>!v)}>
+              {showSavePreset ? '▲ Cancel' : '+ Save Current as Preset'}
             </button>
           </div>
-        )}
-      </div>
-
-      {/* Settings */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Settings</h2>
-        <div className="skybox-form-row">
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Cirrus Multiplier</label>
-            <input className="skybox-input" value={cirrusMult} onChange={e=>setCirrusMult(e.target.value)} placeholder="1.8"/>
-            <p className="skybox-form-help">Global cloud density multiplier.</p>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Cirrus Color</label>
-            <input className="skybox-input" value={cirrusColor} onChange={e=>setCirrusColor(e.target.value)} placeholder="#ffffff"/>
-          </div>
-        </div>
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">Cirrus Texture</label>
-          <input className="skybox-input" value={cirrusTexture} onChange={e=>setCirrusTexture(e.target.value)}/>
+          {showSavePreset && (
+            <div className="sb-cirrus-save-preset-panel">
+              <div className="ctrl-field">
+                <div className="ctrl-label">Preset Name</div>
+                <input className="ctrl-input ctrl-input--text" value={newPresetName}
+                  onChange={e=>setNewPresetName(e.target.value)}
+                  placeholder="My Preset" onKeyDown={e=>e.key==='Enter'&&onSaveCustomPreset()}/>
+              </div>
+              <div className="ctrl-field">
+                <div className="ctrl-label">Import from JSON / Lua (optional)</div>
+                <textarea className="ctrl-input ctrl-input--text sb-textarea" rows={4} value={importText}
+                  onChange={e=>{setImportText(e.target.value);setImportError('');}}
+                  onDragOver={e=>{e.preventDefault();setImportDragOver(true);}}
+                  onDragLeave={()=>setImportDragOver(false)}
+                  onDrop={e=>{
+                    e.preventDefault();setImportDragOver(false);
+                    const text=e.dataTransfer.getData('text');
+                    if(text){setImportText(text);const res=parseCirrusFromText(text);if(!res)setImportError('Could not parse.');}
+                  }}
+                  style={{outline:importDragOver?'1px solid var(--skybox-generator-color)':'none'}}
+                  placeholder="Paste skybox JSON or Lua here…"/>
+                {importError && <p className="sb-field-help" style={{color:'rgba(255,80,80,0.9)'}}>{importError}</p>}
+              </div>
+              <button className="ctrl-btn-add" onClick={onSaveCustomPreset} disabled={!newPresetName.trim()}>
+                Save Preset
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Layers */}
-      <div className="skybox-section-card">
-        <div className="skybox-card-header">
-          <h2 className="skybox-section-title">Layers ({cirrusLayers.length})</h2>
-          {cirrusLayers.length < 4 && (
-            <button className="btn-secondary" onClick={onAddCirrus}>+ Add Layer</button>
-          )}
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">Layers ({cirrusLayers.length})</div>
+        <div className="ctrl-content">
+          <EntityCardGrid>
+            {cirrusLayers.map((layer, i) => (
+              <EntityCard
+                key={layer.id}
+                index={i}
+                color={PLANET_UV_COLORS[i % PLANET_UV_COLORS.length]}
+                title={`L${i + 1}`}
+                onDelete={() => onRemoveCirrus(layer.id)}
+              >
+                <div onClick={(e) => e.stopPropagation()}>
+                  <div className="sb-cfg-row sb-cfg-row--3">
+                    <div className="ctrl-field">
+                      <div className="ctrl-label">Freq X</div>
+                      <input className="ctrl-input" value={layer.freqX}
+                        onChange={e=>onUpdateCirrus(layer.id,'freqX',e.target.value)}/>
+                    </div>
+                    <div className="ctrl-field">
+                      <div className="ctrl-label">Freq Y</div>
+                      <input className="ctrl-input" value={layer.freqY}
+                        onChange={e=>onUpdateCirrus(layer.id,'freqY',e.target.value)}/>
+                    </div>
+                    <div className="ctrl-field">
+                      <div className="ctrl-label">Speed</div>
+                      <input className="ctrl-input" value={layer.speed}
+                        onChange={e=>onUpdateCirrus(layer.id,'speed',e.target.value)}/>
+                    </div>
+                  </div>
+                  <div className="sb-cfg-row">
+                    <div className="ctrl-field">
+                      <div className="ctrl-label">Dir X</div>
+                      <input className="ctrl-input" value={layer.dirX}
+                        onChange={e=>onUpdateCirrus(layer.id,'dirX',e.target.value)}/>
+                    </div>
+                    <div className="ctrl-field">
+                      <div className="ctrl-label">Dir Y</div>
+                      <input className="ctrl-input" value={layer.dirY}
+                        onChange={e=>onUpdateCirrus(layer.id,'dirY',e.target.value)}/>
+                    </div>
+                  </div>
+                </div>
+              </EntityCard>
+            ))}
+            {cirrusLayers.length < 4 && (
+              <AddTile label="Add Layer" onClick={onAddCirrus} />
+            )}
+          </EntityCardGrid>
         </div>
-        {cirrusLayers.map((layer, i) => (
-          <div key={layer.id} className="sb-cirrus-layer-row">
-            <div className="sb-cirrus-layer-header">
-              <span style={{color: PLANET_UV_COLORS[i%PLANET_UV_COLORS.length], fontWeight:700, fontFamily:'monospace', fontSize:'0.8rem'}}>
-                L{i+1}
-              </span>
-              <button className="btn-delete-xs" onClick={() => onRemoveCirrus(layer.id)}>×</button>
-            </div>
-            <div className="skybox-form-row">
-              <div className="skybox-form-group">
-                <label className="skybox-form-label">Freq X</label>
-                <input className="skybox-input" value={layer.freqX}
-                  onChange={e=>onUpdateCirrus(layer.id,'freqX',e.target.value)}/>
-              </div>
-              <div className="skybox-form-group">
-                <label className="skybox-form-label">Freq Y</label>
-                <input className="skybox-input" value={layer.freqY}
-                  onChange={e=>onUpdateCirrus(layer.id,'freqY',e.target.value)}/>
-              </div>
-              <div className="skybox-form-group">
-                <label className="skybox-form-label">Speed</label>
-                <input className="skybox-input" value={layer.speed}
-                  onChange={e=>onUpdateCirrus(layer.id,'speed',e.target.value)}/>
-              </div>
-            </div>
-            <div className="skybox-form-row">
-              <div className="skybox-form-group">
-                <label className="skybox-form-label">Dir X</label>
-                <input className="skybox-input" value={layer.dirX}
-                  onChange={e=>onUpdateCirrus(layer.id,'dirX',e.target.value)}/>
-              </div>
-              <div className="skybox-form-group">
-                <label className="skybox-form-label">Dir Y</label>
-                <input className="skybox-input" value={layer.dirY}
-                  onChange={e=>onUpdateCirrus(layer.id,'dirY',e.target.value)}/>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Layer Structure Diagram */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Layer Structure</h2>
-        <CirrusLayerDiagram layers={cirrusLayers} cirrusMult={cirrusMult}/>
       </div>
 
     </div>

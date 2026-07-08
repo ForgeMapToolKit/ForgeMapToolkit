@@ -11,6 +11,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
 import '../../../Shared/shared.css';
+import '../../../Shared/trace.css';
 import './SkyboxGenerator.css';
 
 // ── Shared Infrastruktur ──────────────────────────────────────────────────────
@@ -23,10 +24,10 @@ import { luxuryAlert }                       from '../../../Shared/Ui/Notificati
 import { generateReadme as buildReadme, writeReadme } from '../../../../../utils/readmeGenerator';
 
 // ── Sektions-Komponenten ──────────────────────────────────────────────────────
-import Configuration, { FullscreenDome } from './Configuration.jsx';
-import Cirrus                            from './Cirrus.jsx';
+import Configuration, { FullscreenDome, DomePreview, EditorBridgeBadge } from './Configuration.jsx';
+import Cirrus, { CirrusLayerDiagram }    from './Cirrus.jsx';
 import Planets                           from './Planets.jsx';
-import Stars                             from './Stars.jsx';
+import Stars, { StarsAside }             from './Stars.jsx';
 import Output                            from './Output.jsx';
 import Help                              from './Help.jsx';
 
@@ -34,7 +35,6 @@ import Help                              from './Help.jsx';
 import {
   hexToRgba,
   toHex,
-  parseUvOptions,
   parseWeights,
   uvRowsToOptions,
   uvRowsToWeights,
@@ -118,8 +118,6 @@ const SkyboxGeneratorTab = ({
   const [uvWeights,       setUvWeights]       = usePersistentState(s, 'sb_uvWeights',
     '0.25\n0.25\n0.25\n0.25', onSharedChange);
   const [uvRows,          setUvRows]          = usePersistentState(s, 'sb_uvRows',  DEFAULT_UV_ROWS, onSharedChange);
-  const [seed,            setSeed]            = usePersistentState(s, 'sb_seed',    42,   onSharedChange);
-  const [useSeed,         setUseSeed]         = usePersistentState(s, 'sb_useSeed', false,onSharedChange);
   const [yMode,           setYMode]           = usePersistentState(s, 'sb_yMode',   'flat',onSharedChange);
   const [yMax,            setYMax]            = usePersistentState(s, 'sb_yMax',    '1500',onSharedChange);
   const [yCenter,         setYCenter]         = usePersistentState(s, 'sb_yCenter', '750', onSharedChange);
@@ -137,7 +135,6 @@ const SkyboxGeneratorTab = ({
 
   // ── 2c. Lokaler UI-State ──────────────────────────────────────
   const [activeSection,    setActiveSection]    = useState('atmosphere');
-  const [selectedPlanetId, setSelectedPlanetId] = useState(null);
   const [domeFullscreen,   setDomeFullscreen]   = useState(false);
   const [showDomeLabels,   setShowDomeLabels]   = useState(true);
   const [showSkyboxLibrary,setShowSkyboxLibrary]= useState(false);
@@ -303,33 +300,13 @@ const SkyboxGeneratorTab = ({
 
   // Planeten-CRUD
   const onAddPlanet    = useCallback(() => {
-    const np = defaultPlanet();
-    setPlanets(ps => [...ps, np]);
-    setSelectedPlanetId(np.id);
+    setPlanets(ps => [...ps, defaultPlanet()]);
   }, [setPlanets]);
   const onRemovePlanet = useCallback((id) => {
-    setPlanets(ps => {
-      const next = ps.filter(p => p.id !== id);
-      setSelectedPlanetId(cur => {
-        if (cur !== id) return cur;
-        return next.length ? next[0].id : null;
-      });
-      return next;
-    });
+    setPlanets(ps => ps.filter(p => p.id !== id));
   }, [setPlanets]);
   const onUpdatePlanet = useCallback((id, field, val) =>
     setPlanets(ps => ps.map(p => p.id === id ? { ...p, [field]: val } : p)), [setPlanets]);
-  const onDuplicatePlanet = useCallback((id) => {
-    setPlanets(ps => {
-      const src = ps.find(p => p.id === id);
-      if (!src) return ps;
-      const copy = { ...src, id: Date.now() + Math.random() };
-      const idx = ps.findIndex(p => p.id === id);
-      const next = [...ps.slice(0, idx + 1), copy, ...ps.slice(idx + 1)];
-      setSelectedPlanetId(copy.id);
-      return next;
-    });
-  }, [setPlanets]);
 
   // Cirrus-CRUD
   const onAddCirrus    = useCallback(() =>
@@ -389,9 +366,6 @@ const SkyboxGeneratorTab = ({
   }, [syncUvRows, setNumStars, setNumClusters, setClusterSpread, setClusterStdDev,
       setBackgroundRatio, setScaleMin, setScaleMax, setUvOpacity]);
 
-  const onRandomizeSeed = useCallback(() =>
-    setSeed(Math.floor(Math.random() * 999999) + 1), [setSeed]);
-
   // generateStarPlanets — benötigt für Export/Inject
   const generateStarPlanets = useCallback(() => {
     const n = parseInt(numStars) || 50;
@@ -399,7 +373,7 @@ const SkyboxGeneratorTab = ({
       const stars = buildStars({
         nStars: n, numClusters, clusterSpread, clusterStdDev, backgroundRatio,
         scaleMin, scaleMax, uvOptions, uvWeights, exclusionZones, exEnabled,
-        seed, useSeed, yMode, yMax, yCenter, yStdDev, yLayers,
+        yMode, yMax, yCenter, yStdDev, yLayers,
         diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter,
       });
       return stars.map(s => ({
@@ -414,7 +388,7 @@ const SkyboxGeneratorTab = ({
     }
   }, [numStars, numClusters, clusterSpread, clusterStdDev, backgroundRatio,
       scaleMin, scaleMax, uvOptions, uvWeights, exclusionZones, exEnabled,
-      seed, useSeed, yMode, yMax, yCenter, yStdDev, yLayers,
+      yMode, yMax, yCenter, yStdDev, yLayers,
       diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter]);
 
   // Inject stars
@@ -439,7 +413,7 @@ const SkyboxGeneratorTab = ({
       if (!readRes?.success) throw new Error(`data.lua read failed: ${readRes?.error}`);
       const stars    = buildStars({ nStars: parseInt(numStars)||50, numClusters, clusterSpread,
         clusterStdDev, backgroundRatio, scaleMin, scaleMax, uvOptions, uvWeights,
-        exclusionZones, exEnabled, seed, useSeed, yMode, yMax, yCenter, yStdDev,
+        exclusionZones, exEnabled, yMode, yMax, yCenter, yStdDev,
         yLayers, diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter });
       const planetLuaStr = stars.map(st =>
         `        {\n            position = { ${st.x.toFixed(3)}, ${st.y.toFixed(3)}, ${st.z.toFixed(3)}, },\n` +
@@ -466,7 +440,7 @@ const SkyboxGeneratorTab = ({
     }
   }, [mapName, settings, numStars, numClusters, clusterSpread, clusterStdDev,
       backgroundRatio, scaleMin, scaleMax, uvOptions, uvWeights, exclusionZones,
-      exEnabled, seed, useSeed, yMode, yMax, yCenter, yStdDev, yLayers,
+      exEnabled, yMode, yMax, yCenter, yStdDev, yLayers,
       diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter]);
 
   // Export .scmskybox
@@ -640,9 +614,8 @@ const SkyboxGeneratorTab = ({
       loadSkyboxLibrary({ forceRefresh: false });
   }, [skyboxLibLoaded, loadSkyboxLibrary]);
 
-  // Image upload (UV preview)
-  const onImageUpload = useCallback(async (e) => {
-    const file = e.target.files[0];
+  // Image upload (UV preview) — DropSlot hands us the File directly
+  const onImageUpload = useCallback(async (file) => {
     if (!file) return;
     const isDds = file.name.toLowerCase().endsWith('.dds');
     if (isDds) {
@@ -669,25 +642,15 @@ const SkyboxGeneratorTab = ({
 
   // ── 2e. Section-Props-Bündel ──────────────────────────────────
 const configProps = {
-    mapName, setMapName, mapsFolderPath, setMapsFolderPath,
+    mapName, setMapName,
     mapInfo, mapSize, scale,
     subtractHeight, setSubtractHeight,
     subdivAxis, setSubdivAxis,
     subdivHeight, setSubdivHeight,
-    horizonHeight, setHorizonHeight,
-    zenithHeight, setZenithHeight,
     horizonColor, setHorizonColor,
     zenithColor, setZenithColor,
-    decalGlowMult, setDecalGlowMult,
-    albedo, setAlbedo,
-    glow, setGlow,
-    showDomeLabels, setShowDomeLabels,
-    domeFullscreen, setDomeFullscreen,
-    // Bridge
-    bridgeState,
-    bridgeLoadedMap,
-    onBridgeConnect,
-    onBridgeDisconnect,
+    horizonHeight, setHorizonHeight,
+    zenithHeight, setZenithHeight,
   };
 
   const cirrusProps = {
@@ -710,8 +673,8 @@ const configProps = {
 
   const planetsProps = {
     planets,
-    onAddPlanet, onRemovePlanet, onUpdatePlanet, onDuplicatePlanet,
-    selectedPlanetId, setSelectedPlanetId,
+    onAddPlanet, onRemovePlanet, onUpdatePlanet,
+    decalGlowMult, setDecalGlowMult, albedo, setAlbedo, glow, setGlow,
   };
 
   const starsProps = {
@@ -722,12 +685,8 @@ const configProps = {
     backgroundRatio, setBackgroundRatio,
     scaleMin, setScaleMin,
     scaleMax, setScaleMax,
-    uvOpacity, setUvOpacity,
     uvOptions, uvWeights,
     uvRows, syncUvRows,
-    seed, setSeed,
-    useSeed, setUseSeed,
-    onRandomizeSeed,
     yMode, setYMode,
     yMax, setYMax,
     yCenter, setYCenter,
@@ -739,16 +698,21 @@ const configProps = {
     haloRatio, setHaloRatio,
     curvePoints, setCurvePoints,
     yClusterScatter, setYClusterScatter,
+    onResetDefaults: onResetStarDefaults,
+    onInjectStars,
+  };
+
+  const starsAsideProps = {
     exclusionZones, setExclusionZones,
     draftZone, setDraftZone,
     selectedZoneIdx, setSelectedZoneIdx,
     exEnabled, setExEnabled,
+    clusterSpread,
     previewImage, previewImageData,
     onRemovePreview: () => { setPreviewImage(null); setPreviewImageData(null); },
     texOpacity, setTexOpacity,
     onImageUpload,
-    onResetDefaults: onResetStarDefaults,
-    onInjectStars,
+    uvOptions, uvOpacity, setUvOpacity,
   };
 
   const outputProps = {
@@ -757,36 +721,20 @@ const configProps = {
     generateReadme, setGenerateReadme,
     onExportScmskybox,
     onInjectSkybox,
-    // Vorschau-JSON live berechnen
-    previewJson: (() => {
-      try {
-        return generateSkyboxJson({ mapSize, horizonHeight, horizonColor, zenithColor,
-          zenithHeight, subtractHeight, subdivAxis, subdivHeight, decalGlowMult, albedo, glow,
-          cirrusMult, cirrusColor, cirrusTexture, cirrusLayers, planets, generateStarPlanets, scale });
-      } catch { return ''; }
-    })(),
-    // Summary
-    planets, cirrusLayers, numStars,
-    stParsedUvs: parseUvOptions(uvOptions),
   };
 
   // ── WorkspaceConsole-Sektionen ────────────────────────────────
   const sections = [
     { id: 'atmosphere', index: '01', label: 'Atmosphere',
-      desc: 'Dome geometry, mesh subdivisions, horizon/zenith color and decal.',
-      aside: null },
+      desc: 'Dome geometry, mesh subdivisions, horizon/zenith color and decal.' },
     { id: 'cirrus',     index: '02', label: 'Cirrus',
-      desc: 'Cloud layers — frequency, drift speed and direction per layer.',
-      aside: null },
+      desc: 'Cloud layers — frequency, drift speed and direction per layer.' },
     { id: 'planets',    index: '03', label: 'Planets',
-      desc: 'Manually placed celestial bodies at exact world coordinates.',
-      aside: null },
+      desc: 'Manually placed celestial bodies at exact world coordinates.' },
     { id: 'stars',      index: '04', label: 'Stars',
-      desc: 'Procedural star field — distribution, scale, exclusion zones and UVs.',
-      aside: null },
+      desc: 'Procedural star field — distribution, scale, exclusion zones and UVs.' },
     { id: 'output',     index: '05', label: 'Output',
-      desc: 'Review the generated Lua block, set export options and generate.',
-      aside: null },
+      desc: 'Review the generated Lua block, set export options and generate.' },
   ];
 
   const sectionContent = {
@@ -797,14 +745,58 @@ const configProps = {
     output:     <Output        {...outputProps}  />,
   };
 
-  // Aside-Inhalt analog zu sectionContent — aktuell trägt keine Sektion ein
-  // aside-Feld (Inhalts-Komponenten für Cirrus/Planets/Stars sind nicht gebaut).
-  // Map bleibt als Anschlussstelle stehen, sobald das nachgezogen wird.
-  const asideContent = {};
+  // Aside content is per-section, matching the Wreckage/RockErosion/Treemap
+  // convention: TabLayout's generic caption/mirror header is never used
+  // (asideCaption/asideMirror stay null) — each block brings its own
+  // in-body header via .mp-subtitle (+ .mp-action-row for controls),
+  // exactly like MapPreview does. No .ctrl-subtitle/.ctrl-content(--flush)
+  // in here — those are main-column staircase classes; --flush's negative
+  // margin trick drags content out of the aside box into the left column.
+  const asideBySection = {
+    atmosphere: (
+      <>
+        <div className="ctrl-block">
+          <div className="mp-subtitle">Dome Preview</div>
+          <div className="mp-action-row">
+            <button className="ctrl-btn-add" onClick={() => setShowDomeLabels(v => !v)}>
+              {showDomeLabels ? 'Hide Labels' : 'Show Labels'}
+            </button>
+            <button className="ctrl-btn-add" onClick={() => setDomeFullscreen(true)}>⤢ Expand</button>
+          </div>
+          <div className="mp-canvas-block">
+            <DomePreview
+              horizonColor={horizonColor} zenithColor={zenithColor}
+              horizonHeight={horizonHeight} zenithHeight={zenithHeight}
+              subtractHeight={subtractHeight} subdivHeight={subdivHeight}
+              scale={scale} showLabels={showDomeLabels} fullscreen={false}
+            />
+          </div>
+        </div>
+
+        <div className="ctrl-block">
+          <div className="mp-subtitle">Editor Sync</div>
+          <EditorBridgeBadge
+            bridgeState={bridgeState}
+            bridgeLoadedMap={bridgeLoadedMap}
+            mapName={mapName}
+            onBridgeConnect={onBridgeConnect}
+            onBridgeDisconnect={onBridgeDisconnect}
+          />
+        </div>
+      </>
+    ),
+    cirrus: (
+      <div className="ctrl-block">
+        <div className="mp-subtitle">Layer Structure</div>
+        <CirrusLayerDiagram layers={cirrusLayers} cirrusMult={cirrusMult} />
+      </div>
+    ),
+    stars: <StarsAside {...starsAsideProps} />,
+  };
 
   // ── 2f. Render ────────────────────────────────────────────────
   return (
-    <div className="skybox-tab tab-scrollbar">
+    <div className="skybox-tab trace-tab">
 
       {/* Dome Fullscreen Overlay */}
       {domeFullscreen && ReactDOM.createPortal(
@@ -824,7 +816,7 @@ const configProps = {
 
       {/* Skybox Library Overlay */}
       {showSkyboxLibrary && (
-        <SkyboxLibraryOverlay
+        <SkyboxLibrary
           onClose={() => setShowSkyboxLibrary(false)}
           onApply={applyLibrarySkybox}
           onReload={() => loadSkyboxLibrary({ forceRefresh: true })}
@@ -837,7 +829,14 @@ const configProps = {
 
       {/* Help Modal */}
       {showHelp && (
-        <SkyboxHelp onClose={() => setShowHelp(false)} />
+        <Help onClose={() => setShowHelp(false)} />
+      )}
+
+      {!showSkyboxLibrary && !showHelp && (
+        <>
+          <button className="skybox-library-btn" onClick={onOpenSkyboxLibrary} title="Skybox Library">⊞</button>
+          <button className="help-btn" onClick={() => setShowHelp(true)} title="Help Guide">?</button>
+        </>
       )}
 
       <TabLayout
@@ -845,19 +844,9 @@ const configProps = {
         activeSection={activeSection}
         onSelect={setActiveSection}
         railStorageKey="skybox-gen-section"
-        toolbarSlot={
-          <>
-            <button
-              className="skybox-tab-btn library-btn"
-              onClick={onOpenSkyboxLibrary}
-              style={{ borderColor: 'rgba(59,118,255,0.35)', color: 'var(--skybox-generator-color)' }}
-            >
-              ⊞ Library
-            </button>
-            <button className="help-btn" onClick={() => setShowHelp(true)} title="Help Guide">?</button>
-          </>
-        }
-        asideSlot={asideContent[activeSection]}
+        asideSlot={asideBySection[activeSection]}
+        asideCaption={null}
+        asideMirror={null}
       >
         {sectionContent[activeSection]}
       </TabLayout>

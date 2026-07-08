@@ -7,7 +7,7 @@ import './Emitter.css';
 
 // ── Shared UI ─────────────────────────────────────────────────────────────────
 import TabLayout                              from '../../../Shared/Ui/TabLayout/TabLayout.jsx';
-import { MapPreview } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
+import { MapPreview, MirrorDropdown } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 
 // ── Libraries ─────────────────────────────────────────────────────────────────
 import EmitterLibraryOverlay from '../../../Shared/Libraries/EmitterLibrary/EmitterLibrary.jsx';
@@ -155,6 +155,7 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   const [emitterPublicPaths,  setEmitterPublicPaths]  = usePersistentState(s, 'em_emitterPublicPaths', {}, onSharedChange);
   const [generateReadme,      setGenerateReadme]      = usePersistentState(s, 'em_generateReadme', settings?.generateReadme !== false, onSharedChange);
   const [exportRawLua,        setExportRawLua]        = usePersistentState(s, 'em_exportRawLua', false, onSharedChange);
+  const [legendCollapsed,     setLegendCollapsed]     = usePersistentState(s, 'em_legendCollapsed', false, onSharedChange);
   const [activeSection,       setActiveSection]       = useState('config');
 
   const { mapInfo, mapSize, mapOffsetX, mapOffsetY } = useMapInfo({
@@ -184,7 +185,6 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   const [maskWidth,          setMaskWidth]          = useState(0);
   const [maskHeight,         setMaskHeight]         = useState(0);
   const [maskPreviewUrl,     setMaskPreviewUrl]     = useState(null);
-  const maskFileInputRef = useRef(null);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [showHelp,     setShowHelp]     = useState(false);
@@ -194,6 +194,8 @@ const EmitterTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
 
   const canvasRef    = useRef(null);
   const fileInputRef = useRef(null);
+  const canvasContainerRef = useRef(null);
+  const mirrorModeRef = useRef(null);
   const mirrorRef    = useRef(mirrorMode);
   useEffect(() => { mirrorRef.current = mirrorMode; }, [mirrorMode]);
   const mapNameRef = useRef(mapName);
@@ -682,8 +684,7 @@ TypeClass = ${pairName}`;
     reader.readAsDataURL(file);
   };
 
-  const handleMaskUpload = (e) => {
-    const file = e.target.files?.[0];
+  const handleMaskUpload = (file) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
@@ -743,12 +744,11 @@ TypeClass = ${pairName}`;
     addManualCoordinate, updateCoordinate, deleteCoordinate, clearCoordinates,
     emitterPaths, toggleCardEmitter, getEmitterNameFromPath,
     globalRandomness, setGlobalRandomness,
-    maskFileInputRef, maskImageData, handleMaskUpload,
+    maskImageData, handleMaskUpload,
     maskScanMode, setMaskScanMode, maskPreviewUrl, maskWidth, maskHeight,
     onRemoveMask: () => {
       setMaskImageData(null); setMaskWidth(0); setMaskHeight(0);
       setMaskPreviewUrl(null);
-      if (maskFileInputRef.current) maskFileInputRef.current.value = '';
     },
   };
 
@@ -806,33 +806,6 @@ TypeClass = ${pairName}`;
         railStorageKey="em-rail-pinned"
         navLabel="Emitter console navigation"
 
-        asideMirror={
-          <div className="preview-panel-head-controls">
-            <select
-              className="field-select"
-              style={{ width: 'auto' }}
-              value={mirrorMode}
-              onChange={e => setMirrorMode(e.target.value)}
-            >
-              <option value="none">No Mirror</option>
-              <option value="diagonal">Diagonal</option>
-              <option value="horizontal">Horizontal</option>
-              <option value="vertical">Vertical</option>
-            </select>
-            {previewImageData && (
-              <button
-                className="action-button action-button--danger"
-                style={{ padding: '4px 10px', fontSize: '0.62rem' }}
-                onClick={() => {
-                  setPreviewImageData(null);
-                  if (fileInputRef.current) fileInputRef.current.value = '';
-                }}
-              >
-                Delete Preview
-              </button>
-            )}
-          </div>
-        }
         asideSlot={
           <MapPreview
             previewLoading={previewLoading}
@@ -840,8 +813,13 @@ TypeClass = ${pairName}`;
             onUploadClick={() => fileInputRef.current?.click()}
             fileInputRef={fileInputRef}
             onImageUpload={handleImageUpload}
+            controls={
+              <MirrorDropdown value={mirrorMode} onChange={setMirrorMode} triggerRef={mirrorModeRef} />
+            }
+            subtitle="Map Preview"
             canvasRef={canvasRef}
             onCanvasClick={handleCanvasClick}
+            containerRef={canvasContainerRef}
             markers={markers}
             onMarkerDelete={(marker) => deleteCoordinate(marker.entityIdx, marker.coordIdx)}
             markerTitle={(marker) => `${marker.label} — Click to delete`}
@@ -854,6 +832,11 @@ TypeClass = ${pairName}`;
               label: card.label || `Emitter ${i + 1}`,
               pts:   card.coordinates.filter(c => c.x && c.z).length,
             }))}
+            legendCollapsible
+            legendCollapsed={legendCollapsed}
+            onToggleLegend={() => setLegendCollapsed(c => !c)}
+            selectedLegendId={emitterCards[selectedCard]?.id}
+            onLegendSelect={(id, idx) => setSelectedCard(idx)}
             hint={`Click canvas to place · ${mirrorMode !== 'none' ? `${mirrorMode} mirror active` : 'no mirror'}`}
           />
         }

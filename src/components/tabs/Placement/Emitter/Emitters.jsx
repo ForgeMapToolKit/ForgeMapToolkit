@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { luxuryConfirm } from '../../../Shared/Ui/Notifications/notifications';
 import {
-  EntityCard, EntityCardGrid, AddTile, CoordinateList,
+  EntityCard, EntityCardGrid, AddTile, CoordinateList, DropSlot, Dropdown,
 } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
+
+const MASK_SCAN_OPTIONS = [
+  { value: 'right',  label: 'Slide Right' },
+  { value: 'left',   label: 'Slide Left'  },
+  { value: 'ignore', label: 'Ignore'      },
+];
 
 function EmitterToggleBlock({ card, cardIdx, emitterPaths, toggleCardEmitter, getEmitterNameFromPath }) {
   const [open, setOpen] = useState(false);
@@ -43,6 +49,53 @@ function EmitterToggleBlock({ card, cardIdx, emitterPaths, toggleCardEmitter, ge
   );
 }
 
+/* ── GridPlacementBlock — collapsed by default, matches EmitterToggleBlock ── */
+
+function GridPlacementBlock({ card, cardIdx, updateCard, handleGenerateGrid }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div onClick={e => e.stopPropagation()} style={{ marginTop: 'var(--space-xl)' }}>
+      <div className="trace-subsection" onClick={() => setOpen(o => !o)}>
+        Grid Placement
+      </div>
+      {open && (<>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)' }}>
+          <div className="ctrl-field">
+            <div className="ctrl-label">X Step</div>
+            <input
+              type="number" min="1"
+              className="ctrl-input"
+              placeholder="64"
+              value={card.gridStepX}
+              onChange={e => { e.stopPropagation(); updateCard(cardIdx, 'gridStepX', e.target.value); }}
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+          <div className="ctrl-field">
+            <div className="ctrl-label">Z Step</div>
+            <input
+              type="number" min="1"
+              className="ctrl-input"
+              placeholder="64"
+              value={card.gridStepZ}
+              onChange={e => { e.stopPropagation(); updateCard(cardIdx, 'gridStepZ', e.target.value); }}
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+        </div>
+        <div className="ctrl-action-row" style={{ marginTop: 'var(--space-sm)' }}>
+          <button
+            className="ctrl-btn-add"
+            disabled={!card.gridStepX || !card.gridStepZ}
+            onClick={e => { e.stopPropagation(); handleGenerateGrid(cardIdx); }}
+          >Generate Grid</button>
+        </div>
+      </>)}
+    </div>
+  );
+}
+
 export default function EmitterEmitters({
   emitterCards, selectedCard, setSelectedCard,
   availableColors, showColorPicker, setShowColorPicker,
@@ -52,7 +105,7 @@ export default function EmitterEmitters({
   addManualCoordinate, updateCoordinate, deleteCoordinate, clearCoordinates,
   emitterPaths, toggleCardEmitter, getEmitterNameFromPath,
   globalRandomness, setGlobalRandomness,
-  maskFileInputRef, maskImageData, handleMaskUpload,
+  maskImageData, handleMaskUpload,
   maskScanMode, setMaskScanMode, maskPreviewUrl, maskWidth, maskHeight, onRemoveMask,
 }) {
   return (
@@ -73,37 +126,32 @@ export default function EmitterEmitters({
               onChange={e => setGlobalRandomness(prev => ({ ...prev, poissonRadius: e.target.value }))}
             />
           </div>
-          <div className="em-mask-upload" onClick={() => maskFileInputRef.current?.click()}>
-            <span>{maskImageData ? 'Mask loaded — click to replace' : 'Click to upload area mask (B/W)'}</span>
-            <input
-              ref={maskFileInputRef}
-              type="file"
-              style={{ display: 'none' }}
-              accept="image/*"
+          <div className="ctrl-field" style={{ marginTop: 'var(--space-xl)' }}>
+            <div className="ctrl-label">Area Mask</div>
+            <DropSlot
+              hint="B/W image — dark = excluded"
+              acceptInput="image/*"
+              status={maskImageData ? 'done' : 'idle'}
+              idleText="Click or drop an area mask"
+              doneText={maskImageData ? `${maskWidth} × ${maskHeight} px` : undefined}
               onChange={handleMaskUpload}
+              onClear={onRemoveMask}
+            />
+            {maskPreviewUrl && (
+              <div className="em-mask-preview">
+                <img src={maskPreviewUrl} alt="Area Mask" className="em-mask-img" />
+              </div>
+            )}
+          </div>
+          <div className="ctrl-field" style={{ marginTop: 'var(--space-xl)' }}>
+            <div className="ctrl-label">Dark Pixel Behaviour</div>
+            <Dropdown
+              options={MASK_SCAN_OPTIONS}
+              value={maskScanMode}
+              onChange={setMaskScanMode}
+              ariaLabel="Dark pixel behaviour"
             />
           </div>
-          {maskPreviewUrl && (
-            <div className="em-mask-preview">
-              <img src={maskPreviewUrl} alt="Area Mask" className="em-mask-img" />
-              <div className="em-mask-dim">{maskWidth} × {maskHeight} px</div>
-            </div>
-          )}
-          <div className="ctrl-field">
-            <div className="ctrl-label">Dark Pixel Behaviour</div>
-            <select
-              className="ctrl-input"
-              value={maskScanMode}
-              onChange={e => setMaskScanMode(e.target.value)}
-            >
-              <option value="right">Slide Right</option>
-              <option value="left">Slide Left</option>
-              <option value="ignore">Ignore</option>
-            </select>
-          </div>
-          {maskImageData && (
-            <button className="ctrl-btn-danger" onClick={onRemoveMask}>Remove Mask</button>
-          )}
         </div>
       </div>
 
@@ -157,40 +205,12 @@ export default function EmitterEmitters({
                   />
 
                   {/* Grid Placement */}
-                  <div style={{ marginTop: 'var(--space-xl)' }} onClick={e => e.stopPropagation()}>
-                    <div className="trace-subsection">Grid Placement</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)' }}>
-                      <div className="ctrl-field">
-                        <div className="ctrl-label">X Step</div>
-                        <input
-                          type="number" min="1"
-                          className="ctrl-input"
-                          placeholder="64"
-                          value={card.gridStepX}
-                          onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepX', e.target.value); }}
-                          onClick={e => e.stopPropagation()}
-                        />
-                      </div>
-                      <div className="ctrl-field">
-                        <div className="ctrl-label">Z Step</div>
-                        <input
-                          type="number" min="1"
-                          className="ctrl-input"
-                          placeholder="64"
-                          value={card.gridStepZ}
-                          onChange={e => { e.stopPropagation(); updateCard(ci, 'gridStepZ', e.target.value); }}
-                          onClick={e => e.stopPropagation()}
-                        />
-                      </div>
-                    </div>
-                    <div className="ctrl-action-row" style={{ marginTop: 'var(--space-sm)' }}>
-                      <button
-                        className="ctrl-btn-add"
-                        disabled={!card.gridStepX || !card.gridStepZ}
-                        onClick={e => { e.stopPropagation(); handleGenerateGrid(ci); }}
-                      >Generate Grid</button>
-                    </div>
-                  </div>
+                  <GridPlacementBlock
+                    card={card}
+                    cardIdx={ci}
+                    updateCard={updateCard}
+                    handleGenerateGrid={handleGenerateGrid}
+                  />
 
                   {/* Coordinates */}
                   <div style={{ marginTop: 'var(--space-xl)' }}>

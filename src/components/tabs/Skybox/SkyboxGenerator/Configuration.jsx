@@ -117,7 +117,11 @@ export const DomePreview = ({
 
   const w = fullscreen ? 900 : 420;
   const h = fullscreen ? 560 : 280;
-  return <canvas ref={canvasRef} width={w} height={h} style={{width:'100%',display:'block',border:'1px solid rgba(255,255,255,0.08)'}}/>;
+  return (
+    <div className="ec-canvas-wrap" style={{ width: '100%', aspectRatio: `${w}/${h}` }}>
+      <canvas ref={canvasRef} width={w} height={h} className="ec-canvas" style={{ width: '100%', height: '100%', display: 'block', cursor: 'default' }}/>
+    </div>
+  );
 };
 
 // ── FullscreenDome Overlay ────────────────────────────────────────
@@ -126,8 +130,6 @@ export const FullscreenDome = ({
   horizonHeight, setHorizonHeight, zenithHeight, setZenithHeight,
   subtractHeight, subdivHeight, scale, showLabels, setShowLabels, onClose,
 }) => {
-  const HH_MIN = -200, HH_MAX = 1000;
-  const ZH_MIN = -100, ZH_MAX = 1000;
   const hH = parseFloat(horizonHeight) || 0;
   const zH = parseFloat(zenithHeight)  || 256;
   const sphereLerp = Math.max(0, Math.min(1, 1-(parseFloat(subtractHeight)||1.2566)*2/Math.PI));
@@ -140,32 +142,22 @@ export const FullscreenDome = ({
             <span style={{color:'var(--skybox-generator-color)',fontFamily:'Space Grotesk',fontWeight:700,fontSize:'0.9rem',letterSpacing:'0.1em',textTransform:'uppercase'}}>⬡ Dome Editor</span>
             <button className="btn-delete-sm" onClick={onClose} style={{width:36,height:36,minWidth:36,padding:0,fontSize:'1.1rem'}}>×</button>
           </div>
-          <div className="dome-fs-group">
-            <label>Horizon Color</label>
+          <div className="ctrl-field">
+            <div className="ctrl-label">Horizon Color</div>
             <ColorPicker value={horizonColor} onChange={e=>setHorizonColor(e.target.value)} />
           </div>
-          <div className="dome-fs-group">
-            <label>Horizon Height</label>
-            <div className="dome-fs-slider-row">
-              <input type="range" min={HH_MIN} max={HH_MAX} step={1}
-                value={Math.max(HH_MIN, Math.min(HH_MAX, hH))}
-                onChange={e => setHorizonHeight(e.target.value)} className="dome-fs-slider"/>
-              <input className="skybox-input dome-fs-slider-input" value={horizonHeight} onChange={e=>setHorizonHeight(e.target.value)} placeholder="-42.5"/>
-            </div>
+          <div className="ctrl-field">
+            <div className="ctrl-label">Horizon Height</div>
+            <input className="ctrl-input" value={horizonHeight} onChange={e=>setHorizonHeight(e.target.value)} placeholder="-42.5"/>
           </div>
           <div className="dome-fs-divider"/>
-          <div className="dome-fs-group">
-            <label>Zenith Color</label>
+          <div className="ctrl-field">
+            <div className="ctrl-label">Zenith Color</div>
             <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)} />
           </div>
-          <div className="dome-fs-group">
-            <label>Zenith Height</label>
-            <div className="dome-fs-slider-row">
-              <input type="range" min={ZH_MIN} max={ZH_MAX} step={1}
-                value={Math.max(ZH_MIN, Math.min(ZH_MAX, zH))}
-                onChange={e => setZenithHeight(e.target.value)} className="dome-fs-slider"/>
-              <input className="skybox-input dome-fs-slider-input" value={zenithHeight} onChange={e=>setZenithHeight(e.target.value)} placeholder="293.507"/>
-            </div>
+          <div className="ctrl-field">
+            <div className="ctrl-label">Zenith Height</div>
+            <input className="ctrl-input" value={zenithHeight} onChange={e=>setZenithHeight(e.target.value)} placeholder="293.507"/>
           </div>
           <div className="dome-fs-divider"/>
           <div className="dome-fs-stat"><span>SphereLerp</span><span style={{color:'var(--skybox-generator-color)',fontFamily:'monospace'}}>{sphereLerp.toFixed(4)}</span></div>
@@ -331,42 +323,32 @@ const BRIDGE_LABEL = {
   live:         'Live',
 };
 
-const BRIDGE_BADGE_STYLE = {
-  disconnected: { color: 'var(--ink-muted)',                  borderColor: 'var(--line-subtle)' },
-  connecting:   { color: 'var(--skybox-generator-color)',     borderColor: 'var(--skybox-generator-color)', opacity: 0.7 },
-  mismatch:     { color: '#e8933a',                           borderColor: '#e8933a' },
-  live:         { color: '#4ade80',                           borderColor: '#4ade80' },
+const BRIDGE_BADGE_VARIANT = {
+  disconnected: '',
+  connecting:   'ctrl-badge--warn',
+  mismatch:     'ctrl-badge--warn',
+  live:         'ctrl-badge--ok',
 };
 
-const EditorBridgeBadge = ({ bridgeState, bridgeLoadedMap, mapName, onBridgeConnect, onBridgeDisconnect }) => {
+export const EditorBridgeBadge = ({ bridgeState, bridgeLoadedMap, mapName, onBridgeConnect, onBridgeDisconnect }) => {
   const isLive         = bridgeState === 'live';
-  const isConnecting   = bridgeState === 'connecting';
   const isMismatch     = bridgeState === 'mismatch';
   const isDisconnected = bridgeState === 'disconnected';
-  const badgeStyle     = BRIDGE_BADGE_STYLE[bridgeState] ?? BRIDGE_BADGE_STYLE.disconnected;
   const noMapName      = !mapName?.trim();
 
   return (
-    <div className="skybox-bridge-row">
-      {/* Status dot + label */}
-      <div className="skybox-bridge-status" style={{ color: badgeStyle.color }}>
-        <span
-          className={`skybox-bridge-dot${isConnecting ? ' skybox-bridge-dot--pulse' : ''}`}
-          style={{ background: badgeStyle.color }}
-        />
-        <span className="skybox-bridge-label">{BRIDGE_LABEL[bridgeState]}</span>
-        {isMismatch && bridgeLoadedMap && (
-          <span className="skybox-bridge-hint">
-            Editor has: <em>{bridgeLoadedMap}</em>
-          </span>
-        )}
-      </div>
+    <div className="ctrl-action-row">
+      <span className={`ctrl-badge ${BRIDGE_BADGE_VARIANT[bridgeState] ?? ''}`.trim()}>
+        {BRIDGE_LABEL[bridgeState]}
+      </span>
+      {isMismatch && bridgeLoadedMap && (
+        <span className="sb-field-help">Editor has: {bridgeLoadedMap}</span>
+      )}
 
       {/* Action button */}
       {(isDisconnected || isMismatch) ? (
         <button
-          className="btn-secondary skybox-bridge-btn"
-          style={{ borderColor: badgeStyle.borderColor, color: badgeStyle.color }}
+          className="ctrl-btn-add"
           onClick={onBridgeConnect}
           disabled={noMapName}
           title={noMapName ? 'Set a Map Name first' : 'Connect to running FAF Map Editor'}
@@ -374,173 +356,115 @@ const EditorBridgeBadge = ({ bridgeState, bridgeLoadedMap, mapName, onBridgeConn
           {isMismatch ? '↺ Retry' : '⇄ Connect'}
         </button>
       ) : isLive ? (
-        <button
-          className="btn-secondary skybox-bridge-btn"
-          style={{ borderColor: 'var(--line-subtle)', color: 'var(--ink-muted)' }}
-          onClick={onBridgeDisconnect}
-        >
-          Disconnect
-        </button>
+        <button className="ctrl-btn-add" onClick={onBridgeDisconnect}>Disconnect</button>
       ) : null /* connecting — no button */ }
     </div>
   );
 };
 
 // ── Haupt-Sektions-Komponente ─────────────────────────────────────
+// Sky Colors, Editor Sync (→ Aside) und Decal Textures (→ Planets) leben
+// nicht mehr hier — siehe SkyboxGenerator.jsx (asideBySection.atmosphere)
+// bzw. Planets.jsx.
 const Configuration = ({
-  mapName, setMapName, mapsFolderPath, setMapsFolderPath,
+  mapName, setMapName,
   mapInfo, mapSize, scale,
   subtractHeight, setSubtractHeight,
   subdivAxis, setSubdivAxis,
   subdivHeight, setSubdivHeight,
-  horizonHeight, setHorizonHeight,
-  zenithHeight, setZenithHeight,
   horizonColor, setHorizonColor,
   zenithColor, setZenithColor,
-  decalGlowMult, setDecalGlowMult,
-  albedo, setAlbedo,
-  glow, setGlow,
-  showDomeLabels, setShowDomeLabels,
-  domeFullscreen, setDomeFullscreen,
-  // Bridge
-  bridgeState = 'disconnected',
-  bridgeLoadedMap = '',
-  onBridgeConnect,
-  onBridgeDisconnect,
+  horizonHeight, setHorizonHeight,
+  zenithHeight, setZenithHeight,
 }) => {
-  const sphereLerp = Math.max(0, Math.min(1, 1-(parseFloat(subtractHeight)||1.2566)*2/Math.PI));
+  const [metaOpen, setMetaOpen] = useState(false);
 
   return (
-    <div className="skybox-section-stack">
+    <div className="ctrl-col">
 
       {/* Map Context */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Map Context</h2>
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">Map Name</label>
-          <input className="skybox-input" value={mapName} onChange={e=>setMapName(e.target.value)} placeholder="Hades_Dust.v0002"/>
-          {mapName && (
-            <p className="skybox-form-help">…/{/\.v\d{4}$/.test(mapName)?mapName:mapName+'.v0001'}/env/skybox/</p>
-          )}
-          {mapInfo ? (
-            <p className="skybox-form-help">Map Size: <strong>{mapSize}</strong> · Scale: <strong>{scale.toFixed(0)}</strong></p>
-          ) : (
-            <p className="skybox-form-help" style={{color:'rgba(255,255,255,0.35)'}}>Map size auto-read from scenario.lua once Map Name is set</p>
-          )}
-        </div>
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">Maps Folder</label>
-          <input className="skybox-input" value={mapsFolderPath} onChange={e=>setMapsFolderPath(e.target.value)} placeholder="C:\ProgramData\FAForever\maps"/>
-        </div>
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">Map Context</div>
+        <div className="ctrl-content">
+          <div className="ctrl-field">
+            <input
+              type="text"
+              className="ctrl-input ctrl-input--text"
+              value={mapName}
+              onChange={e=>setMapName(e.target.value)}
+              placeholder="Hades_Dust.v0002"
+            />
 
-        {/* Editor Live-Bridge */}
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">
-            Editor Sync
-            {bridgeState === 'live' && (
-              <span className="skybox-live-badge">● LIVE</span>
+            {mapName && (
+              <button className="ctrl-btn-meta" onClick={() => setMetaOpen(o => !o)}>
+                {metaOpen ? '− Metadata' : '+ Metadata'}
+              </button>
             )}
-          </label>
-          <EditorBridgeBadge
-            bridgeState={bridgeState}
-            bridgeLoadedMap={bridgeLoadedMap}
-            mapName={mapName}
-            onBridgeConnect={onBridgeConnect}
-            onBridgeDisconnect={onBridgeDisconnect}
-          />
-          <p className="skybox-form-help">
-            {bridgeState === 'live'
-              ? 'Atmosphere values are streaming to the open FAF Map Editor.'
-              : bridgeState === 'mismatch'
-              ? 'Open the correct map in the FAF Map Editor, then retry.'
-              : 'Open the FAF Map Editor with this map loaded, then connect.'}
-          </p>
-        </div>
-      </div>
 
-      {/* Dome Colors */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Sky Colors</h2>
-        <div className="skybox-form-row">
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Horizon Color</label>
-            <ColorPicker value={horizonColor} onChange={e=>setHorizonColor(e.target.value)}/>
+            {mapName && metaOpen && (
+              <div className="ctrl-mapinfo">
+                <div className="ctrl-path-hint">
+                  …/{/\.v\d{4}$/.test(mapName)?mapName:mapName+'.v0001'}/env/skybox/
+                </div>
+                {mapInfo ? (<>
+                  <span className="ctrl-badge ctrl-badge--ok">Map</span>
+                  <span>{mapSize} × {mapSize}</span>
+                  <span className="ctrl-mapinfo-sep">·</span>
+                  <span>Scale {scale.toFixed(0)}</span>
+                </>) : (
+                  <span className="ctrl-mapinfo-err">Map size auto-read from scenario.lua once Map Name is set</span>
+                )}
+              </div>
+            )}
           </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Zenith Color</label>
-            <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)}/>
-          </div>
-        </div>
-        <div className="skybox-form-row">
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Horizon Height</label>
-            <input className="skybox-input" value={horizonHeight} onChange={e=>setHorizonHeight(e.target.value)} placeholder="-42.5"/>
-            <p className="skybox-form-help">Cut-off edge — below: black.</p>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Zenith Height</label>
-            <input className="skybox-input" value={zenithHeight} onChange={e=>setZenithHeight(e.target.value)} placeholder="293.507"/>
-          </div>
-        </div>
-      </div>
-
-      {/* Dome Preview */}
-      <div className="skybox-section-card">
-        <div className="skybox-card-header">
-          <h2 className="skybox-section-title">Dome Preview</h2>
-          <div style={{display:'flex',gap:'8px'}}>
-            <button className="btn-secondary" onClick={()=>setShowDomeLabels(v=>!v)}>
-              {showDomeLabels?'Hide Labels':'Show Labels'}
-            </button>
-            <button className="btn-secondary" onClick={()=>setDomeFullscreen(true)}>⤢ Expand</button>
-          </div>
-        </div>
-        <DomePreview
-          horizonColor={horizonColor} zenithColor={zenithColor}
-          horizonHeight={horizonHeight} zenithHeight={zenithHeight}
-          subtractHeight={subtractHeight} subdivHeight={subdivHeight}
-          scale={scale} showLabels={showDomeLabels} fullscreen={false}/>
-        <div className="skybox-dome-stats">
-          <span>SphereLerp: <strong>{sphereLerp.toFixed(4)}</strong></span>
-          <span>Scale: <strong>{Math.round(scale)}</strong></span>
-          <span>Apex ≈ <strong>{Math.round((parseFloat(horizonHeight)||0)+sphereLerp*(parseFloat(mapSize||1024)*2.288))}</strong></span>
         </div>
       </div>
 
       {/* Geometry */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Geometry</h2>
-        <div className="skybox-form-row">
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Subtract Height</label>
-            <input className="skybox-input" value={subtractHeight} onChange={e=>setSubtractHeight(e.target.value)} placeholder="1.2566"/>
-            <p className="skybox-form-help">Controls sphere vs cylinder blending (SphereLerp).</p>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Subdiv Axis</label>
-            <input className="skybox-input" value={subdivAxis} onChange={e=>setSubdivAxis(e.target.value)} placeholder="16"/>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Subdiv Height</label>
-            <input className="skybox-input" value={subdivHeight} onChange={e=>setSubdivHeight(e.target.value)} placeholder="6"/>
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">Geometry</div>
+        <div className="ctrl-content">
+          <div className="sb-cfg-row sb-cfg-row--3">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Subtract Height</div>
+              <input className="ctrl-input" value={subtractHeight} onChange={e=>setSubtractHeight(e.target.value)} placeholder="1.2566"/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Subdiv Axis</div>
+              <input className="ctrl-input" value={subdivAxis} onChange={e=>setSubdivAxis(e.target.value)} placeholder="16"/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Subdiv Height</div>
+              <input className="ctrl-input" value={subdivHeight} onChange={e=>setSubdivHeight(e.target.value)} placeholder="6"/>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Decal / Textures */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Decal Textures</h2>
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">Decal Glow Multiplier</label>
-          <input className="skybox-input" value={decalGlowMult} onChange={e=>setDecalGlowMult(e.target.value)} placeholder="0.1"/>
-        </div>
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">Albedo Texture</label>
-          <input className="skybox-input" value={albedo} onChange={e=>setAlbedo(e.target.value)}/>
-        </div>
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">Glow Texture</label>
-          <input className="skybox-input" value={glow} onChange={e=>setGlow(e.target.value)}/>
+      {/* Sky Colors */}
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">Sky Colors</div>
+        <div className="ctrl-content">
+          <div className="sb-cfg-row">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Horizon Color</div>
+              <ColorPicker value={horizonColor} onChange={e=>setHorizonColor(e.target.value)}/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Zenith Color</div>
+              <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)}/>
+            </div>
+          </div>
+          <div className="sb-cfg-row">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Horizon Height</div>
+              <input className="ctrl-input" value={horizonHeight} onChange={e=>setHorizonHeight(e.target.value)} placeholder="-42.5"/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Zenith Height</div>
+              <input className="ctrl-input" value={zenithHeight} onChange={e=>setZenithHeight(e.target.value)} placeholder="293.507"/>
+            </div>
+          </div>
         </div>
       </div>
 

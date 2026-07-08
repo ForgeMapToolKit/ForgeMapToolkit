@@ -90,7 +90,7 @@ const INVOKE_CHANNELS = new Set([
   'bridge-disconnect',
   'bridge-send-snapshot',
   'read-footer-article',
-  'cli-run',
+  'cli-exec',
   'cli-abort',
 ]);
 

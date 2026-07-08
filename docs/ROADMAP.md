@@ -55,37 +55,63 @@ ohne dass jedes Mal das Gesamtbild neu erarbeitet werden muss.
 
 Sortiert nach **Hebel = Wert ÷ (Risiko × Abhängigkeit)**.
 
+> **Update 2026-07-08:** Phase 0 und der Kern von Phase 2 sind inzwischen gelandet
+> (siehe unten) — `docs/UI_UNIFICATION_ROADMAP.md` (der parallele UI-Fahrplan, der
+> das im Detail trackte) wurde nach hier gemergt und gelöscht, damit es nur noch
+> einen Fahrplan gibt. Phase 4/5 unten sind seit 15.06. nicht neu verifiziert.
+
 ### Phase 0 — Spezifikation & Quick Wins (klein, schaltet alles frei)
-- [ ] **Tab-Contract / Authoring-Guide** schreiben (`docs/TAB_CONTRACT.md`): wie ein Tab
-  auf das neue System migriert wird (Sektions-Schnitt, Props-Bündel, Hooks, Tokens).
-  → *Macht die gesamte UI-Migration delegierbar und konsistent.*
-- [ ] **Tab-Farb-Registry zentralisieren**: aktuell sind `--*-color` über 15 CSS-Dateien
-  verstreut. Eine Quelle (z. B. `tokens.css` oder JS-Tool-Registry).
-  → *Direkte Voraussetzung für Feature #3 und visuelle Konsistenz.*
-- [ ] **Feature #3 — Banner-Akzent folgt Hover-Tab** (Homepage). Infra existiert
-  (`Banner` nimmt `tool.glow`; `--current-glow`). Nur: HomeScreen-Hover-State →
-  an Banner durchreichen, statt fixem Orange `#ff8c00`. **Isoliert, ~½ Tag.**
+- [x] **Tab-Contract / Authoring-Guide** (`docs/TAB_CONTRACT.md`) — geschrieben,
+  Stand 2026-07-08 gegen Wreckage/Props/Emitter verifiziert.
+- [x] **Tab-Farb-Registry zentralisiert**: `Shared/DesignSystem/tokens.css` §11
+  PER-TAB ACCENT REGISTRY ist die einzige Quelle; `Core/Home/Data/toolRegistry.js`
+  (Nav-Metadaten) + `Core/tabRoutes.jsx` (Render-Wiring) referenzieren sie.
+- [ ] **Feature #3 — Banner-Akzent folgt Hover-Tab** (Homepage). Nicht erneut
+  verifiziert seit 15.06. — Status unklar, vor Weiterarbeit kurz gegenchecken.
 
 ### Phase 1 — Logik-Konsolidierung (entlastet jede spätere Tab-Migration)
-- [ ] `map-logic`-Adoption auf alle Tabs ausweiten, die map-info / scmap-preview /
-  props.lua-Injection / Kategorie-Matching nutzen. Doppelten IPC-/Preview-Code je Tab
-  durch die bestehenden Hooks ersetzen (wie bei Emitter/Props/Wreckage geschehen).
-- [ ] Gemeinsame, noch fehlende Utilities identifizieren (z. B. Library-Loader,
-  README-Bau, Folder-Picker-Bestätigung) und nach `shared/` ziehen.
+- [x] `Shared/MapLogic` (`usePersistentState`, `useMapInfo`, `useScmapPreview`,
+  `scmapIO`, `mapGeometry`, `mapCanvas`) ist für Wreckage/Props/Emitter der einzige
+  Weg zu map-info/preview/scmap-IO — kein dupliziertes IPC mehr in diesen drei Tabs.
+  Ein separater `useEmitterCategories`-Hook wurde **nicht** gebaut; Kategorie-Matching
+  läuft stattdessen über `EmitterToggleBlock` direkt in der Entity-Karte (Declare-
+  Source/Inherit-Modell) — siehe `TAB_CONTRACT.md §2`.
+- [ ] Adoption auf die restlichen Tabs (Phase 2) ausweiten — dort größtenteils noch
+  offen; nicht erneut verifiziert.
+- [ ] Gemeinsame, noch fehlende Utilities identifizieren (Library-Loader,
+  README-Bau, Folder-Picker-Bestätigung) und nach `Shared/` ziehen.
 
 ### Phase 2 — UI-Migration aller Tabs (Feature #1 + #2, das große Stück)
-Pro Tab nach Contract: WorkspaceConsole-Shell + Sektions-Split + Tokens.
-Reihenfolge nach Komplexität (einfachste zuerst, Übung sammeln):
-- [ ] PreviewImage, Stars, History, Settings (klein/formlastig)
-- [ ] MapResizer, AdaptiveMapHelper, CoopVersioner, Contributions
-- [ ] RockErosion, Trees, SkyboxGenerator, CustomProps (groß, viel State)
-- [ ] Library-Overlays + Guides visuell ans System angleichen
+Pro Tab nach Contract: **`TabLayout`**-Shell (vier Varianten X/Y/Z/W, siehe
+`docs/LAYOUTS.md`) + Sektions-Split + Tokens. `primitives.css` liefert dafür die
+`ctrl-*`-Kontrollfamilie + `commit-button` + `station` — kein separates
+5-Klassen-Button-Set wie ursprünglich geplant, siehe `DESIGN_SYSTEM_MIGRATION.md §4`.
+
+- [x] **Placement — Wreckage, Props, Emitter**: fertig, Gold-Standard, verifiziert
+  2026-07-08. `layoutMode="x"` (Controls + Aside/MapPreview).
+- [ ] **Welle 1 (klein/formlastig)** — PreviewImage, Stars, History, Settings
+  → vsl. `layoutMode="y"` (Standby-Field statt Preview)
+- [ ] **Welle 2** — MapResizer, AdaptiveMapHelper, CoOp, Contributions
+  → gemischt `x·half` / `w` (AdaptiveMapHelper hat ein dominantes Canvas)
+- [ ] **Welle 3 (groß, viel State)** — RockErosion, Trees, SkyboxGenerator, CustomProps
+  → gemischt `x·fixed` / `z·parallel`
+- [ ] **Welle 4** — Library-Overlays + Guides visuell ans System angleichen
+- [ ] **Cleanup** — `Tabs/HelpModals/` auflösen, sobald Phase 3 (unten) durch ist
+
+Layout-Typ pro Tab/Sektion ist in `docs/LAYOUTS.md` "Tab Overview" vorgemerkt,
+gilt aber nur als Absichtserklärung, bis der jeweilige Tab tatsächlich migriert ist
 → *Jeder Tab einzeln baubar/testbar — ideal delegierbar.*
 
 ### Phase 3 — Help-System (Feature #4)
-- [ ] Die ~15 `HelpModals/*_help.jsx` auf `HelpConsole` + Section-Komponenten migrieren
-  (Vorlage: Wreckage_help). Pro Tab klein und risikoarm, gut parallelisierbar.
-- [ ] HelpConsole-UI final polieren (offener Punkt laut deiner Liste).
+- [x] **Wreckage**: migriert auf `Shared/Ui/HelpPanel/HelpPanel.jsx` (`HelpConsole`
+  + `HelpButton`) + Section-Komponenten. Vorlage: `Tabs/Placement/Wreckage/Help.jsx`.
+- [ ] **Props, Emitter**: noch **nicht** migriert — hängen weiterhin an
+  `Tabs/HelpModals/{Props,Emitter}_help.jsx` (eigenständige Modals ohne
+  `HelpPanel`-Anbindung). Kleine, risikoarme Aufgabe, siehe `TAB_CONTRACT.md §7`.
+- [ ] Die übrigen ~13 `HelpModals/*_help.jsx` (ein Tab pro noch nicht migriertem
+  Tab aus Phase 2) auf `HelpPanel` + Section-Komponenten migrieren. Pro Tab klein
+  und risikoarm, gut parallelisierbar.
+- [ ] `HelpPanel`-UI final polieren (offener Punkt laut deiner Liste).
 
 ### Phase 4 — Qualität: Bugs (Feature #5)
 - [ ] **Build-Hardening zuerst**: ESLint + `eslint-plugin-react-hooks` einführen

@@ -79,6 +79,15 @@ already, and correctly, uses more than one color at rest.
   never collide. A data color on a unit card is a signal, not generic chrome, and may
   legitimately carry an edge / swatch.
 
+**A fourth axis, not a fourth role — light/dark mode.** A light theme exists
+(`Shared/DesignSystem/tokens-light.css`, toggled via a `data-theme` attribute driven
+by a user setting) alongside dark. Under light mode, Role 1 deliberately
+**collapses every tab's individual hue to one shared accent** instead of keeping
+per-tab identity colors distinct. This is not a violation of "one identity color
+per tab" — light mode is a different *rendering* of the same role, not a second
+role. Component code must reference `var(--tab-color)`, never assume it resolves
+to a specific tab's registered hue, so both modes stay correct automatically.
+
 **Role 3 — System / feedback color** — status: success / warning / error.
 - **Green = success · Yellow = warning · Red = error.**
 - These live one layer *above* the tab design language (notifications, validation) and
@@ -184,13 +193,22 @@ two channels into one and wastes the contrast.
 | `TAB_CONTRACT.md` | *How* is it built technically? File structure, state contracts, token obligations, IPC security. |
 | `TAB_DESIGN_LAW.md` | *Which* concrete rules (loudness, staircase, lines, trace, color roles) apply as law per tab surface? |
 
-All three reference the same token source (`shared/design-system/tokens.css`). If a
+All three reference the same token source (`Shared/DesignSystem/tokens.css`). If a
 principle changes here, check whether TAB_DESIGN_LAW and TAB_CONTRACT.md §5 (styling
 contract) need to be updated as well — and vice versa.
+
+> Verified against the three gold-standard tabs (`Tabs/Placement/{Wreckage,Props,
+> Emitter}`) as of 2026-07-08. Path shown above updated for the `shared/` → `Shared/`
+> rename; principles unchanged.
 
 ---
 
 ## Changelog
+
+**2026-07-08 — added the light/dark mode note to §2 (Role 1 collapses to a shared
+accent in light mode; not a new role, just a second rendering). No principle
+changed; this documents a real, previously-undocumented feature
+(`tokens-light.css`).**
 
 **2026-06-24 — Philosophy aligned with the build (after adversarial design review).**
 - **Principle 2 & §2 Color:** "one accent, everything else grey" replaced by **three

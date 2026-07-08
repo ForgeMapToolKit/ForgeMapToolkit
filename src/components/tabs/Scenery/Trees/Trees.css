@@ -1,49 +1,43 @@
 /* =============================================================================
    Trees.css — TreemapTab-specific styles only.
-   All shared tokens (layout, section-card, form, buttons) live in shared.css.
-   Import order:  shared.css  →  Trees.css
+   Everything covered by the shared design system (cards, coordinates, buttons,
+   inputs, checklist, map preview, workspace shell) comes from TabLayout +
+   EntityPanel — this file only holds tab-specific bits:
+     1. Tab root + theme cascade
+     2. Legend-rail escape hatch (same pattern as Wreckage/Props/Emitter/RockErosion)
+     3. Map info readout
+     4. Grid layouts (Density/Diffusion, Treeline cutoffs)
+     5. Slider value badges
+     6. Accessibility
+     7. Help modal (unchanged — still consumed by Trees_help.jsx)
+     8. Shared help element theme overrides (unchanged — still consumed by Trees_help.jsx)
+   Import order:  shared.css  →  trace.css  →  Trees.css
    ============================================================================= */
 
 
 /* ── 1. TAB ROOT & THEME VARIABLES ──────────────────────────────────────────── */
 
-.treemap-theme {
+.treemap-tab {
   --tab-color:       var(--treemap-color);
   --tab-glow:        var(--treemap-glow);
   --tab-glow-strong: var(--treemap-glow-strong);
-  display:     flex;
-  flex:        1;
-  min-height:  0;
-  font-family: var(--font-display);
-  color:       var(--ink-72);
-  position:    relative;
+  background-color: var(--surface-canvas);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
 }
 
-/* ── Preview panel body layout ────────────────────────────────────────────── */
-.tm-upload-btn   { width: 100%; }
-.tm-preview-body { display: flex; flex-direction: column; gap: var(--space-md); }.tm-upload-row   { display: flex; align-items: center; gap: var(--space-sm); }
+/* ── 2. Legend rail escape hatch ─────────────────────────────────────────── */
 
-.tm-canvas-wrap {
-  position:     relative;
-  width:        100%;
-  aspect-ratio: 1;
-  background:   rgba(0,0,0,0.6);
-  border:       1px solid color-mix(in srgb, var(--tab-color) 8%, transparent);
-  overflow:     hidden;
-}
-.tm-canvas-wrap canvas { width: 100%; height: 100%; display: block; }
-.tm-canvas-empty {
-  position:    absolute;
-  inset:       0;
-  display:     flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size:   var(--text-sm);
-  text-transform: uppercase;
-  color:       var(--ink-28);
-  pointer-events: none;
-}
+.treemap-tab .workspace-main-inner--half { overflow: visible; }
+.treemap-tab .preview-panel              { overflow: visible; }
+
+.treemap-tab .section-content,
+.treemap-tab .ec-legend-cards,
+.treemap-tab .preview-panel-body { scrollbar-width: none; }
+.treemap-tab .section-content::-webkit-scrollbar,
+.treemap-tab .ec-legend-cards::-webkit-scrollbar,
+.treemap-tab .preview-panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── 3. Map info readout (Configuration.jsx) ─────────────────────────────── */
 
 .tm-map-info {
   margin-top:  6px;
@@ -61,84 +55,24 @@
 .tm-map-info-err      { color: rgba(255,100,100,0.5); font-size: var(--text-xs); }
 
 
-/* ── 2. ACCESSIBILITY ────────────────────────────────────────────────────────── */
+/* ── 4. Grid layouts (Density/Diffusion, Treeline cutoffs) ───────────────── */
 
-@media (prefers-reduced-motion: reduce) {
-  .treemap-theme *, .treemap-theme *::before, .treemap-theme *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-
-/* ── 3. IMAGE PREVIEWS (density map, heightmap, area, exclusion) ─────────────── */
-
-.treemap-image-preview,
-.treemap-area-preview {
-  position:     relative;
-  width:        100%;
-  aspect-ratio: 1;
-  border:       1px solid color-mix(in srgb, var(--tab-color) 15%, transparent);
-  margin-top:   10px;
-  overflow:     hidden;
-  background:   rgba(0, 0, 0, 0.3);
-}
-.treemap-image-preview img,
-.treemap-area-preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-/* Position the canonical btn-delete-sm as an overlay inside preview containers */
-.treemap-image-preview .btn-delete-sm,
-.treemap-area-preview .btn-delete-sm {
-  position: absolute;
-  top:      8px;
-  right:    8px;
-}
-
-
-/* ── 4. MIRROR TOGGLE DROPDOWN ──────────────────────────────────────────────── */
-
-/* Override width only — form-input provides all other styling */
-.treemap-mirror-dropdown {
-  width:     auto;
-  min-width: 130px;
-}
-
-
-/* ── 5. PROP CARD NAME INPUT (inline edit — unique to Trees) ─────────────────── */
-
-.treemap-prop-name-input {
-  background:  transparent;
-  border:      none;
-  outline:     none;
-  color:       var(--ink-72);
-  font-family: inherit;
-  font-size:   0.92rem;
-  font-weight: 500;
-  width:       100%;
-  padding:     0;
-  cursor:      text;
-}
-.treemap-prop-name-input::placeholder { color: var(--ink-22); }
-
-
-/* ── 5b. EC-CARD HEADER LAYOUT HELPERS ──────────────────────────────────────── */
-
-/* Trees uses bespoke slot names for the card header flex children. */
-.ec-card-header-left    { display: flex; align-items: center; gap: var(--space-md); flex: 1; min-width: 0; }
-.ec-card-header-actions { display: flex; align-items: center; gap: var(--space-xs); flex-shrink: 0; }
-
-
-/* ── 5c. DENSITY PARAMS ROW (Multiplier · Diffusion · Grid Res in one line) ─── */
-
-.tm-density-params-row {
+.tm-density-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-sm);
-  margin-bottom: var(--space-lg);
 }
-.tm-density-params-row .form-group { margin-bottom: 0; }
 
-/* Slider value badge (float right inside field-label) */
+.tm-cutoff-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+/* ── 5. Slider value badges ──────────────────────────────────────────────── */
+
+/* Slider value badge (float right inside ctrl-label) */
 .tm-slider-value {
   float: right;
   color: var(--tab-color);
@@ -157,143 +91,39 @@
 /* Number input paired with a range slider — needs top gap */
 .tm-slider-number { margin-top: var(--space-xs); }
 
-/* Compact font for the "Delete All" header button */
-.tm-delete-all-btn { font-size: var(--text-xs); }
-
-
-/* ── 6. CUSTOM VALUES ACCORDION ──────────────────────────────────────────────── */
-
-.treemap-cv-body {
-  background: rgba(0, 0, 0, 0.2);
-  padding:    var(--space-sm);
-  border:     1px solid color-mix(in srgb, var(--tab-color) 10%, transparent);
-  border-top: none;
-}
-
-.treemap-cv-subgroup        { border-bottom: 1px solid color-mix(in srgb, var(--tab-color) 8%, transparent); padding-bottom: var(--space-sm); margin-bottom: var(--space-sm); }
-.treemap-cv-subgroup--last  { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-.treemap-cv-subgroup-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: var(--space-xs) var(--space-sm); cursor: pointer;
-  font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--ink-55);
-  border: 1px solid color-mix(in srgb, var(--tab-color) 15%, transparent);
-  transition: color var(--motion-fast), border-color var(--motion-fast), background var(--motion-fast);
-}
-.treemap-cv-subgroup-header:hover {
-  color:        var(--tab-color);
-  border-color: color-mix(in srgb, var(--tab-color) 30%, transparent);
-  background:   color-mix(in srgb, var(--tab-color) 4%, transparent);
-}
-.treemap-cv-chevron         { font-size: 0.65rem; opacity: 0.6; }
-.treemap-cv-toggle-chevron  { font-size: 0.65rem; opacity: 0.6; }
-.treemap-cv-subgroup-end    { display: flex; align-items: center; gap: var(--space-xs); }
-
-/* Active indicator badge inside subgroup headers */
-.treemap-cv-active-badge {
-  font-size:  var(--text-xs);
-  color:      var(--tab-color);
-  font-variant-numeric: tabular-nums;
-}
-
-.treemap-cv-subgroup-body {
-  padding:    var(--space-sm) var(--space-sm) var(--space-xs);
-  border:     1px solid color-mix(in srgb, var(--tab-color) 10%, transparent);
-  border-top: none;
-  background: rgba(0, 0, 0, 0.15);
-}
-/* Labels inside subgroup bodies use field-label — override spacing only */
-.treemap-cv-subgroup-body .field-label { margin-top: var(--space-sm); }
-.treemap-cv-subgroup-body .field-label:first-child { margin-top: 0; }
-/* Range inputs don't inherit field-input appearance */
-.treemap-cv-subgroup-body input[type="range"] {
-  width: 100%; padding: 0; border: none; background: transparent; box-shadow: none;
-  cursor: pointer; accent-color: var(--tab-color); margin-bottom: var(--space-xs);
-}
-
 /* Mono font modifier for blueprint path inputs */
 .field-input--mono { font-family: var(--font-mono); font-size: var(--text-xs); }
 
-/* Custom Values toggle — active state */
-button.field-select.treemap-cv-toggle {
-  display:         flex;
-  align-items:     center;
-  justify-content: space-between;
-  width:           100%;
-  cursor:          pointer;
-  text-align:      left;
-}
-.treemap-cv-toggle .treemap-cv-toggle-chevron { margin-left: var(--space-sm); }
-button.field-select.treemap-cv-open {
-  border-color: var(--tab-color);
-  color:        var(--tab-color);
+/* ── 6. Accessibility ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .treemap-tab *,
+  .treemap-tab *::before,
+  .treemap-tab *::after {
+    animation-duration:  0.01ms !important;
+    animation-delay:     0ms    !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-
-/* ── 7. CANVAS PREVIEW ───────────────────────────────────────────────────────── */
-
-.treemap-preview-container {
-  width:        100%;
-  aspect-ratio: 1;
-  background:   rgba(0, 0, 0, 0.6);
-  border:       1px solid color-mix(in srgb, var(--tab-color) 8%, transparent);
-  border-top:   none;
-  position:     relative;
-  overflow:     hidden;
-  box-shadow:   inset 0 0 60px rgba(0, 0, 0, 0.8);
-}
-.treemap-preview-container canvas { width: 100%; height: 100%; display: block; }
-
-.treemap-preview-placeholder {
-  position:        absolute;
-  inset:           0;
-  display:         flex;
-  flex-direction:  column;
-  align-items:     center;
-  justify-content: center;
-  gap:             15px;
-  color:           var(--text-muted);
-  pointer-events:  none;
-}
-.treemap-preview-placeholder p {
-  font-size:      0.9rem;
-  margin:         0;
-  font-weight:    300;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.treemap-tab a:focus-visible,
+.treemap-tab button:focus-visible,
+.treemap-tab input:focus-visible {
+  outline: 1px solid var(--ink-60);
+  outline-offset: 2px;
 }
 
-
-/* ── 8. PROGRESS BAR ─────────────────────────────────────────────────────────── */
-
-.treemap-generating-label {
-  text-align:     center;
-  color:          var(--tab-color);
-  font-weight:    600;
-  margin-bottom:  12px;
-  letter-spacing: 0.1em;
-}
-.treemap-progress-bar {
-  height:     6px;
-  background: var(--line-ghost-border);
-  position:   relative;
-  margin-top: 16px;
-}
-.treemap-progress-fill {
-  position:   absolute;
-  inset:      0;
-  background: var(--tab-color);
-  transition: width 0.3s;
-}
-.treemap-progress-text {
-  text-align: center;
-  margin-top: 10px;
-  font-size:  0.82rem;
-  color:      var(--ink-50);
+.treemap-tab ::selection {
+  background: var(--treemap-color);
+  color: #000;
 }
 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
 
-/* ── 9. HELP MODAL ───────────────────────────────────────────────────────────── */
+
+/* ── 8. HELP MODAL ───────────────────────────────────────────────────────────── */
 
 .treemap-help-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(10px); z-index: 9998; animation: treemapHelpOverlayIn 0.3s ease; }
 @keyframes treemapHelpOverlayIn { from { opacity: 0; } to { opacity: 1; } }
@@ -353,18 +183,18 @@ button.field-select.treemap-cv-open {
 .treemap-help-explain-tip strong { color: var(--treemap-color); }
 
 
-/* ── 10. SHARED HELP ELEMENT THEME OVERRIDES ─────────────────────────────────── */
+/* ── 9. SHARED HELP ELEMENT THEME OVERRIDES ──────────────────────────────────── */
 
-.treemap-theme .help-troubleshooting-item         { background: var(--surface-ghost); border: 1px solid var(--line-ghost-border); overflow: hidden; margin-bottom: 2px; }
-.treemap-theme .help-troubleshooting-item:hover   { background: linear-gradient(135deg, var(--sheen-040) 0%, var(--surface-ghost) 100%); border-color: var(--ink-15); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
-.treemap-theme .help-troubleshooting-question     { display: flex; align-items: center; gap: 15px; padding: 20px 25px; background: var(--line-soft); border-left: 3px solid var(--treemap-color); cursor: pointer; }
-.treemap-theme .help-troubleshooting-icon         { width: 18px; height: 18px; border-radius: 50%; background: var(--treemap-glow-strong); flex-shrink: 0; }
-.treemap-theme .help-troubleshooting-question strong { color: var(--treemap-color); font-size: 1rem; font-weight: 600; }
-.treemap-theme .help-troubleshooting-answer       { padding: 20px 25px 20px 60px; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
+.treemap-tab .help-troubleshooting-item         { background: var(--surface-ghost); border: 1px solid var(--line-ghost-border); overflow: hidden; margin-bottom: 2px; }
+.treemap-tab .help-troubleshooting-item:hover   { background: linear-gradient(135deg, var(--sheen-040) 0%, var(--surface-ghost) 100%); border-color: var(--ink-15); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
+.treemap-tab .help-troubleshooting-question     { display: flex; align-items: center; gap: 15px; padding: 20px 25px; background: var(--line-soft); border-left: 3px solid var(--treemap-color); cursor: pointer; }
+.treemap-tab .help-troubleshooting-icon         { width: 18px; height: 18px; border-radius: 50%; background: var(--treemap-glow-strong); flex-shrink: 0; }
+.treemap-tab .help-troubleshooting-question strong { color: var(--treemap-color); font-size: 1rem; font-weight: 600; }
+.treemap-tab .help-troubleshooting-answer       { padding: 20px 25px 20px 60px; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
 
-.treemap-theme .help-note-box { background: rgba(0,255,102,0.05); border: 1px solid rgba(0,255,102,0.2); border-left: 4px solid var(--treemap-color); padding: 16px 20px; border-radius: 6px; font-size: 0.88rem; line-height: 1.8; color: var(--ink-65); margin: 16px 0; }
-.treemap-theme .help-note-box code { background: rgba(0,255,102,0.12); color: var(--treemap-color); padding: 1px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.85em; }
-.treemap-theme .help-code-block    { background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,102,0.15); border-radius: 6px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 0.82rem; color: rgba(0,255,102,0.8); margin-top: 10px; overflow-x: auto; white-space: pre; line-height: 1.7; }
+.treemap-tab .help-note-box { background: rgba(0,255,102,0.05); border: 1px solid rgba(0,255,102,0.2); border-left: 4px solid var(--treemap-color); padding: 16px 20px; border-radius: 6px; font-size: 0.88rem; line-height: 1.8; color: var(--ink-65); margin: 16px 0; }
+.treemap-tab .help-note-box code { background: rgba(0,255,102,0.12); color: var(--treemap-color); padding: 1px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.85em; }
+.treemap-tab .help-code-block    { background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,102,0.15); border-radius: 6px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 0.82rem; color: rgba(0,255,102,0.8); margin-top: 10px; overflow-x: auto; white-space: pre; line-height: 1.7; }
 
 /* Section headers & process timeline inside help */
 .help-section-header  { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 22px 0; display: flex; align-items: center; gap: 14px; }
@@ -459,34 +289,6 @@ button.field-select.treemap-cv-open {
 .help-cta-check:hover { background: rgba(0,255,102,0.10); border-color: var(--treemap-color); box-shadow: 0 0 25px var(--treemap-glow); transform: translateY(-2px); }
 
 
-/* ── 12. ENTITY CONSOLE DROP SLOT OVERRIDES ─────────────────────────────────── */
-
-/* Global upload slots (Density Map, Heightmap, Exclusion Zone) sit in a
-   form-group column — give them a fixed compact height and bottom margin
-   to match the existing action-button rhythm. */
-.form-group .ec-drop-slot,
-.ec-drop-slot.tm-drop-slot {
-  aspect-ratio: unset;
-  min-height: 72px;
-  margin-bottom: var(--space-sm, 8px);
-}
-
-/* The eyebrow label already printed as <label class="field-label"> above
-   the slot in the form-group, so hide the redundant in-slot label. */
-.form-group .ec-drop-slot .ec-drop-slot-label {
-  display: none;
-}
-
-/* Per-card slots inside treemap-cv-subgroup-body are even more compact. */
-.treemap-cv-subgroup-body .ec-drop-slot {
-  aspect-ratio: unset;
-  min-height: 60px;
-}
-.treemap-cv-subgroup-body .ec-drop-slot .ec-drop-slot-label {
-  display: none;
-}
-
-@media (max-width: 1400px) { .treemap-theme .tab-col-detail { position: relative; top: 0; } }
 @media (max-width: 768px)  {
   .treemap-help-guide-layout { flex-direction: column; }
   .help-technical-grid       { grid-template-columns: 1fr; }

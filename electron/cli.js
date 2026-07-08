@@ -45,6 +45,13 @@ const { SCMAP_DIR, readSettings } = require('./modules/settings');
 let _version = '0.1.0';
 try { _version = require('../package.json').version; } catch (_) {}
 
+// ── Active-child registry ─────────────────────────────────────────────────────
+// Lets a host (the in-app terminal) abort a long-running spawned process
+// (currently only cmdPreview's editor launch) without owning the child itself.
+let _activeChild = null;
+function setActiveChild(child) { _activeChild = child; }
+function getActiveChild()      { return _activeChild; }
+
 // ── ANSI helpers ──────────────────────────────────────────────────────────────
 const C = {
   reset:  '\x1b[0m',  bold:   '\x1b[1m',  dim:    '\x1b[2m',
@@ -346,6 +353,7 @@ async function cmdPreview(pos, flags) {
       ['-renderPreviewImage', String(resolution), String(resolution), scenarioPath, pngPath],
       { cwd: editorDir, windowsHide: true },
     );
+    setActiveChild(child);
     child.stdout?.on('data', d => print(`  [editor] ${d.toString().trim()}`));
     child.stderr?.on('data', d => print(`  [editor] ${d.toString().trim()}`));
 
@@ -353,6 +361,7 @@ async function cmdPreview(pos, flags) {
     const done = p => {
       if (!resolved) {
         resolved = true;
+        setActiveChild(null);
         clearInterval(poll);
         clearTimeout(hard);
         clearTimeout(postExit);
@@ -568,4 +577,11 @@ async function main() {
   startRepl();
 }
 
-main();
+// Only auto-run the REPL/one-shot entry point when invoked directly
+// (`node cli.js ...`) — not when required as a module by the in-app
+// terminal (electron/modules/cli-runner.js), which drives dispatch() itself.
+if (require.main === module) {
+  main();
+}
+
+module.exports = { parseArgs, dispatch, printHelp, setActiveChild, getActiveChild };

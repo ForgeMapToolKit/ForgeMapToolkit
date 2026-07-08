@@ -166,16 +166,6 @@ export const uvRowsToWeights = (rows) =>
   rows.map(r => r.weight).join('\n');
 
 // ── PRNG ──────────────────────────────────────────────────────────
-export const mulberry32 = (seed) => {
-  let s = seed >>> 0;
-  return () => {
-    s |= 0; s = s + 0x6D2B79F5 | 0;
-    let t = Math.imul(s ^ s >>> 15, 1 | s);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-};
-
 export const gaussianRandomSeeded = (std, rng) => {
   const u1 = rng(), u2 = rng();
   return std * Math.sqrt(-2 * Math.log(Math.max(u1, 1e-10))) * Math.cos(2 * Math.PI * u2);
@@ -232,7 +222,7 @@ export const inExclusionZone = (px, pz, zone, spread) => {
 export const buildStars = ({
   nStars, numClusters, clusterSpread, clusterStdDev, backgroundRatio,
   scaleMin, scaleMax, uvOptions, uvWeights, exclusionZones, exEnabled,
-  seed, useSeed, yMode, yMax, yCenter, yStdDev, yLayers,
+  yMode, yMax, yCenter, yStdDev, yLayers,
   diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter,
 }) => {
   const spread   = parseFloat(clusterSpread)   || 14000;
@@ -248,7 +238,7 @@ export const buildStars = ({
   if (!parsedUvs.length)                           throw new Error('No valid UV options');
   if (parsedWeights.length !== parsedUvs.length)   throw new Error('UV options/weights count mismatch');
 
-  const rng   = useSeed ? mulberry32(seed) : Math.random.bind(Math);
+  const rng   = Math.random.bind(Math);
   const gauss = std => gaussianRandomSeeded(std, rng);
 
   const sampleY = () => {

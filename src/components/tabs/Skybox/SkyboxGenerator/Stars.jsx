@@ -1,12 +1,16 @@
-﻿/**
+/**
  * SkyboxGenerator_Stars.jsx — Sektion 04: Stars
  *
- * Enthält: YCurveEditor, ExclusionZoneCanvas, UVCanvas, RangeSlider, StyledSelect, Toggle.
+ * Default export `Stars` = Hauptcontent (Star Parameters, Y-Distribution, UV Options).
+ * Named export `StarsAside` = Exclusion Zones + UV Visualization, gerendert im Section-Aside
+ * (siehe SkyboxGenerator.jsx) statt im Hauptcontent.
+ * Enthält außerdem: YCurveEditor, RangeSlider, Toggle (lokale UI-Primitives).
  * Rein präsentational bis auf lokale Canvas-Zeichenlogik (Refs, kein persistenter State).
  */
 import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
+import { Dropdown, DropSlot } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 import { UV_COLORS, Y_MODES, clamp01, parseUvOptions } from './utils.js';
 
 // ── RangeSlider ───────────────────────────────────────────────────
@@ -31,40 +35,6 @@ const Toggle = ({ checked, onChange, label }) => (
     {label && <span className="sb-st-toggle-text">{label}</span>}
   </label>
 );
-
-// ── StyledSelect ──────────────────────────────────────────────────
-const StyledSelect = ({ value, onChange, options }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => { if (!ref.current?.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-  const selected = options.find(o => o.value === value);
-  return (
-    <div className="sb-st-styled-select" ref={ref}>
-      <button type="button" className={`sb-st-styled-select-trigger${open?' open':''}`} onClick={()=>setOpen(v=>!v)}>
-        <span>{selected?.label ?? value}</span>
-        <svg className="sb-st-styled-select-arrow" width="10" height="6" viewBox="0 0 10 6">
-          <path d="M0 0L5 6L10 0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-      {open && (
-        <div className="sb-st-styled-select-dropdown">
-          {options.map(o => (
-            <div key={o.value} className={`sb-st-styled-select-option${o.value===value?' selected':''}`}
-              onMouseDown={()=>{onChange(o.value);setOpen(false);}}>
-              {o.value === value && <span className="sb-st-styled-select-tick">✓</span>}
-              {o.label}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 // ── YCurveEditor ──────────────────────────────────────────────────
 const YCurveEditor = ({ points, onChange, yMax = 1500 }) => {
@@ -191,9 +161,9 @@ const YCurveEditor = ({ points, onChange, yMax = 1500 }) => {
   const onMouseMove=useCallback((e)=>{if(dragIdx.current!==null)return;const h=findHit(e.clientX,e.clientY);if(h!==hoverIdx.current){hoverIdx.current=h;setIsHoveringPoint(h>=0);draw();}},[findHit,draw]);
 
   return (
-    <div className="sb-st-curve-wrap" ref={wrapRef}>
+    <div className="ec-canvas-wrap sb-st-curve-wrap" ref={wrapRef}>
       <div className="sb-st-curve-header">
-        <span className="sb-st-curve-header-label">Y-Distribution Curve</span>
+        <span className="ctrl-label">Y-Distribution Curve</span>
         <div className="sb-st-curve-header-stats">
           <span className="sb-st-curve-stat">pts <span className="sb-st-curve-stat-val">{points?.length??0}</span></span>
           <span className="sb-st-curve-stat">yMax <span className="sb-st-curve-stat-val">{yMax>=1000?`${(yMax/1000).toFixed(1)}k`:String(yMax)}</span></span>
@@ -214,14 +184,13 @@ const YCurveEditor = ({ points, onChange, yMax = 1500 }) => {
   );
 };
 
-// ── Stars Hauptkomponente ───────────────────────────────────
+// ── Stars Hauptkomponente (Star Parameters / Y-Distribution / UV Options) ──
 const Stars = ({
   numStars, setNumStars, numClusters, setNumClusters,
   clusterSpread, setClusterSpread, clusterStdDev, setClusterStdDev,
   backgroundRatio, setBackgroundRatio, scaleMin, setScaleMin, scaleMax, setScaleMax,
-  uvOpacity, setUvOpacity, uvOptions, uvWeights,
+  uvOptions, uvWeights,
   uvRows, syncUvRows,
-  seed, setSeed, useSeed, setUseSeed, onRandomizeSeed,
   yMode, setYMode, yMax, setYMax,
   yCenter, setYCenter, yStdDev, setYStdDev,
   yLayers, setYLayers,
@@ -229,26 +198,164 @@ const Stars = ({
   haloStdDev, setHaloStdDev, haloRatio, setHaloRatio,
   curvePoints, setCurvePoints,
   yClusterScatter, setYClusterScatter,
+  onResetDefaults, onInjectStars,
+}) => {
+  const yModeTriggerRef = useRef(null);
+
+  return (
+    <div className="ctrl-col">
+
+      {/* Controls */}
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">Star Parameters</div>
+        <div className="ctrl-content">
+          <div className="ctrl-action-row">
+            <button className="ctrl-btn-add" onClick={onResetDefaults}>Reset Defaults</button>
+            <button className="ctrl-btn-add" onClick={onInjectStars}>Inject Stars</button>
+          </div>
+
+          <div className="sb-cfg-row sb-cfg-row--3">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Star Count</div>
+              <input className="ctrl-input" value={numStars} onChange={e=>setNumStars(e.target.value)}/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Clusters</div>
+              <input className="ctrl-input" value={numClusters} onChange={e=>setNumClusters(e.target.value)}/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Background Ratio</div>
+              <input className="ctrl-input" value={backgroundRatio} onChange={e=>setBackgroundRatio(e.target.value)}/>
+            </div>
+          </div>
+
+          <div className="sb-cfg-row sb-cfg-row--3">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Cluster Spread</div>
+              <input className="ctrl-input" value={clusterSpread} onChange={e=>setClusterSpread(e.target.value)}/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Cluster Std Dev</div>
+              <input className="ctrl-input" value={clusterStdDev} onChange={e=>setClusterStdDev(e.target.value)}/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Y Cluster Scatter</div>
+              <input className="ctrl-input" value={yClusterScatter} onChange={e=>setYClusterScatter(e.target.value)}/>
+            </div>
+          </div>
+
+          <div className="sb-cfg-row">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Scale Min</div>
+              <input className="ctrl-input" value={scaleMin} onChange={e=>setScaleMin(e.target.value)}/>
+            </div>
+            <div className="ctrl-field">
+              <div className="ctrl-label">Scale Max</div>
+              <input className="ctrl-input" value={scaleMax} onChange={e=>setScaleMax(e.target.value)}/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Y-Distribution */}
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">Y-Distribution</div>
+        <div className="ctrl-content">
+          <div className="ctrl-field">
+            <div className="ctrl-label">Mode</div>
+            <Dropdown options={Y_MODES} value={yMode} onChange={setYMode} triggerRef={yModeTriggerRef} ariaLabel="Y-Distribution Mode" />
+          </div>
+          {yMode==='flat' && (
+            <div className="ctrl-field"><div className="ctrl-label">Y Max</div><input className="ctrl-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
+          )}
+          {yMode==='gaussian' && (
+            <div className="sb-cfg-row sb-cfg-row--3">
+              <div className="ctrl-field"><div className="ctrl-label">Center</div><input className="ctrl-input" value={yCenter} onChange={e=>setYCenter(e.target.value)}/></div>
+              <div className="ctrl-field"><div className="ctrl-label">Std Dev</div><input className="ctrl-input" value={yStdDev} onChange={e=>setYStdDev(e.target.value)}/></div>
+              <div className="ctrl-field"><div className="ctrl-label">Y Max</div><input className="ctrl-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
+            </div>
+          )}
+          {yMode==='layered' && (
+            <div className="ctrl-field">
+              <div className="ctrl-label">Layers (center, stddev, weight per line)</div>
+              <textarea className="ctrl-input ctrl-input--text sb-textarea" rows={4} value={yLayers} onChange={e=>setYLayers(e.target.value)}/>
+              <div className="ctrl-field"><div className="ctrl-label">Y Max</div><input className="ctrl-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
+            </div>
+          )}
+          {yMode==='disk_halo' && (
+            <div className="sb-cfg-row sb-cfg-row--5">
+              <div className="ctrl-field"><div className="ctrl-label">Disk Center</div><input className="ctrl-input" value={diskCenter} onChange={e=>setDiskCenter(e.target.value)}/></div>
+              <div className="ctrl-field"><div className="ctrl-label">Disk StdDev</div><input className="ctrl-input" value={diskStdDev} onChange={e=>setDiskStdDev(e.target.value)}/></div>
+              <div className="ctrl-field"><div className="ctrl-label">Halo StdDev</div><input className="ctrl-input" value={haloStdDev} onChange={e=>setHaloStdDev(e.target.value)}/></div>
+              <div className="ctrl-field"><div className="ctrl-label">Halo Ratio</div><input className="ctrl-input" value={haloRatio} onChange={e=>setHaloRatio(e.target.value)}/></div>
+              <div className="ctrl-field"><div className="ctrl-label">Y Max</div><input className="ctrl-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
+            </div>
+          )}
+          {yMode==='curve' && (
+            <>
+              <div className="ctrl-field"><div className="ctrl-label">Y Max</div><input className="ctrl-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
+              <YCurveEditor points={curvePoints} onChange={setCurvePoints} yMax={parseFloat(yMax)||1500}/>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* UV Rows */}
+      <div className="ctrl-block">
+        <div className="ctrl-subtitle">UV Options</div>
+        <div className="ctrl-content">
+          <div className="sb-uv-row sb-uv-row--header">
+            <span className="sb-uv-idx" />
+            <span>X</span><span>Y</span><span>Z</span><span>W</span><span>Weight</span>
+            <span className="sb-uv-del" />
+          </div>
+          {uvRows.map((row, i) => (
+            <div key={i} className="sb-uv-row">
+              <span className="sb-uv-idx" style={{color:UV_COLORS[i%UV_COLORS.length]}}>{i+1}</span>
+              {['x','y','z','w'].map(f=>(
+                <input key={f} className="ctrl-input" value={row[f]}
+                  onChange={e=>{const next=[...uvRows];next[i]={...next[i],[f]:e.target.value};syncUvRows(next);}}/>
+              ))}
+              <input className="ctrl-input" value={row.weight}
+                onChange={e=>{const next=[...uvRows];next[i]={...next[i],weight:e.target.value};syncUvRows(next);}}/>
+              <button className="ctrl-btn-delete sb-uv-del"
+                disabled={uvRows.length<=1}
+                onClick={()=>{const next=uvRows.filter((_,j)=>j!==i);syncUvRows(next);}}>×</button>
+            </div>
+          ))}
+          <div className="ctrl-action-row">
+            <button className="ctrl-btn-add"
+              onClick={()=>syncUvRows([...uvRows,{x:'0.0',y:'0.0',z:'0.5',w:'0.5',weight:'0.25'}])}>
+              + Add UV Row
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
+// ── StarsAside (Exclusion Zones + UV Visualization — rendered in the Stars-section aside) ──
+export const StarsAside = ({
   exclusionZones, setExclusionZones,
   draftZone, setDraftZone,
   selectedZoneIdx, setSelectedZoneIdx,
   exEnabled, setExEnabled,
+  clusterSpread,
   previewImage, previewImageData,
   onRemovePreview, texOpacity, setTexOpacity, onImageUpload,
-  onResetDefaults, onInjectStars,
+  uvOptions, uvOpacity, setUvOpacity,
 }) => {
-  // Canvas refs (lokal, kein persistenter State)
   const uvCanvasRef  = useRef(null);
   const exCanvasRef  = useRef(null);
   const exWrapRef    = useRef(null);
-  const fileInputRef = useRef(null);
   const exDragging   = useRef(false);
   const exDragStart  = useRef({ x:0, y:0 });
   const exDraft      = useRef(null);
 
   const EX_RES = 800, UV_RES = 400;
 
-  // ── Exclusion-Canvas-Zeichnung ──────────────────────────────
   const drawExCanvas = useCallback((zones, draft) => {
     const canvas = exCanvasRef.current;
     if (!canvas) return;
@@ -282,7 +389,6 @@ const Stars = ({
 
   useEffect(()=>{drawExCanvas(exclusionZones,draftZone);},[exclusionZones,draftZone,exEnabled,clusterSpread,drawExCanvas,selectedZoneIdx]);
 
-  // Exclusion zone mouse interaction
   const getPosRel = useCallback((clientX, clientY) => {
     const rect = exWrapRef.current?.getBoundingClientRect();
     if(!rect) return{x:0,y:0};
@@ -304,7 +410,6 @@ const Stars = ({
     return()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
   },[getPosRel,drawExCanvas,exclusionZones,setDraftZone]);
 
-  // UV Canvas
   useEffect(()=>{
     const canvas=uvCanvasRef.current;if(!canvas)return;
     const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;
@@ -320,154 +425,15 @@ const Stars = ({
   const zoneWorldCoords=(zone)=>{const spread=parseFloat(clusterSpread)||14000;const toW=v=>((v*2-1)*spread).toFixed(0);return`X ${toW(Math.min(zone.x0,zone.x1))} → ${toW(Math.max(zone.x0,zone.x1))}   Z ${toW(Math.min(zone.y0,zone.y1))} → ${toW(Math.max(zone.y0,zone.y1))}`;};
 
   return (
-    <div className="skybox-section-stack">
-
-      {/* Controls */}
-      <div className="skybox-section-card">
-        <div className="skybox-card-header">
-          <h2 className="skybox-section-title">Star Parameters</h2>
-          <div style={{display:'flex',gap:'8px'}}>
-            <button className="btn-secondary" onClick={onResetDefaults}>Reset Defaults</button>
-            <button className="btn-primary" onClick={onInjectStars}>Inject Stars</button>
-          </div>
-        </div>
-
-        <div className="skybox-form-row">
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Star Count</label>
-            <input className="skybox-input" value={numStars} onChange={e=>setNumStars(e.target.value)}/>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Clusters</label>
-            <input className="skybox-input" value={numClusters} onChange={e=>setNumClusters(e.target.value)}/>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Background Ratio</label>
-            <RangeSlider min="0" max="1" step="0.01" value={parseFloat(backgroundRatio)||0} onChange={e=>setBackgroundRatio(e.target.value)}/>
-            <input className="skybox-input" value={backgroundRatio} onChange={e=>setBackgroundRatio(e.target.value)}/>
-          </div>
-        </div>
-
-        <div className="skybox-form-row">
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Cluster Spread</label>
-            <input className="skybox-input" value={clusterSpread} onChange={e=>setClusterSpread(e.target.value)}/>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Cluster Std Dev</label>
-            <input className="skybox-input" value={clusterStdDev} onChange={e=>setClusterStdDev(e.target.value)}/>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Y Cluster Scatter</label>
-            <input className="skybox-input" value={yClusterScatter} onChange={e=>setYClusterScatter(e.target.value)}/>
-          </div>
-        </div>
-
-        <div className="skybox-form-row">
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Scale Min</label>
-            <input className="skybox-input" value={scaleMin} onChange={e=>setScaleMin(e.target.value)}/>
-          </div>
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Scale Max</label>
-            <input className="skybox-input" value={scaleMax} onChange={e=>setScaleMax(e.target.value)}/>
-          </div>
-        </div>
-      </div>
-
-      {/* Seed */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Seed</h2>
-        <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-          <Toggle checked={useSeed} onChange={e=>setUseSeed(e.target.checked)} label="Use Seed"/>
-          {useSeed && (
-            <>
-              <input className="skybox-input" style={{width:'120px'}} value={seed}
-                onChange={e=>setSeed(parseInt(e.target.value)||0)}/>
-              <button className="btn-secondary" onClick={onRandomizeSeed}>↺ Randomize</button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Y-Distribution */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">Y-Distribution</h2>
-        <div className="skybox-form-group">
-          <label className="skybox-form-label">Mode</label>
-          <StyledSelect value={yMode} onChange={setYMode} options={Y_MODES}/>
-        </div>
-        {yMode==='flat' && (
-          <div className="skybox-form-group"><label className="skybox-form-label">Y Max</label><input className="skybox-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
-        )}
-        {yMode==='gaussian' && (
-          <div className="skybox-form-row">
-            <div className="skybox-form-group"><label className="skybox-form-label">Center</label><input className="skybox-input" value={yCenter} onChange={e=>setYCenter(e.target.value)}/></div>
-            <div className="skybox-form-group"><label className="skybox-form-label">Std Dev</label><input className="skybox-input" value={yStdDev} onChange={e=>setYStdDev(e.target.value)}/></div>
-            <div className="skybox-form-group"><label className="skybox-form-label">Y Max</label><input className="skybox-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
-          </div>
-        )}
-        {yMode==='layered' && (
-          <div className="skybox-form-group">
-            <label className="skybox-form-label">Layers (center, stddev, weight per line)</label>
-            <textarea className="skybox-input skybox-textarea" rows={4} value={yLayers} onChange={e=>setYLayers(e.target.value)}/>
-            <div className="skybox-form-group"><label className="skybox-form-label">Y Max</label><input className="skybox-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
-          </div>
-        )}
-        {yMode==='disk_halo' && (
-          <div className="skybox-form-row">
-            <div className="skybox-form-group"><label className="skybox-form-label">Disk Center</label><input className="skybox-input" value={diskCenter} onChange={e=>setDiskCenter(e.target.value)}/></div>
-            <div className="skybox-form-group"><label className="skybox-form-label">Disk StdDev</label><input className="skybox-input" value={diskStdDev} onChange={e=>setDiskStdDev(e.target.value)}/></div>
-            <div className="skybox-form-group"><label className="skybox-form-label">Halo StdDev</label><input className="skybox-input" value={haloStdDev} onChange={e=>setHaloStdDev(e.target.value)}/></div>
-            <div className="skybox-form-group"><label className="skybox-form-label">Halo Ratio</label><input className="skybox-input" value={haloRatio} onChange={e=>setHaloRatio(e.target.value)}/></div>
-            <div className="skybox-form-group"><label className="skybox-form-label">Y Max</label><input className="skybox-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
-          </div>
-        )}
-        {yMode==='curve' && (
-          <>
-            <div className="skybox-form-group"><label className="skybox-form-label">Y Max</label><input className="skybox-input" value={yMax} onChange={e=>setYMax(e.target.value)}/></div>
-            <YCurveEditor points={curvePoints} onChange={setCurvePoints} yMax={parseFloat(yMax)||1500}/>
-          </>
-        )}
-      </div>
-
-      {/* UV Rows */}
-      <div className="skybox-section-card">
-        <h2 className="skybox-section-title">UV Options</h2>
-        {uvRows.map((row, i) => (
-          <div key={i} className="skybox-form-row" style={{alignItems:'center'}}>
-            <span style={{color:UV_COLORS[i%UV_COLORS.length],fontFamily:'monospace',fontWeight:700,width:'20px',flexShrink:0}}>{i+1}</span>
-            {['x','y','z','w'].map(f=>(
-              <div key={f} className="skybox-form-group" style={{flexShrink:1}}>
-                <label className="skybox-form-label">{f.toUpperCase()}</label>
-                <input className="skybox-input" value={row[f]}
-                  onChange={e=>{const next=[...uvRows];next[i]={...next[i],[f]:e.target.value};syncUvRows(next);}}/>
-              </div>
-            ))}
-            <div className="skybox-form-group" style={{flexShrink:1}}>
-              <label className="skybox-form-label">Weight</label>
-              <input className="skybox-input" value={row.weight}
-                onChange={e=>{const next=[...uvRows];next[i]={...next[i],weight:e.target.value};syncUvRows(next);}}/>
-            </div>
-            <button className="btn-delete-xs" style={{alignSelf:'flex-end',marginBottom:'2px'}}
-              disabled={uvRows.length<=1}
-              onClick={()=>{const next=uvRows.filter((_,j)=>j!==i);syncUvRows(next);}}>×</button>
-          </div>
-        ))}
-        <button className="btn-secondary" style={{marginTop:'8px'}}
-          onClick={()=>syncUvRows([...uvRows,{x:'0.0',y:'0.0',z:'0.5',w:'0.5',weight:'0.25'}])}>
-          + Add UV Row
-        </button>
-      </div>
-
+    <>
       {/* Exclusion Zones */}
-      <div className="section-card">
+      <div className="ctrl-block">
+        <div className="mp-subtitle">Exclusion Zones</div>
         <div className="sb-st-card-header">
-          <h2 className="section-title">EXCLUSION ZONES</h2>
           <div className="sb-st-ex-header-actions">
             <Toggle checked={exEnabled} onChange={e=>setExEnabled(e.target.checked)} label={exEnabled?'Enabled':'Disabled'}/>
             {exclusionZones.length > 0 && (
-              <button className="btn-delete" onClick={()=>{setExclusionZones([]);setDraftZone(null);setSelectedZoneIdx(null);}}>Clear All</button>
+              <button className="ctrl-btn-danger" onClick={()=>{setExclusionZones([]);setDraftZone(null);setSelectedZoneIdx(null);}}>Clear All</button>
             )}
           </div>
         </div>
@@ -488,13 +454,13 @@ const Stars = ({
                 onClick={()=>setSelectedZoneIdx(i===selectedZoneIdx?null:i)}>
                 <span className="sb-st-ex-info-label">Zone {i+1}</span>
                 {i===selectedZoneIdx&&<code className="sb-st-ex-info-code">{zoneWorldCoords(zone)}</code>}
-                <button className="btn-delete-xs" style={{marginLeft:'auto'}} onClick={e=>{e.stopPropagation();const next=exclusionZones.filter((_,j)=>j!==i);setExclusionZones(next);setSelectedZoneIdx(prev=>prev===i?null:prev>i?prev-1:prev);}}>×</button>
+                <button className="ctrl-btn-delete" style={{marginLeft:'auto'}} onClick={e=>{e.stopPropagation();const next=exclusionZones.filter((_,j)=>j!==i);setExclusionZones(next);setSelectedZoneIdx(prev=>prev===i?null:prev>i?prev-1:prev);}}>×</button>
               </div>
             ))}
           </div>
         )}
-        <div style={{margin:'-24px',padding:'24px',cursor:exEnabled?'crosshair':'default'}} onMouseDown={onMouseDownEx}>
-          <div className="sb-st-ex-wrap">
+        <div style={{cursor:exEnabled?'crosshair':'default'}} onMouseDown={onMouseDownEx}>
+          <div className="ec-canvas-wrap sb-st-ex-wrap">
             <div ref={exWrapRef} style={{position:'absolute',inset:0,pointerEvents:'none'}}>
               <canvas ref={exCanvasRef} width={EX_RES} height={EX_RES} className="sb-st-ex-canvas"/>
             </div>
@@ -503,36 +469,37 @@ const Stars = ({
       </div>
 
       {/* UV Visualization */}
-      <div className="section-card">
-        <div className="sb-st-card-header" style={{marginBottom:'14px'}}>
-          <h2 className="section-title">UV VISUALIZATION</h2>
-          {previewImageData && <button className="btn-delete" onClick={onRemovePreview}>Remove</button>}
-        </div>
-        <div className="sb-st-upload-area" onClick={()=>fileInputRef.current?.click()}>
-          <span className="sb-st-upload-icon"/>
-          <span>{previewImageData?'Replace texture preview':'Upload texture preview'}</span>
-          <input ref={fileInputRef} type="file" style={{display:'none'}} accept="image/*,.dds" onChange={onImageUpload}/>
-        </div>
+      <div className="ctrl-block">
+        <div className="mp-subtitle">UV Visualization</div>
+        <DropSlot
+          acceptInput="image/*,.dds"
+          status={previewImageData ? 'done' : 'idle'}
+          idleText="Click or drop a texture preview"
+          doneText="Texture preview loaded"
+          onChange={onImageUpload}
+          onClear={onRemovePreview}
+        />
         {previewImageData && (
-          <div className="skybox-form-group" style={{marginTop:'14px',marginBottom:'6px'}}>
-            <label className="skybox-form-label">Texture Opacity</label>
+          <div className="ctrl-field" style={{marginTop:'14px',marginBottom:'6px'}}>
+            <div className="ctrl-label">Texture Opacity</div>
             <div className="sb-st-opacity-row">
               <RangeSlider min="0" max="1" step="0.01" value={Math.min(parseFloat(texOpacity)||0,1)} onChange={e=>setTexOpacity(e.target.value===''?'':parseFloat(e.target.value)||0)}/>
-              <input type="number" min="0" step="0.01" className="form-input sb-st-opacity-input" value={texOpacity} onChange={e=>setTexOpacity(e.target.value)}/>
+              <input type="number" min="0" step="0.01" className="ctrl-input sb-st-opacity-input" value={texOpacity} onChange={e=>setTexOpacity(e.target.value)}/>
             </div>
           </div>
         )}
-        <div className="skybox-form-group" style={{marginBottom:'14px'}}>
-          <label className="skybox-form-label">UV Overlay Opacity</label>
+        <div className="ctrl-field" style={{marginBottom:'14px'}}>
+          <div className="ctrl-label">UV Overlay Opacity</div>
           <div className="sb-st-opacity-row">
             <RangeSlider min="0" max="1" step="0.01" value={Math.min(parseFloat(uvOpacity)||0,1)} onChange={e=>setUvOpacity(e.target.value)}/>
-            <input type="number" min="0" step="0.01" className="form-input sb-st-opacity-input" value={uvOpacity} onChange={e=>setUvOpacity(e.target.value)}/>
+            <input type="number" min="0" step="0.01" className="ctrl-input sb-st-opacity-input" value={uvOpacity} onChange={e=>setUvOpacity(e.target.value)}/>
           </div>
         </div>
-        <canvas ref={uvCanvasRef} width={UV_RES} height={UV_RES} className="sb-st-uv-canvas"/>
+        <div className="ec-canvas-wrap sb-st-uv-canvas">
+          <canvas ref={uvCanvasRef} width={UV_RES} height={UV_RES} style={{width:'100%',height:'100%',display:'block',cursor:'default'}}/>
+        </div>
       </div>
-
-    </div>
+    </>
   );
 };
 

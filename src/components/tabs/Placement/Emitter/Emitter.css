@@ -35,32 +35,9 @@
 .emitter-tab .ec-legend-cards::-webkit-scrollbar,
 .emitter-tab .preview-panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
-/* ── 2. Area-mask upload widget ──────────────────────────────────── */
-
-.em-mask-upload {
-  display:       flex;
-  align-items:   center;
-  justify-content: center;
-  padding:       var(--space-lg) var(--space-md);
-  border:        1px dashed var(--ink-18);
-  background:    var(--surface-ghost);
-  cursor:        pointer;
-  font-family:   'Space Grotesk', sans-serif;
-  font-size:     0.78rem;
-  letter-spacing: 0.06em;
-  color:         var(--ink-45);
-  transition:
-    border-color  0.18s linear,
-    background    0.18s linear,
-    color         0.18s linear;
-  margin-bottom: var(--space-sm);
-}
-
-.em-mask-upload:hover {
-  border-color: var(--tab-color);
-  background:   color-mix(in srgb, var(--tab-color) 6%, transparent);
-  color:        var(--tab-color);
-}
+/* ── 2. Area-mask preview ─────────────────────────────────────────────
+   Upload affordance itself is the shared DropSlot (EntityPanel.css);
+   this is just the image thumbnail shown once a mask is loaded.        */
 
 .em-mask-preview {
   display:       flex;
@@ -80,13 +57,6 @@
   object-fit: contain;
   image-rendering: pixelated;
   opacity:   0.88;
-}
-
-.em-mask-dim {
-  font-family:    'JetBrains Mono', monospace;
-  font-size:      0.66rem;
-  letter-spacing: 0.08em;
-  color:          var(--ink-35);
 }
 
 /* ── 3. Accessibility ────────────────────────────────────────────── */

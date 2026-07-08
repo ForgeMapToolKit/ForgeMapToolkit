@@ -4,8 +4,8 @@
   "description": "Advanced Mapping Toolkit",
   "main": "electron/main.js",
   "bin": {
-  "fmt": "electron/cli.js"
-},
+    "fmt": "electron/cli.js"
+  },
   "scripts": {
     "dev": "vite",
     "prebuild": "node utils/generate-csp-hashes.js",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@uiw/react-color": "^2.9.6",
     "adm-zip": "^0.5.16",
+    "anser": "^2.3.5",
     "framer-motion": "^12.40.0",
     "highlight.js": "^11.11.1",
     "jszip": "^3.10.1",

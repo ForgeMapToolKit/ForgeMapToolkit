@@ -1,7 +1,11 @@
 # TAB DESIGN LAW
 ## ForgeMapToolkit — UI System for Tab Surfaces
-*Established 2026-06. Revised 2026-06-24 to match the shipped build (see Changelog).*
+*Established 2026-06. Revised 2026-06-24 to match the shipped build; class/token names
+refreshed 2026-07-08 after the `Shared/`/`Tabs/` PascalCase rename and the
+`WorkspaceConsole`→`TabLayout`, `EntityConsole`→`EntityPanel` component renames
+(see Changelog).*
 *This document is law. Deviations require justification — but the law follows the build, not the other way around: when the implementation is provably smarter than a rule here, the rule is corrected, not the build.*
+*Scope: verified against the three gold-standard tabs (`Tabs/Placement/{Wreckage,Props,Emitter}`). Other tabs may not yet comply — see `DESIGN_SYSTEM_MIGRATION.md`.*
 
 ---
 
@@ -98,13 +102,13 @@ The horizontal line problem is the primary failure mode of the previous system. 
 |------|------|-----|--------|
 | T1 | Structural | Max 1 per block. Marks a major boundary. No `--tab-color` glow. | `--line-soft` to `--line-medium` |
 | T2 | Functional | Field input baselines. **Always present at rest, even on empty fields** (see §5). | `rgba(255,255,255,0.09)` |
-| T3 | Accent | Exactly one per section. Always the Primary Button TraceLine. | `--tab-color` with bloom |
+| T3 | Accent | Exactly one per section. Always the Primary Button TraceLine (`.commit-button`). | `--tab-color` with bloom |
 
 ### Forbidden
 
 - `divider` component inside section content (only permitted at shell level)
 - `border-bottom` on check-rows, list items, or repeated elements
-- `subsection-head` with full-width `border-bottom` — replaced by Subtitle (staircase)
+- `.subsection-head` with full-width `border-bottom` — replaced by `.ctrl-subtitle` (staircase). Note: `.subsection-head` still physically exists in `primitives.css` but is unused by the gold-standard tabs (Wreckage/Props/Emitter use `.trace-subsection` for collapsible in-card headers instead, which is the vertical-tick form, not the forbidden full-width-border form) — don't copy it into a new tab.
 - More than one T3 accent line per section
 - Any element that creates a horizontal line through the full column width except T1 and T3
 
@@ -123,19 +127,19 @@ The original principle — "no element encloses itself in a border" — is **tru
 
 ### The button hierarchy
 
-Buttons are the primary design challenge. The system uses four distinct levels — dosed deliberately, never all at once.
+Buttons are the primary design challenge. The system uses four distinct levels — dosed deliberately, never all at once. Actual classes (`Shared/DesignSystem/primitives.css §5`):
 
-| Level | Name | Form | When |
-|-------|------|------|------|
-| 1 | **Primary** | TraceLine — no box, no fill. The glowing baseline IS the button. | One per section. Generate, Commit, Export. |
-| 2 | **Secondary CTA** | `border: 1px solid var(--tab-color)`, no fill. | When the user would genuinely miss it without a clear signal. Library, major overlays. |
-| 3 | **Normal** | Text + stub-line that grows on hover. No box, no fill. | Add, standard actions. |
-| 4 | **Leise** | Bare text, minimal hover reveal. | Rare helpers, destructive actions in context. |
+| Level | Name | Form | Class | When |
+|-------|------|------|------|------|
+| 1 | **Primary** | TraceLine — no box, no fill. The glowing baseline IS the button. | `commit-button` (always via `OutputChecklist`) | One per section. Generate, Commit, Export. |
+| 2 | **Secondary CTA** | `border: 1px solid var(--tab-color)`, no fill. | `ctrl-btn-library` | When the user would genuinely miss it without a clear signal. Library, major overlays. |
+| 3 | **Normal** | Text + stub-line that grows on hover. No box, no fill. | `ctrl-btn-add` | Add, standard actions. |
+| 4 | **Leise** | Bare text, minimal hover reveal. | `ctrl-btn-meta` (metadata), `ctrl-btn-delete` (destructive glyph), `ctrl-btn-danger` (labelled destructive), `ctrl-btn-close` (dismiss) | Rare helpers, destructive actions in context. |
 
 ### The key distinction: noise vs. signal
 
 A `border: 1px solid rgba(255,255,255,0.18)` is noise — a generic rectangle.
-A `border: 1px solid var(--tab-color)` is a signal — the same color as the Subtitle, the Rail, the TraceLine. The box is not a container, it is a carrier of tab identity.
+A `border: 1px solid var(--tab-color)` is a signal — the same color as the Subtitle (`.ctrl-subtitle`), the Rail, the TraceLine (`.commit-button`). The box is not a container, it is a carrier of tab identity.
 
 **The footer READ MORE button is the reference implementation.** Colored border, no fill, dosiert — one per card, only where the user would otherwise be uncertain.
 
@@ -223,12 +227,21 @@ Status semantics: success, warning, error.
 
 ### Ink scale usage (the neutral spine all three roles sit on)
 
-- `--ink-92` — Title, dominant text
-- `--ink-72` — Normal interactive elements
-- `--ink-55` — Standard content
+`tokens.css` defines a primary 6-step scale plus a wider set of finer-grained
+aliases (kept for existing rules that need an in-between value — both are live,
+not one canonical vs. one deprecated):
+
+- `--ink-100` — Title, dominant text (aliased as `--ink-92`/`-95` in some rules)
+- `--ink-72` — Normal interactive elements (e.g. `ctrl-btn-close:hover`)
+- `--ink-55` — Standard content (e.g. `subsection-head-title`, `ctrl-btn-meta:hover`)
+- `--ink-40` — Muted controls / state text
 - `--ink-28` — Leise / meta information
-- `--ink-22` — Barely visible labels
-- Below `--ink-22` — decorative / structural only, not readable text
+- `--ink-22`/`-16` — Barely visible labels (e.g. `field-hint`)
+- Below `--ink-11` — decorative / structural only, not readable text
+
+New rules should reach for the primary scale (`100/72/55/40/28/16`) first; only use
+a finer alias (e.g. `--ink-45`) when matching an existing sibling rule that already
+uses it.
 
 ---
 
@@ -270,6 +283,22 @@ The solution is not "fewer lines" — it is **intentional lines with clear hiera
 ---
 
 ## CHANGELOG
+
+**2026-07-08 — refreshed class/token names after the `Shared/`/`Tabs/` rename; scoped to Wreckage/Props/Emitter.**
+
+- No principle changed. Updated concrete references only: `WorkspaceConsole` →
+  `TabLayout`, `EntityConsole` → `EntityPanel`, the button hierarchy now names the
+  actual `ctrl-btn-*`/`commit-button`/`station` classes (the `action-button`/
+  `button-solid` vocabulary drafted in an earlier roadmap was never shipped under
+  those names).
+- §7 Ink scale: documented the real primary 6-step scale (`100/72/55/40/28/16`)
+  alongside the finer-grained compat aliases (`92`, `22`, …) that individual rules
+  still use — both are live, not one canonical vs. one dead.
+- §4 Line Law: clarified that `.subsection-head` (forbidden form) still physically
+  exists in `primitives.css` but is unused by the gold-standard tabs, which use
+  `.trace-subsection` (the permitted vertical-tick form) instead.
+- Added scope note: this document is verified against Wreckage/Props/Emitter only;
+  other tabs may still diverge — see `DESIGN_SYSTEM_MIGRATION.md`.
 
 **2026-06-24 — synced law to shipped build after an adversarial design review.**
 

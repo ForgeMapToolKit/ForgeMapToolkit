@@ -5,7 +5,7 @@
  * Aufruf im Parent: {showHelp && <Help onClose={() => setShowHelp(false)} />}
  */
 import React, { useState } from 'react';
-import HelpPanel from '../../../Shared/Ui/HelpPanel/HelpPanel.jsx';
+import HelpConsole from '../../../Shared/Ui/HelpPanel/HelpPanel.jsx';
 
 // ─────────────────────────────────────────────────────────────────
 const SECTIONS = [

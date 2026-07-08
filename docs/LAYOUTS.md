@@ -1,9 +1,14 @@
 # FMT Layout System
 
-> Introduced as part of the UI Unification (see UI_UNIFICATION_ROADMAP.md).
+> Introduced as part of the UI Unification (see `ROADMAP.md` Phase 2 — the former
+> standalone `UI_UNIFICATION_ROADMAP.md` was merged into it 2026-07-08).
 > This document defines the universal layout system used by all tabs and
 > sections in FMT. It replaces the previous ad-hoc distinction between
 > `no-aside`, `aside-balanced`, and `aside-wide`.
+>
+> Verified 2026-07-08: `Shared/Ui/TabLayout/TabLayout.jsx` implements this spec
+> as written (`layoutMode` prop, all four X/Y/Z/W renderers) — this document is
+> current, not aspirational, at least for the props/behavior described below.
 
 ---
 
@@ -309,22 +314,30 @@ hidden until output exists.
 | PreviewImageTab | all | Z | parallel | Mapconfig + Preview (`align-self: start`) |
 | HistoryTab | all | X | half | Snapshots + Diff Viewer |
 | ContributionsTab | all | Z | exclusive | Single vs. Merged upload, 2nd Rail (Asset-Type) |
-| SettingsTab | — | — | — | Exempt from this system — self-contained settings shell with its own internal layout. No WorkspaceConsole. |
+| SettingsTab | — | — | — | Exempt from this system — self-contained settings shell with its own internal layout. No `TabLayout`. |
+
+> Note (2026-07-08): only the `WreckageTab`/`PropsTab`/`EmitterTab` (→ Layout X ·
+> fixed) rows above are verified against shipped code. The rest of this table
+> reflects the intended assignment for tabs not yet migrated — treat as a plan,
+> not a confirmed fact, until that tab is actually on `TabLayout`. See
+> `docs/ROADMAP.md` Phase 2 for migration status.
 
 ---
 
 ## Relation to the Roadmap
 
-This document replaces Steps 2 and 3c of UI_UNIFICATION_ROADMAP:
+This document replaces what used to be Steps 2 and 3c of a standalone
+`UI_UNIFICATION_ROADMAP.md` (merged into `docs/ROADMAP.md` Phase 2 on 2026-07-08):
 
 - `aside-balanced` / `aside-wide` → **Layout X** (`controlsWidth: fixed | half`)
 - `no-aside` → **Layout Y** (standby field replaces empty space)
 - Internal grid → **Layout Z** (`groupMode: parallel | exclusive`)
 - Full-width canvas / output → **Layout W** (`canvasToolbar: true | false`)
 
-**WorkspaceConsole target API:**
+**`TabLayout` API** (component: `Shared/Ui/TabLayout/TabLayout.jsx`, renamed from
+the originally-planned `WorkspaceConsole`) — matches the shipped implementation:
 ```jsx
-<WorkspaceConsole
+<TabLayout
   layoutMode="x"           // 'x' | 'y' | 'z' | 'w'
   controlsWidth="fixed"    // X only: 'fixed' | 'half'
   groupMode="parallel"     // Z only: 'parallel' | 'exclusive'
@@ -335,5 +348,7 @@ This document replaces Steps 2 and 3c of UI_UNIFICATION_ROADMAP:
 />
 ```
 
-**`StandbyField` component:** lives in `shared/ui/StandbyField/`.
-Tab-independent. Props: `ghostLabel`, `readout: string[]`, `cursorVisible`.
+**`StandbyField`:** not a standalone component/file — it's an internal
+sub-component defined inside `TabLayout.jsx` itself (rendered by Layout Y).
+Props: `ghostLabel`, `readout: string[]`, `cursorVisible`. The earlier plan to
+extract it to `shared/ui/StandbyField/` was not carried out; there was no need to.

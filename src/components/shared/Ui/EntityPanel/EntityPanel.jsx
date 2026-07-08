@@ -249,7 +249,10 @@ const LegendRail = ({
             onClick={() => onSelect?.(row.id, idx)}
           >
             <span className="ec-card-dot" style={{ backgroundColor: row.color }} />
-            <span className="ec-legend-card-name">{row.label}</span>
+            <div className="ec-legend-card-info">
+              <span className="ec-legend-card-name">{row.label}</span>
+              {row.meta && <span className="ec-legend-card-meta">{row.meta}</span>}
+            </div>
             {row.pts != null && <span className="ec-legend-card-count">{row.pts}</span>}
           </div>
         ))}
@@ -258,21 +261,16 @@ const LegendRail = ({
   </div>
 );
 
-/* ── MirrorDropdown — custom dropdown replacing the native mirror-mode
-   <select> on the canvas header. Shared by every placement tab. ──── */
+/* ── Dropdown — custom dropdown replacing native <select>s across every
+   placement tab. Gives full control over panel background, option
+   spacing, and selected-state styling that Chromium's native OS widget
+   ignores via CSS. `options` = [{ value, label }]. ──────────────────── */
 
-const MIRROR_OPTIONS = [
-  { value: 'none',       label: 'No Mirror' },
-  { value: 'diagonal',   label: 'Diagonal'  },
-  { value: 'horizontal', label: 'Horizontal'},
-  { value: 'vertical',   label: 'Vertical'  },
-];
-
-export const MirrorDropdown = ({ value, onChange, triggerRef }) => {
+export const Dropdown = ({ options, value, onChange, triggerRef, ariaLabel = 'Select option' }) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
-  const selected = MIRROR_OPTIONS.find(o => o.value === value) ?? MIRROR_OPTIONS[0];
+  const selected = options.find(o => o.value === value) ?? options[0];
 
   useEffect(() => {
     if (!open) return;
@@ -298,15 +296,15 @@ export const MirrorDropdown = ({ value, onChange, triggerRef }) => {
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className="wr-mirror-label">{selected.label}</span>
+        <span className="wr-mirror-label">{selected?.label}</span>
         <svg className="wr-mirror-chevron" width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
           <path d="M1.5 3L4.5 6L7.5 3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="square"/>
         </svg>
       </button>
 
       {open && (
-        <ul className="wr-mirror-panel" role="listbox" aria-label="Mirror mode">
-          {MIRROR_OPTIONS.map(opt => (
+        <ul className="wr-mirror-panel" role="listbox" aria-label={ariaLabel}>
+          {options.map(opt => (
             <li
               key={opt.value}
               role="option"
@@ -322,6 +320,21 @@ export const MirrorDropdown = ({ value, onChange, triggerRef }) => {
     </div>
   );
 };
+
+/* ── MirrorDropdown — Dropdown preset for the canvas-header mirror-mode
+   control. Kept as its own export since every placement tab imports it
+   by name. ───────────────────────────────────────────────────────────── */
+
+const MIRROR_OPTIONS = [
+  { value: 'none',       label: 'No Mirror' },
+  { value: 'diagonal',   label: 'Diagonal'  },
+  { value: 'horizontal', label: 'Horizontal'},
+  { value: 'vertical',   label: 'Vertical'  },
+];
+
+export const MirrorDropdown = ({ value, onChange, triggerRef }) => (
+  <Dropdown options={MIRROR_OPTIONS} value={value} onChange={onChange} triggerRef={triggerRef} ariaLabel="Mirror mode" />
+);
 
 /* ── EmitterToggleBlock — per-entity direct emitter list with source ─
    Default collapsed (trace-subsection pattern). Extracted from the

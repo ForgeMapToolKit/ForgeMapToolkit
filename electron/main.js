@@ -44,6 +44,7 @@ require('./modules/scmap');
 require('./modules/map-resizer');
 require('./modules/preview');
 require('./modules/cli-runner');
+require('./modules/cli-session-store');
 require('./modules/editor-bridge').register();
 registerSettingsIpc();
 

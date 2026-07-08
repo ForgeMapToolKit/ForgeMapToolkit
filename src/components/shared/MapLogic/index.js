@@ -4,3 +4,4 @@ export * from './mapCanvas';
 export { usePersistentState } from './usePersistentState';
 export { useMapInfo } from './useMapInfo';
 export { useScmapPreview } from './useScmapPreview';
+export { loadImageChannel, sampleChannel } from './imageChannels';
