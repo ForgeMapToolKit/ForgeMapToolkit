@@ -407,11 +407,9 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: none;
 }
-.section-content::-webkit-scrollbar { width: 4px; }
-.section-content::-webkit-scrollbar-track { background: transparent; }
-.section-content::-webkit-scrollbar-thumb { background: var(--line-strong); }
-.section-content::-webkit-scrollbar-thumb:hover { background: var(--ink-28); }
+.section-content::-webkit-scrollbar { display: none; }
 
 /* ══════════════════════════════════════════════════════════════════
    PREVIEW PANEL — fixed right column, accent edge

@@ -139,8 +139,8 @@ export const FullscreenDome = ({
       <div className="dome-fullscreen-inner">
         <div className="dome-fullscreen-sidebar">
           <div className="dome-fs-header">
-            <span style={{color:'var(--skybox-generator-color)',fontFamily:'Space Grotesk',fontWeight:700,fontSize:'0.9rem',letterSpacing:'0.1em',textTransform:'uppercase'}}>⬡ Dome Editor</span>
-            <button className="btn-delete-sm" onClick={onClose} style={{width:36,height:36,minWidth:36,padding:0,fontSize:'1.1rem'}}>×</button>
+            <span className="ctrl-subtitle ctrl-subtitle--flush">Dome Editor</span>
+            <button className="ctrl-btn-close" onClick={onClose} aria-label="Close">×</button>
           </div>
           <div className="ctrl-field">
             <div className="ctrl-label">Horizon Color</div>
@@ -150,7 +150,6 @@ export const FullscreenDome = ({
             <div className="ctrl-label">Horizon Height</div>
             <input className="ctrl-input" value={horizonHeight} onChange={e=>setHorizonHeight(e.target.value)} placeholder="-42.5"/>
           </div>
-          <div className="dome-fs-divider"/>
           <div className="ctrl-field">
             <div className="ctrl-label">Zenith Color</div>
             <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)} />
@@ -159,11 +158,9 @@ export const FullscreenDome = ({
             <div className="ctrl-label">Zenith Height</div>
             <input className="ctrl-input" value={zenithHeight} onChange={e=>setZenithHeight(e.target.value)} placeholder="293.507"/>
           </div>
-          <div className="dome-fs-divider"/>
-          <div className="dome-fs-stat"><span>SphereLerp</span><span style={{color:'var(--skybox-generator-color)',fontFamily:'monospace'}}>{sphereLerp.toFixed(4)}</span></div>
-          <div className="dome-fs-stat"><span>Scale</span><span style={{color:'var(--skybox-generator-color)',fontFamily:'monospace'}}>{Math.round(scale)}</span></div>
-          <div className="dome-fs-divider"/>
-          <button onClick={()=>setShowLabels(v=>!v)} className="btn-secondary" style={{width:'100%',marginTop:'4px'}}>
+          <div className="dome-fs-stat"><span className="ctrl-label">SphereLerp</span><span className="dome-fs-stat-val">{sphereLerp.toFixed(4)}</span></div>
+          <div className="dome-fs-stat"><span className="ctrl-label">Scale</span><span className="dome-fs-stat-val">{Math.round(scale)}</span></div>
+          <button onClick={()=>setShowLabels(v=>!v)} className="ctrl-btn-add">
             {showLabels?'Hide Labels':'Show Labels'}
           </button>
         </div>
@@ -216,7 +213,16 @@ export const ColorPicker = ({ value, onChange }) => {
   useEffect(() => {
     if (!open || !swatchRef.current) return;
     const rect = swatchRef.current.getBoundingClientRect();
-    setPos({ top: rect.bottom + 8, left: rect.left, width: rect.width });
+    // The popup is portaled to document.body, outside the .skybox-tab subtree
+    // that defines --tab-color — forward the resolved values so the accent
+    // cascade still reaches it.
+    const cs = getComputedStyle(swatchRef.current);
+    setPos({
+      top: rect.bottom + 8, left: rect.left, width: rect.width,
+      tabColor:       cs.getPropertyValue('--tab-color').trim(),
+      tabGlow:        cs.getPropertyValue('--tab-glow').trim(),
+      tabGlowStrong:  cs.getPropertyValue('--tab-glow-strong').trim(),
+    });
   }, [open]);
 
   const { h, s, v } = hexToHsv(safeValue);
@@ -242,65 +248,87 @@ export const ColorPicker = ({ value, onChange }) => {
 
   return (
     <div className="sb-cp-swatch-wrap" ref={swatchRef}>
-      <div className="sb-cp-swatch" style={{ background: safeValue }}
-        onClick={() => setOpen(o => !o)} title={safeValue}/>
+      <button
+        type="button"
+        className={`sb-cp-trigger${open ? ' open' : ''}`}
+        onClick={() => setOpen(o => !o)}
+        title={safeValue}
+      >
+        <span className="sb-cp-trigger-swatch" style={{ background: safeValue }}/>
+        <span className="sb-cp-trigger-hex">{safeValue.toUpperCase()}</span>
+      </button>
       {open && ReactDOM.createPortal(
         <div ref={popupRef} className="sb-cp-popup"
-          style={{ position:'fixed', top: pos.top, left: pos.left, zIndex: 99999 }}>
-          {/* SV Gradient */}
-          <div ref={svRef} className="sb-cp-sv"
-            style={{ background: `hsl(${h},100%,50%)` }}
-            onClick={onSVClick}>
-            <div className="sb-cp-sv-white"/>
-            <div className="sb-cp-sv-black"/>
-            <div className="sb-cp-sv-cursor"
-              style={{ left:`${s*100}%`, top:`${(1-v)*100}%`, background: safeValue }}/>
-          </div>
-          {/* Hue slider */}
-          <div ref={hueRef} className="sb-cp-hue" onClick={onHueClick}>
-            <div className="sb-cp-hue-cursor" style={{ left:`${(h/360)*100}%` }}/>
-          </div>
-          {/* Inputs */}
-          <div className="sb-cp-inputs">
-            <div className="sb-cp-input-col">
-              <div className="sb-cp-input-hex-wrap">
-                <span className="sb-cp-input-hash">#</span>
-                <input className="sb-cp-input sb-cp-input--hex"
-                  value={editingHex ? hexEdit : safeValue.slice(1).toUpperCase()}
-                  onFocus={() => { setEditingHex(true); setHexEdit(safeValue.slice(1).toUpperCase()); }}
-                  onChange={e => setHexEdit(e.target.value)}
-                  onBlur={() => { setEditingHex(false); const h2='#'+hexEdit; if(isValidHex(h2)) onChange({target:{value:h2}}); }}
-                  onKeyDown={e => { if(e.key==='Enter'){setEditingHex(false);const h2='#'+hexEdit;if(isValidHex(h2))onChange({target:{value:h2}});} }}
-                  maxLength={6} spellCheck={false}/>
+          style={{
+            position:'fixed', top: pos.top, left: pos.left, zIndex: 99999,
+            '--tab-color': pos.tabColor, '--tab-glow': pos.tabGlow, '--tab-glow-strong': pos.tabGlowStrong,
+          }}>
+          {/* Landscape layout: SV+hue column on the left, fields stacked to
+              the right — wide, not tall. */}
+          <div className="sb-cp-popup-top">
+            <div className="sb-cp-sv-col">
+              {/* SV field — machined bezel, same recessed-slot language as .ctrl-toggle */}
+              <div className="sb-cp-sv-frame">
+                <div ref={svRef} className="sb-cp-sv"
+                  style={{ background: `hsl(${h},100%,50%)` }}
+                  onClick={onSVClick}>
+                  <div className="sb-cp-sv-white"/>
+                  <div className="sb-cp-sv-black"/>
+                  <div className="sb-cp-sv-cursor"
+                    style={{ left:`${s*100}%`, top:`${(1-v)*100}%`, background: safeValue }}/>
+                </div>
               </div>
-              <span className="sb-cp-input-label">HEX</span>
+              {/* Hue — recessed track, travelling pole (same mechanic as .ctrl-toggle-pole) */}
+              <div className="sb-cp-hue-frame">
+                <div ref={hueRef} className="sb-cp-hue" onClick={onHueClick}>
+                  <div className="sb-cp-hue-cursor" style={{ left:`${(h/360)*100}%` }}/>
+                </div>
+              </div>
             </div>
-            {[['R',r,0],['G',g,1],['B',b,2]].map(([ch,chVal]) => (
-              <div key={ch} className="sb-cp-input-col">
-                <input className="sb-cp-input"
-                  value={editingRgb ? rgbEdit[ch.toLowerCase()] : chVal}
-                  onFocus={() => { setEditingRgb(true); setRgbEdit({r:String(r),g:String(g),b:String(b)}); }}
-                  onChange={e => setRgbEdit(prev => ({...prev,[ch.toLowerCase()]:e.target.value}))}
-                  onBlur={() => {
-                    setEditingRgb(false);
-                    const rv=Math.max(0,Math.min(255,parseInt(rgbEdit.r)||0));
-                    const gv=Math.max(0,Math.min(255,parseInt(rgbEdit.g)||0));
-                    const bv=Math.max(0,Math.min(255,parseInt(rgbEdit.b)||0));
-                    onChange({target:{value:'#'+[rv,gv,bv].map(x=>x.toString(16).padStart(2,'0')).join('')}});
-                  }}
-                  onKeyDown={e => { if(e.key==='Enter'){
-                    setEditingRgb(false);
-                    const rv=Math.max(0,Math.min(255,parseInt(rgbEdit.r)||0));
-                    const gv=Math.max(0,Math.min(255,parseInt(rgbEdit.g)||0));
-                    const bv=Math.max(0,Math.min(255,parseInt(rgbEdit.b)||0));
-                    onChange({target:{value:'#'+[rv,gv,bv].map(x=>x.toString(16).padStart(2,'0')).join('')}});
-                  }}}
-                  maxLength={3}/>
-                <span className="sb-cp-input-label">{ch}</span>
+            {/* Fields — the same never-boxed baseline as every other ctrl-input in the app */}
+            <div className="sb-cp-fields-col">
+              <div className="ctrl-field">
+                <div className="ctrl-label">Hex</div>
+                <div className="sb-cp-input-hex-wrap">
+                  <span className="sb-cp-input-hash">#</span>
+                  <input className="ctrl-input sb-cp-input--hex"
+                    value={editingHex ? hexEdit : safeValue.slice(1).toUpperCase()}
+                    onFocus={() => { setEditingHex(true); setHexEdit(safeValue.slice(1).toUpperCase()); }}
+                    onChange={e => setHexEdit(e.target.value)}
+                    onBlur={() => { setEditingHex(false); const h2='#'+hexEdit; if(isValidHex(h2)) onChange({target:{value:h2}}); }}
+                    onKeyDown={e => { if(e.key==='Enter'){setEditingHex(false);const h2='#'+hexEdit;if(isValidHex(h2))onChange({target:{value:h2}});} }}
+                    maxLength={6} spellCheck={false}/>
+                </div>
               </div>
-            ))}
+              <div className="sb-cp-rgb-row">
+                {[['R',r,0],['G',g,1],['B',b,2]].map(([ch,chVal]) => (
+                  <div key={ch} className="ctrl-field">
+                    <div className="ctrl-label">{ch}</div>
+                    <input className="ctrl-input sb-cp-input--num"
+                      value={editingRgb ? rgbEdit[ch.toLowerCase()] : chVal}
+                      onFocus={() => { setEditingRgb(true); setRgbEdit({r:String(r),g:String(g),b:String(b)}); }}
+                      onChange={e => setRgbEdit(prev => ({...prev,[ch.toLowerCase()]:e.target.value}))}
+                      onBlur={() => {
+                        setEditingRgb(false);
+                        const rv=Math.max(0,Math.min(255,parseInt(rgbEdit.r)||0));
+                        const gv=Math.max(0,Math.min(255,parseInt(rgbEdit.g)||0));
+                        const bv=Math.max(0,Math.min(255,parseInt(rgbEdit.b)||0));
+                        onChange({target:{value:'#'+[rv,gv,bv].map(x=>x.toString(16).padStart(2,'0')).join('')}});
+                      }}
+                      onKeyDown={e => { if(e.key==='Enter'){
+                        setEditingRgb(false);
+                        const rv=Math.max(0,Math.min(255,parseInt(rgbEdit.r)||0));
+                        const gv=Math.max(0,Math.min(255,parseInt(rgbEdit.g)||0));
+                        const bv=Math.max(0,Math.min(255,parseInt(rgbEdit.b)||0));
+                        onChange({target:{value:'#'+[rv,gv,bv].map(x=>x.toString(16).padStart(2,'0')).join('')}});
+                      }}}
+                      maxLength={3}/>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="sb-cp-presets-label">PRESETS</div>
+          <div className="ctrl-label sb-cp-presets-label">Presets</div>
           <div className="sb-cp-presets">
             {SKYBOX_PRESET_COLORS.map(c => (
               <div key={c} className="sb-cp-preset" style={{background:c}}
@@ -338,9 +366,11 @@ export const EditorBridgeBadge = ({ bridgeState, bridgeLoadedMap, mapName, onBri
 
   return (
     <div className="ctrl-action-row">
-      <span className={`ctrl-badge ${BRIDGE_BADGE_VARIANT[bridgeState] ?? ''}`.trim()}>
-        {BRIDGE_LABEL[bridgeState]}
-      </span>
+      {!isDisconnected && (
+        <span className={`ctrl-badge ${BRIDGE_BADGE_VARIANT[bridgeState] ?? ''}`.trim()}>
+          {BRIDGE_LABEL[bridgeState]}
+        </span>
+      )}
       {isMismatch && bridgeLoadedMap && (
         <span className="sb-field-help">Editor has: {bridgeLoadedMap}</span>
       )}
@@ -348,7 +378,7 @@ export const EditorBridgeBadge = ({ bridgeState, bridgeLoadedMap, mapName, onBri
       {/* Action button */}
       {(isDisconnected || isMismatch) ? (
         <button
-          className="ctrl-btn-add"
+          className="btn-library"
           onClick={onBridgeConnect}
           disabled={noMapName}
           title={noMapName ? 'Set a Map Name first' : 'Connect to running FAF Map Editor'}

@@ -1,12 +1,115 @@
+<div class="fcv-content">
+
 <h1>Tech Stack</h1>
 
 <p>
-  This is placeholder content for the &quot;Tech Stack&quot; article. Final
-  copy gets written in Phase 6 of the footer-content-feature roadmap.
+  ForgeMapToolkit runs as a native desktop application rather than a web
+  app. Advanced mapping requires direct filesystem access to the game
+  install, binary parsing of <code>.scmap</code> files, and writing
+  output straight into the maps folder. None of that is possible from a
+  browser sandbox, so the app is built on a stack that bridges native OS
+  access with a full browser rendering engine for the UI.
 </p>
 
+<h2>Core Stack</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Choice</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Desktop runtime</td>
+      <td>Electron</td>
+      <td>Bundled Node.js handles the binary <code>.scmap</code> parser, DDS encode and decode, SCD and ZIP scanning, and direct writes to the maps folder. Bundled Chromium keeps canvas rendering consistent across every user's Windows version.</td>
+    </tr>
+    <tr>
+      <td>UI framework</td>
+      <td>React 18</td>
+      <td>Handles deeply nested, performance-sensitive state such as the 500-unit library, the 60fps Bézier curve editors in the Skybox Generator, and the Poisson disk sampling used for prop and emitter placement.</td>
+    </tr>
+    <tr>
+      <td>Build tool</td>
+      <td>Vite</td>
+      <td>Instant hot module replacement means library and canvas state survive a rebuild. A full library scan takes around 30 seconds, so losing that state on every code change would make development painful.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Key Libraries</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>Used for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>jszip / adm-zip</td>
+      <td>Reading SCD and ZIP archives from the game install, including unit and blueprint scanning</td>
+    </tr>
+    <tr>
+      <td>sharp</td>
+      <td>Image processing for texture and prop asset generation</td>
+    </tr>
+    <tr>
+      <td>three</td>
+      <td>3D preview rendering</td>
+    </tr>
+    <tr>
+      <td>framer-motion</td>
+      <td>UI animation across the TRACE design system</td>
+    </tr>
+    <tr>
+      <td>highlight.js / rehype-highlight</td>
+      <td>Syntax highlighting for code blocks, including the CLI and footer article viewer</td>
+    </tr>
+    <tr>
+      <td>react-markdown / remark-gfm</td>
+      <td>Rendering Markdown content such as changelogs and documentation</td>
+    </tr>
+    <tr>
+      <td>anser</td>
+      <td>Parsing ANSI escape codes for the CLI terminal component</td>
+    </tr>
+    <tr>
+      <td>@uiw/react-color</td>
+      <td>Color pickers used across tools like the Skybox Generator</td>
+    </tr>
+    <tr>
+      <td>electron-builder</td>
+      <td>Packaging the app into a single distributable for Windows, macOS, and Linux</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Architecture</h2>
+
 <p>
-  Until then this fragment exists purely to prove the loading pipeline end
-  to end: Footer.jsx -> FooterContentViewer -> IPC (read-footer-article)
-  -> this file at public/footer/content/techstack.html.
+  The main process, running Node.js, owns everything filesystem and
+  binary related. This includes the custom <code>scmap.js</code> parser,
+  SCD archive scanning, DDS conversion, and settings storage. The
+  renderer process, running React inside Chromium, owns all UI state.
+  The two communicate over more than twenty IPC channels, which keeps
+  the UI responsive during long operations like a full library scan and
+  keeps binary parsing isolated from the rendering process.
 </p>
+
+<div class="fcv-callout">
+  <p>
+    Alternatives like Tauri, NW.js, and Python with PyQt were considered
+    and set aside. Tauri would require rewriting the existing binary
+    parsing and placement algorithms in Rust for marginal binary size
+    savings, and its system WebView is less consistent across Windows
+    versions than Electron's bundled Chromium. The reasoning behind each
+    decision is documented in full for contributors.
+  </p>
+</div>
+
+</div>

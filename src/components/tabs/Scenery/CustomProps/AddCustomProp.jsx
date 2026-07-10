@@ -215,8 +215,8 @@ function FolderDropZone({ folderName, fileList, onFolder, status, propCount }) {
 function NumField({ label, value, onChange, min, step = 0.01 }) {
   return (
     <div className="acpo-field">
-      <label className="field-label">{label}</label>
-      <input type="number" className="field-input"
+      <label className="ctrl-label">{label}</label>
+      <input type="number" className="ctrl-input"
         value={value} min={min} step={step}
         onChange={e => onChange(parseFloat(e.target.value) || 0)} />
     </div>
@@ -684,20 +684,22 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
 
   return (
     <OuterWrapper>
-      <div className="acpo-body">
+      <div className="ctrl-col">
 
           {/* ── Input Mode ── */}
-          <div className="acpo-section">
-            <label className="acpo-section-label">INPUT MODE</label>
-            <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-              <button className={`station option-row${inputMode === 'manual' ? ' active' : ''}`}
-                onClick={() => setInputMode('manual')} style={{ flex: 1 }}>
-                <div className="option-row-head"><span className="option-label">Manual</span></div>
-              </button>
-              <button className={`station option-row${inputMode === 'folder' ? ' active' : ''}`}
-                onClick={() => setInputMode('folder')} style={{ flex: 1 }}>
-                <div className="option-row-head"><span className="option-label">Drop Folder</span></div>
-              </button>
+          <div className="ctrl-block">
+            <div className="ctrl-subtitle">Input Mode</div>
+            <div className="ctrl-content">
+              <div className="ctrl-option-group" style={{ flexDirection: 'row', gap: 'var(--space-sm)' }}>
+                <button className={`ctrl-option${inputMode === 'manual' ? ' active' : ''}`}
+                  onClick={() => setInputMode('manual')} style={{ flex: 1 }}>
+                  <div className="ctrl-option-label">Manual</div>
+                </button>
+                <button className={`ctrl-option${inputMode === 'folder' ? ' active' : ''}`}
+                  onClick={() => setInputMode('folder')} style={{ flex: 1 }}>
+                  <div className="ctrl-option-label">Drop Folder</div>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -706,22 +708,25 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
               ═══════════════════════════ */}
           {inputMode === 'folder' && (
             <>
-              <div className="acpo-section">
-                <FolderDropZone
-                  folderName={folderName}
-                  fileList={folderFiles}
-                  onFolder={handleFolderDrop}
-                  status={folderStatus}
-                  propCount={folderProps.length > 0 ? folderProps.length : (folderBp?._bpCount ?? 1)}
-                />
+              <div className="ctrl-block">
+                <div className="ctrl-content">
+                  <FolderDropZone
+                    folderName={folderName}
+                    fileList={folderFiles}
+                    onFolder={handleFolderDrop}
+                    status={folderStatus}
+                    propCount={folderProps.length > 0 ? folderProps.length : (folderBp?._bpCount ?? 1)}
+                  />
+                </div>
               </div>
 
               {/* ── Multi-prop tabs (flat folder with several .bp files) ── */}
               {folderProps.length > 1 && (
-                <div className="acpo-section">
-                  <label className="acpo-section-label">
-                    PROPS IN FOLDER ({folderProps.length})
-                  </label>
+                <div className="ctrl-block">
+                  <div className="ctrl-subtitle">
+                    Props in Folder ({folderProps.length})
+                  </div>
+                  <div className="ctrl-content">
                   <div className="acpo-bp-tabs" style={{ flexWrap: 'wrap' }}>
                     {folderProps.map((p, i) => (
                       <button
@@ -751,6 +756,7 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
                         : `Each prop gets its own folder with individual albedo & normal map`}
                     </span>
                   </div>
+                  </div>
                 </div>
               )}
 
@@ -762,15 +768,16 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
                 const hasEdits = !!propBpEdits[prop.name];
                 const isTree = prop.propType === 'tree';
                 return (
-                  <div className="acpo-section">
-                    <label className="acpo-section-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {folderProps.length > 1 ? `VALUES: ${prop.name}` : 'VALUES FROM PROP.BP'}
+                  <div className="ctrl-block">
+                    <div className="ctrl-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {folderProps.length > 1 ? `Values: ${prop.name}` : 'Values from prop.bp'}
                       {hasEdits && (
-                        <button className="action-button" onClick={() => resetPropBpEdits(prop.name)} title="Reset changes">
+                        <button className="ctrl-btn-add" onClick={() => resetPropBpEdits(prop.name)} title="Reset changes">
                           ↺ Reset
                         </button>
                       )}
-                    </label>
+                    </div>
+                    <div className="ctrl-content">
                     <div className="acpo-fields-grid">
                       <NumField label="Reclaim Mass"   value={vals.reclaimMass   ?? 0} onChange={v => setPropBpField(prop.name, 'reclaimMass', v)}   step={1}     min={0} />
                       <NumField label="Reclaim Energy" value={vals.reclaimEnergy ?? 0} onChange={v => setPropBpField(prop.name, 'reclaimEnergy', v)} step={1}     min={0} />
@@ -786,8 +793,8 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
                       )}
                     </div>
                     <div className="acpo-field acpo-field-full" style={{ marginTop: 8 }}>
-                      <label className="field-label">Help Text</label>
-                      <input className="field-input" value={vals.helpText ?? ''}
+                      <label className="ctrl-label">Help Text</label>
+                      <input className="ctrl-input" value={vals.helpText ?? ''}
                         onChange={e => setPropBpField(prop.name, 'helpText', e.target.value)}
                         placeholder={prop.name} />
                     </div>
@@ -805,22 +812,25 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
                         </pre>
                       </details>
                     )}
+                    </div>
                   </div>
                 );
               })()}
 
               {/* Detected type note */}
               {folderProps.length > 0 && (
-                <div className="acpo-section">
-                  <div className="acpo-folder-type-note">
-                    <span>{propType === 'tree' ? '' : ''}</span>
-                    <span>
-                      {folderProps.length > 1
-                        ? packTogether
-                          ? `Pack Together → one folder "${folderName}" with ${folderProps.length} props`
-                          : `Separate folders → ${folderProps.length} props, individual texture copies`
-                        : `Detected type: ${propType === 'tree' ? 'Tree' : 'Rock'}${propType === 'tree' ? ' — proptree.lua' : ''}`}
-                    </span>
+                <div className="ctrl-block">
+                  <div className="ctrl-content">
+                    <div className="acpo-folder-type-note">
+                      <span>{propType === 'tree' ? '' : ''}</span>
+                      <span>
+                        {folderProps.length > 1
+                          ? packTogether
+                            ? `Pack Together → one folder "${folderName}" with ${folderProps.length} props`
+                            : `Separate folders → ${folderProps.length} props, individual texture copies`
+                          : `Detected type: ${propType === 'tree' ? 'Tree' : 'Rock'}${propType === 'tree' ? ' — proptree.lua' : ''}`}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -833,59 +843,66 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
           {inputMode === 'manual' && (
             <>
               {/* Type */}
-              <div className="acpo-section">
-                <label className="acpo-section-label">PROP TYPE</label>
-                <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                  <button className={`station option-row${propType === 'tree' ? ' active' : ''}`} onClick={() => switchType('tree')} style={{ flex: 1 }}>
-                    <div className="option-row-head"><span className="option-label">Tree</span></div>
-                  </button>
-                  <button className={`station option-row${propType === 'rock' ? ' active' : ''}`} onClick={() => switchType('rock')} style={{ flex: 1 }}>
-                    <div className="option-row-head"><span className="option-label">Rock</span></div>
-                  </button>
+              <div className="ctrl-block">
+                <div className="ctrl-subtitle">Prop Type</div>
+                <div className="ctrl-content">
+                  <div className="ctrl-option-group" style={{ flexDirection: 'row', gap: 'var(--space-sm)' }}>
+                    <button className={`ctrl-option${propType === 'tree' ? ' active' : ''}`} onClick={() => switchType('tree')} style={{ flex: 1 }}>
+                      <div className="ctrl-option-label">Tree</div>
+                    </button>
+                    <button className={`ctrl-option${propType === 'rock' ? ' active' : ''}`} onClick={() => switchType('rock')} style={{ flex: 1 }}>
+                      <div className="ctrl-option-label">Rock</div>
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Name */}
-              <div className="acpo-section">
-                <label className="acpo-section-label">PROP NAME</label>
-                <input className="field-input" value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder={propType === 'tree' ? 'e.g. PineTree_01' : 'e.g. Boulder_Large_01'}
-                  autoFocus />
-                {propName && <div className="acpo-path-preview">/env/props/{propName}/{propName}_prop.bp</div>}
+              <div className="ctrl-block">
+                <div className="ctrl-subtitle">Prop Name</div>
+                <div className="ctrl-content">
+                  <input className="ctrl-input" value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder={propType === 'tree' ? 'e.g. PineTree_01' : 'e.g. Boulder_Large_01'}
+                    autoFocus />
+                  {propName && <div className="acpo-path-preview">/env/props/{propName}/{propName}_prop.bp</div>}
+                </div>
               </div>
 
               {/* Assets */}
-              <div className="acpo-section">
-                <label className="acpo-section-label">ASSETS</label>
-                <div className="acpo-dropzones">
-                  <DropZone label="Mesh LOD0" accept={['.scm']} file={scmLod0} onFile={setScmLod0} hint=".scm (required)" compact />
-                  <DropZone label="Albedo" accept={['.dds']} file={albedoFile} onFile={setAlbedoFile} hint=".dds only" compact />
-                  <DropZone label="Normal Map" accept={['.dds']} file={normalFile} onFile={setNormalFile} hint=".dds only" compact />
-                </div>
-                {scmLod0 && (
-                  <div className="acpo-lod-extra">
-                    {!showExtraLods ? (
-                      <button className="action-button" onClick={() => setShowExtraLods(true)}>+ Add LOD levels (LOD1 / LOD2)</button>
-                    ) : (
-                      <div className="acpo-lod-extra-grid">
-                        <DropZone label="Mesh LOD1" accept={['.scm']} file={scmLod1} onFile={setScmLod1} hint=".scm" optional compact />
-                        <DropZone label="Mesh LOD2" accept={['.scm']} file={scmLod2} onFile={setScmLod2} hint=".scm" optional compact />
-                      </div>
-                    )}
+              <div className="ctrl-block">
+                <div className="ctrl-subtitle">Assets</div>
+                <div className="ctrl-content">
+                  <div className="acpo-dropzones">
+                    <DropZone label="Mesh LOD0" accept={['.scm']} file={scmLod0} onFile={setScmLod0} hint=".scm (required)" compact />
+                    <DropZone label="Albedo" accept={['.dds']} file={albedoFile} onFile={setAlbedoFile} hint=".dds only" compact />
+                    <DropZone label="Normal Map" accept={['.dds']} file={normalFile} onFile={setNormalFile} hint=".dds only" compact />
                   </div>
-                )}
+                  {scmLod0 && (
+                    <div className="acpo-lod-extra">
+                      {!showExtraLods ? (
+                        <button className="ctrl-btn-add" onClick={() => setShowExtraLods(true)}>+ Add LOD levels (LOD1 / LOD2)</button>
+                      ) : (
+                        <div className="acpo-lod-extra-grid">
+                          <DropZone label="Mesh LOD1" accept={['.scm']} file={scmLod1} onFile={setScmLod1} hint=".scm" optional compact />
+                          <DropZone label="Mesh LOD2" accept={['.scm']} file={scmLod2} onFile={setScmLod2} hint=".scm" optional compact />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Blueprint */}
-              <div className="acpo-section">
-                <label className="acpo-section-label">BLUEPRINT</label>
-                <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                  <button className={`station option-row${bpMode === 'upload' ? ' active' : ''}`} onClick={() => setBpMode('upload')} style={{ flex: 1 }}>
-                    <div className="option-row-head"><span className="option-label">Upload prop.bp</span></div>
+              <div className="ctrl-block">
+                <div className="ctrl-subtitle">Blueprint</div>
+                <div className="ctrl-content">
+                <div className="ctrl-option-group" style={{ flexDirection: 'row', gap: 'var(--space-sm)' }}>
+                  <button className={`ctrl-option${bpMode === 'upload' ? ' active' : ''}`} onClick={() => setBpMode('upload')} style={{ flex: 1 }}>
+                    <div className="ctrl-option-label">Upload prop.bp</div>
                   </button>
-                  <button className={`station option-row${bpMode === 'create' ? ' active' : ''}`} onClick={() => setBpMode('create')} style={{ flex: 1 }}>
-                    <div className="option-row-head"><span className="option-label">Create prop.bp</span></div>
+                  <button className={`ctrl-option${bpMode === 'create' ? ' active' : ''}`} onClick={() => setBpMode('create')} style={{ flex: 1 }}>
+                    <div className="ctrl-option-label">Create prop.bp</div>
                   </button>
                 </div>
                 {bpMode === 'upload' && (
@@ -910,8 +927,8 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
                       )}
                     </div>
                     <div className="acpo-field acpo-field-full">
-                      <label className="field-label">Help Text</label>
-                      <input className="field-input" value={bp.helpText}
+                      <label className="ctrl-label">Help Text</label>
+                      <input className="ctrl-input" value={bp.helpText}
                         onChange={e => setBpField('helpText', e.target.value)}
                         placeholder={propName || 'Prop description'} />
                     </div>
@@ -928,42 +945,25 @@ export default function AddCustomPropOverlay({ onConfirm, onSaved, onClose, inli
                     )}
                   </div>
                 )}
+                </div>
               </div>
             </>
           )}
 
-        </div>
-
-        {/* Footer */}
-        <div className="acpo-footer">
-          <div className="acpo-footer-hint">
-            {inputMode === 'folder'
-              ? !folderName
-                ? 'Drop a prop folder or click to browse.'
-                : folderStatus === 'error'
-                  ? ' No _prop.bp file found in folder.'
-                  : folderStatus === 'warn'
-                    ? ' .bp found, but mesh or texture may be missing.'
-                  : folderProps.length > 1
-                    ? packTogether
-                      ? ` ${folderProps.length} props → shared folder "${folderName}"`
-                      : ` ${folderProps.length} props → individual folders`
-                    : ` Folder will be saved globally under ${propType === 'tree' ? 'global/trees' : 'global/rocks'}.`
-              : !propName
-                ? 'Enter a prop name to get started.'
-                : !scmLod0 || !albedoFile || !normalFile
-                  ? 'Upload Mesh LOD0, Albedo (.dds) and Normal Map (.dds).'
-                  : !bpMode
-                    ? 'Choose a blueprint option above.'
-                    : bpMode === 'upload' && !bpFile
-                      ? 'Upload your prop.bp file.'
-                      : ' Ready — prop will be stored globally and available across all maps.'}
-          </div>
-          <div className="acpo-footer-actions">
-            <button className="action-button" onClick={onClose}>Cancel</button>
-            <button className={`action-button${canSave ? ' ready' : ''}`} onClick={handleSave} disabled={!canSave || saving}>
-              {saving ? ' Saving…' : ' Save Prop'}
-            </button>
+        {/* Save */}
+          <div className="ctrl-block">
+            <div className="ctrl-subtitle">Save</div>
+            <div className="ctrl-content">
+              <div className="ctrl-action-row" style={{ justifyContent: 'flex-end' }}>
+                <button className="ctrl-btn-add" onClick={onClose}>Cancel</button>
+              </div>
+              <button className="commit-button" onClick={handleSave} disabled={!canSave || saving}>
+                <span className="commit-button-label">{saving ? 'Saving…' : 'Save Prop'}</span>
+                <span className="commit-button-status">{canSave ? 'Ready' : 'Not Ready'}</span>
+                <span className="commit-button-bloom" aria-hidden="true" />
+                <span className="commit-button-line" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </div>
     </OuterWrapper>

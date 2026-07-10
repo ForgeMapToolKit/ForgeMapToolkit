@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import '../../../shared/shared.css';
+import '../../../Shared/DesignSystem/index.css';
+import '../../../Shared/shared.css';
+import '../../../Shared/trace.css';
+import TabLayout from '../../../Shared/Ui/TabLayout/TabLayout';
 import './PreviewImage.css';
 import PreviewImageHelpModal from '../../HelpModals/PreviewImage_help.jsx';
 
@@ -26,6 +29,7 @@ const PreviewImageTab = ({ settings }) => {
   const [previewSrc,  setPreviewSrc] = useState(null);
   const [errorMsg,    setErrorMsg]   = useState('');
 
+  const [activeSection, setActiveSection] = useState('configuration');
   const [showHelp,      setShowHelp]      = useState(false);
   const [activeHelpTab, setActiveHelpTab] = useState('guide');
   const [helpSelected,  setHelpSelected]  = useState(null);
@@ -96,23 +100,28 @@ const PreviewImageTab = ({ settings }) => {
     }
   };
 
-  const isRunning = status === 'running';
+  const isRunning   = status === 'running';
+  const canGenerate = !isRunning && !!mapName.trim() && !!editorPath && !!mapsFolder;
 
-  return (
-    <div className="pi-theme tab-root tab-scrollbar">
+  // ── Sections ──────────────────────────────────────────────────────────────────
 
-      <div className="tab-grid">
+  const sections = [
+    { id: 'configuration', index: '01', label: 'Configuration', desc: 'Set the map name and choose a render resolution.', done: !!mapName.trim() },
+    { id: 'output',        index: '02', label: 'Output',        desc: 'Run the render pipeline and generate the preview.', done: status === 'done' },
+  ];
 
-        {/* LEFT */}
-        <div className="tab-col-config">
+  const sectionContent = {
+    configuration: (
+      <div className="ctrl-col">
 
-          <div className="section-card">
-            <h3 className="section-title">Map Configuration</h3>
-
-            <div className="form-group">
-              <label className="form-label">Map Name</label>
+        {/* Map Name */}
+        <div className="ctrl-block">
+          <div className="ctrl-subtitle">Map</div>
+          <div className="ctrl-content">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Map Name</div>
               <input
-                className="form-input"
+                className="ctrl-input"
                 placeholder="e.g. Hades_Dust.v0002"
                 value={mapName}
                 onChange={e => setMapName(e.target.value)}
@@ -121,22 +130,25 @@ const PreviewImageTab = ({ settings }) => {
                 spellCheck={false}
               />
             </div>
+          </div>
+        </div>
 
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Render Resolution</label>
-              <div className="pi-resolution-grid">
-                {RESOLUTIONS.map(r => (
-                  <button
-                    key={r.label}
-                    className={`pi-res-btn${resolution.w === r.w ? ' active' : ''}`}
-                    style={{ opacity: r.warnRed ? 0.75 : 1 }}
-                    onClick={() => setResolution(r)}
-                    disabled={isRunning}
-                  >
-                    {r.label}{r.warnRed ? ' ⚠' : ''}
-                  </button>
-                ))}
-              </div>
+        {/* Render resolution */}
+        <div className="ctrl-block">
+          <div className="ctrl-subtitle">Render Resolution</div>
+          <div className="ctrl-content">
+            <div className="pi-resolution-grid">
+              {RESOLUTIONS.map(r => (
+                <button
+                  key={r.label}
+                  type="button"
+                  className={`station pi-res-btn${resolution.w === r.w ? ' active' : ''}`}
+                  onClick={() => setResolution(r)}
+                  disabled={isRunning}
+                >
+                  {r.label}{r.warnRed ? ' ⚠' : ''}
+                </button>
+              ))}
             </div>
 
             {resolution.warnYellow && (
@@ -145,21 +157,29 @@ const PreviewImageTab = ({ settings }) => {
               </div>
             )}
             {resolution.warnRed && (
-              <div className="pi-warn-box" style={{ borderLeftColor: '#ff4444', background: 'rgba(255,60,60,0.07)', border: '1px solid rgba(255,60,60,0.3)', borderLeft: '4px solid #ff4444', color: '#ff9090' }}>
-                <strong style={{ color: '#ff4444' }}>Caution:</strong> 4096 × 4096 previews cause a freeze and RAM spike when loading in lobby. Memory may not deallocate cleanly.
+              <div className="pi-warn-box pi-warn-box--danger">
+                <strong>Caution:</strong> 4096 × 4096 previews cause a freeze and RAM spike when loading in lobby. Memory may not deallocate cleanly.
               </div>
             )}
 
             {(!editorPath || !mapsFolder) && (
-              <div className="hint-box" style={{ marginTop: 18 }}>
-                {!editorPath && <div>Map Editor path is not configured. Set it under <strong>Settings → Game Paths</strong>.</div>}
-                {!mapsFolder && <div style={!editorPath ? { marginTop: 8 } : {}}>Maps folder is not configured. Set it under <strong>Settings → Game Paths</strong>.</div>}
+              <div className="ctrl-field" style={{ marginTop: 'var(--space-lg)' }}>
+                {!editorPath && <p className="field-hint">Map Editor path is not configured. Set it under <strong>Settings → Game Paths</strong>.</p>}
+                {!mapsFolder && <p className="field-hint" style={!editorPath ? { marginTop: 'var(--space-xs)' } : {}}>Maps folder is not configured. Set it under <strong>Settings → Game Paths</strong>.</p>}
               </div>
             )}
           </div>
+        </div>
 
-          <div className="section-card">
-            <h3 className="section-title">Pipeline</h3>
+      </div>
+    ),
+    output: (
+      <div className="ctrl-col">
+
+        {/* Pipeline */}
+        <div className="ctrl-block">
+          <div className="ctrl-subtitle">Pipeline</div>
+          <div className="ctrl-content">
             <div className="pi-steps">
               {STEPS.map((step, idx) => {
                 const state = stepStates[step.id] ?? 'pending';
@@ -183,50 +203,80 @@ const PreviewImageTab = ({ settings }) => {
               </div>
             )}
           </div>
-
-          <button
-            className="btn-primary btn-lg"
-            onClick={handleGenerate}
-            disabled={isRunning || !mapName.trim() || !editorPath || !mapsFolder}
-          >
-            {isRunning ? <><span className="pi-spinner" /> Generating…</> : 'Generate Preview'}
-          </button>
-
         </div>
 
-        {/* RIGHT */}
-        <div className="tab-col-detail">
-          <div className="section-card pi-preview-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 className="section-title" style={{ margin: 0 }}>Preview</h3>
-              {status === 'done'  && <span className="pi-badge pi-badge--success">Updated</span>}
-              {status === 'error' && <span className="pi-badge pi-badge--error">Failed</span>}
-            </div>
-
-            <div className="pi-preview-area">
-              {previewSrc ? (
-                <img src={previewSrc} alt="Generated map preview" className="pi-preview-img" />
-              ) : (
-                <div className="canvas-placeholder pi-preview-placeholder">
-                  {isRunning ? 'Rendering…' : 'Preview will appear here after generation'}
-                </div>
-              )}
-              {isRunning && (
-                <div className="pi-overlay-spinner">
-                  <div className="pi-big-spinner" />
-                </div>
-              )}
-            </div>
-
-            {status === 'done' && (
-              <div className="hint-box" style={{ marginTop: 20 }}>
-                The .scmap has been updated with the new {resolution.label} preview image.
-              </div>
-            )}
+        {/* Generate */}
+        <div className="ctrl-block">
+          <div className="ctrl-subtitle">Generate</div>
+          <div className="ctrl-content">
+            <button
+              className="commit-button"
+              onClick={handleGenerate}
+              disabled={!canGenerate}
+            >
+              <span className="commit-button-label">{isRunning ? 'Generating…' : 'Generate Preview'}</span>
+              <span className="commit-button-status">{canGenerate ? 'Ready' : (isRunning ? '●' : 'Not Ready')}</span>
+              <div className="commit-button-bloom" aria-hidden="true" />
+              <div className="commit-button-line"  aria-hidden="true" />
+            </button>
           </div>
         </div>
 
       </div>
+    ),
+  };
+
+  // ── Aside (rendered preview) ─────────────────────────────────────────────────
+
+  const asideSlot = (
+    <div className="ctrl-block">
+      <div className="mp-subtitle">Preview</div>
+      {(status === 'done' || status === 'error') && (
+        <div className="mp-action-row">
+          {status === 'done'  && <span className="ctrl-badge ctrl-badge--ok">Updated</span>}
+          {status === 'error' && <span className="ctrl-badge ctrl-badge--err">Failed</span>}
+        </div>
+      )}
+
+      <div className="ec-canvas-wrap pi-preview-wrap">
+        {previewSrc ? (
+          <img src={previewSrc} alt="Generated map preview" className="pi-preview-img" />
+        ) : (
+          <div className="ec-canvas-placeholder">
+            {isRunning ? 'Rendering…' : 'Preview will appear here after generation'}
+          </div>
+        )}
+        {isRunning && (
+          <div className="pi-overlay-spinner">
+            <div className="pi-big-spinner" />
+          </div>
+        )}
+      </div>
+
+      {status === 'done' && (
+        <p className="field-hint" style={{ marginTop: 'var(--space-md)' }}>
+          The .scmap has been updated with the new {resolution.label} preview image.
+        </p>
+      )}
+    </div>
+  );
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+
+  return (
+    <div className="pi-theme trace-tab">
+      <TabLayout
+        sections={sections}
+        activeSection={activeSection}
+        onSelect={setActiveSection}
+        railStorageKey="previewimage-rail-pinned"
+        navLabel="Preview image navigation"
+        asideSlot={asideSlot}
+        asideCaption={null}
+        asideMirror={null}
+      >
+        {sectionContent[activeSection]}
+      </TabLayout>
 
       <button className="help-btn" onClick={() => setShowHelp(true)} title="Help">?</button>
 
@@ -239,7 +289,6 @@ const PreviewImageTab = ({ settings }) => {
           setHelpSelected={setHelpSelected}
         />
       )}
-
     </div>
   );
 };

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import TabLayout         from '../../../Shared/Ui/TabLayout/TabLayout';
+import { OutputChecklist } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 import '../../../Shared/DesignSystem/index.css';
 import '../../../Shared/shared.css';
+import '../../../Shared/trace.css';
 import './MapResizer.css';
 import { luxuryAlert, luxuryConfirm } from '../../../Shared/Ui/Notifications/notifications';
 import MapResizerHelpModal from '../../HelpModals/MapResizer_help.jsx';
@@ -102,6 +104,7 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
   const [mapInfo,         setMapInfo]         = useState(null);
   const [running,         setRunning]         = useState(false);
+  const [activeSection,   setActiveSection]   = useState('configuration');
   const [showHelp,        setShowHelp]        = useState(false);
   const [activeHelpTab,   setActiveHelpTab]   = useState('guide');
   const [helpSelected,    setHelpSelected]    = useState(null);
@@ -218,6 +221,7 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
       items: [
         { key: 'props',    val: scaleProps,    set: setScaleProps,    label: 'Scale Props',                 hint: 'Moves all scmap prop X/Z positions by the scale factor.' },
         { key: 'decals',   val: scaleDecals,   set: setScaleDecals,   label: 'Scale Decals',                hint: 'Moves and resizes all decal positions and scale values.' },
+        { key: 'textures', val: scaleTextures, set: setScaleTextures, label: 'Scale Terrain Tex / Normals', hint: 'Scales tile sizes of normals[] and textures[] in data.lua. scale=0 preserved; mapinfo/mapnormal forced to toSize+1.' },
       ],
     },
     {
@@ -225,7 +229,6 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
       items: [
         { key: 'markers',  val: scaleMarkers,  set: setScaleMarkers,  label: 'Scale Markers',               hint: 'Scales VECTOR3 positions (spawn, mex, hydro…) in save.lua.' },
         { key: 'areas',    val: scaleAreas,    set: setScaleAreas,    label: 'Scale Areas',                 hint: 'Scales all RECTANGLE coordinates in save.lua.' },
-        { key: 'textures', val: scaleTextures, set: setScaleTextures, label: 'Scale Terrain Tex / Normals', hint: 'Scales tile sizes of normals[] and textures[] in data.lua. scale=0 preserved; mapinfo/mapnormal forced to toSize+1.' },
       ],
     },
     {
@@ -237,144 +240,156 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
     },
   ];
 
+  // ── Aside (scale layer toggles, grouped) ─────────────────────────────────────
+
+  const asideSlot = (
+    <>
+      {SCALE_GROUPS.map(({ group, items }) => (
+        <div className="ctrl-block" key={group}>
+          <div className="mp-subtitle">{group}</div>
+          {items.map(({ key, val, set, label, hint }) => (
+            <button
+              key={key}
+              type="button"
+              className={`ctrl-toggle-row${val ? ' on' : ''}`}
+              role="switch"
+              aria-checked={val}
+              onClick={() => !running && set(!val)}
+            >
+              <span className="ctrl-toggle"><span className="ctrl-toggle-pole" /></span>
+              <span className="ctrl-toggle-text">
+                <span className="ctrl-toggle-label">{label}</span>
+                <span className="ctrl-toggle-sub">{hint}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ))}
+    </>
+  );
+
+  // ── Sections ──────────────────────────────────────────────────────────────────
+
+  const sections = [
+    {
+      id:    'configuration',
+      index: '01',
+      label: 'Configuration',
+      desc:  'Select the map and choose a target size.',
+      done:  !!mapInfo?.ok,
+    },
+    {
+      id:    'output',
+      index: '02',
+      label: 'Output',
+      desc:  'Set the version behaviour and resize the map.',
+      done:  mapInfo?.ok && !running && !sameSize,
+    },
+  ];
+
+  const sectionContent = {
+    configuration: (
+      <div className="ctrl-col">
+
+        {/* Map Name */}
+        <div className="ctrl-block">
+          <div className="ctrl-subtitle">Map</div>
+          <div className="ctrl-content">
+            <div className="ctrl-field">
+              <div className="ctrl-label">Map Name</div>
+              <input
+                className="ctrl-input"
+                value={mapName}
+                onChange={e => setMapName(e.target.value)}
+                placeholder="Hades_Dust.v0002"
+                disabled={running}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Target size */}
+        <div className="ctrl-block">
+          <div className="ctrl-subtitle">Target Size</div>
+          <div className="ctrl-content">
+            <div className="mr-size-grid">
+              {SIZE_OPTIONS.map(opt => (
+                <SizeButton
+                  key={opt.value}
+                  option={opt}
+                  selected={targetSize === opt.value}
+                  isCurrent={mapInfo?.ok && mapInfo.fromSize === opt.value}
+                  disabled={running || (mapInfo?.ok && mapInfo.fromSize === opt.value)}
+                  onClick={setTargetSize}
+                />
+              ))}
+            </div>
+
+            {sameSize && mapInfo?.ok && (
+              <div className="mr-same-size-warning">
+                Target equals current size — choose a different size.
+              </div>
+            )}
+
+            {/* Size preview — current → target */}
+            <div className="mr-size-preview">
+              <div className="mr-size-preview-side">
+                <span className="mr-size-preview-label">Current</span>
+                <span className="mr-size-preview-value">{mapInfo?.ok ? mapInfo.fromSize : '—'}</span>
+                {mapInfo?.ok && <span className="mr-size-preview-km">{mapInfo.km}</span>}
+              </div>
+              <ScaleArrow fromSize={mapInfo?.ok ? mapInfo.fromSize : null} toSize={targetSize} />
+              <div className="mr-size-preview-side">
+                <span className="mr-size-preview-label">Target</span>
+                <span className="mr-size-preview-value">{targetSize}</span>
+                <span className="mr-size-preview-km">{SIZE_OPTIONS.find(o => o.value === targetSize)?.km ?? ''}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    ),
+    output: (
+      <div className="ctrl-col">
+        <OutputChecklist
+          ready={canResize}
+          onCommit={handleResize}
+          commitLabel={running ? 'Resizing…' : 'Resize Map'}
+          commitAriaLabel="Resize the map to the selected target size"
+          notReadyText={running ? '●' : 'Not Ready'}
+          optionsLabel="Version"
+          filesLabel="Resize"
+          items={[
+            {
+              label:    'Create new version',
+              sub:      createNewVersion
+                ? 'A new versioned folder (e.g. map.v0007) is created — original is untouched.'
+                : 'The existing map folder is overwritten in place. Back up first.',
+              checked:  createNewVersion,
+              onToggle: () => !running && setCreateNewVersion(!createNewVersion),
+            },
+          ]}
+        />
+      </div>
+    ),
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div
-      className="map-resizer-tab"
-      style={{
-        '--tab-color':       'var(--mapresizer-color)',
-        '--tab-glow':        'var(--mapresizer-glow)',
-        '--tab-glow-strong': 'var(--mapresizer-glow-strong)',
-      }}
-    >
+    <div className="map-resizer-tab trace-tab">
       <TabLayout
-        sections={[{
-          id:    'resize',
-          index: '01',
-          label: 'Resize',
-          desc:  'Select the map, choose a target size, configure scale layers and resize.',
-          done:  mapInfo?.ok && !running && !sameSize,
-        }]}
-        activeSection="resize"
-        onSelect={() => {}}
-        ghostLabel="RESIZE"
-        renderEyebrow={(s) => `MAP RESIZER — ${s.index} — ${s.label.toUpperCase()} CONSOLE`}
+        sections={sections}
+        activeSection={activeSection}
+        onSelect={setActiveSection}
         railStorageKey="mapresizer-rail-pinned"
         navLabel="Map resizer navigation"
-        previewCaption=""
-        previewSlot={
-          <>
-            {SCALE_GROUPS.map(({ group, items }, gi) => (
-              <div key={group}>
-                <div className="subsection-head" style={gi > 0 ? { marginTop: 28 } : {}}>
-                  <span className="subsection-head-title">{group}</span>
-                </div>
-                <div className="mr-options-stack">
-                  {items.map(({ key, val, set, label, hint }) => (
-                    <label key={key} className="checkbox-label" onClick={() => !running && set(!val)}>
-                      <div className={`checkbox${val ? ' checked' : ''}`}>
-                        {val && (
-                          <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </div>
-                      <div>
-                        <span className="checkbox-text">{label}</span>
-                        <p className="field-hint" style={{ marginTop: 3, marginBottom: 0 }}>{hint}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </>
-        }
+        asideSlot={asideSlot}
+        asideCaption={null}
+        asideMirror={null}
       >
-        <div className="mr-section-body">
-
-          {/* Map Name */}
-          <div className="form-group">
-            <label className="field-label">Map Name</label>
-            <input
-              className="field-input"
-              value={mapName}
-              onChange={e => setMapName(e.target.value)}
-              placeholder="Hades_Dust.v0002"
-              disabled={running}
-            />
-          </div>
-
-          {/* Size grid */}
-          <div className="mr-size-grid">
-            {SIZE_OPTIONS.map(opt => (
-              <SizeButton
-                key={opt.value}
-                option={opt}
-                selected={targetSize === opt.value}
-                isCurrent={mapInfo?.ok && mapInfo.fromSize === opt.value}
-                disabled={running || (mapInfo?.ok && mapInfo.fromSize === opt.value)}
-                onClick={setTargetSize}
-              />
-            ))}
-          </div>
-
-          {sameSize && mapInfo?.ok && (
-            <div className="mr-same-size-warning">
-              Target equals current size — choose a different size.
-            </div>
-          )}
-
-          {/* Size preview — current → target */}
-          <div className="mr-size-preview" style={{ marginTop: 20 }}>
-            <div className="mr-size-preview-side">
-              <span className="mr-size-preview-label">Current</span>
-              <span className="mr-size-preview-value">{mapInfo?.ok ? mapInfo.fromSize : '—'}</span>
-              {mapInfo?.ok && <span className="mr-size-preview-km">{mapInfo.km}</span>}
-            </div>
-            <ScaleArrow fromSize={mapInfo?.ok ? mapInfo.fromSize : null} toSize={targetSize} />
-            <div className="mr-size-preview-side">
-              <span className="mr-size-preview-label">Target</span>
-              <span className="mr-size-preview-value">{targetSize}</span>
-              <span className="mr-size-preview-km">{SIZE_OPTIONS.find(o => o.value === targetSize)?.km ?? ''}</span>
-            </div>
-          </div>
-
-          <div className="divider" style={{ margin: '24px 0' }} />
-
-          {/* Create new version */}
-          <label className="checkbox-label" onClick={() => !running && setCreateNewVersion(!createNewVersion)}>
-            <div className={`checkbox${createNewVersion ? ' checked' : ''}`}>
-              {createNewVersion && (
-                <svg className="checkbox-check" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <polyline points="1.5,5 4.5,8.5 10.5,1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )}
-            </div>
-            <div>
-              <span className="checkbox-text">Create new version</span>
-              <p className="field-hint" style={{ marginTop: 3, marginBottom: 0 }}>
-                {createNewVersion
-                  ? 'A new versioned folder (e.g. map.v0007) is created — original is untouched.'
-                  : 'The existing map folder is overwritten in place. Back up first.'}
-              </p>
-            </div>
-          </label>
-
-          {/* Resize CTA */}
-          <button
-            className="commit-button"
-            onClick={handleResize}
-            disabled={!canResize}
-          >
-            <span className="commit-button-label">{running ? 'Resizing…' : 'Resize Map'}</span>
-            <span className="commit-button-status">{canResize ? 'Ready' : (running ? '●' : 'Not Ready')}</span>
-            <div className="commit-button-bloom" aria-hidden="true" />
-            <div className="commit-button-line"  aria-hidden="true" />
-          </button>
-
-        </div>
+        {sectionContent[activeSection]}
       </TabLayout>
 
       {/* ── Help Button ── */}

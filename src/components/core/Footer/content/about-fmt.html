@@ -1,12 +1,60 @@
+<div class="fcv-content">
+
 <h1>About ForgeMapToolkit</h1>
 
 <p>
-  This is placeholder content for the &quot;About ForgeMapToolkit&quot; article. Final
-  copy gets written in Phase 6 of the footer-content-feature roadmap.
+  ForgeMapToolkit (FMT) is a desktop application for advanced Supreme
+  Commander: Forged Alliance map creation. It doesn't cover terrain
+  sculpting or basic texturing because the FAF Map Editor already does that
+  well. FMT exists for the layer on top of that. Skyboxes, emitter-driven
+  atmosphere, and realistic, large-scale prop placement. It's built for
+  mappers who want to push a map's atmosphere to the next level, not for
+  a first pass at a heightmap.
+</p>
+
+<h2>Origins</h2>
+
+<p>
+  FMT didn't start as a toolkit. It started as a handful of small Python
+  scripts used to generate wreckage placements with attached emitters that
+  originally written to hand off to IndexLibrorum who needed the same
+  thing. Handing over several fragmented scripts felt clunky, so they
+  got consolidated into a single small Python program.
 </p>
 
 <p>
-  Until then this fragment exists purely to prove the loading pipeline end
-  to end: Footer.jsx -> FooterContentViewer -> IPC (read-footer-article)
-  -> this file at public/footer/content/about-fmt.html.
+  The look of that program never sat right, which led to a rewrite as an
+  Electron app. From there it kept growing. One tool became several,
+  several became tabs, and tabs kept getting added as new advanced
+  mapping problems came up. FMT is currently at 15 tabs covering
+  distinct areas of advanced mapping.
 </p>
+
+<h2>What FMT Focuses On</h2>
+
+<p>
+  Everything in FMT targets the atmospheric and technical side of
+  mapping. From skybox generation over to emitter placement and configuration, and
+  automatic prop distribution using erosion simulation and Gaea-based
+  terrain data for realistic scatter patterns. These are tools for
+  cutting-edge, atmosphere-focused map work and not entry-level mapping
+  tasks.
+</p>
+
+<div class="fcv-callout">
+  <p>
+    Building FMT's live skybox preview required more than FMT itself
+    could provide. The FAF Map Editor was extended with
+    <code>ForgeBridgeServer.cs</code>, a named-pipe bridge that syncs
+    skybox changes between the editor and FMT in real time. A small
+    example of FMT's development reaching back into the tools it works
+    alongside.
+  </p>
+</div>
+
+<p>
+  FMT is still actively developed, with new tabs and tools added as new
+  advanced mapping needs come up.
+</p>
+
+</div>

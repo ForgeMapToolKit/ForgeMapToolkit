@@ -36,10 +36,6 @@ const Planets = ({
       <div className="ctrl-block">
         <div className="ctrl-subtitle">Manual Planets ({planets.length})</div>
         <div className="ctrl-content">
-          <p className="sb-field-help">
-            Manual planets are placed at exact world coordinates. For procedural stars, use the Stars section.
-          </p>
-
           <EntityCardGrid>
             {planets.map((planet, i) => {
               const col = PLANET_UV_COLORS[i % PLANET_UV_COLORS.length];

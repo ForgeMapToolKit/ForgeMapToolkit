@@ -1,6 +1,7 @@
-﻿import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../../../Shared/DesignSystem/index.css';
 import '../../../Shared/shared.css';
+import '../../../Shared/trace.css';
 import './Stars.css';
 import { luxuryAlert }                            from '../../../Shared/Ui/Notifications/notifications';
 import { generateReadme as buildReadme, writeReadme } from '../../../../../utils/readmeGenerator';
@@ -9,10 +10,10 @@ import TabLayout                                  from '../../../Shared/Ui/TabLa
 import { usePersistentState, useMapInfo, kmLabel } from '../../../Shared/MapLogic';
 
 // ── Sektions-Komponenten ──────────────────────────────────────────────────────
-import Configuration from './Configuration.jsx';
-import UV            from './UV.jsx';
-import Exclusion     from './Exclusion.jsx';
-import Export        from './Export.jsx';
+import Configuration           from './Configuration.jsx';
+import UV, { UVAside }         from './UV.jsx';
+import Exclusion, { ExclusionAside } from './Exclusion.jsx';
+import Export                  from './Export.jsx';
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 import {
@@ -24,40 +25,16 @@ import { exportPlanetsJson, injectStarsIntoScmap } from './injection';
 
 // ─────────────────────────────────────────────────────────────────
 // Stars.jsx — Parent (Orchestrierung): State, Hooks, Handler, Overlays.
-//
-// Migration note (Schritt 1+2/N — siehe Chat-Verlauf):
-//   Schritt 1: die früher hier lokal definierten Stücke (YCurveEditor-
-//   Komponente, UV-Parsing, Stern-Generator, kompletter unpack→patch→
-//   pack→copy-back-IPC-Flow, Config-/UV-Sektionen als Inline-JSX)
-//   wurden ausgelagert nach starsGeneration.js / starsInjection.js /
-//   Stars_Configuration.jsx / Stars_UV.jsx / YCurveEditor.jsx.
-//   Schritt 2: State-Vertrag (TAB_CONTRACT.md §3) — der lokale
-//   `mkState`-Wrapper ist raus, jedes persistente Feld läuft jetzt
-//   über `usePersistentState(shared, key, initial, onSharedChange)`
-//   aus shared/map-logic mit einheitlichem `st_`-Prefix; `mapInfo`
-//   kommt ausschließlich aus `useMapInfo`.
-//   ⚠ Ich habe den Quellcode von usePersistentState/useMapInfo nicht
-//   gesehen — Signatur/Verhalten ist 1:1 aus TAB_CONTRACT.md §2
-//   übernommen (inkl. Unterstützung für funktionale Updates wie
-//   useState). Bitte gegen die echte Implementierung / eine andere
-//   migrierte Sektion (PropsTab/Props_Configuration) gegenprüfen,
-//   bevor das gemerged wird.
-//   Bewusst NICHT über usePersistentState: `textureDataUrl`/
-//   `texOpacity` (potenziell große Daten-URLs — sollen den Shared-
-//   State nicht aufblähen) sowie rein transiente UI-Auswahl/Drag-
-//   Zustände (`draftZone`, `selectedZoneIdx`, `activeSection`,
-//   Help-Modal-State). ExclusionSection/ExportSection sind weiterhin
-//   inline im Parent (nächster Schritt).
+// Sektionen: Configuration (main-only) / UV (+ UVAside) / Exclusion
+// (+ ExclusionAside) / Export. Aside content is per-section, matching
+// the Wreckage/RockErosion/Treemap/SkyboxGenerator convention —
+// TabLayout's generic caption/mirror header is never used (asideCaption/
+// asideMirror stay null); each aside block brings its own in-body
+// header via .mp-subtitle.
 // ─────────────────────────────────────────────────────────────────
-
-// ════════════════════════════════════════════════════════════════
 const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSnapshot = () => {} }) => {
 
   // ── Persistenter State ──────────────────────────────────────────
-  // Jedes Feld, das die Stern-Generierung reproduzierbar definiert,
-  // läuft über usePersistentState mit eindeutigem 'st_'-Prefix
-  // (TAB_CONTRACT.md §3). Rein transiente UI-/Auswahl-Zustände bleiben
-  // bewusst plain useState (siehe Datei-Kopfkommentar).
   const [numStars,        setNumStars]        = usePersistentState(shared, 'st_numStars',        DEFAULTS.numStars,        onSharedChange);
   const [numClusters,     setNumClusters]      = usePersistentState(shared, 'st_numClusters',     DEFAULTS.numClusters,     onSharedChange);
   const [clusterSpread,   setClusterSpread]    = usePersistentState(shared, 'st_clusterSpread',   DEFAULTS.clusterSpread,   onSharedChange);
@@ -107,12 +84,6 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
     onMapSize: v => onSharedChange('st_mapSize', v),
   });
 
-  // ── Seed ──────────────────────────────────────────────────────
-  const [seed,    setSeed]    = usePersistentState(shared, 'st_seed',    42,    onSharedChange);
-  const [useSeed, setUseSeed] = usePersistentState(shared, 'st_useSeed', false, onSharedChange);
-
-  const randomizeSeed = () => setSeed(Math.floor(Math.random() * 999999) + 1);
-
   // ── Y-Distribution ────────────────────────────────────────────
   const [yMode,       setYMode]       = usePersistentState(shared, 'st_yMode',       'flat',                         onSharedChange);
   const [yMax,        setYMax]        = usePersistentState(shared, 'st_yMax',        '1500',                         onSharedChange);
@@ -123,12 +94,10 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
   const [diskStdDev,  setDiskStdDev]  = usePersistentState(shared, 'st_diskStdDev',  '120',                          onSharedChange);
   const [haloStdDev,  setHaloStdDev]  = usePersistentState(shared, 'st_haloStdDev',  '800',                          onSharedChange);
   const [haloRatio,   setHaloRatio]   = usePersistentState(shared, 'st_haloRatio',   '0.15',                         onSharedChange);
-  const [curvePoints, setCurvePoints] = usePersistentState(shared, 'st_curvePoints', DEFAULT_CURVE_POINTS,           onSharedChange);
+  const [curvePoints, setCurvePoints] = usePersistentState(shared, 'st_curvePoints', DEFAULT_CURVE_POINTS, onSharedChange);
   const [yClusterScatter, setYClusterScatter] = usePersistentState(shared, 'st_yClusterScatter', '200', onSharedChange);
 
   // ── Exclusion zones ───────────────────────────────────────────
-  // Die Zonen selbst + der Enabled-Schalter definieren die Generierung
-  // und werden persistiert; Auswahl/Entwurf bleiben transient.
   const [exclusionZones,   setExclusionZones]   = usePersistentState(shared, 'st_exclusionZones', [],   onSharedChange);
   const [draftZone,        setDraftZone]         = useState(null);
   const [selectedZoneIdx,  setSelectedZoneIdx]   = useState(null);
@@ -143,35 +112,25 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
   const [helpSelected,   setHelpSelected]   = useState(null);
   const [activeAdvSubTab,setActiveAdvSubTab]= useState('workflow');
 
-
   // ── UV / texture ──────────────────────────────────────────────
   // Bewusst NICHT persistiert: Daten-URLs können mehrere MB groß sein
-  // und würden den Shared-Store aufblähen (siehe Datei-Kopfkommentar).
+  // und würden den Shared-Store aufblähen.
   const [textureDataUrl, setTextureDataUrl] = useState(null);
   const [texOpacity,     setTexOpacity]     = useState(1);
 
-  const fileInputRef = useRef(null);
-
   // ── Build config bundle für den Generator ──────────────────────
-  // Ein gemeinsames cfg-Objekt für Export- und Inject-Handler, damit
-  // buildStars (aus starsGeneration.js) konsistent mit denselben
-  // Parametern aufgerufen wird.
   const buildGenCfg = useCallback(() => ({
     numStars, numClusters, clusterSpread, clusterStdDev, backgroundRatio,
     scaleMin, scaleMax, uvOptions, uvWeights,
     exclusionZones, exEnabled,
-    seed, useSeed,
     yMode, yMax, yCenter, yStdDev, yLayers,
     diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter,
   }), [numStars, numClusters, clusterSpread, clusterStdDev, backgroundRatio,
        scaleMin, scaleMax, uvOptions, uvWeights, exclusionZones, exEnabled,
-       seed, useSeed, yMode, yMax, yCenter, yStdDev, yLayers,
+       yMode, yMax, yCenter, yStdDev, yLayers,
        diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter]);
 
   // ── Export / Inject Handler ─────────────────────────────────────
-  // Der frühere komplette unpack→patch→pack→copy-back-IPC-Flow lebt
-  // jetzt in starsInjection.js (siehe TAB_CONTRACT.md §6); hier wird
-  // er nur noch aufgerufen.
   const handleExportJson = useCallback(async () => {
     const mapNameTrimmed = mapName.trim();
     const mapsFolder     = (settings?.mapsFolder || '').trim();
@@ -248,11 +207,11 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
   const onRemoveUvRow  = (i) => syncUvRows(uvRows.filter((_, j) => j !== i));
 
   // ── Texture upload ────────────────────────────────────────────
+  // DropSlot hands us the File directly (no change event to unwrap).
   // NOTE: `webUtils` wird hier referenziert, ist aber in dieser Datei
   // (auch schon im Original) nicht importiert — bestehender Bug, hier
-  // unverändert übernommen, nicht Teil dieses Migrationsschritts.
-  const onUploadImage = async e => {
-    const file = e.target.files[0];
+  // unverändert übernommen, nicht Teil dieser Migration.
+  const onUploadImage = useCallback(async (file) => {
     if (!file) return;
     const isDds = file.name.toLowerCase().endsWith('.dds');
     if (isDds) {
@@ -269,7 +228,7 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
     const reader = new FileReader();
     reader.onload = ev => setTextureDataUrl(ev.target.result);
     reader.readAsDataURL(file);
-  };
+  }, []);
 
   const onRemoveTexture = () => setTextureDataUrl(null);
 
@@ -298,20 +257,18 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
     haloStdDev,       onHaloStdDevChange:       setHaloStdDev,
     haloRatio,        onHaloRatioChange:        setHaloRatio,
     curvePoints,      onCurvePointsChange:      setCurvePoints,
-    onResetCurve: () => setCurvePoints(DEFAULT_CURVE_POINTS),
-
-    seed, onSeedChange: setSeed,
-    useSeed, onUseSeedChange: setUseSeed, onRandomizeSeed: randomizeSeed,
 
     onResetDefaults: resetDefaults,
   };
 
   const uvProps = {
     uvRows, onResetUvRows, onAddUvRow, onUpdateUvRow, onRemoveUvRow,
+  };
+
+  const uvAsideProps = {
     uvOptions, uvOpacity, onUvOpacityChange: setUvOpacity,
     textureDataUrl, onUploadImage, onRemoveTexture,
     texOpacity, onTexOpacityChange: setTexOpacity,
-    fileInputRef,
   };
 
   const exclusionProps = {
@@ -322,42 +279,53 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
     selectedZoneIdx, onSelectedZoneIdxChange: setSelectedZoneIdx,
   };
 
+  const exclusionAsideProps = {
+    exclusionZones, draftZone, exEnabled, clusterSpread, selectedZoneIdx,
+    onDraftZoneChange: setDraftZone, onSelectedZoneIdxChange: setSelectedZoneIdx,
+  };
+
   const exportProps = {
+    ready: !!(mapName?.trim() && (settings?.mapsFolder || '').trim()),
     exportRawJson,   onExportRawJsonChange:   setExportRawJson,
     generateReadme,  onGenerateReadmeChange:  setGenerateReadme,
     onExportJson:    handleExportJson,
     onInjectStars:   handleInjectStars,
   };
 
+  // ── WorkspaceConsole-Sektionen ────────────────────────────────
+  const sections = [
+    { id: 'config',    index: '01', label: 'Configuration',   desc: 'Set star count, cluster parameters and Y-distribution mode.' },
+    { id: 'uv',        index: '02', label: 'UV Texture',      desc: 'Define UV tile coordinates and weights, preview against the texture atlas.' },
+    { id: 'exclusion', index: '03', label: 'Exclusion Zones', desc: 'Draw rectangular regions where no stars will be placed.' },
+    { id: 'export',    index: '04', label: 'Export',          desc: 'Inject generated stars into the .scmap or export a raw JSON file.' },
+  ];
+
+  const sectionContent = {
+    config:    <Configuration {...configProps} />,
+    uv:        <UV            {...uvProps} />,
+    exclusion: <Exclusion     {...exclusionProps} />,
+    export:    <Export        {...exportProps} />,
+  };
+
+  const asideBySection = {
+    uv:        <UVAside        {...uvAsideProps} />,
+    exclusion: <ExclusionAside {...exclusionAsideProps} />,
+  };
+
   // ── Render ────────────────────────────────────────────────────
   return (
-    <div
-      className="stars-tab tab-scrollbar"
-      style={{
-        '--tab-color':       'var(--stars-color)',
-        '--tab-glow':        'var(--stars-glow)',
-        '--tab-glow-strong': 'var(--stars-glow-strong)',
-      }}
-    >
+    <div className="stars-tab trace-tab">
+
       <TabLayout
-        sections={[
-          { id: 'config',    index: '01', label: 'Configuration',   desc: 'Set star count, cluster parameters and Y-distribution mode.' },
-          { id: 'uv',        index: '02', label: 'UV Texture',      desc: 'Define UV tile coordinates, weights and preview the texture atlas.' },
-          { id: 'exclusion', index: '03', label: 'Exclusion Zones', desc: 'Draw rectangular regions where no stars will be placed.' },
-          { id: 'export',    index: '04', label: 'Export',          desc: 'Inject generated stars into the .scmap or export a raw JSON file.' },
-        ]}
+        sections={sections}
         activeSection={activeSection}
         onSelect={setActiveSection}
-        ghostLabel="STARS"
-        renderEyebrow={(s) => `STAR REGISTER — ${s.index} — STARS CONSOLE`}
         railStorageKey="st-rail-pinned"
-        navLabel="Stars console navigation"
-        bootMs={280}
+        asideSlot={asideBySection[activeSection]}
+        asideCaption={null}
+        asideMirror={null}
       >
-        {activeSection === 'config'    && <div className="section-card"><Configuration {...configProps} /></div>}
-        {activeSection === 'uv'        && <div className="section-card"><UV {...uvProps} /></div>}
-        {activeSection === 'exclusion' && <div className="section-card"><Exclusion {...exclusionProps} /></div>}
-        {activeSection === 'export'    && <div className="section-card"><Export {...exportProps} /></div>}
+        {sectionContent[activeSection]}
       </TabLayout>
 
       {/* ── Help Button ── */}

@@ -1,21 +1,32 @@
 /* ═══════════════════════════════════════════════════════════════════
    SCMAP TOOL — Scmap.css
-   Migrated to the FABLE5 design system. The tab is a WorkspaceConsole
-   (rail → working column → preview), so layout/typography/controls all
-   come from design-system primitives. This file only adds the few
-   SCMAP-specific instruments: the drop well, the map register rows, the
-   console log readout, the global drag overlay and the credits line.
-   Accent = the yellow --scmaptool-* tokens, surfaced as --tab-color.
+   The tab is a TabLayout console (rail → main column → aside), so
+   layout/typography/controls all come from design-system primitives
+   (ctrl-*, mp-*). This file only adds the few SCMAP-specific bits: the
+   map register rows, the status line, the global drag overlay and the
+   credits line. Accent = the yellow --scmaptool-* tokens, surfaced as
+   --tab-color.
    ═══════════════════════════════════════════════════════════════════ */
 
 .scmap-tab {
-  position: relative;
-  display: flex;
-  flex: 1;
-  min-height: 0;
   --tab-color:       var(--scmaptool-color);
   --tab-glow:        var(--scmaptool-glow);
   --tab-glow-strong: var(--scmaptool-glow-strong);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
+}
+
+/* Unpack/Repack height match: the aside has no header of its own, so
+   without help "Repack" would start ~200px above "Unpack". Scmap.jsx
+   renders an invisible clone of the real section-header inside the
+   aside (same markup/classes) to reserve the identical amount of
+   space — see the `aria-hidden` block in Scmap.jsx's `asideSlot`. */
+
+/* .mp-subtitle ships its own 20px margin-top (tuned for asides that have
+   no header clone above them) — here that stacks on top of the cloned
+   header's reserved space and pushes "Repack" below "Unpack". Cancelled
+   only in this tab, since the clone already accounts for the offset. */
+.scmap-tab .mp-subtitle {
+  margin-top: 0;
 }
 
 /* ── Hint line — derived output path ──────────────────────────────── */
@@ -82,40 +93,7 @@
   color: var(--ink-22);
 }
 
-/* ── Console log — the live readout inside the preview panel ───────── */
-.scmap-preview { display: flex; flex-direction: column; height: 100%; }
-.scmap-console-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ink-14) transparent;
-}
-.scmap-console-scroll::-webkit-scrollbar { width: 3px; }
-.scmap-console-scroll::-webkit-scrollbar-thumb { background: var(--ink-14); }
-.scmap-console {
-  font-family: var(--font-mono);
-  font-size: var(--text-md);
-  line-height: 1.75;
-  color: var(--ink-38);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.scmap-line { display: block; }
-.scmap-line-ok   { color: var(--status-ok); }
-.scmap-line-err  { color: var(--status-err); }
-.scmap-line-info { color: color-mix(in srgb, var(--tab-color) 75%, #fff); }
-.scmap-console-empty {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: var(--weight-light);
-  letter-spacing: var(--track-tight);
-  line-height: 1.6;
-  color: var(--ink-28);
-  font-style: italic;
-}
-
-/* ── Credits — quiet attribution, pinned under the console ────────── */
+/* ── Credits — quiet attribution, pinned under the map register ───── */
 .scmap-credits {
   flex-shrink: 0;
   display: flex;

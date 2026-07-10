@@ -1342,3 +1342,73 @@
   box-shadow: 0 0 20px var(--customprops-glow-strong);
 }
 .cpt-slider-input-interactive::-webkit-slider-runnable-track { background: transparent; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GOLD-STANDARD MIGRATION — rules below are consumed ONLY by the live tab
+   (PropList.jsx / PropDetail.jsx / CustomProps.jsx). Everything above this
+   line is shared with — or exclusively used by — CustomProps_help.jsx's
+   embedded mock UI and must not be renamed/removed here.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Card body — sits inside EntityCard's children, replaces the old
+   .cpt-prop-card-header as the real card's thumb+info row ── */
+.cpt-card-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  cursor: pointer;
+}
+.cpt-card-body.is-linked {
+  box-shadow: inset 0 0 20px rgba(62, 163, 135, 0.03);
+}
+.cpt-card-body.is-link-source {
+  box-shadow: inset 0 0 20px rgba(62, 163, 135, 0.05);
+}
+
+/* ── Count badge next to the "Custom Props" subtitle ── */
+.cpt-count-badge {
+  margin-left: var(--space-sm);
+  font-size: var(--text-2xs);
+  color: var(--ink-38);
+  font-family: var(--font-mono);
+  font-weight: var(--weight-regular);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Small inline badge riding next to a .mp-subtitle (Pass 1 / Pass 2) ── */
+.cpt-subtitle-badge {
+  margin-left: var(--space-sm);
+}
+
+/* ── Slider value color state (PropDetail.jsx toggles via class instead of
+   inline style; the CustomProps_help.jsx mock still sets its own inline
+   style and is unaffected) ── */
+.cpt-slider-val { color: var(--ink-35); }
+.cpt-slider-val.changed { color: var(--tab-color); }
+
+/* ── Empty aside state (real tab only — no equivalent in the help mock) ── */
+.cpt-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-3xl) var(--space-xl);
+  text-align: center;
+  height: 100%;
+}
+.cpt-empty-title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-30);
+}
+.cpt-empty-hint {
+  font-size: var(--text-xs);
+  color: var(--ink-20);
+  max-width: 280px;
+  line-height: 1.65;
+}

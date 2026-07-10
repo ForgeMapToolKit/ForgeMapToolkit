@@ -22,77 +22,76 @@
  * Field reference:
  *  - id:          action id from NAV_COLS, also used as the article slug
  *  - title:       shown in FooterArticlePreview headline and FooterContentViewer header
- *  - teaser:      2-3 sentence preview shown before "Read more" (placeholder until Phase 6)
+ *  - teaser:      2-3 sentence preview shown before "Read more"
  *  - accentWord:  (optional) exact substring within `title` to render in the
  *                 tool accent color (--tab-color), e.g. 'ForgeMapToolkit' or
  *                 just 'ForgeMap'. Omit to leave the title unaccented.
+ *
+ * Note: 'shortcuts' still carries a placeholder teaser. The article body
+ * itself is still demo content proving out the fcv-* markup, not the real
+ * keybinding list, so a final teaser doesn't have anything real to summarize
+ * yet either.
  */
 
 export const FOOTER_CONTENT = [
   {
     id: 'about-fmt',
     title: 'About ForgeMapToolkit',
-    teaser: 'What ForgeMapToolkit is, who it is for, and how it fits into the Forged Alliance Forever mapping ecosystem. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'What ForgeMapToolkit is for and how a handful of Python scripts for wreckage placement grew into a 15 tab toolkit for advanced, atmosphere focused Supreme Commander mapping.',
     accentWord: 'ForgeMapToolkit',
   },
   {
     id: 'about-author',
     title: 'About the Author',
-    teaser: 'A short introduction to who builds and maintains ForgeMapToolkit. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'Seraphim-noob\'s path through the FAF community, from a first game in 2013 to joining the trainer team and the FAF Association, and how that led into building ForgeMapToolkit.',
     accentWord: 'Author',
   },
   {
     id: 'contribute',
     title: 'How to Contribute',
-    teaser: 'How to report issues, suggest features, or submit changes to the project. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'How to set up ForgeMapToolkit locally, what the TRACE design system expects from any UI change, and the current state of contributing to an early, mostly solo project.',
     accentWord: 'Contribute',
   },
   {
     id: 'donate',
     title: 'Donate',
-    teaser: 'Ways to support continued development of ForgeMapToolkit. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'ForgeMapToolkit is free and stays that way. An overview of the optional ways to support development.',
     accentWord: 'Donate',
-  },
-  {
-    id: 'forgetools',
-    title: 'ForgeTools',
-    teaser: 'An overview of the ForgeTools companion project and how it relates to ForgeMapToolkit. Placeholder teaser -- final copy lands in Phase 6.',
-    accentWord: 'Forge',
   },
   {
     id: 'changelog',
     title: 'Changelog',
-    teaser: 'A running record of what has changed across recent ForgeMapToolkit releases. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'There is no changelog yet. Why that is, and when entries here will start.',
     accentWord: 'Changelog',
   },
   {
     id: 'techstack',
     title: 'Tech Stack',
-    teaser: 'The technologies ForgeMapToolkit is built on -- Electron, React, Vite and friends. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'The technologies ForgeMapToolkit is built on, Electron, React and Vite, why each was chosen, and the key libraries doing the heavy lifting across its tools.',
     accentWord: 'Tech',
   },
   {
     id: 'licenses',
     title: 'Licenses',
-    teaser: 'License information for ForgeMapToolkit and the third-party libraries it depends on. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'License information for ForgeMapToolkit itself and for the third-party libraries and bundled assets it depends on.',
     accentWord: 'Licenses',
   },
   {
     id: 'shortcuts',
     title: 'Keyboard Shortcuts',
-    teaser: 'A reference list of keyboard shortcuts available across the toolkit. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'A reference list of keyboard shortcuts available across the toolkit. Placeholder teaser -- final copy lands once the real shortcut list replaces the current demo content.',
     accentWord: 'Shortcuts',
   },
   {
     id: 'docs',
     title: 'Documentation',
-    teaser: 'Where to find in-depth documentation for each tool in the suite. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'Every tab has its own help console covering exactly how that tool is meant to be used. Where to find it and how it is organized.',
     accentWord: 'Documentation',
   },
   {
     id: 'getting-started',
     title: 'Getting Started',
-    teaser: 'A quick-start guide for first-time users of ForgeMapToolkit. Placeholder teaser -- final copy lands in Phase 6.',
+    teaser: 'Set your game paths, scan the libraries, and jump into whichever tab you want to start with. A three step quick-start for first-time users.',
     accentWord: 'Started',
   },
 ];

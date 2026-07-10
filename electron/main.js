@@ -268,7 +268,7 @@ function installCSP() {
     "default-src 'none'",
     scriptSrc,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: https://raw.githubusercontent.com https://avatars.githubusercontent.com",
+    "img-src 'self' data: file: https://raw.githubusercontent.com https://avatars.githubusercontent.com",
     "media-src 'self' data:",
     `connect-src 'self'${devExtra}`,
     "font-src 'self' https://fonts.gstatic.com",

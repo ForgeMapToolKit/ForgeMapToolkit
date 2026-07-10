@@ -1,12 +1,73 @@
+<div class="fcv-content">
+
 <h1>Licenses</h1>
 
-<p>
-  This is placeholder content for the &quot;Licenses&quot; article. Final
-  copy gets written in Phase 6 of the footer-content-feature roadmap.
-</p>
+<div class="fcv-callout">
+  <p>
+    ForgeMapToolkit itself is released under the
+    <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">PolyForm
+    Noncommercial 1.0.0</a> license. You are free to use, modify, and
+    redistribute it for noncommercial purposes, with the original
+    copyright notice kept intact. Commercial use requires separate
+    permission. The skybox assets bundled with FMT are licensed
+    separately under CC BY-NC 4.0, see below.
+  </p>
+</div>
+
+<h2>Skybox Assets</h2>
 
 <p>
-  Until then this fragment exists purely to prove the loading pipeline end
-  to end: Footer.jsx -> FooterContentViewer -> IPC (read-footer-article)
-  -> this file at public/footer/content/licenses.html.
+  Skybox presets included with FMT are released under
+  <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative
+  Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>,
+  copyright Seraphim-Noob. You are free to share and adapt them, but not
+  for commercial purposes, and the copyright block embedded in each asset
+  file must stay intact in any copy or derivative. The source repository
+  for these assets is
+  <a href="https://github.com/SeraphimNoob01/ForgeMapToolkit-Assets">github.com/SeraphimNoob01/ForgeMapToolkit-Assets</a>.
 </p>
+
+<h2>Third-Party Libraries</h2>
+
+<p>
+  FMT is built on a number of open source libraries. Most are permissively
+  licensed under MIT or ISC, with a couple of exceptions noted below.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Library</th>
+      <th>License</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>React / React DOM</td><td>MIT</td></tr>
+    <tr><td>Electron</td><td>MIT</td></tr>
+    <tr><td>Electron Builder</td><td>MIT</td></tr>
+    <tr><td>Vite / @vitejs/plugin-react</td><td>MIT</td></tr>
+    <tr><td>Tailwind CSS</td><td>MIT</td></tr>
+    <tr><td>PostCSS / Autoprefixer</td><td>MIT</td></tr>
+    <tr><td>Three.js</td><td>MIT</td></tr>
+    <tr><td>Framer Motion</td><td>MIT</td></tr>
+    <tr><td>Sharp</td><td>Apache-2.0</td></tr>
+    <tr><td>JSZip</td><td>MIT or GPLv3 (dual-licensed, used here under MIT)</td></tr>
+    <tr><td>Adm-Zip</td><td>MIT</td></tr>
+    <tr><td>Highlight.js / rehype-highlight</td><td>BSD-3-Clause</td></tr>
+    <tr><td>React Markdown / remark-gfm</td><td>MIT</td></tr>
+    <tr><td>Anser</td><td>MIT</td></tr>
+    <tr><td>Lucide React</td><td>ISC</td></tr>
+    <tr><td>@uiw/react-color</td><td>MIT</td></tr>
+    <tr><td>Concurrently / Cross-env / Wait-on</td><td>MIT</td></tr>
+    <tr><td>Standard Version</td><td>MIT</td></tr>
+  </tbody>
+</table>
+
+<p>
+  JSZip is dual-licensed under MIT or GPLv3. FMT uses it under the MIT
+  terms. Sharp and its bundled libvips binaries are Apache-2.0, with some
+  platform binaries additionally covered by LGPL-3.0-or-later for their
+  bundled native dependencies.
+</p>
+
+</div>

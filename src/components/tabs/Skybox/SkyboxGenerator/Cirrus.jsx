@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { EntityCardGrid, EntityCard, AddTile } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
+import { ColorPicker } from './Configuration.jsx';
 import { PLANET_UV_COLORS } from './utils.js';
 
 // ── CirrusLayerDiagram ─────────────────────────────────────────────
@@ -18,8 +19,6 @@ export const CirrusLayerDiagram = ({ layers, cirrusMult }) => {
     return Math.round(8 + t * 80);
   };
   const S = {
-    muted: 'rgba(255,255,255,0.22)',
-    dim:   'rgba(255,255,255,0.12)',
     label: { fontSize:'0.6rem', letterSpacing:'0.07em', textTransform:'uppercase', color:'rgba(255,255,255,0.28)' },
     mono:  { fontFamily:'monospace' },
   };
@@ -38,15 +37,11 @@ export const CirrusLayerDiagram = ({ layers, cirrusMult }) => {
         const bx    = freqBar(fx), by = freqBar(fy);
 
         return (
-          <div key={layer.id} style={{
-            display:'grid', gridTemplateColumns:'1fr 52px', gap:'10px', alignItems:'start',
-            marginBottom:'7px', padding:'9px 11px',
-            background:'rgba(0,0,0,0.28)', border:`1px solid ${col}28`, borderLeft:`3px solid ${col}`,
-          }}>
+          <div key={layer.id} className="sb-cirrus-layer-box" style={{ '--layer-color': col, borderLeftColor: col }}>
             <div>
               <div style={{display:'flex',alignItems:'center',gap:'7px',marginBottom:'8px'}}>
                 <span style={{color:col,fontWeight:700,fontSize:'0.78rem',fontFamily:'monospace'}}>L{i+1}</span>
-                <span style={{fontSize:'0.6rem',color:S.muted,letterSpacing:'0.04em'}}>channel {['R','G','B','A'][i] ?? i+1}</span>
+                <span className="ctrl-label">channel {['R','G','B','A'][i] ?? i+1}</span>
               </div>
               <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px'}}>
                 <span style={{...S.label,width:'40px'}}>freq X</span>
@@ -156,48 +151,13 @@ const Cirrus = ({
             </div>
             <div className="ctrl-field">
               <div className="ctrl-label">Cirrus Color</div>
-              <input className="ctrl-input" value={cirrusColor} onChange={e=>setCirrusColor(e.target.value)} placeholder="#ffffff"/>
+              <ColorPicker value={cirrusColor} onChange={e=>setCirrusColor(e.target.value)}/>
             </div>
           </div>
           <div className="ctrl-field">
             <div className="ctrl-label">Cirrus Texture</div>
             <input className="ctrl-input ctrl-input--text" value={cirrusTexture} onChange={e=>setCirrusTexture(e.target.value)}/>
           </div>
-
-          {/* Save custom preset */}
-          <div className="ctrl-action-row">
-            <button className="ctrl-btn-add" onClick={() => setShowSavePreset(v=>!v)}>
-              {showSavePreset ? '▲ Cancel' : '+ Save Current as Preset'}
-            </button>
-          </div>
-          {showSavePreset && (
-            <div className="sb-cirrus-save-preset-panel">
-              <div className="ctrl-field">
-                <div className="ctrl-label">Preset Name</div>
-                <input className="ctrl-input ctrl-input--text" value={newPresetName}
-                  onChange={e=>setNewPresetName(e.target.value)}
-                  placeholder="My Preset" onKeyDown={e=>e.key==='Enter'&&onSaveCustomPreset()}/>
-              </div>
-              <div className="ctrl-field">
-                <div className="ctrl-label">Import from JSON / Lua (optional)</div>
-                <textarea className="ctrl-input ctrl-input--text sb-textarea" rows={4} value={importText}
-                  onChange={e=>{setImportText(e.target.value);setImportError('');}}
-                  onDragOver={e=>{e.preventDefault();setImportDragOver(true);}}
-                  onDragLeave={()=>setImportDragOver(false)}
-                  onDrop={e=>{
-                    e.preventDefault();setImportDragOver(false);
-                    const text=e.dataTransfer.getData('text');
-                    if(text){setImportText(text);const res=parseCirrusFromText(text);if(!res)setImportError('Could not parse.');}
-                  }}
-                  style={{outline:importDragOver?'1px solid var(--skybox-generator-color)':'none'}}
-                  placeholder="Paste skybox JSON or Lua here…"/>
-                {importError && <p className="sb-field-help" style={{color:'rgba(255,80,80,0.9)'}}>{importError}</p>}
-              </div>
-              <button className="ctrl-btn-add" onClick={onSaveCustomPreset} disabled={!newPresetName.trim()}>
-                Save Preset
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -251,6 +211,45 @@ const Cirrus = ({
               <AddTile label="Add Layer" onClick={onAddCirrus} />
             )}
           </EntityCardGrid>
+        </div>
+      </div>
+
+      {/* Save custom preset — captures Settings + the Layers above */}
+      <div className="ctrl-block">
+        <div className="ctrl-content">
+          <div className="ctrl-action-row">
+            <button className="ctrl-btn-add" onClick={() => setShowSavePreset(v=>!v)}>
+              {showSavePreset ? '▲ Cancel' : '+ Save Current as Preset'}
+            </button>
+          </div>
+          {showSavePreset && (
+            <div className="sb-cirrus-save-preset-panel">
+              <div className="ctrl-field">
+                <div className="ctrl-label">Preset Name</div>
+                <input className="ctrl-input ctrl-input--text" value={newPresetName}
+                  onChange={e=>setNewPresetName(e.target.value)}
+                  placeholder="My Preset" onKeyDown={e=>e.key==='Enter'&&onSaveCustomPreset()}/>
+              </div>
+              <div className="ctrl-field">
+                <div className="ctrl-label">Import from JSON / Lua (optional)</div>
+                <textarea className="ctrl-input ctrl-input--text sb-textarea" rows={4} value={importText}
+                  onChange={e=>{setImportText(e.target.value);setImportError('');}}
+                  onDragOver={e=>{e.preventDefault();setImportDragOver(true);}}
+                  onDragLeave={()=>setImportDragOver(false)}
+                  onDrop={e=>{
+                    e.preventDefault();setImportDragOver(false);
+                    const text=e.dataTransfer.getData('text');
+                    if(text){setImportText(text);const res=parseCirrusFromText(text);if(!res)setImportError('Could not parse.');}
+                  }}
+                  style={{outline:importDragOver?'1px solid var(--skybox-generator-color)':'none'}}
+                  placeholder="Paste skybox JSON or Lua here…"/>
+                {importError && <p className="sb-field-help" style={{color:'rgba(255,80,80,0.9)'}}>{importError}</p>}
+              </div>
+              <button className="ctrl-btn-add" onClick={onSaveCustomPreset} disabled={!newPresetName.trim()}>
+                Save Preset
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -15,8 +15,8 @@ export const DEFAULT_UV_ROWS = [
 ];
 
 export const UV_COLORS = [
-  '#3b76ff','#22d3ee','#34d399','#f59e0b',
-  '#f43f5e','#60a5fa','#fb923c','#84cc16',
+  '#3b76ff','#38bdd6','#3ecf8e','#e0a336',
+  '#e0546a','#6b93d6','#e0904f','#8fc042',
 ];
 
 export const PLANET_UV_COLORS = [
@@ -35,6 +35,7 @@ export const CIRRUS_BUILTIN_PRESETS = [
   {
     id: 'heavy-overcast', label: 'Heavy Overcast',
     texture: '/textures/environment/cirrus000.dds',
+    cirrusMult: '2.4',
     layers: [
       { freqX:'0.0001',   freqY:'0.0001',   speed:'3.5',  dirX:'0.432',   dirY:'-0.902' },
       { freqX:'0.001011', freqY:'0.003189',  speed:'1.28', dirX:'1.0',     dirY:'0.0'   },
@@ -45,6 +46,7 @@ export const CIRRUS_BUILTIN_PRESETS = [
   {
     id: 'layered-drift', label: 'Layered Drift',
     texture: '/textures/environment/cirrus001_512.dds',
+    cirrusMult: '1.8',
     layers: [
       { freqX:'0.00025', freqY:'0.00025', speed:'1.5',  dirX:'0.866',  dirY:'0.5'   },
       { freqX:'0.00078', freqY:'0.00195', speed:'1.2',  dirX:'0.5',    dirY:'0.866' },
@@ -55,6 +57,7 @@ export const CIRRUS_BUILTIN_PRESETS = [
   {
     id: 'turbulent-banks', label: 'Turbulent Banks',
     texture: '/textures/environment/cirrus000.dds',
+    cirrusMult: '2.1',
     layers: [
       { freqX:'0.00014', freqY:'0.00014', speed:'4.5',  dirX:'-0.6',  dirY:'-0.8'  },
       { freqX:'0.0018',  freqY:'0.0038',  speed:'2.8',  dirX:'0.8',   dirY:'0.6'   },
@@ -65,6 +68,7 @@ export const CIRRUS_BUILTIN_PRESETS = [
   {
     id: 'high-cirrus', label: 'High Cirrus',
     texture: '/textures/environment/cirrus000.dds',
+    cirrusMult: '1.2',
     layers: [
       { freqX:'0.00082', freqY:'0.00082', speed:'0.3',  dirX:'1.0',      dirY:'0.0'       },
       { freqX:'0.00055', freqY:'0.00173', speed:'0.2',  dirX:'0.866',    dirY:'0.5'       },
@@ -453,7 +457,7 @@ export const buildSkyboxLuaBlock = ({
 // ── Cirrus-Import-Parser ──────────────────────────────────────────
 export const parseCirrusFromText = (raw) => {
   raw = (raw || '').trim();
-  let layers = null, texture = null;
+  let layers = null, texture = null, cirrusMult = null;
 
   const tryParseJson = (str) => { try { return JSON.parse(str); } catch (_) { return null; } };
   const tryWrap = (str) => {
@@ -469,14 +473,17 @@ export const parseCirrusFromText = (raw) => {
     if (Array.isArray(obj)) {
       layers = obj;
     } else {
-      layers  = obj?.CirrusLayers  ?? obj?.cirrusLayers  ?? null;
-      texture = obj?.CirrusTexture ?? obj?.cirrusTexture ?? null;
+      layers     = obj?.CirrusLayers     ?? obj?.cirrusLayers     ?? null;
+      texture    = obj?.CirrusTexture    ?? obj?.cirrusTexture    ?? null;
+      cirrusMult = obj?.CirrusMultiplier ?? obj?.cirrusMultiplier ?? null;
     }
   }
 
   if (!layers) {
     const texMatch = raw.match(/cirrusTexture\s*=\s*"([^"]+)"/);
     if (texMatch) texture = texMatch[1];
+    const multMatch = raw.match(/cirrusMultiplier\s*=\s*([\d.eE+\-]+)/i);
+    if (multMatch) cirrusMult = multMatch[1];
     const layersBlock = raw.match(/cirrusLayers\s*=\s*\{([\s\S]*?)\},?\s*(?:cirrus|decal|glow|horizon|zenith|planet|position|scale|subDiv|subHeight|albedo|\})/);
     if (layersBlock) {
       const block   = layersBlock[1];
@@ -507,5 +514,5 @@ export const parseCirrusFromText = (raw) => {
     dirY:  String(l.Direction?.y ?? l.DirectionY ?? 0),
   }));
 
-  return { layers: normalized, texture };
+  return { layers: normalized, texture, cirrusMult: cirrusMult != null ? String(cirrusMult) : null };
 };

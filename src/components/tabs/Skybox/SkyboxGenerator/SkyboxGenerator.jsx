@@ -324,7 +324,8 @@ const SkyboxGeneratorTab = ({
     setActivePresetId(preset.id);
     setCirrusTexture(preset.texture);
     setCirrusLayers(presetToLayers(preset));
-  }, [activePresetId, setActivePresetId, setCirrusTexture, setCirrusLayers]);
+    if (preset.cirrusMult != null) setCirrusMult(preset.cirrusMult);
+  }, [activePresetId, setActivePresetId, setCirrusTexture, setCirrusLayers, setCirrusMult]);
 
   const onSaveCustomPreset = useCallback(() => {
     const name = newPresetName.trim();
@@ -334,6 +335,7 @@ const SkyboxGeneratorTab = ({
       id: 'custom-' + Date.now(),
       label: name,
       texture: fromImport?.texture ?? cirrusTexture,
+      cirrusMult: fromImport?.cirrusMult ?? cirrusMult,
       layers: (fromImport?.layers ?? cirrusLayers).map(
         ({ freqX, freqY, speed, dirX, dirY }) =>
           ({ freqX: String(freqX), freqY: String(freqY), speed: String(speed),
@@ -344,7 +346,7 @@ const SkyboxGeneratorTab = ({
     setImportText('');
     setImportError('');
     setShowSavePreset(false);
-  }, [newPresetName, importText, cirrusTexture, cirrusLayers, setCustomPresets]);
+  }, [newPresetName, importText, cirrusTexture, cirrusMult, cirrusLayers, setCustomPresets]);
 
   const onDeleteCustomPreset = useCallback((id) => {
     setCustomPresets(ps => ps.filter(p => p.id !== id));
@@ -391,57 +393,6 @@ const SkyboxGeneratorTab = ({
       yMode, yMax, yCenter, yStdDev, yLayers,
       diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter]);
 
-  // Inject stars
-  const onInjectStars = useCallback(async () => {
-    const mapNameTrimmed = mapName.trim();
-    const mapsFolder     = (settings?.mapsFolder || '').trim();
-    if (!mapNameTrimmed) { await luxuryAlert('Bitte Map Name setzen.', 'Map Name Required', 'warning'); return; }
-    if (!mapsFolder)     { await luxuryAlert('Bitte Maps Folder konfigurieren.', 'Maps Folder Not Set', 'warning'); return; }
-    const finalName     = /\.v\d{4}$/.test(mapNameTrimmed) ? mapNameTrimmed : mapNameTrimmed + '.v0001';
-    const mapFolderPath = `${mapsFolder}\\${finalName}`;
-    try {
-      const dirEntries = await window.electronAPI.invoke('list-dir', { dirPath: mapFolderPath });
-      if (!dirEntries?.success) throw new Error('Could not read map folder.');
-      const scmapEntry = dirEntries.entries.find(e => !e.isDirectory && e.name.toLowerCase().endsWith('.scmap'));
-      if (!scmapEntry) throw new Error(`No .scmap in ${mapFolderPath}`);
-      const scmapPath = `${mapFolderPath}\\${scmapEntry.name}`;
-      const unpackRes = await window.electronAPI.invoke('scmap-unpack', { scmapPath });
-      if (!unpackRes.success) throw new Error(`Unpack failed: ${unpackRes.error}`);
-      const unpackedFolder = unpackRes.outputFolder;
-      const dataLuaPath    = `${unpackedFolder}\\data.lua`;
-      const readRes        = await window.electronAPI.invoke('read-file', { path: dataLuaPath });
-      if (!readRes?.success) throw new Error(`data.lua read failed: ${readRes?.error}`);
-      const stars    = buildStars({ nStars: parseInt(numStars)||50, numClusters, clusterSpread,
-        clusterStdDev, backgroundRatio, scaleMin, scaleMax, uvOptions, uvWeights,
-        exclusionZones, exEnabled, yMode, yMax, yCenter, yStdDev,
-        yLayers, diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter });
-      const planetLuaStr = stars.map(st =>
-        `        {\n            position = { ${st.x.toFixed(3)}, ${st.y.toFixed(3)}, ${st.z.toFixed(3)}, },\n` +
-        `            rotation = ${st.rotation.toFixed(4)},\n            scale = { ${st.scale.toFixed(2)}, ${st.scale.toFixed(2)}, },\n` +
-        `            uv = { ${st.uv.x}, ${st.uv.y}, ${st.uv.z}, ${st.uv.w}, },\n        },\n`
-      ).join('');
-      let dataLua = readRes.content;
-      const planetsRegex = /planets\s*=\s*\{[\s\S]*?\},/;
-      if (planetsRegex.test(dataLua)) {
-        dataLua = dataLua.replace(planetsRegex, `planets = {\n${planetLuaStr}        },`);
-      } else {
-        throw new Error('planets section not found in data.lua');
-      }
-      const writeRes = await window.electronAPI.invoke('write-file', { filePath: dataLuaPath, content: dataLua });
-      if (!writeRes?.success) throw new Error(`Write failed: ${writeRes?.error}`);
-      const mapNameForPack = unpackedFolder.split(/[\\/]/).pop();
-      const packRes  = await window.electronAPI.invoke('scmap-pack', { mapName: mapNameForPack });
-      if (!packRes.success) throw new Error(`Pack failed: ${packRes.error}`);
-      const copyRes  = await window.electronAPI.invoke('copy-file', { src: packRes.outputPath, dest: scmapPath });
-      if (!copyRes?.success) throw new Error('Repack copy failed.');
-      await luxuryAlert(`✓ ${stars.length} stars injected.`, 'Stars Injected', 'success');
-    } catch (e) {
-      await luxuryAlert(e.message, 'Inject Failed', 'error');
-    }
-  }, [mapName, settings, numStars, numClusters, clusterSpread, clusterStdDev,
-      backgroundRatio, scaleMin, scaleMax, uvOptions, uvWeights, exclusionZones,
-      exEnabled, yMode, yMax, yCenter, yStdDev, yLayers,
-      diskCenter, diskStdDev, haloStdDev, haloRatio, curvePoints, yClusterScatter]);
 
   // Export .scmskybox
   const onExportScmskybox = useCallback(async () => {
@@ -699,7 +650,6 @@ const configProps = {
     curvePoints, setCurvePoints,
     yClusterScatter, setYClusterScatter,
     onResetDefaults: onResetStarDefaults,
-    onInjectStars,
   };
 
   const starsAsideProps = {

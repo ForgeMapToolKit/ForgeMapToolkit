@@ -30,34 +30,24 @@ const Output = ({
 
       <OutputChecklist
         ready={ready}
-        onCommit={onInjectSkybox}
-        commitLabel="Generate Skybox → .scmap"
-        commitAriaLabel="Inject skybox into .scmap"
+        onCommit={exportRawScmskybox ? onExportScmskybox : onInjectSkybox}
+        commitLabel="Generate Skybox"
+        commitAriaLabel={exportRawScmskybox ? 'Export skybox as .scmskybox file' : 'Inject skybox into .scmap'}
         items={[
-          { label: 'Export raw .scmskybox JSON alongside .scmap inject', checked: !!exportRawScmskybox, onToggle: () => setExportRawScmskybox(!exportRawScmskybox) },
+          { label: 'Export raw .scmskybox', checked: !!exportRawScmskybox, onToggle: () => setExportRawScmskybox(!exportRawScmskybox) },
           { label: 'Generate README file', checked: !!generateReadme, onToggle: () => setGenerateReadme(!generateReadme) },
         ]}
       />
 
-      <div className="ctrl-block">
-        <div className="ctrl-content">
-          <div className="ctrl-action-row">
-            <button
-              className="action-button action-button--full"
-              onClick={onExportScmskybox}
-              disabled={!ready}
-              title={ready ? 'Export skyBox JSON as .scmskybox file' : 'Map Name and Maps Folder required'}
-            >
-              Export .scmskybox only
-            </button>
-          </div>
-          {!ready && (
+      {!ready && (
+        <div className="ctrl-block">
+          <div className="ctrl-content">
             <p className="sb-field-help">
               Set <strong>Map Name</strong> in the Atmosphere section and configure the <strong>Maps Folder</strong> in Settings to enable generation.
             </p>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );

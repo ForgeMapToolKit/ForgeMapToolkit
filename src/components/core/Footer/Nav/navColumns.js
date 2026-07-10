@@ -21,7 +21,7 @@ export const NAV_COLS = [
     label: 'Ecosystem',
     items: [
       { label: 'ForgeClient',    href: 'https://github.com/Seraphim-Noob/ForgeClient', extern: true },
-      { label: 'ForgeTools',     action: 'forgetools' },
+      { label: 'ForgeTools',     href: 'https://timmasalme.github.io/ForgeTools/', extern: true },
       { label: 'FAF Map Editor', href: 'https://github.com/FAForever/FAForeverMapEditor', extern: true },
       { label: 'FAF Discord',    href: 'https://discord.gg/hgvj6Af', extern: true },
     ],

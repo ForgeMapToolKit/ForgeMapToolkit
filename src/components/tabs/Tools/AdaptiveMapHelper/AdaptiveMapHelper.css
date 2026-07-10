@@ -1,4 +1,6 @@
 /* ── Variables ─────────────────────────────────────────────────────── */
+/* Layout (flex/overflow/full-bleed sizing) inherited from .trace-tab —
+   this tab no longer owns its own page shell (that's TabLayout's job now). */
 .amh-tab {
   --amh-accent:             #ff8c00;
   --amh-accent-glow:        rgba(255, 140, 0, 0.35);
@@ -11,22 +13,223 @@
   --tab-color:              var(--adaptivemaphelper-color);
   --tab-glow:               var(--adaptivemaphelper-glow);
   --tab-glow-strong:        var(--adaptivemaphelper-glow-strong);
-
-  color:       var(--amh-text);
-  font-family: 'Poppins', sans-serif;
-  background:  var(--bg-primary, #0a0a0a);
-  min-height:  100vh;
-  padding:     32px 20px 40px;
-  animation:   amhFadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-  display:     flex;
-  flex-direction: column;
-  gap:         24px;
-  box-sizing:  border-box;
 }
 
-@keyframes amhFadeIn {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ═══════════════════════════════════════════════════════════════════════════
+   GOLD-STANDARD MIGRATION — live-tab-only classes for the Canvas/Tables
+   TabLayout bands + MapCanvas popup/zoom controls. Distinct names from the
+   amh-* originals below (those stay untouched — AdaptiveMapHelper_help.jsx's
+   embedded walkthrough replica still renders with the pre-migration markup).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Canvas topBar: compact map-name field for the 52px single-line band ── */
+.amh-topbar-input {
+  width:   auto;
+  flex:    0 1 320px;
+  min-width: 160px;
+}
+
+/* Pushes trailing content to the band's right edge. */
+.amh-topbar-spacer { flex: 1; }
+
+/* .layout-w-toolbar's default rgba(255,255,255,0.012) tint reads as a flat
+   grey bar against the dark canvas below, and both bands' default
+   border-bottom read as unwanted horizontal rules once Replace Preview /
+   Metadata / Mirror / Quick-assign are left-clustered with lots of open
+   space around them — AMH is the only layoutMode="w" consumer right now,
+   so this is scoped locally rather than touched in the shared layout.css
+   until more tabs adopt Layout W and a consensus forms. */
+.amh-tab .layout-w-toolbar { background: none; }
+.amh-tab .layout-w-top-bar,
+.amh-tab .layout-w-toolbar { border-bottom: none; }
+
+/* Map-name toolbar "+ Metadata" disclosure — a small floating card (needs an
+   opaque backing + one accent edge, same "content container" allowance as
+   the assignment popup) since the 44px toolbar band has no room to expand
+   the row itself without breaking the "one line" rule. */
+.amh-meta-wrap { position: relative; }
+.amh-meta-pop {
+  position:   absolute;
+  top:        calc(100% + var(--space-sm));
+  left:       0;
+  z-index:    50;
+  background: rgba(10,10,10,0.97);
+  border:     1px solid color-mix(in srgb, var(--tab-color) 25%, transparent);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+  padding:    var(--space-sm) var(--space-md);
+  white-space: nowrap;
+}
+
+/* Canvas topBar map-info/stat readouts reuse .ctrl-mapinfo / .ctrl-badge
+   (primitives.css §6 — plain Leise text, no boxed pills: TAB_DESIGN_LAW §5
+   forbids a neutral surface + neutral border together, which the earlier
+   pill treatment violated). */
+.amh-stat-icon {
+  width:  14px;
+  height: 14px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.amh-stat-assigned { color: var(--tab-color); }
+
+/* ── Canvas toolbar ────────────────────────────────────────────────────── */
+.amh-toolbar-note {
+  font-size:  var(--text-xs);
+  color:      var(--ink-38);
+  font-style: italic;
+}
+
+/* Mirror toggle — the real §5c toggle mechanism (pole-on-a-track IS the
+   control, not decoration), just sized to sit inline in the 44px toolbar
+   band instead of a full-width block-list row. */
+.amh-inline-toggle {
+  width:   auto;
+  padding: 0;
+}
+
+/* Quick-assign army row — the ACU icon already carries the army's colour
+   (Role 2 data colour lives in the artwork itself), so the button needs no
+   box at all: no background, no border, at rest OR on hover/active. The
+   only signal is a bottom baseline (T2-style) that ignites in the army's
+   colour when active — the same "line, not box" language as .ctrl-input. */
+.amh-qa-wrap {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-sm);
+  flex-wrap:   wrap;
+}
+.amh-qa-label {
+  font-size:   var(--text-xs);
+  color:       var(--ink-38);
+  padding:     0 var(--space-2xs) 0 0;
+  white-space: nowrap;
+}
+.amh-qa-btn {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2xs);
+  height:         26px;
+  padding:        0 0 2px;
+  background:     none;
+  border:         none;
+  border-bottom:  1px solid transparent;
+  color:          var(--ink-40);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-2xs);
+  font-weight:    var(--weight-bold);
+  letter-spacing: var(--track-wide);
+  cursor:         pointer;
+  transition:     color var(--dur-base) linear, border-color var(--dur-base) linear;
+  white-space:    nowrap;
+}
+.amh-qa-btn:hover {
+  color:        color-mix(in srgb, var(--qcol) 80%, #fff);
+  border-bottom-color: color-mix(in srgb, var(--qcol) 50%, transparent);
+}
+.amh-qa-btn.active {
+  color:        color-mix(in srgb, var(--qcol) 85%, #fff);
+  border-bottom-color: var(--qcol);
+}
+.amh-qa-icon {
+  width:  15px;
+  height: 15px;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+/* ── Zoom control buttons (canvas) — .amh-zoom-controls wrapper is
+   unused-by-mock and stays as-is further down. ── */
+/* No border at rest (rgba(255,255,255,0.022)-class subtle surface only, per
+   TAB_DESIGN_LAW §5 "content containers"); the tab-color edge + glow is an
+   interaction-only signal (Philosophy §5 "glow coupled exclusively to
+   hover/active"), not permanent chrome on a Leise utility control. */
+.amh-zoom-item {
+  width:       30px;
+  height:      30px;
+  background:  rgba(255,255,255,0.022);
+  border:      1px solid transparent;
+  color:       var(--ink-55);
+  cursor:      pointer;
+  font-size:   14px;
+  transition:  all var(--dur-base) linear;
+  font-family: var(--font-display);
+}
+.amh-zoom-item:hover {
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  box-shadow:   0 0 10px var(--tab-glow);
+}
+
+/* ── Assignment popup — new names, floating over the canvas ── */
+.amh-assign-pop {
+  position:   absolute;
+  z-index:    100;
+  background: rgba(10,10,10,0.97);
+  border:     1px solid color-mix(in srgb, var(--tab-color) 30%, transparent);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 30px var(--tab-glow);
+  display:    flex;
+  flex-direction: column;
+  overflow:   hidden;
+  animation:  amhPopupIn 0.18s cubic-bezier(0.23,1,0.32,1);
+}
+.amh-assign-pop::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--tab-color), transparent);
+}
+.amh-assign-pop-header {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-xs);
+  padding:     var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--line-faint);
+  background:  color-mix(in srgb, var(--tab-color) 4%, transparent);
+}
+.amh-assign-pop-title {
+  flex:        1;
+  font-size:   var(--text-sm);
+  font-weight: var(--weight-semi);
+  color:       var(--tab-color);
+  letter-spacing: 0.04em;
+  font-family: var(--font-mono);
+}
+.amh-assign-pop-mirror {
+  font-size:     var(--text-xs);
+  color:         #64b5f6;
+  background:    rgba(100,181,246,0.15);
+  border:        1px solid rgba(100,181,246,0.3);
+  padding:       1px 5px;
+  margin-left:   auto;
+  margin-right:  var(--space-2xs);
+}
+.amh-assign-pop-body { overflow-y: auto; max-height: 220px; }
+.amh-assign-pop-body::-webkit-scrollbar       { width: 4px; }
+.amh-assign-pop-body::-webkit-scrollbar-thumb { background: var(--tab-glow); border-radius: 2px; }
+.amh-assign-pop-list { display: flex; flex-direction: column; gap: 1px; padding: var(--space-xs); }
+.amh-assign-pop-btn {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-xs);
+  padding:     var(--space-xs) var(--space-sm);
+  background:  transparent;
+  border:      1px solid transparent;
+  color:       var(--ink-55);
+  font-family: var(--font-display);
+  font-size:   var(--text-xs);
+  cursor:      pointer;
+  transition:  all var(--dur-base) linear;
+  text-align:  left;
+  width:       100%;
+}
+.amh-assign-pop-btn:hover {
+  background:  var(--sheen-040);
+  color:       #fff;
+}
+.amh-assign-pop-btn.active {
+  background:  color-mix(in srgb, var(--army-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--army-color) 50%, transparent);
+  color:       var(--army-color);
 }
 
 
@@ -116,6 +319,20 @@
 
 .amh-form-input::placeholder { color: var(--amh-text-muted); }
 
+/* Compact override for the Canvas topBar's single-line band — the base
+   .amh-form-input is width:100% for the (mock-only, now unused-by-the-live-
+   tab) card layout; here it's one flex item among several in a 52px row. */
+.amh-topbar-input {
+  width:   auto;
+  flex:    0 1 320px;
+  min-width: 160px;
+  padding: 8px 14px;
+}
+
+/* Pushes trailing content (stat pills / generate button) to the band's
+   right edge — used in both the Canvas topBar/toolbar and Tables topBar. */
+.amh-topbar-spacer { flex: 1; }
+
 .amh-map-info {
   margin-top: 8px;
   padding:    7px 14px;
@@ -168,15 +385,16 @@
   filter: saturate(0) brightness(0.85);
 }
 
-/* ── Empty state ────────────────────────────────────────────────────── */
+/* ── Empty state — fills .layout-w-content ────────────────────────────── */
 .amh-empty-state {
+  height:         100%;
+  box-sizing:     border-box;
   display:        flex;
   flex-direction: column;
   align-items:    center;
   justify-content: center;
   padding:        80px 40px;
   background:     linear-gradient(135deg, var(--surface-ghost) 0%, rgba(0,0,0,0.1) 100%);
-  border:         1px solid var(--amh-border);
   gap:            12px;
   text-align:     center;
 }
@@ -202,12 +420,6 @@
 }
 
 /* ── Editor layout ──────────────────────────────────────────────────── */
-.amh-editor {
-  flex:    1;
-  display: flex;
-  min-height: 0;
-}
-
 /* ── Canvas panel — FULL WIDTH ──────────────────────────────────────── */
 .amh-canvas-panel {
   flex:           1;
@@ -563,24 +775,46 @@
   box-shadow:  0 0 12px rgba(255,140,0,0.2);
 }
 
-.amh-code-saved-note {
-  margin-bottom: 12px;
-  padding:    8px 14px;
-  background: rgba(0,200,100,0.07);
-  border:     1px solid rgba(0,200,100,0.2);
-  font-size:  0.75rem;
-  font-family: monospace;
-  color:      #4caf82;
+/* Small "✓ saved" pill riding next to the Tables topBar label */
+/* ── Code output — fills .layout-w-content (which is itself overflow:hidden,
+   so this wrapper owns the scroll region) ──────────────────────────────── */
+.amh-tables-content {
+  height:  100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: var(--space-xl) var(--space-3xl);
+  box-sizing: border-box;
 }
 
-/* ── Code output ────────────────────────────────────────────────────── */
-.amh-code-wrap  { flex: 1; overflow: auto; padding: 28px 32px; }
-
-.amh-code-header {
-  display:         flex;
-  justify-content: space-between;
-  align-items:     center;
-  margin-bottom:   14px;
+/* Export section content — controls column + standby-field, same pairing
+   Layout Y uses. Genuine Layout Y's .standby-field is flex:1 (fills
+   whatever's left of the already-capped 1300px workspace-main-inner) —
+   fine at the window sizes it's normally seen at, but on a very wide
+   window that "whatever's left" balloons to 900px+ of near-empty ghost
+   field, which read as "too wide" rather than deliberate. Fix: cap the
+   whole (column + standby) composition at a fixed total width and centre
+   *that pair* in the available space — the standby-field keeps its real
+   content (ghost word, readout, cursor) but stops stretching to fill
+   arbitrary leftover width; any width beyond the pair's cap is genuine
+   page background, not a field trying to look busy. */
+.amh-export-content {
+  height:   100%;
+  overflow: hidden;
+  display:  flex;
+  justify-content: center;
+}
+.amh-export-column {
+  /* Base .workspace-column is flex:1 (assumes a Layout X/Y ancestor rule
+     narrows it) — this lives directly in .layout-w-content instead, so the
+     fixed ~360px basis has to be set explicitly here. */
+  flex:     0 0 360px;
+  width:    360px;
+  overflow-y: auto;
+  padding-top: var(--space-md);
+}
+.amh-export-content .standby-field {
+  flex: 0 1 480px;
 }
 
 .amh-code-label {
@@ -611,7 +845,7 @@
   line-height: 1.8;
   color:       #c9d1d9;
   overflow:    auto;
-  font-family: 'DM Mono', 'Fira Code', monospace;
+  font-family: var(--font-mono);
 }
 
 .amh-code-empty {
@@ -805,10 +1039,7 @@
   gap:             16px;
 }
 
-/* ── shared.css .help-adv-layout needs --tab-color set on .amh-tab ──
-   The AMH tab already sets --amh-accent; map it for shared classes here. */
-.amh-tab {
-  --tab-color:      var(--amh-accent);
-  --tab-glow:       var(--amh-glow);
-  --tab-glow-strong:var(--amh-glow-strong);
-}
+/* Note: --tab-color/--tab-glow/--tab-glow-strong for .amh-tab (needed by
+   shared.css .help-adv-layout and everything else) are already set once,
+   at the top of this file — --amh-accent and tokens.css's global
+   --amh-glow/--amh-glow-strong aliases resolve to the same values anyway. */

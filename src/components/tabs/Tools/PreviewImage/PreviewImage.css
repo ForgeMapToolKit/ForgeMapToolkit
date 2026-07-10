@@ -1,151 +1,119 @@
-/* ── 1. TAB ROOT & THEME ──────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════════
+   PREVIEW IMAGE TAB — feature-only CSS
+   The tab is a TabLayout console (rail → main column → aside), so layout/
+   typography/controls all come from design-system primitives (ctrl-*, mp-*,
+   ec-*). This file only adds the few Preview-Image-specific bits: the
+   resolution tiles, the pipeline step list, warn/error notices, the rendered
+   preview well and its spinners.
+   ══════════════════════════════════════════════════════════════════════════════ */
 
-/* Theme variables only — safe to apply to any container */
+/* ── 1. Root ─────────────────────────────────────────────────────────────────── */
 .pi-theme {
-  --tab-color:       var(--preview-color,      #00ddff);
-  --tab-glow:        var(--preview-glow,        rgba(0, 221, 255, 0.25));
-  --tab-glow-strong: var(--preview-glow-strong, rgba(0, 221, 255, 0.55));
-
-  --theme-accent:       var(--tab-color);
-  --theme-glow:         var(--tab-glow);
-  --theme-glow-strong:  var(--tab-glow-strong);
-
-  color:       var(--text-primary);
-  font-family: 'Poppins', sans-serif;
+  --tab-color:       var(--previewimage-color);
+  --tab-glow:        var(--previewimage-glow);
+  --tab-glow-strong: var(--previewimage-glow-strong);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
 }
 
-/* Standalone full-page layout (help modal replica) */
-.pi-tab {
-  --tab-color:       var(--preview-color,      #00ddff);
-  --tab-glow:        var(--preview-glow,        rgba(0, 221, 255, 0.25));
-  --tab-glow-strong: var(--preview-glow-strong, rgba(0, 221, 255, 0.55));
-
-  --theme-accent:       var(--tab-color);
-  --theme-glow:         var(--tab-glow);
-  --theme-glow-strong:  var(--tab-glow-strong);
-
-  color:       var(--text-primary);
-  font-family: 'Poppins', sans-serif;
-  background:  var(--bg-primary);
-  min-height:  100vh;
-  padding:     40px 20px;
-  animation:   piTabFadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes piTabFadeIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0);    }
-}
-
-/* ── 2. RESOLUTION GRID ───────────────────────────────────────────────────── */
-
+/* ── 2. Resolution tiles ───────────────────────────────────────────────────────
+   .station (primitives.css) supplies the lift/hover/active mechanic — these
+   rules add only the typography, matching MapResizer's SizeButton pattern. */
 .pi-resolution-grid {
   display:               grid;
   grid-template-columns: repeat(2, 1fr);
   gap:                   10px;
-  margin-top:            4px;
 }
 
 .pi-res-btn {
-  background:     var(--sheen-040);
-  border:         1px solid var(--ink-12);
-  color:          var(--text-secondary);
   padding:        14px 10px;
-  font-family:    'Poppins', sans-serif;
+  font-family:    var(--font-display);
   font-size:      0.85rem;
-  font-weight:    500;
+  font-weight:    var(--weight-medium);
   letter-spacing: 0.06em;
-  cursor:         pointer;
-  transition:     all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  color:          var(--ink-55);
   text-align:     center;
-  border-radius:  0;
+  transition:     color var(--dur-slow) var(--ease-decay);
 }
-
-.pi-res-btn:hover:not(:disabled) {
-  border-color: var(--tab-color);
-  color:        var(--tab-color);
-  background:   var(--line-medium);
-  box-shadow:   0 0 18px var(--tab-glow);
-  transform:    translateY(-2px);
-}
-
-.pi-res-btn.active {
-  background:  color-mix(in srgb, var(--tab-color) 18%, transparent);
-  border-color: var(--tab-color);
-  color:        var(--tab-color);
-  box-shadow:   0 0 24px var(--tab-glow), inset 0 0 10px color-mix(in srgb, var(--tab-color) 10%, transparent);
-  font-weight:  700;
-}
+.station.pi-res-btn:hover,
+.station.pi-res-btn.active { color: var(--ink-100); }
 
 .pi-res-btn:disabled {
-  opacity: 0.4;
-  cursor:  not-allowed;
+  opacity:        0.4;
+  pointer-events: none;
 }
 
-/* ── 3. PIPELINE STEPS ────────────────────────────────────────────────────── */
-
+/* ── 3. Pipeline steps ─────────────────────────────────────────────────────────── */
 .pi-steps {
   display:        flex;
   flex-direction: column;
   gap:            8px;
 }
 
+/* "Seam only" mechanic (same family as .station/.ctrl-option): a quiet dark
+   face with a glowing left-edge tick that ignites per state — no boxed
+   border, the accent line IS the state indicator. */
 .pi-step {
   display:     flex;
   align-items: center;
   gap:         16px;
-  padding:     14px 18px;
-  border:      1px solid var(--line-medium);
-  background:  var(--surface-ghost);
-  transition:  all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  padding:     12px 16px;
+  background:  linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  transition:  background var(--dur-slow) var(--ease-decay), opacity var(--dur-slow) var(--ease-decay);
   position:    relative;
-  overflow:    hidden;
 }
+
+.pi-step--pending { opacity: 0.55; }
 
 .pi-step::before {
   content:    '';
   position:   absolute;
   left: 0; top: 0; bottom: 0;
-  width:      3px;
+  width:      2px;
   background: transparent;
-  transition: background 0.35s ease, box-shadow 0.35s ease;
+  opacity:    0;
+  transition: opacity var(--dur-slow) var(--ease-decay), background var(--dur-slow) var(--ease-decay), box-shadow var(--dur-slow) var(--ease-decay);
 }
 
-.pi-step--running { border-color: var(--tab-color); background: color-mix(in srgb, var(--tab-color) 6%, transparent); }
-.pi-step--running::before { background: var(--tab-color); box-shadow: 0 0 12px var(--tab-glow); }
+.pi-step--running { background: linear-gradient(180deg, color-mix(in srgb, var(--tab-color) 8%, transparent), rgba(255,255,255,0.006)); }
+.pi-step--running::before { opacity: 1; background: var(--tab-color); box-shadow: 0 0 10px var(--tab-glow); }
 
-.pi-step--done { border-color: rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.05); }
-.pi-step--done::before { background: #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.5); }
+.pi-step--done { background: linear-gradient(180deg, color-mix(in srgb, var(--status-ok) 6%, transparent), rgba(255,255,255,0.004)); }
+.pi-step--done::before { opacity: 1; background: var(--status-ok); box-shadow: 0 0 8px color-mix(in srgb, var(--status-ok) 50%, transparent); }
 
-.pi-step--error { border-color: rgba(255, 77, 77, 0.4); background: rgba(255, 77, 77, 0.06); }
-.pi-step--error::before { background: #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5); }
+.pi-step--error { background: linear-gradient(180deg, color-mix(in srgb, var(--status-err) 8%, transparent), rgba(255,255,255,0.006)); }
+.pi-step--error::before { opacity: 1; background: var(--status-err); box-shadow: 0 0 8px color-mix(in srgb, var(--status-err) 50%, transparent); }
 
 .pi-step-num {
   display:         flex;
   align-items:     center;
   justify-content: center;
-  width:           32px;
-  height:          32px;
+  width:           1.4em;
   flex-shrink:     0;
-  border:          2px solid var(--ink-15);
-  font-size:       0.85rem;
-  font-weight:     700;
-  color:           var(--text-muted);
-  background:      var(--sheen-040);
-  transition:      all 0.35s ease;
+  font-family:     var(--font-mono);
+  font-size:       1.1rem;
+  font-weight:     var(--weight-bold);
+  color:           var(--ink-30);
+  font-variant-numeric: tabular-nums;
+  transition:      color var(--dur-slow) var(--ease-decay), text-shadow var(--dur-slow) var(--ease-decay);
 }
 
-.pi-step--running .pi-step-num { border-color: var(--tab-color); color: var(--tab-color); background: color-mix(in srgb, var(--tab-color) 12%, transparent); }
-.pi-step--done    .pi-step-num { border-color: #34d399; color: #34d399; background: rgba(52, 211, 153, 0.12); }
-.pi-step--error   .pi-step-num { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255, 77, 77, 0.12); }
+.pi-step--running .pi-step-num { color: var(--tab-color);  text-shadow: 0 0 10px var(--tab-glow); }
+.pi-step--done    .pi-step-num { color: var(--status-ok); }
+.pi-step--error   .pi-step-num { color: var(--status-err); }
 
-.pi-step-label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 400; }
-.pi-step--running .pi-step-label { color: var(--tab-color); font-weight: 500; }
-.pi-step--done    .pi-step-label { color: #34d399; }
-.pi-step--error   .pi-step-label { color: #ff4d4d; }
+.pi-step-label {
+  font-family:    var(--font-display);
+  font-size:      0.78rem;
+  font-weight:    var(--weight-medium);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color:          var(--ink-55);
+}
+.pi-step--running .pi-step-label { color: var(--tab-color); }
+.pi-step--done    .pi-step-label { color: var(--status-ok); }
+.pi-step--error   .pi-step-label { color: var(--status-err); }
 
-/* ── 4. SPINNER ───────────────────────────────────────────────────────────── */
-
+/* ── 4. Spinners ───────────────────────────────────────────────────────────────── */
 .pi-spinner {
   display:       inline-block;
   width:         14px;
@@ -167,35 +135,53 @@
   animation:     piSpin 0.8s linear infinite;
 }
 
-/* ── 5. WARN BOX ──────────────────────────────────────────────────────────── */
-
+/* ── 5. Warn / error notices ───────────────────────────────────────────────────── */
 .pi-warn-box {
-  margin-top:  18px;
+  margin-top:  var(--space-lg);
   padding:     16px 20px;
-  background:  rgba(255, 170, 0, 0.07);
-  border:      1px solid rgba(255, 170, 0, 0.3);
-  border-left: 4px solid #ffaa00;
-  color:       #ffd070;
+  background:  color-mix(in srgb, var(--status-warn) 7%, transparent);
+  border:      1px solid color-mix(in srgb, var(--status-warn) 30%, transparent);
+  border-left: 4px solid var(--status-warn);
+  color:       color-mix(in srgb, var(--status-warn) 75%, #fff);
   font-size:   0.88rem;
   line-height: 1.7;
 }
+.pi-warn-box strong { color: var(--status-warn); }
 
-.pi-warn-box strong { color: #ffaa00; }
+.pi-warn-box--danger {
+  background:  color-mix(in srgb, var(--status-err) 7%, transparent);
+  border-color: color-mix(in srgb, var(--status-err) 30%, transparent);
+  border-left-color: var(--status-err);
+  color:       color-mix(in srgb, var(--status-err) 75%, #fff);
+}
+.pi-warn-box--danger strong { color: var(--status-err); }
 
-/* ── 6. PREVIEW AREA ──────────────────────────────────────────────────────── */
+.pi-error-box {
+  margin-top:  var(--space-lg);
+  padding:     16px 20px;
+  background:  color-mix(in srgb, var(--status-err) 7%, transparent);
+  border:      1px solid color-mix(in srgb, var(--status-err) 30%, transparent);
+  border-left: 4px solid var(--status-err);
+  color:       color-mix(in srgb, var(--status-err) 75%, #fff);
+  font-size:   0.88rem;
+  line-height: 1.7;
+}
+.pi-error-box strong { color: var(--status-err); }
 
-.pi-preview-card { height: fit-content; }
+/* ── 6. Rendered preview (aside) ───────────────────────────────────────────────── */
+.pi-preview-wrap {
+  width:        100%;
+  aspect-ratio: 1 / 1;
+}
 
-.pi-preview-area {
-  width:           100%;
-  aspect-ratio:    1 / 1;
-  background:      rgba(0, 0, 0, 0.5);
-  border:          1px solid var(--line-ghost-border);
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-  position:        relative;
-  overflow:        hidden;
+/* .ec-canvas-wrap's shared vignette lightens toward blue at its top-center
+   (rgb(12,12,15) vs the near-black rgb(6,4,4) edge) — reads fine behind a
+   canvas grid, but here it's the only thing visible in the idle/empty
+   state, so the blue tint stands out as an odd cast. Neutralised locally
+   (compound selector to outrank the shared rule) without touching the
+   base .ec-canvas-wrap style every other tab's canvas relies on. */
+.ec-canvas-wrap.pi-preview-wrap {
+  background: radial-gradient(125% 125% at 50% 0%, #0e0e0e 0%, var(--surface-canvas) 70%);
 }
 
 .pi-preview-img {
@@ -203,19 +189,12 @@
   height:     100%;
   object-fit: contain;
   display:    block;
-  animation:  piFadeIn 0.5s ease;
+  animation:  piFadeIn var(--dur-slow, 0.4s) var(--ease-decay, ease-out);
 }
 
 @keyframes piFadeIn {
   from { opacity: 0; transform: scale(0.97); }
   to   { opacity: 1; transform: scale(1);    }
-}
-
-.pi-preview-placeholder {
-  position:   static;
-  transform:  none;
-  padding:    20px;
-  text-align: center;
 }
 
 .pi-overlay-spinner {
@@ -224,41 +203,21 @@
   display:         flex;
   align-items:     center;
   justify-content: center;
-  background:      rgba(0, 0, 0, 0.45);
+  background:      var(--surface-overlay);
   backdrop-filter: blur(4px);
 }
 
-/* ── 7. BADGES ────────────────────────────────────────────────────────────── */
-
-.pi-badge {
-  font-size:      0.75rem;
-  font-weight:    700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding:        5px 14px;
-  border:         1px solid;
+/* ── 7. Accessibility ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pi-theme *,
+  .pi-theme *::before,
+  .pi-theme *::after {
+    animation-duration:  0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.pi-badge--success { color: #34d399; border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.1); }
-.pi-badge--error   { color: #ff7b72; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.08); }
-
-/* ── 8. ERROR BOX ─────────────────────────────────────────────────────────── */
-
-.pi-error-box {
-  margin-top:  18px;
-  padding:     16px 20px;
-  background:  rgba(255, 77, 77, 0.07);
-  border:      1px solid rgba(255, 77, 77, 0.3);
-  border-left: 4px solid #ff4d4d;
-  color:       #ff7b72;
-  font-size:   0.88rem;
-  line-height: 1.7;
-}
-
-.pi-error-box strong { color: #ff4d4d; }
-
-/* ── 9. RESPONSIVE ────────────────────────────────────────────────────────── */
-
-@media (max-width: 900px) {
-  .tab-grid { grid-template-columns: 1fr; }
-}
+/* Note: PreviewImage_help.jsx's mockup reuses .pi-resolution-grid/.pi-spinner/
+   .pi-step-label/.pi-step-num/.pi-steps for its own illustration — same
+   classes as the live tab (unlike Stars/MapResizer, nothing here went
+   orphaned; both consumers still actively use these rules). */

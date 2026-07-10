@@ -1,12 +1,69 @@
+<div class="fcv-content">
+
 <h1>How to Contribute</h1>
 
 <p>
-  This is placeholder content for the &quot;How to Contribute&quot; article. Final
-  copy gets written in Phase 6 of the footer-content-feature roadmap.
+  This guide is for people who want to work on ForgeMapToolkit itself,
+  not for reporting bugs or requesting features. If you ran into a
+  problem while using FMT or have an idea for a new tool, the Report an
+  Issue guide is the better place to start.
+</p>
+
+<h2>Getting Set Up</h2>
+
+<p>
+  FMT is built as an Electron application with React and Vite. To work
+  on it locally you fork the repository, clone your fork, and install
+  dependencies with npm. From there the usual Vite and Electron dev
+  scripts get you a running instance with hot reload.
+</p>
+
+<div class="fcv-callout">
+  <p>
+    Fork and clone
+    <a href="https://github.com/ForgeMapToolKit/ForgeMapToolkit">github.com/ForgeMapToolKit/ForgeMapToolkit</a>,
+    then run <code>npm install</code>. Use <code>npm run electron:dev</code>
+    to start the Vite dev server and Electron together with hot reload.
+    Running <code>npm run dev</code> alone only starts the Vite server
+    without the Electron shell.
+  </p>
+</div>
+
+<h2>Design System First</h2>
+
+<p>
+  FMT follows a strict design system called TRACE. Before touching any
+  UI code, read through <code>TAB_DESIGN_LAW.md</code> and
+  <code>UI_PHILOSOPHY.md</code>, and get familiar with
+  <code>tokens.css</code>. No hardcoded colors, spacing, or typography
+  values. Everything goes through tokens, and the Wreckage tab is the
+  reference implementation if you want to see the system applied in
+  practice.
 </p>
 
 <p>
-  Until then this fragment exists purely to prove the loading pipeline end
-  to end: Footer.jsx -> FooterContentViewer -> IPC (read-footer-article)
-  -> this file at public/footer/content/contribute.html.
+  Pull requests that introduce hardcoded values or break the established
+  BEM-like class conventions will get sent back for changes, so it is
+  worth reading these documents fully before starting on anything
+  visual.
 </p>
+
+<h2>Where to Start</h2>
+
+<p>
+  FMT has been developed mostly by a single person so far, and there is
+  no curated list of good first issues yet. If you want to contribute,
+  the most reliable way to find something worth working on is to reach
+  out directly and ask what currently needs attention.
+</p>
+
+<h2>Submitting Changes</h2>
+
+<p>
+  There is no formal pull request workflow in place yet, since the
+  project has not had outside contributors up to this point. Open a pull
+  request with what you have, and expect the process around reviewing
+  and merging contributions to take shape as more people get involved.
+</p>
+
+</div>

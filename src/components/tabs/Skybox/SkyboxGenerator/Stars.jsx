@@ -11,7 +11,7 @@ import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import { Dropdown, DropSlot } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
-import { UV_COLORS, Y_MODES, clamp01, parseUvOptions } from './utils.js';
+import { UV_COLORS, Y_MODES, clamp01, parseUvOptions, hexToRgbArr } from './utils.js';
 
 // ── RangeSlider ───────────────────────────────────────────────────
 const RangeSlider = ({ min, max, step, value, onChange }) => {
@@ -27,16 +27,10 @@ const RangeSlider = ({ min, max, step, value, onChange }) => {
   );
 };
 
-// ── Toggle ────────────────────────────────────────────────────────
-const Toggle = ({ checked, onChange, label }) => (
-  <label className="sb-st-toggle-label">
-    <input type="checkbox" className="sb-st-toggle-input" checked={checked} onChange={onChange}/>
-    <span className="sb-st-toggle-track"><span className="sb-st-toggle-thumb"/></span>
-    {label && <span className="sb-st-toggle-text">{label}</span>}
-  </label>
-);
-
 // ── YCurveEditor ──────────────────────────────────────────────────
+const DEFAULT_CURVE_POINTS = [
+  { x: 0.05, y: 0.0 }, { x: 1.0, y: 0.15 }, { x: 0.3, y: 0.5 }, { x: 0.05, y: 1.0 },
+];
 const YCurveEditor = ({ points, onChange, yMax = 1500 }) => {
   const canvasRef = useRef(null);
   const wrapRef   = useRef(null);
@@ -44,9 +38,20 @@ const YCurveEditor = ({ points, onChange, yMax = 1500 }) => {
   const hoverIdx  = useRef(-1);
   const didMove   = useRef(false);
   const downPos   = useRef(null);
+  const accentRef = useRef([59, 118, 255]); // fallback until --tab-color resolves
   const [isHoveringPoint, setIsHoveringPoint] = useState(false);
   const CW = 400, CH = 400, HIT_PX = 14;
   const ptToCv = (p) => ({ cx: p.x * CW, cy: (1 - p.y) * CH });
+  const accent = (a) => { const [r,g,b] = accentRef.current; return `rgba(${r},${g},${b},${a})`; };
+
+  // The canvas can't read CSS custom properties directly — resolve
+  // --tab-color once against the wrap (which sits inside .skybox-tab,
+  // where the cascade is actually defined) and reuse it for every draw.
+  useEffect(() => {
+    if (!wrapRef.current) return;
+    const tabColor = getComputedStyle(wrapRef.current).getPropertyValue('--tab-color').trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(tabColor)) accentRef.current = hexToRgbArr(tabColor);
+  }, []);
 
   const clientToNorm = useCallback((clientX, clientY) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -76,54 +81,39 @@ const YCurveEditor = ({ points, onChange, yMax = 1500 }) => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = CW, H = CH;
+    // Background/grid/border/axis-labels are CSS+HTML now (ec-canvas-wrap +
+    // .sb-st-curve-grid + .sb-st-curve-axis-label) — canvas only draws the
+    // curve itself, so it stays transparent underneath.
     ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#03040b'; ctx.fillRect(0,0,W,H);
-    const vg = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.75);
-    vg.addColorStop(0,'rgba(8,16,36,0)'); vg.addColorStop(1,'rgba(0,0,0,0.55)');
-    ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
-    ctx.strokeStyle='rgba(255,255,255,0.022)'; ctx.lineWidth=1;
-    for(let i=1;i<8;i++){const p=i/8;ctx.beginPath();ctx.moveTo(p*W,0);ctx.lineTo(p*W,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,p*H);ctx.lineTo(W,p*H);ctx.stroke();}
-    ctx.strokeStyle='rgba(59,118,255,0.09)'; ctx.lineWidth=1;
-    for(let i=1;i<4;i++){const p=i/4;ctx.beginPath();ctx.moveTo(p*W,0);ctx.lineTo(p*W,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,p*H);ctx.lineTo(W,p*H);ctx.stroke();}
-    ctx.font='9px monospace'; ctx.fillStyle='rgba(255,255,255,0.15)';
-    ctx.textAlign='left';  ctx.textBaseline='bottom'; ctx.fillText('prob 0%',5,H-4);
-    ctx.textAlign='right'; ctx.textBaseline='bottom'; ctx.fillText('100%',W-5,H-4);
-    ctx.textAlign='center';ctx.textBaseline='bottom'; ctx.fillText('→ probability',W/2,H-4);
-    ctx.save(); ctx.translate(10,H/2); ctx.rotate(-Math.PI/2);
-    ctx.textAlign='center';ctx.textBaseline='middle'; ctx.fillText('height ↑',0,0); ctx.restore();
-    const yMaxLabel = yMax>=1000?`${(yMax/1000).toFixed(1)}k`:String(yMax);
-    ctx.textAlign='left';ctx.textBaseline='top';   ctx.fillText(yMaxLabel,14,4);
-    ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText('0',14,H-16);
-    ctx.strokeStyle='rgba(59,118,255,0.3)'; ctx.lineWidth=1; ctx.strokeRect(0.5,0.5,W-1,H-1);
     if (!points?.length) {
-      ctx.fillStyle='rgba(59,118,255,0.3)';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=accent(0.4);ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.font='11px monospace';ctx.fillText('Click to add control points',W/2,H/2); return;
     }
     const sortedByHeight = [...points].sort((a,b)=>a.y-b.y);
     const cvByHeight     = sortedByHeight.map(ptToCv);
     if (points.length >= 2) {
-      cvByHeight.forEach(({cx,cy})=>{ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(cx,cy);ctx.strokeStyle='rgba(59,118,255,0.07)';ctx.lineWidth=1;ctx.setLineDash([2,5]);ctx.stroke();ctx.setLineDash([]);});
+      cvByHeight.forEach(({cx,cy})=>{ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(cx,cy);ctx.strokeStyle=accent(0.09);ctx.lineWidth=1;ctx.setLineDash([2,5]);ctx.stroke();ctx.setLineDash([]);});
       ctx.beginPath();ctx.moveTo(0,cvByHeight[0].cy);
       cvByHeight.forEach(({cx,cy})=>ctx.lineTo(cx,cy));
       ctx.lineTo(0,cvByHeight[cvByHeight.length-1].cy);ctx.closePath();
-      const ag=ctx.createLinearGradient(0,0,W,0);ag.addColorStop(0,'rgba(59,118,255,0.03)');ag.addColorStop(1,'rgba(80,150,255,0.22)');
+      const ag=ctx.createLinearGradient(0,0,W,0);ag.addColorStop(0,accent(0.03));ag.addColorStop(1,accent(0.22));
       ctx.fillStyle=ag;ctx.fill();
       const linePath=()=>{ctx.beginPath();ctx.lineJoin='round';ctx.lineCap='round';cvByHeight.forEach(({cx,cy},i)=>i===0?ctx.moveTo(cx,cy):ctx.lineTo(cx,cy));};
-      linePath();ctx.strokeStyle='rgba(59,118,255,0.22)';ctx.lineWidth=14;ctx.stroke();
-      linePath();ctx.strokeStyle='rgba(80,140,255,0.5)';ctx.lineWidth=5;ctx.stroke();
-      linePath();ctx.strokeStyle='rgba(140,190,255,0.95)';ctx.lineWidth=1.5;ctx.stroke();
+      linePath();ctx.strokeStyle=accent(0.22);ctx.lineWidth=14;ctx.stroke();
+      linePath();ctx.strokeStyle=accent(0.55);ctx.lineWidth=5;ctx.stroke();
+      linePath();ctx.strokeStyle='rgba(255,255,255,0.92)';ctx.lineWidth=1.5;ctx.stroke();
     }
     const hovI=hoverIdx.current,dragI=dragIdx.current;
     points.forEach((p,i)=>{
       const{cx,cy}=ptToCv(p);
       const isDrag=dragI===i,isHov=hovI===i,r=isDrag?9:isHov?8:6;
-      if(isDrag||isHov){const haloR=r+(isDrag?11:7);const halo=ctx.createRadialGradient(cx,cy,0,cx,cy,haloR);halo.addColorStop(0,isDrag?'rgba(60,120,220,0.22)':'rgba(59,118,255,0.14)');halo.addColorStop(1,'rgba(0,0,0,0)');ctx.beginPath();ctx.arc(cx,cy,haloR,0,Math.PI*2);ctx.fillStyle=halo;ctx.fill();}
+      if(isDrag||isHov){const haloR=r+(isDrag?11:7);const halo=ctx.createRadialGradient(cx,cy,0,cx,cy,haloR);halo.addColorStop(0,accent(isDrag?0.28:0.16));halo.addColorStop(1,'rgba(0,0,0,0)');ctx.beginPath();ctx.arc(cx,cy,haloR,0,Math.PI*2);ctx.fillStyle=halo;ctx.fill();}
       ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-      ctx.fillStyle=isDrag?'rgba(30,40,65,0.92)':isHov?'rgba(20,30,55,0.88)':'rgba(12,18,35,0.82)';ctx.fill();
-      ctx.strokeStyle=`rgba(80,140,255,${isDrag?0.95:isHov?0.75:0.45})`;ctx.lineWidth=isDrag?1.5:1;ctx.stroke();
+      ctx.fillStyle=isDrag?'rgba(30,30,34,0.92)':isHov?'rgba(24,24,28,0.88)':'rgba(18,18,22,0.82)';ctx.fill();
+      ctx.strokeStyle=accent(isDrag?0.95:isHov?0.75:0.5);ctx.lineWidth=isDrag?1.5:1;ctx.stroke();
       ctx.beginPath();ctx.arc(cx,cy,r-1,Math.PI*1.15,Math.PI*1.75);
       ctx.strokeStyle=isDrag?'rgba(255,255,255,0.55)':isHov?'rgba(255,255,255,0.35)':'rgba(255,255,255,0.18)';ctx.lineWidth=1;ctx.stroke();
-      if(isDrag||isHov){const probLabel=(p.x*100).toFixed(0)+'%';const heightLabel=(p.y*yMax).toFixed(0);const label=`prob ${probLabel}  h=${heightLabel}`;ctx.font='bold 10px monospace';const tw=ctx.measureText(label).width;let tx=cx,ty=cy-r-18;if(ty<12)ty=cy+r+18;tx=Math.max(tw/2+6,Math.min(W-tw/2-6,tx));const pw=tw+14,ph=17,px2=tx-pw/2,py2=ty-ph/2;ctx.fillStyle='rgba(8,12,28,0.92)';ctx.beginPath();ctx.roundRect?.(px2,py2,pw,ph,3)??ctx.rect(px2,py2,pw,ph);ctx.fill();ctx.strokeStyle='rgba(80,140,255,0.55)';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect?.(px2,py2,pw,ph,3)??ctx.rect(px2,py2,pw,ph);ctx.stroke();ctx.fillStyle='rgba(160,200,255,0.95)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,tx,ty);}
+      if(isDrag||isHov){const probLabel=(p.x*100).toFixed(0)+'%';const heightLabel=(p.y*yMax).toFixed(0);const label=`prob ${probLabel}  h=${heightLabel}`;ctx.font='bold 10px monospace';const tw=ctx.measureText(label).width;let tx=cx,ty=cy-r-18;if(ty<12)ty=cy+r+18;tx=Math.max(tw/2+6,Math.min(W-tw/2-6,tx));const pw=tw+14,ph=17,px2=tx-pw/2,py2=ty-ph/2;ctx.fillStyle='rgba(10,10,14,0.92)';ctx.beginPath();ctx.roundRect?.(px2,py2,pw,ph,3)??ctx.rect(px2,py2,pw,ph);ctx.fill();ctx.strokeStyle=accent(0.55);ctx.lineWidth=1;ctx.beginPath();ctx.roundRect?.(px2,py2,pw,ph,3)??ctx.rect(px2,py2,pw,ph);ctx.stroke();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,tx,ty);}
     });
   }, [points, yMax]);
 
@@ -160,19 +150,31 @@ const YCurveEditor = ({ points, onChange, yMax = 1500 }) => {
   const onMouseLeave=useCallback(()=>{if(dragIdx.current!==null)return;hoverIdx.current=-1;setIsHoveringPoint(false);draw();},[draw]);
   const onMouseMove=useCallback((e)=>{if(dragIdx.current!==null)return;const h=findHit(e.clientX,e.clientY);if(h!==hoverIdx.current){hoverIdx.current=h;setIsHoveringPoint(h>=0);draw();}},[findHit,draw]);
 
+  const yMaxLabel = yMax>=1000 ? `${(yMax/1000).toFixed(1)}k` : String(yMax);
+
   return (
-    <div className="ec-canvas-wrap sb-st-curve-wrap" ref={wrapRef}>
+    <div className="sb-st-curve-shell">
       <div className="sb-st-curve-header">
         <span className="ctrl-label">Y-Distribution Curve</span>
         <div className="sb-st-curve-header-stats">
-          <span className="sb-st-curve-stat">pts <span className="sb-st-curve-stat-val">{points?.length??0}</span></span>
-          <span className="sb-st-curve-stat">yMax <span className="sb-st-curve-stat-val">{yMax>=1000?`${(yMax/1000).toFixed(1)}k`:String(yMax)}</span></span>
+          <span className="ctrl-badge">{points?.length??0} pts</span>
+          <span className="ctrl-badge">yMax {yMaxLabel}</span>
+          <button className="ctrl-btn-add" onClick={() => onChange(DEFAULT_CURVE_POINTS)}>Reset</button>
         </div>
       </div>
-      <canvas ref={canvasRef} width={CW} height={CH} className="sb-st-curve-canvas"
-        style={{cursor:isHoveringPoint?'pointer':'crosshair'}}
-        onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}
-        onContextMenu={e=>e.preventDefault()}/>
+      <div className="ec-canvas-wrap sb-st-curve-wrap" ref={wrapRef}>
+        <div className="sb-st-curve-grid" aria-hidden="true"/>
+        <canvas ref={canvasRef} width={CW} height={CH} className="sb-st-curve-canvas"
+          style={{cursor:isHoveringPoint?'pointer':'crosshair'}}
+          onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}
+          onContextMenu={e=>e.preventDefault()}/>
+        <span className="sb-st-curve-axis-label sb-st-curve-axis-label--ymax">{yMaxLabel}</span>
+        <span className="sb-st-curve-axis-label sb-st-curve-axis-label--ymin">0</span>
+        <span className="sb-st-curve-axis-label sb-st-curve-axis-label--y-caption">height ↑</span>
+        <span className="sb-st-curve-axis-label sb-st-curve-axis-label--x0">0%</span>
+        <span className="sb-st-curve-axis-label sb-st-curve-axis-label--x100">100%</span>
+        <span className="sb-st-curve-axis-label sb-st-curve-axis-label--x-caption">probability →</span>
+      </div>
       <div className="sb-st-curve-hint">
         {isHoveringPoint ? (
           <><span className="sb-st-curve-hint-active">Drag</span><span className="sb-st-curve-hint-sep"> to move</span><span className="sb-st-curve-hint-dot"/><span className="sb-st-curve-hint-active">Right-click</span><span className="sb-st-curve-hint-sep"> to remove</span></>
@@ -198,7 +200,7 @@ const Stars = ({
   haloStdDev, setHaloStdDev, haloRatio, setHaloRatio,
   curvePoints, setCurvePoints,
   yClusterScatter, setYClusterScatter,
-  onResetDefaults, onInjectStars,
+  onResetDefaults,
 }) => {
   const yModeTriggerRef = useRef(null);
 
@@ -211,7 +213,6 @@ const Stars = ({
         <div className="ctrl-content">
           <div className="ctrl-action-row">
             <button className="ctrl-btn-add" onClick={onResetDefaults}>Reset Defaults</button>
-            <button className="ctrl-btn-add" onClick={onInjectStars}>Inject Stars</button>
           </div>
 
           <div className="sb-cfg-row sb-cfg-row--3">
@@ -410,17 +411,26 @@ export const StarsAside = ({
     return()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
   },[getPosRel,drawExCanvas,exclusionZones,setDraftZone]);
 
+  // Canvas draws only the raster texture preview — grid, corner coordinates
+  // and UV rect markers are CSS/HTML now (.sb-st-uv-grid / -corner-label /
+  // -marker), so they stay crisp and themeable instead of baked pixels.
   useEffect(()=>{
     const canvas=uvCanvasRef.current;if(!canvas)return;
     const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;
     ctx.clearRect(0,0,W,H);
-    if(previewImage?.complete){const fullPasses=Math.floor(texOpacity);const remainder=texOpacity-fullPasses;for(let i=0;i<fullPasses;i++){ctx.globalAlpha=1;ctx.drawImage(previewImage,0,0,W,H);}if(remainder>0){ctx.globalAlpha=remainder;ctx.drawImage(previewImage,0,0,W,H);}ctx.globalAlpha=1;if(texOpacity<=1){ctx.fillStyle=`rgba(0,0,0,${0.28*(1-texOpacity*0.5)})`;ctx.fillRect(0,0,W,H);}}else{ctx.fillStyle='#0e0e14';ctx.fillRect(0,0,W,H);}
-    ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;for(let i=1;i<4;i++){const p=(i/4)*W;ctx.beginPath();ctx.moveTo(p,0);ctx.lineTo(p,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,p);ctx.lineTo(W,p);ctx.stroke();}
-    ctx.font='9px monospace';ctx.fillStyle='rgba(255,255,255,0.2)';
-    ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText('(0,0)',4,H-3);ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('(1,0)',W-3,H-3);ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('(0,1)',4,3);ctx.textAlign='right';ctx.textBaseline='top';ctx.fillText('(1,1)',W-3,3);
-    const parsedUvs=parseUvOptions(uvOptions);const opacity=parseFloat(uvOpacity)||0;
-    parsedUvs.forEach((uv,idx)=>{const color=UV_COLORS[idx%UV_COLORS.length];const cx1=uv.x*W,cy1=(1-uv.y-uv.w)*H,cw=uv.z*W,ch=uv.w*H;if(opacity>0){ctx.fillStyle=color+Math.round(opacity*255).toString(16).padStart(2,'0');ctx.fillRect(cx1,cy1,cw,ch);}ctx.strokeStyle=color;ctx.lineWidth=2;ctx.strokeRect(cx1,cy1,cw,ch);const cx=cx1+cw/2,cy=cy1+ch/2;ctx.fillStyle='#111';ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,13,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(idx+1),cx,cy);});
-  },[uvOptions,uvOpacity,previewImage,texOpacity]);
+    if(previewImage?.complete){
+      const fullPasses=Math.floor(texOpacity);const remainder=texOpacity-fullPasses;
+      for(let i=0;i<fullPasses;i++){ctx.globalAlpha=1;ctx.drawImage(previewImage,0,0,W,H);}
+      if(remainder>0){ctx.globalAlpha=remainder;ctx.drawImage(previewImage,0,0,W,H);}
+      ctx.globalAlpha=1;
+      if(texOpacity<=1){ctx.fillStyle=`rgba(0,0,0,${0.28*(1-texOpacity*0.5)})`;ctx.fillRect(0,0,W,H);}
+    }else{
+      ctx.fillStyle='#0e0e14';ctx.fillRect(0,0,W,H);
+    }
+  },[previewImage,texOpacity]);
+
+  const uvMarkers = parseUvOptions(uvOptions);
+  const uvOverlayOpacity = Math.max(0, Math.min(1, parseFloat(uvOpacity)||0));
 
   const zoneWorldCoords=(zone)=>{const spread=parseFloat(clusterSpread)||14000;const toW=v=>((v*2-1)*spread).toFixed(0);return`X ${toW(Math.min(zone.x0,zone.x1))} → ${toW(Math.max(zone.x0,zone.x1))}   Z ${toW(Math.min(zone.y0,zone.y1))} → ${toW(Math.max(zone.y0,zone.y1))}`;};
 
@@ -431,7 +441,19 @@ export const StarsAside = ({
         <div className="mp-subtitle">Exclusion Zones</div>
         <div className="sb-st-card-header">
           <div className="sb-st-ex-header-actions">
-            <Toggle checked={exEnabled} onChange={e=>setExEnabled(e.target.checked)} label={exEnabled?'Enabled':'Disabled'}/>
+            <button
+              type="button"
+              className={`ctrl-toggle-row${exEnabled ? ' on' : ''}`}
+              role="switch"
+              aria-checked={exEnabled}
+              onClick={() => setExEnabled(v => !v)}
+              style={{ width: 'auto', padding: 0 }}
+            >
+              <span className="ctrl-toggle"><span className="ctrl-toggle-pole"/></span>
+              <span className="ctrl-toggle-text">
+                <span className="ctrl-toggle-label">{exEnabled ? 'Enabled' : 'Disabled'}</span>
+              </span>
+            </button>
             {exclusionZones.length > 0 && (
               <button className="ctrl-btn-danger" onClick={()=>{setExclusionZones([]);setDraftZone(null);setSelectedZoneIdx(null);}}>Clear All</button>
             )}
@@ -441,8 +463,8 @@ export const StarsAside = ({
           <div className="sb-st-ex-confirm-bar">
             <span className="sb-st-ex-confirm-label">New zone drawn — confirm to add it.</span>
             <div className="sb-st-ex-confirm-actions">
-              <button className="sb-st-ex-btn-confirm" onClick={()=>{const n=[...exclusionZones,draftZone];setExclusionZones(n);setSelectedZoneIdx(n.length-1);setDraftZone(null);}}>Confirm</button>
-              <button className="sb-st-ex-btn-discard" onClick={()=>{setDraftZone(null);drawExCanvas(exclusionZones,null);}}>Discard</button>
+              <button className="ftr-preview-readmore" onClick={()=>{const n=[...exclusionZones,draftZone];setExclusionZones(n);setSelectedZoneIdx(n.length-1);setDraftZone(null);}}>Confirm</button>
+              <button className="ctrl-btn-danger" onClick={()=>{setDraftZone(null);drawExCanvas(exclusionZones,null);}}>Discard</button>
             </div>
           </div>
         )}
@@ -459,12 +481,16 @@ export const StarsAside = ({
             ))}
           </div>
         )}
-        <div style={{cursor:exEnabled?'crosshair':'default'}} onMouseDown={onMouseDownEx}>
+        <div style={{position:'relative'}}>
           <div className="ec-canvas-wrap sb-st-ex-wrap">
             <div ref={exWrapRef} style={{position:'absolute',inset:0,pointerEvents:'none'}}>
               <canvas ref={exCanvasRef} width={EX_RES} height={EX_RES} className="sb-st-ex-canvas"/>
             </div>
           </div>
+          {/* Hit area extends beyond the visible canvas so a drag can start
+              near the edge without needing pixel-perfect precision — purely
+              functional, no visual footprint change. */}
+          <div style={{position:'absolute',inset:'-24px',cursor:exEnabled?'crosshair':'default'}} onMouseDown={onMouseDownEx}/>
         </div>
       </div>
 
@@ -472,6 +498,7 @@ export const StarsAside = ({
       <div className="ctrl-block">
         <div className="mp-subtitle">UV Visualization</div>
         <DropSlot
+          className="sb-st-upload-dropslot"
           acceptInput="image/*,.dds"
           status={previewImageData ? 'done' : 'idle'}
           idleText="Click or drop a texture preview"
@@ -497,6 +524,28 @@ export const StarsAside = ({
         </div>
         <div className="ec-canvas-wrap sb-st-uv-canvas">
           <canvas ref={uvCanvasRef} width={UV_RES} height={UV_RES} style={{width:'100%',height:'100%',display:'block',cursor:'default'}}/>
+          <div className="sb-st-uv-grid" aria-hidden="true"/>
+          <span className="sb-st-uv-corner-label sb-st-uv-corner-label--tl">(0,1)</span>
+          <span className="sb-st-uv-corner-label sb-st-uv-corner-label--tr">(1,1)</span>
+          <span className="sb-st-uv-corner-label sb-st-uv-corner-label--bl">(0,0)</span>
+          <span className="sb-st-uv-corner-label sb-st-uv-corner-label--br">(1,0)</span>
+          {uvMarkers.map((uv, idx) => {
+            const color = UV_COLORS[idx % UV_COLORS.length];
+            return (
+              <div
+                key={idx}
+                className="sb-st-uv-marker"
+                style={{
+                  left: `${uv.x*100}%`, top: `${(1-uv.y-uv.w)*100}%`,
+                  width: `${uv.z*100}%`, height: `${uv.w*100}%`,
+                  '--marker-color': color,
+                  background: uvOverlayOpacity > 0 ? color+Math.round(uvOverlayOpacity*255).toString(16).padStart(2,'0') : 'transparent',
+                }}
+              >
+                <span className="sb-st-uv-marker-badge">{idx+1}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </>

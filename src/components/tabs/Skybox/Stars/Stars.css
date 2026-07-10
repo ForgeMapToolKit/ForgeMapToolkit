@@ -1,567 +1,261 @@
-/* =============================================================================
-   Stars.css — StarsTab-specific styles only.
-   The design-system (tokens, primitives, layout) and shared.css are
-   imported in Stars.jsx via design-system/index.css + shared.css.
-   --tab-color / --tab-glow / --tab-glow-strong are set on the root div
-   via the style prop in Stars.jsx; they must NOT be redeclared here.
+/* ═══════════════════════════════════════════════════════════════════
+   STARS TAB — Stars.css
+   Everything covered by the shared design system (cards, ctrl-*,
+   workspace shell) comes from TabLayout + EntityPanel — this file only
+   holds tab-specific bits:
+     1. Tab root + theme cascade
+     2. Field help + row grids (Configuration / UV table)
+     3. Custom range slider
+     4. Exclusion zone canvas (aside)
+     5. UV atlas canvas (aside)
+     6. Y-curve editor (Configuration)
+     7. Accessibility
+     8. LEGACY — consumed only by Stars_help.jsx's static mockup, which
+        still documents the pre-migration UI. Follow-up: rewrite the
+        help guide onto the live markup, then delete this block.
+   ═══════════════════════════════════════════════════════════════════ */
 
-   All spacing uses --space-* tokens; all ink uses --ink-* tokens;
-   all surfaces use --surface-* tokens; all hairlines use --line-*.
-   Hard px/hex/rgba in stylesheet rules are forbidden (§5 contract).
+/* ── 1. Tab root ─────────────────────────────────────────────────── */
 
-   EXCEPTIONS (intentional):
-   - Canvas 2D draw calls in YCurveEditor.jsx and Stars_UV.jsx use
-     literal colours — those execute in JS, not CSS, and are excluded.
-   - .st-curve-* rules retain their purple-specific values because the
-     curve editor is a bespoke interactive widget whose accent is the
-     YCurve purple, NOT the tab accent; tokenising those into --tab-color
-     would break the visual intent. Flagged for future dedicated token.
-   - .st-ex-zone-* danger colours (red tones) are zone-state signals,
-     not accent colours; they match the canvas draw palette and are kept
-     as-is for that reason.
-   ============================================================================= */
-
-/* ── Tab root — entry animation only ─────────────────────────────────────── */
 .stars-tab {
-  animation: stFadeIn 0.7s var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  --tab-color:       var(--stars-color);
+  --tab-glow:        var(--stars-glow);
+  --tab-glow-strong: var(--stars-glow-strong);
+  background-color: var(--surface-canvas);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
 }
 
-@keyframes stFadeIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ── 2. Field help + row grids ───────────────────────────────────── */
+
+.st-cfg-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+.st-cfg-row--3 { grid-template-columns: 1fr 1fr 1fr; }
+.st-cfg-row--5 { grid-template-columns: repeat(5, 1fr); }
+.st-cfg-row + .st-cfg-row { margin-top: var(--space-md); }
+
+.st-textarea {
+  font-family: var(--font-mono);
+  font-size:   0.82rem;
+  resize:      vertical;
 }
 
-/* ── Curve Editor ─────────────────────────────────────────────────────────── */
-/* NOTE: rgba values here are intentional — the curve editor uses its own
-   purple accent (not --tab-color) so it reads as a distinct widget.        */
-.st-curve-wrap {
-  position:      relative;
-  user-select:   none;
-  overflow:      hidden;
-  border:        1px solid rgba(138, 18, 189, 0.28);
-  border-radius: 0;
-  background:    var(--surface-deep, #06050e);
-  box-shadow:    0 0 0 1px rgba(138, 18, 189, 0.06) inset,
-                 0 4px 24px var(--shadow-md, rgba(0, 0, 0, 0.55));
-  transition:    border-color var(--duration-base, 0.3s) var(--ease-out),
-                 box-shadow   var(--duration-long, 0.35s) var(--ease-out);
+/* UV Options row — index, X, Y, Z, W, Weight, delete. */
+.st-uv-row {
+  display:               grid;
+  grid-template-columns: 20px repeat(5, 1fr) 24px;
+  gap:                   var(--space-xs);
+  align-items:           center;
+  margin-bottom:         var(--space-xs);
 }
-.st-curve-wrap::before {
-  content:    '';
-  position:   absolute;
-  top: 0; left: 0; right: 0;
-  height:     2px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(138, 18, 189, 0.55) 35%,
-    rgba(200, 100, 255, 0.7) 50%,
-    rgba(138, 18, 189, 0.55) 65%,
-    transparent 100%
-  );
-  z-index:    2;
-  opacity:    0.6;
-  transition: opacity var(--duration-base, 0.3s) var(--ease-out);
-}
-.st-curve-wrap:hover {
-  border-color: rgba(165, 40, 220, 0.55);
-  box-shadow:   0 0 0 1px rgba(138, 18, 189, 0.1) inset,
-                0 0 28px rgba(138, 18, 189, 0.18),
-                0 8px 32px var(--shadow-lg, rgba(0, 0, 0, 0.6));
-}
-.st-curve-wrap:hover::before { opacity: 1; }
-
-.st-curve-header {
-  display:         flex;
-  align-items:     center;
-  justify-content: space-between;
-  padding:         var(--space-xs, 6px) var(--space-md, 12px) var(--space-xs, 5px);
-  background:      var(--surface-overlay, rgba(0, 0, 0, 0.35));
-  border-bottom:   1px solid rgba(138, 18, 189, 0.14);
-}
-
-.st-curve-header-label {
-  font-size:      var(--text-2xs, 0.62rem);
-  font-weight:    700;
-  letter-spacing: 0.14em;
+.st-uv-row--header {
+  font-size:      var(--text-3xs);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color:          rgba(180, 100, 255, 0.55);
+  color:          var(--ink-30);
+  text-align:     center;
 }
+.st-uv-idx {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size:   var(--text-xs);
+  text-align:  center;
+}
+.st-uv-del { align-self: center; }
 
-.st-curve-header-stats {
-  display:     flex;
+/* ── 3. Custom range slider ───────────────────────────────────────── */
+
+.st-range-wrap { flex: 1; display: flex; align-items: center; padding: 4px 0; }
+.st-range {
+  -webkit-appearance: none;
+  appearance:          none;
+  width:               100%;
+  height:              4px;
+  background: linear-gradient(to right,
+    var(--tab-color) 0%, var(--tab-color) var(--fill, 0%),
+    var(--ink-16) var(--fill, 0%), var(--ink-16) 100%);
+  border:     none;
+  outline:    none;
+  cursor:     pointer;
+  transition: background 0.1s;
+}
+.st-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance:          none;
+  width:         14px;
+  height:        14px;
+  border-radius: 50%;
+  background:    var(--tab-color);
+  border:        2px solid rgba(0, 0, 0, 0.6);
+  box-shadow:    0 0 8px var(--tab-glow), 0 0 0 1px rgba(255,255,255,0.1);
+  cursor:        pointer;
+  transition:    box-shadow 0.2s, transform 0.15s, background 0.2s;
+}
+.st-range::-webkit-slider-thumb:hover { box-shadow: 0 0 14px var(--tab-glow), 0 0 0 2px var(--tab-color); transform: scale(1.2); }
+.st-range:active::-webkit-slider-thumb { transform: scale(1.3); box-shadow: 0 0 20px var(--tab-glow), 0 0 0 2px var(--tab-color); }
+.st-range::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--tab-color);
+  border:     2px solid rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 8px var(--tab-glow);
+  cursor:     pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.st-range::-moz-range-thumb:hover { box-shadow: 0 0 14px var(--tab-glow); transform: scale(1.2); }
+.st-range::-moz-range-progress { background: var(--tab-color); height: 4px; }
+.st-range::-moz-range-track   { background: var(--ink-16);    height: 4px; }
+.st-range:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--tab-color); outline-offset: 2px; }
+
+.st-upload-dropslot.ec-drop-slot { aspect-ratio: 5 / 1; }
+
+.st-opacity-row { display: flex; align-items: center; gap: 10px; }
+.st-opacity-row .st-range-wrap { flex: 1; padding: 0; }
+.st-opacity-input { width: 72px !important; flex-shrink: 0; text-align: right; }
+
+.st-ex-header-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+/* ── 4. Exclusion zone canvas (aside) ─────────────────────────────── */
+
+.st-ex-info {
+  display:       flex;
+  align-items:   center;
+  gap:           12px;
+  margin-bottom: 8px;
+  padding:       9px 14px;
+  background:    rgba(255, 50, 50, 0.06);
+  border:        1px solid rgba(255, 50, 50, 0.18);
+  font-size:     0.8rem;
+}
+.st-ex-info-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 80, 80, 0.8); white-space: nowrap; }
+.st-ex-info-code  { font-family: var(--font-mono); font-size: 0.8rem; color: rgba(255, 150, 150, 0.9); }
+
+/* Capped: the aside column is a fixed 560-820px — a full-width square
+   canvas would dominate it. */
+.stc-ex-wrap   { overflow: hidden; position: relative; width: 100%; max-width: 560px; aspect-ratio: 1 / 1; margin: 0 auto; }
+.stc-ex-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+/* Pending-zone notice — machined "station" background + top-edge tick. */
+.st-ex-confirm-bar {
+  position: relative;
+  display: flex; align-items: center; gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tab-color) 8%, transparent),
+    rgba(255,255,255,0.006));
+  border: 1px solid var(--ink-14);
+}
+.st-ex-confirm-bar::before {
+  content: '';
+  position: absolute; top: -1px; left: 0; right: 0; height: 2px;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow);
+}
+.st-ex-confirm-label   { flex: 1; font-family: var(--font-display); font-size: var(--text-xs); color: var(--ink-72); }
+.st-ex-confirm-actions { display: flex; align-items: center; gap: var(--space-sm); flex-shrink: 0; }
+
+/* ── 5. UV atlas canvas (aside) ───────────────────────────────────── */
+
+.stc-uv-canvas { width: 100%; max-width: 560px; aspect-ratio: 1 / 1; display: block; margin: 0 auto; }
+.st-uv-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 25%),
+    repeating-linear-gradient(to bottom, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 25%);
+}
+.st-uv-corner-label {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size:   var(--text-2xs);
+  color:       var(--ink-30);
+  pointer-events: none;
+}
+.st-uv-corner-label--tl { top: 4px; left: 6px; }
+.st-uv-corner-label--tr { top: 4px; right: 6px; }
+.st-uv-corner-label--bl { bottom: 4px; left: 6px; }
+.st-uv-corner-label--br { bottom: 4px; right: 6px; }
+
+.st-uv-marker {
+  position: absolute;
+  display: flex;
   align-items: center;
-  gap:         var(--space-md, 12px);
+  justify-content: center;
+  border: 1.5px solid var(--marker-color, var(--tab-color));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--marker-color, var(--tab-color)) 65%, transparent);
+  transition: box-shadow 0.2s ease;
+}
+.st-uv-marker-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(10, 10, 14, 0.85);
+  border: 1.5px solid var(--marker-color, var(--tab-color));
+  color: var(--marker-color, var(--tab-color));
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.72rem;
 }
 
-.st-curve-stat {
-  font-size:      var(--text-3xs, 0.6rem);
-  font-family:    var(--font-mono);
-  color:          rgba(180, 100, 255, 0.38);
+/* ── 6. Y-Distribution Curve Editor (Configuration) ───────────────── */
+/* Header (ctrl-label + ctrl-badge stats) above the instrument well,
+   hint bar below. The well itself is the shared .ec-canvas-wrap; canvas
+   draws only the curve, everything else (grid, axis labels) is CSS/HTML
+   layered above it. */
+.st-curve-shell { display: flex; flex-direction: column; gap: var(--space-sm); }
+.st-curve-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.st-curve-header-stats { display: flex; align-items: center; gap: var(--space-xs); }
+
+.st-curve-wrap { position: relative; user-select: none; width: 100%; aspect-ratio: 1 / 1; }
+.st-curve-grid {
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(to right, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 12.5%),
+    repeating-linear-gradient(to bottom, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 12.5%);
+}
+.st-curve-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+
+.st-curve-axis-label {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-25);
   letter-spacing: 0.02em;
+  pointer-events: none;
 }
-
-.st-curve-stat-val {
-  color: rgba(200, 130, 255, 0.65);
+.st-curve-axis-label--ymax   { top: 6px; left: 8px; }
+.st-curve-axis-label--ymin   { bottom: 22px; left: 8px; }
+.st-curve-axis-label--y-caption {
+  bottom: 50%; left: 6px; transform: translateY(50%) rotate(-90deg); transform-origin: left center;
+  text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--text-3xs);
 }
-
-.st-curve-canvas {
-  display: block;
-  width:   100%;
-  height:  260px;
+.st-curve-axis-label--x0     { bottom: 4px; left: 8px; }
+.st-curve-axis-label--x100   { bottom: 4px; right: 8px; }
+.st-curve-axis-label--x-caption {
+  bottom: 4px; left: 50%; transform: translateX(-50%);
+  text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--text-3xs);
 }
 
 .st-curve-hint {
-  display:        flex;
-  align-items:    center;
-  gap:            var(--space-xs, 6px);
-  padding:        var(--space-xs, 5px) var(--space-md, 12px);
-  font-size:      var(--text-2xs, 0.62rem);
-  color:          var(--ink-18, var(--ink-18));
-  border-top:     1px solid rgba(138, 18, 189, 0.1);
-  background:     var(--surface-overlay, rgba(0, 0, 0, 0.35));
-  letter-spacing: 0.04em;
-  min-height:     22px;
-  transition:     color var(--duration-base, 0.2s) var(--ease-out);
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--ink-38);
+  min-height: 18px;
+  transition: color 0.2s ease;
 }
-.st-curve-hint-sep    { color: var(--ink-14, rgba(255, 255, 255, 0.14)); }
-.st-curve-hint-active { color: rgba(200, 130, 255, 0.7); font-weight: 600; }
-.st-curve-hint-dot {
-  width:         var(--space-xs, 3px);
-  height:        var(--space-xs, 3px);
-  border-radius: 50%;
-  background:    rgba(138, 18, 189, 0.5);
-  flex-shrink:   0;
-}
+.st-curve-hint-sep    { color: var(--ink-22); }
+.st-curve-hint-active { color: var(--tab-color); font-weight: 600; font-style: normal; }
+.st-curve-hint-dot    { width: 3px; height: 3px; border-radius: 50%; background: var(--tab-color); flex-shrink: 0; }
 
-.st-curve-center {
-  display:         flex;
-  justify-content: center;
-}
-.st-curve-frame {
-  width: 72%;
-}
-.st-curve-maxheight {
-  margin-top: var(--space-sm, 10px);
-}
-.st-curve-reset {
-  margin-top: var(--space-xs, 6px);
-}
+/* ── 7. Accessibility ─────────────────────────────────────────────── */
 
-/* ── UV Table ────────────────────────────────────────────────────────────── */
-.st-uv-table-header,
-.st-uv-table-row {
-  display:               grid;
-  grid-template-columns: 18px 1fr 1fr 1fr 1fr 1fr 28px;
-  gap:                   var(--space-xs, 6px);
-  align-items:           center;
-}
-
-.st-uv-table-header {
-  margin-bottom: var(--space-xs, 6px);
-  padding:       0 var(--space-2xs, 2px);
-}
-
-.st-uv-table-header > div {
-  font-size:      var(--text-xs, 0.68rem);
-  font-weight:    600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color:          var(--ink-35, rgba(255, 255, 255, 0.35));
-  text-align:     center;
-}
-
-.st-uv-table-row { margin-bottom: var(--space-xs, 6px); }
-
-.st-uv-col-color {
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-}
-
-.st-uv-col-field,
-.st-uv-col-weight { min-width: 0; }
-
-.st-uv-cell-input {
-  padding:    var(--space-sm, 8px) var(--space-xs, 6px) !important;
-  text-align: center;
-  font-size:  var(--text-sm, 0.8rem) !important;
-  width:      100%;
-}
-
-.st-uv-col-del {
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-}
-
-.st-uv-legend-dot {
-  width:         var(--space-md, 12px);
-  height:        var(--space-md, 12px);
-  border-radius: 50%;
-  flex-shrink:   0;
-  border:        var(--line-md, 1.5px) solid var(--ink-25, var(--ink-25));
-}
-
-/* ── Range slider ─────────────────────────────────────────────────────────── */
-.st-range-slider {
-  width:              100%;
-  -webkit-appearance: none;
-  height:             5px;
-  background:         var(--surface-control, rgba(255, 255, 255, 0.1));
-  border-radius:      3px;
-  outline:            none;
-  cursor:             pointer;
-}
-.st-range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width:         var(--space-lg, 16px);
-  height:        var(--space-lg, 16px);
-  background:    var(--tab-color);
-  border-radius: 50%;
-  cursor:        pointer;
-  box-shadow:    0 0 10px var(--tab-glow);
-  transition:    all var(--duration-base, 0.3s) var(--ease-out);
-}
-.st-range-slider::-webkit-slider-thumb:hover {
-  transform:  scale(1.2);
-  box-shadow: 0 0 18px var(--tab-glow-strong);
-}
-.st-range-slider::-moz-range-thumb {
-  width:         var(--space-lg, 16px);
-  height:        var(--space-lg, 16px);
-  background:    var(--tab-color);
-  border-radius: 50%;
-  border:        none;
-  box-shadow:    0 0 10px var(--tab-glow);
-}
-
-/* ── Upload drop area ─────────────────────────────────────────────────────── */
-.st-upload-area {
-  border:         var(--line-sm, 2px) dashed var(--line-subtle, var(--ink-16));
-  padding:        var(--space-xl, 20px) var(--space-2xl, 24px);
-  text-align:     center;
-  cursor:         pointer;
-  margin-bottom:  var(--space-md, 14px);
-  transition:     all var(--duration-long, 0.4s) var(--ease-out);
-  background:     var(--surface-ghost, var(--surface-ghost));
-  display:        flex;
-  flex-direction: column;
-  align-items:    center;
-  gap:            var(--space-xs, 6px);
-  font-size:      var(--text-sm, 0.82rem);
-  color:          var(--ink-40, rgba(255, 255, 255, 0.4));
-}
-.st-upload-area:hover {
-  border-color: var(--tab-color);
-  background:   var(--surface-accent-ghost, rgba(255, 255, 255, 0.04));
-  color:        var(--ink-65, rgba(255, 255, 255, 0.65));
-  box-shadow:   0 0 25px var(--tab-glow);
-}
-.st-upload-icon {
-  font-size:  1.6rem;
-  transition: transform var(--duration-base, 0.3s) var(--ease-out);
-}
-.st-upload-area:hover .st-upload-icon { transform: scale(1.15); }
-
-/* ── Exclusion zone canvas + wrap ─────────────────────────────────────────── */
-.st-ex-wrap {
-  overflow:      hidden;
-  background:    var(--surface-canvas, #060404);
-  border:        var(--line-sm, 1px) solid var(--line-subtle, rgba(255, 255, 255, 0.06));
-  position:      relative;
-  width:         100%;
-  aspect-ratio:  1 / 1;
-}
-.st-ex-canvas {
-  position:        absolute;
-  top: 0; left: 0;
-  width:           100%;
-  height:          100%;
-  display:         block;
-  image-rendering: pixelated;
-}
-
-/* ── UV canvas ────────────────────────────────────────────────────────────── */
-.st-uv-canvas {
-  width:      100%;
-  display:    block;
-  border:     var(--line-sm, 1px) solid var(--line-faint, var(--line-ghost-border));
-  background: var(--surface-deep, #0e0e14);
-}
-
-/* ── Seed row ─────────────────────────────────────────────────────────────── */
-.st-seed-row {
-  display:     flex;
-  gap:         var(--space-sm, 10px);
-  align-items: center;
-}
-.st-seed-row .field-input { flex: 1; }
-
-.st-seed-toggle-row {
-  display:         flex;
-  justify-content: flex-end;
-  align-items:     center;
-  gap:             var(--space-sm, 10px);
-  margin-bottom:   var(--space-sm, 10px);
-}
-
-.st-reset-row {
-  display:         flex;
-  justify-content: flex-end;
-  margin-top:      var(--space-xl, 20px);
-}
-
-/* ── Internal 2-column form grid ──────────────────────────────────────────── */
-.st-config-grid {
-  display:               grid;
-  grid-template-columns: 1fr 1fr;
-  gap:                   var(--space-lg, 16px) var(--space-2xl, 24px);
-}
-
-/* ── Textarea variant ─────────────────────────────────────────────────────── */
-.st-textarea {
-  font-family: var(--font-mono);
-  font-size:   var(--text-sm, 0.82rem);
-  resize:      vertical;
-  line-height: 1.6;
-}
-
-/* ── Split two-input row ──────────────────────────────────────────────────── */
-.st-split-input {
-  display:               grid;
-  grid-template-columns: 1fr 1fr;
-  gap:                   var(--space-sm, 8px);
-}
-
-/* ── Opacity row ──────────────────────────────────────────────────────────── */
-.st-opacity-row {
-  display:     flex;
-  align-items: center;
-  gap:         var(--space-sm, 10px);
-}
-.st-opacity-row .st-range-slider { flex: 1; }
-.st-opacity-input {
-  width:       72px !important;
-  flex-shrink: 0;
-  text-align:  right;
-}
-
-/* ── Card header row (title + inline actions) ─────────────────────────────── */
-.st-card-header {
-  display:         flex;
-  justify-content: space-between;
-  align-items:     flex-start;
-  margin-bottom:   var(--space-xs, 6px);
-  gap:             var(--space-md, 12px);
-}
-.st-card-header-actions {
-  display:     flex;
-  gap:         var(--space-sm, 8px);
-  margin-left: auto;
-}
-
-/* ── Opacity field spacing (texture / UV overlay sliders) ─────────────────── */
-.st-opacity-group {
-  margin-top:    var(--space-md, 14px);
-  margin-bottom: var(--space-md, 14px);
-}
-
-.st-remove-texture-row {
-  display:         flex;
-  justify-content: flex-end;
-  margin-bottom:   var(--space-sm, 10px);
-}
-
-/* Visually-hidden native file input — click is proxied via .st-upload-area */
-.st-hidden-input {
-  display: none;
-}
-
-/* ── Exclusion zone confirm bar ───────────────────────────────────────────── */
-.st-ex-confirm-bar {
-  display:       flex;
-  align-items:   center;
-  gap:           var(--space-md, 12px);
-  margin-bottom: var(--space-md, 12px);
-  padding:       var(--space-sm, 10px) var(--space-md, 14px);
-  background:    var(--surface-accent-ghost, rgba(255, 255, 255, 0.04));
-  border:        var(--line-sm, 1px) solid var(--tab-color);
-  font-size:     var(--text-sm, 0.8rem);
-}
-
-.st-ex-confirm-label {
-  flex:  1;
-  color: var(--ink-85, rgba(255, 255, 255, 0.85));
-}
-
-.st-ex-confirm-actions {
-  display:     flex;
-  align-items: center;
-  gap:         var(--space-sm, 8px);
-  flex-shrink: 0;
-}
-
-/* ── Exclusion canvas toggle + hit-area ───────────────────────────────────── */
-/* -24px / 24px bleed trick: extends click target flush to the section-card
-   edge. NOTE: assumes section-card padding = --space-2xl (24px). Swap the
-   fallback literal if that token changes. */
-.st-ex-toggle-row {
-  display:     flex;
-  align-items: center;
-  gap:         var(--space-sm, 10px);
-}
-.st-ex-hitarea {
-  margin:  calc(-1 * var(--space-2xl, 24px));
-  padding: var(--space-2xl, 24px);
-  cursor:  default;
-}
-.st-ex-hitarea.is-active {
-  cursor: crosshair;
-}
-.st-ex-overlay {
-  position:       absolute;
-  inset:          0;
-  pointer-events: none;
-}
-
-/* ── Exclusion zone list ──────────────────────────────────────────────────── */
-.st-ex-zone-list { margin-bottom: var(--space-md, 12px); }
-
-.st-ex-zone-item {
-  display:       flex;
-  align-items:   center;
-  gap:           var(--space-md, 12px);
-  margin-bottom: var(--space-xs, 6px);
-  padding:       var(--space-sm, 9px) var(--space-md, 14px);
-  background:    rgba(255, 50, 50, 0.06);
-  border:        var(--line-sm, 1px) solid rgba(255, 50, 50, 0.18);
-  font-size:     var(--text-sm, 0.8rem);
-  cursor:        pointer;
-  transition:    border-color var(--duration-base, 0.2s) var(--ease-out),
-                 background   var(--duration-base, 0.2s) var(--ease-out);
-}
-.st-ex-zone-item.active {
-  border-color: rgba(255, 80, 80, 0.5);
-  background:   rgba(255, 50, 50, 0.10);
-}
-
-.st-ex-zone-label {
-  font-size:      var(--text-xs, 0.7rem);
-  font-weight:    600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color:          rgba(255, 80, 80, 0.8);
-  white-space:    nowrap;
-}
-
-.st-ex-zone-coords {
-  font-family: var(--font-mono);
-  font-size:   var(--text-xs, 0.78rem);
-  color:       rgba(255, 150, 150, 0.9);
-  flex:        1;
-}
-
-/* Per-zone delete (×) uses the shared .delete-button primitive (§5). */
-
-/* ── Section description ──────────────────────────────────────────────────── */
-.st-section-desc {
-  color:       var(--ink-40, rgba(255, 255, 255, 0.4));
-  font-size:   var(--text-base, 0.87rem);
-  font-weight: 300;
-  line-height: 1.7;
-  margin:      0 0 var(--space-2xl, 24px);
-}
-.st-section-desc strong { color: var(--tab-color); font-weight: 500; }
-
-/* ── Help overlay — Stars-specific ───────────────────────────────────────── */
-.help-adv-timeline--grid {
-  display:               grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:                   var(--space-xl, 20px);
-  margin-top:            var(--space-2xl, 24px);
-  padding:               var(--space-3xl, 40px) var(--space-2xl, 30px);
-  background:            var(--surface-overlay, rgba(0, 0, 0, 0.3));
-  border:                var(--line-sm, 1px) solid var(--line-faint, var(--line-ghost-border));
-  margin-bottom:         var(--space-4xl, 60px);
-}
-
-.help-adv-summary {
-  background:    var(--surface-ghost, var(--surface-ghost));
-  border:        var(--line-sm, 1px) solid var(--line-faint, rgba(255, 255, 255, 0.07));
-  border-left:   var(--line-md, 3px) solid var(--tab-color);
-  padding:       var(--space-lg, 18px) var(--space-2xl, 22px);
-  margin-bottom: var(--space-3xl, 28px);
-  font-size:     var(--text-base, 0.88rem);
-  color:         var(--ink-55, rgba(255, 255, 255, 0.55));
-  line-height:   1.75;
-}
-.help-adv-summary strong { color: var(--tab-color); font-weight: 600; }
-
-.help-adv-summary-title {
-  font-size:      var(--text-xs, 0.72rem);
-  font-weight:    700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color:          var(--tab-color);
-  margin-bottom:  var(--space-sm, 8px);
-  opacity:        0.8;
-}
-
-.help-plain {
-  display:     flex;
-  gap:         var(--space-sm, 10px);
-  align-items: flex-start;
-  margin-top:  var(--space-md, 12px);
-  padding:     var(--space-md, 12px) var(--space-lg, 16px);
-  background:  var(--surface-ghost, rgba(255, 255, 255, 0.03));
-  border-left: var(--line-md, 2px) solid var(--line-subtle, var(--ink-12));
-  font-size:   var(--text-sm, 0.84rem);
-  color:       var(--ink-45, rgba(255, 255, 255, 0.45));
-  line-height: 1.7;
-}
-.help-plain-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; opacity: 0.5; }
-.help-plain strong { color: var(--ink-65, rgba(255, 255, 255, 0.65)); font-weight: 600; }
-
-/* ── Hint box ─────────────────────────────────────────────────────────────── */
-.st-hint-box {
-  background:    var(--surface-accent-ghost, rgba(255, 255, 255, 0.04));
-  border:        var(--line-sm, 1px) solid var(--tab-color);
-  padding:       var(--space-md, 12px) var(--space-lg, 18px);
-  color:         var(--tab-color);
-  font-size:     var(--text-sm, 0.83rem);
-  line-height:   1.7;
-  margin-bottom: var(--space-md, 14px);
-  position:      relative;
-  overflow:      hidden;
-}
-.st-hint-box::before {
-  content:    '';
-  position:   absolute;
-  top: 0; left: 0; right: 0;
-  height:     1px;
-  background: linear-gradient(90deg, transparent, var(--tab-color), transparent);
-  opacity:    0.5;
-}
-
-/* ── Number input — hide spinners ─────────────────────────────────────────── */
-.stars-tab input[type="number"]::-webkit-outer-spin-button,
-.stars-tab input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.stars-tab input[type="number"] { -moz-appearance: textfield; }
-
-/* ── Selection ────────────────────────────────────────────────────────────── */
-.stars-tab ::selection { background: var(--tab-color); color: #fff; }
-
-/* ── Focus ring ───────────────────────────────────────────────────────────── */
-.stars-tab button:focus-visible,
-.stars-tab input:focus-visible {
-  outline:        2px solid var(--tab-color);
-  outline-offset: var(--space-xs, 4px);
-}
-
-/* ── Accessibility ────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .stars-tab *, .stars-tab *::before, .stars-tab *::after {
     animation-duration:  0.01ms !important;
@@ -569,7 +263,97 @@
   }
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .st-config-grid { grid-template-columns: 1fr; }
+  .st-cfg-row { grid-template-columns: 1fr; }
 }
+
+/* ── 8. LEGACY — Stars_help.jsx static mockup only ────────────────────
+   The help guide still illustrates the pre-migration form-group/
+   section-card UI with its own bespoke class names. None of these are
+   used by the live tab anymore. Left in place so the help modal doesn't
+   render unstyled; delete once Stars_help.jsx is rewritten onto the
+   current ctrl-*/mp-*/ec-* markup (same follow-up already tracked for
+   RockErosion_help.jsx / Trees_help.jsx / Props_help.jsx). */
+
+.st-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+.st-split-input {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.st-subsection-divider {
+  border: none;
+  border-top: 1px solid var(--line-faint, rgba(255,255,255,0.06));
+  margin: 14px 0;
+}
+.st-seed-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.st-uv-table-header,
+.st-uv-table-row {
+  display: grid;
+  grid-template-columns: 18px 1fr 1fr 1fr 1fr 1fr 28px;
+  gap: 6px;
+  align-items: center;
+}
+.st-uv-table-header { margin-bottom: 6px; padding: 0 2px; }
+.st-uv-table-header > div {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-35, rgba(255,255,255,0.35));
+  text-align: center;
+}
+.st-uv-table-row { margin-bottom: 6px; }
+.st-uv-col-color { display: flex; align-items: center; justify-content: center; }
+.st-uv-col-field, .st-uv-col-weight { min-width: 0; }
+.st-uv-cell-input { padding: 8px 6px !important; text-align: center; font-size: 0.8rem !important; width: 100%; }
+.st-uv-col-del { display: flex; align-items: center; justify-content: center; }
+.st-uv-legend-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--ink-25, rgba(255,255,255,0.25));
+}
+.st-ex-zone-list { margin-bottom: 12px; }
+.st-ex-zone-item {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 6px; padding: 9px 14px;
+  background: rgba(255, 50, 50, 0.06);
+  border: 1px solid rgba(255, 50, 50, 0.18);
+  font-size: 0.8rem;
+}
+.st-ex-zone-label {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255, 80, 80, 0.8); white-space: nowrap;
+}
+.st-ex-zone-coords { font-family: var(--font-mono); font-size: 0.78rem; color: rgba(255, 150, 150, 0.9); flex: 1; }
+.st-upload-area {
+  border: 2px dashed var(--ink-16);
+  padding: 20px 24px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-size: 0.82rem;
+  color: var(--ink-40, rgba(255,255,255,0.4));
+}
+.st-upload-icon { font-size: 1.6rem; }
+.st-toggle-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.st-toggle-input { display: none; }
+.st-toggle-track {
+  width: 34px; height: 18px; border-radius: 10px;
+  background: var(--ink-16); position: relative; transition: background 0.2s ease;
+}
+.st-toggle-thumb {
+  position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--ink-55); transition: left 0.2s ease, background 0.2s ease;
+}
+.st-toggle-input:checked + .st-toggle-track { background: color-mix(in srgb, var(--tab-color) 45%, transparent); }
+.st-toggle-input:checked + .st-toggle-track .st-toggle-thumb { left: 18px; background: var(--tab-color); }
+.st-toggle-text { font-size: 0.8rem; color: var(--ink-55); }

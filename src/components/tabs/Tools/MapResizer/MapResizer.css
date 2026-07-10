@@ -5,17 +5,13 @@
    ══════════════════════════════════════════════════════════════════════════════ */
 
 /* ── 1. Root ─────────────────────────────────────────────────────────────────── */
-/* --tab-color / --tab-glow / --tab-glow-strong are set inline in the JSX root.  */
 .map-resizer-tab {
+  --tab-color:       var(--mapresizer-color);
+  --tab-glow:        var(--mapresizer-glow);
+  --tab-glow-strong: var(--mapresizer-glow-strong);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
   color:       var(--ink-72);
   font-family: var(--font-display);
-}
-
-/* ── 2. Section body ─────────────────────────────────────────────────────────── */
-.mr-section-body {
-  display:        flex;
-  flex-direction: column;
-  gap:            0;
 }
 
 /* ── 4. Size preview ─────────────────────────────────────────────────────────── */
@@ -147,6 +143,9 @@
 }
 
 /* ── 8. Scale options stack ──────────────────────────────────────────────────── */
+/* No longer used by the live tab (scale toggles now render as
+   .ctrl-toggle-row inside the aside) — kept only because
+   MapResizer_help.jsx's static mockup still reuses this class. */
 .mr-options-stack {
   display:        flex;
   flex-direction: column;
