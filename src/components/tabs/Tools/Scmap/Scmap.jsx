@@ -224,7 +224,6 @@ export default function ScmapTool({ settings }) {
         sections={[sectionMeta]}
         activeSection="console"
         onSelect={() => {}}
-        railStorageKey="scmap-rail-pinned"
         navLabel="SCMAP console navigation"
         asideSlot={asideSlot}
         asideCaption={null}

@@ -213,6 +213,15 @@
   /* Near-black text for use on a fully-opaque tab-color fill (warm cast). */
   --text-on-accent: #050505;
 
+  /* ═══ §9c SOURCE MARKER — asset provenance, not a tab-identity accent ═══ */
+  /* "is this a custom/community asset or a base-game one" — used by the
+     Library overlays (Props/Emitter) to tag custom entries. Deliberately its
+     own role, not --status-warn (that's system feedback, this is a source
+     marker) and not --tab-color (identity, not provenance). */
+  --source-custom-color:       #f0a040;
+  --source-custom-glow:        rgba(240, 160, 64, 0.30);
+  --source-custom-glow-strong: rgba(240, 160, 64, 0.12);
+
   /* ═══ §9b CODE SYNTAX — VS Code dark palette (footer article snippets) ═ */
   --code-keyword: #569cd6;
   --code-string:  #ce9178;

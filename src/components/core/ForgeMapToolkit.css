@@ -61,15 +61,16 @@ body {
    Banner and navbar are positioned siblings of the tab content, so they
    paint OVER any in-tab fixed overlay at their top band. Grouping them
    lets the whole header carriage slide up the moment a help overlay
-   (.hc-overlay) mounts anywhere in the suite — keyed off presence with
-   :has(), no React state plumbing. */
+   (.hc-overlay) or any other full-suite overlay ([data-suite-overlay],
+   e.g. the asset Library overlays) mounts anywhere in the suite — keyed
+   off presence with :has(), no React state plumbing. */
 .forgemaptoolkit-chrome {
   position: relative;
   z-index: var(--z-base);          /* preserve banner/navbar stacking */
   flex-shrink: 0;
   transition: transform var(--dur-slow) var(--ease-out);
 }
-.forgemaptoolkit:has(.hc-overlay) .forgemaptoolkit-chrome {
+.forgemaptoolkit:has(.hc-overlay, [data-suite-overlay]) .forgemaptoolkit-chrome {
   transform: translateY(-100%);
   pointer-events: none;
 }

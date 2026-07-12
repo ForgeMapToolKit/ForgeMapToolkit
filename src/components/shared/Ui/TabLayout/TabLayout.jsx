@@ -34,10 +34,17 @@ import '../../DesignSystem/index.css';
  *
  *   Layout Z props:
  *     groupMode      'parallel' | 'exclusive'   (default: 'parallel')
- *     secondRail     [{ id, label }]  optional secondary rail (Z·exclusive)
- *     activeGroup    string id of active group (Z·exclusive)
+ *     secondRail     [{ id, label }]  optional secondary rail. Dims Group A/B
+ *                    only when its ids are literally 'a'/'b' — otherwise it's
+ *                    just a plain N-way selector (e.g. asset type) alongside
+ *                    the two-column grid, with no dimming side effect.
+ *     activeGroup    string id of active group/rail-item (Z·exclusive)
  *     onGroupSelect  (id) => void              (Z·exclusive)
  *     groupSlotB     content for Group B column
+ *     headerExtra    full-width content above the grid (Z only) — e.g. an
+ *                    auth panel or a field shared by both groups
+ *     footerExtra    full-width content below the grid (Z only) — e.g. a
+ *                    notes field + the section's commit action
  *
  *   Layout W props:
  *     canvasToolbar  true | false               (default: false)
@@ -48,7 +55,6 @@ import '../../DesignSystem/index.css';
  *
  *   toolbarSlot     global content above the rail/column split
  *   renderEyebrow   (section) => string
- *   railStorageKey  localStorage key for pin state
  *   navLabel        aria-label for the rail nav
  *   bootMs          rail boot extend duration  (default: 2200)
  *
@@ -56,7 +62,15 @@ import '../../DesignSystem/index.css';
  *
  *   Set --tab-color (+ --tab-glow, --tab-glow-strong) on an ancestor;
  *   the whole shell recolors automatically.
+ *
+ * ─── Rail pin state ─────────────────────────────────────────────────────────
+ *
+ *   Pinned/collapsed is one setting for the whole app, not per tab — it's
+ *   read/written under RAIL_PINNED_KEY (below) so it carries over across
+ *   tabs and across sessions (plain localStorage persistence).
  */
+
+const RAIL_PINNED_KEY = 'fmt-rail-pinned';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -202,51 +216,70 @@ const LayoutY = ({
 /**
  * Z — Full width, two equal columns.
  * groupMode: 'parallel' | 'exclusive'
+ *
+ * `secondRail` doubles as: (a) an explicit Group A/B switcher when its item
+ * ids are literally 'a'/'b' (dims the inactive column), or (b) a plain
+ * N-way selector unrelated to A/B (e.g. an asset-type picker) — dimming
+ * only engages for the 'a'/'b' case, so reusing secondRail for something
+ * else never accidentally fades both columns.
+ *
+ * `headerExtra` / `footerExtra` are optional full-width slots above/below
+ * the two-column grid, for content that belongs to neither group alone
+ * (an auth panel, a shared field, a notes+submit row).
  */
 const LayoutZ = ({
   section, children, renderEyebrow,
   groupMode, groupSlotB,
   secondRail, activeGroup, onGroupSelect,
+  headerExtra, footerExtra,
   columnRef,
-}) => (
-  <div className={`workspace-main-inner layout-z layout-z--${groupMode}`}>
-    <div className="layout-z-header">
-      <SectionHeader section={section} renderEyebrow={renderEyebrow} />
-      {groupMode === 'exclusive' && secondRail?.length > 0 && (
-        <nav className="layout-z-second-rail" aria-label="Group selection">
-          {secondRail.map(g => (
-            <button
-              key={g.id}
-              className={`layout-z-rail-item${activeGroup === g.id ? ' active' : ''}`}
-              onClick={() => onGroupSelect?.(g.id)}
-            >
-              {g.label}
-            </button>
-          ))}
-        </nav>
-      )}
-    </div>
-    <div className="layout-z-grid">
-      <div
-        className={[
-          'layout-z-group layout-z-group--a',
-          groupMode === 'exclusive' && activeGroup && activeGroup !== 'a' ? 'layout-z-group--dim' : '',
-        ].filter(Boolean).join(' ')}
-        ref={columnRef}
-      >
-        {children}
+}) => {
+  const dimEnabled = groupMode === 'exclusive' && (activeGroup === 'a' || activeGroup === 'b');
+  const hasSecondRail = groupMode === 'exclusive' && secondRail?.length > 0;
+  return (
+  <div className={`layout-z-outer${hasSecondRail ? ' layout-z-outer--railed' : ''}`}>
+    {hasSecondRail && (
+      <nav className="layout-z-second-rail" aria-label="Group selection">
+        {secondRail.map(g => (
+          <button
+            key={g.id}
+            className={`layout-z-rail-item${activeGroup === g.id ? ' active' : ''}`}
+            onClick={() => onGroupSelect?.(g.id)}
+          >
+            {g.label}
+          </button>
+        ))}
+      </nav>
+    )}
+    <div className={`workspace-main-inner layout-z layout-z--${groupMode}`}>
+      <div className="layout-z-header">
+        <SectionHeader section={section} renderEyebrow={renderEyebrow} />
       </div>
-      <div
-        className={[
-          'layout-z-group layout-z-group--b',
-          groupMode === 'exclusive' && activeGroup && activeGroup !== 'b' ? 'layout-z-group--dim' : '',
-        ].filter(Boolean).join(' ')}
-      >
-        {groupSlotB}
+      {headerExtra && <div className="layout-z-header-extra">{headerExtra}</div>}
+      <div className="layout-z-grid">
+        <div
+          className={[
+            'layout-z-group layout-z-group--a',
+            dimEnabled && activeGroup !== 'a' ? 'layout-z-group--dim' : '',
+          ].filter(Boolean).join(' ')}
+          ref={columnRef}
+        >
+          {children}
+        </div>
+        <div
+          className={[
+            'layout-z-group layout-z-group--b',
+            dimEnabled && activeGroup !== 'b' ? 'layout-z-group--dim' : '',
+          ].filter(Boolean).join(' ')}
+        >
+          {groupSlotB}
+        </div>
       </div>
+      {footerExtra && <div className="layout-z-footer-extra">{footerExtra}</div>}
     </div>
   </div>
-);
+  );
+};
 
 /**
  * W — Full width + top bar. Dominant canvas or output.
@@ -330,6 +363,8 @@ const TabLayout = ({
   activeGroup,
   onGroupSelect,
   groupSlotB,
+  headerExtra,
+  footerExtra,
 
   // Layout W
   canvasToolbar  = false,
@@ -339,13 +374,12 @@ const TabLayout = ({
   // Shell
   toolbarSlot,
   renderEyebrow  = null,
-  railStorageKey = 'workspace-rail-pinned',
   navLabel       = 'Tab navigation',
   bootMs         = 2200,
 }) => {
   const [booting, setBooting] = useState(true);
   const [pinned,  setPinned]  = useState(() => {
-    try { return localStorage.getItem(railStorageKey) === '1'; } catch { return false; }
+    try { return localStorage.getItem(RAIL_PINNED_KEY) === '1'; } catch { return false; }
   });
 
   useEffect(() => {
@@ -356,7 +390,7 @@ const TabLayout = ({
   const handleTogglePin = () => {
     setPinned(p => {
       const next = !p;
-      try { localStorage.setItem(railStorageKey, next ? '1' : '0'); } catch { /* noop */ }
+      try { localStorage.setItem(RAIL_PINNED_KEY, next ? '1' : '0'); } catch { /* noop */ }
       return next;
     });
   };
@@ -391,6 +425,8 @@ const TabLayout = ({
             secondRail={secondRail}
             activeGroup={activeGroup}
             onGroupSelect={onGroupSelect}
+            headerExtra={headerExtra}
+            footerExtra={footerExtra}
           />
         );
 

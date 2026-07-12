@@ -10,6 +10,7 @@ import TextureEditor from './TextureEditor/TextureEditor';
 import CustomPropsHelpModal from '../../HelpModals/CustomProps_help.jsx';
 import TabLayout from '../../../Shared/Ui/TabLayout/TabLayout';
 import { usePersistentState, useMapInfo } from '../../../Shared/MapLogic';
+import { generateReadme as buildReadme, writeReadme } from '../../../../../utils/readmeGenerator';
 import CustomPropsConfiguration from './Configuration.jsx';
 import PropList from './PropList.jsx';
 import PropDetail from './PropDetail.jsx';
@@ -345,21 +346,6 @@ export default function CustomPropsTab({ settings, shared = {}, onSharedChange =
       // ── README ──────────────────────────────────────────────────────────────────
       const mapFolderPath = `${mapsFolder}\\${finalMapName}`;
       if (generateReadme) {
-        const now      = new Date();
-        const dateStr  = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const timeStr  = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        const divider  = '─'.repeat(70);
-        const thick    = '═'.repeat(70);
-
-        // Box header — perfectly aligned
-        const BOX_INNER = 38;
-        const c1 = 'CUSTOM PROPS — GENERATION README';
-        const c2 = 'ForgeMapToolkit · Custom Props Tab';
-        const boxTop  = '╔' + '═'.repeat(BOX_INNER) + '╗';
-        const boxRow1 = '║  ' + c1 + ' '.repeat(BOX_INNER - 2 - c1.length) + '║';
-        const boxRow2 = '║  ' + c2 + ' '.repeat(BOX_INNER - 2 - c2.length) + '║';
-        const boxBot  = '╚' + '═'.repeat(BOX_INNER) + '╝';
-
         // Collect link group info
         const groupSourceMap = {};
         customProps.forEach(p => {
@@ -373,37 +359,19 @@ export default function CustomPropsTab({ settings, shared = {}, onSharedChange =
           }
         });
 
-        const lines = [];
-        lines.push(boxTop);
-        lines.push(boxRow1);
-        lines.push(boxRow2);
-        lines.push(boxBot);
-        lines.push('');
-        lines.push(`  Generated  : ${dateStr} at ${timeStr}`);
-        lines.push(`  Repository : https://github.com/timmasalme/ForgeMapToolkit`);
-        lines.push('');
-        lines.push(divider);
-        lines.push('  MAP SETTINGS');
-        lines.push(divider);
-        lines.push(`  Map Name    : ${finalMapName}`);
-        lines.push(`  Maps Folder : ${mapsFolder}`);
-        lines.push(`  Output Dir  : ${finalMapName}\\env\\props\\`);
-        lines.push('');
-        lines.push(divider);
-        lines.push('  ALBEDO CHANGES (Texture Adjustments per Prop)');
-        lines.push(divider);
+        const albedoLines = [];
         const propsWithAdj = customProps.filter(p => p.adjustments);
         if (propsWithAdj.length === 0) {
-          lines.push('  (no albedo / texture adjustments configured)');
+          albedoLines.push('  (no albedo / texture adjustments configured)');
         } else {
           propsWithAdj.forEach((p, i) => {
             const adj         = p.adjustments;
             const displayName = p.customName?.trim() || p.originalProp?.name || p.targetBpPath.split('/').pop();
             const origPath    = (p.originalProp?.gamePath || p.originalProp?.id || '').split('/').pop();
-            lines.push('');
-            lines.push(`  [${String(i + 1).padStart(2, '0')}] ${displayName}`);
-            lines.push(`       Original source : ${origPath || '—'}`);
-            lines.push(`       Output path     : ${p.targetBpPath}`);
+            albedoLines.push('');
+            albedoLines.push(`  [${String(i + 1).padStart(2, '0')}] ${displayName}`);
+            albedoLines.push(`       Original source : ${origPath || '—'}`);
+            albedoLines.push(`       Output path     : ${p.targetBpPath}`);
             const changes = [];
             if (adj.hue        !== undefined && adj.hue        !== 0)   changes.push(`Hue shift: ${adj.hue}°`);
             if (adj.saturation !== undefined && adj.saturation !== 100) changes.push(`Saturation: ${adj.saturation}%`);
@@ -419,76 +387,69 @@ export default function CustomPropsTab({ settings, shared = {}, onSharedChange =
             if (adj._hasBakedPasses)
               changes.push(`Baked texture passes applied`);
             if (changes.length === 0) {
-              lines.push('       Albedo changes  : (no tracked changes)');
+              albedoLines.push('       Albedo changes  : (no tracked changes)');
             } else {
-              lines.push('       Albedo changes  :');
-              changes.forEach(c => lines.push(`         • ${c}`));
+              albedoLines.push('       Albedo changes  :');
+              changes.forEach(c => albedoLines.push(`         • ${c}`));
             }
           });
         }
-        lines.push('');
-        lines.push(divider);
-        lines.push('  LINKED PROP GROUPS');
-        lines.push(divider);
+
+        const groupLines = [];
         const groupIds = Object.keys(linkedGroups);
         if (groupIds.length === 0) {
-          lines.push('  (no link groups configured)');
+          groupLines.push('  (no link groups configured)');
         } else {
           groupIds.forEach((gid, gi) => {
             const group    = linkedGroups[gid];
             const sourceId = groupSourceMap[gid];
             const source   = group.find(p => p.id === sourceId);
             const followers = group.filter(p => p.id !== sourceId);
-            lines.push('');
-            lines.push(`  Group ${gi + 1}  (ID: ${gid.slice(0, 8)}…)`);
+            groupLines.push('');
+            groupLines.push(`  Group ${gi + 1}  (ID: ${gid.slice(0, 8)}…)`);
             if (source) {
               const sName = source.customName?.trim() || source.originalProp?.name || '—';
-              lines.push(`    Texture source : ${sName}`);
-              lines.push(`    Source output  : ${source.targetBpPath}`);
+              groupLines.push(`    Texture source : ${sName}`);
+              groupLines.push(`    Source output  : ${source.targetBpPath}`);
             }
             followers.forEach((f, fi) => {
               const fName = f.customName?.trim() || f.originalProp?.name || '—';
-              lines.push(`    Linked [${fi + 1}]     : ${fName}  →  ${f.targetBpPath}`);
+              groupLines.push(`    Linked [${fi + 1}]     : ${fName}  →  ${f.targetBpPath}`);
             });
-            lines.push(`    Members total  : ${group.length} (1 source, ${followers.length} follower${followers.length !== 1 ? 's' : ''})`);
+            groupLines.push(`    Members total  : ${group.length} (1 source, ${followers.length} follower${followers.length !== 1 ? 's' : ''})`);
           });
         }
-        lines.push('');
-        lines.push(divider);
-        lines.push('  ALL CUSTOM PROPS');
-        lines.push(divider);
+
+        const allPropsLines = [];
         customProps.forEach((p, idx) => {
           const name     = p.customName?.trim() || p.originalProp?.name || '—';
           const hasAdjF  = !!p.adjustments;
           const isSource = groupIds.some(gid => groupSourceMap[gid] === p.id);
           const isFollow = groupIds.some(gid => groupSourceMap[gid] !== p.id && linkedGroups[gid]?.some(e => e.id === p.id));
           const tags = [hasAdjF ? 'custom texture' : 'original', isSource ? 'texture source' : '', isFollow ? 'linked follower' : ''].filter(Boolean).join(', ');
-          lines.push(`  [${String(idx + 1).padStart(2, '0')}] ${name}`);
-          lines.push(`       Target path : ${p.targetBpPath}`);
-          lines.push(`       Tags        : ${tags}`);
+          allPropsLines.push(`  [${String(idx + 1).padStart(2, '0')}] ${name}`);
+          allPropsLines.push(`       Target path : ${p.targetBpPath}`);
+          allPropsLines.push(`       Tags        : ${tags}`);
         });
-        lines.push('');
-        lines.push(thick);
-        lines.push('  COPYRIGHT');
-        lines.push(thick);
-        lines.push('');
-        lines.push('  Creative Commons Attribution-NonCommercial 4.0 International');
-        lines.push('  Copyright (c) 2026 timmasalme');
-        lines.push('');
-        lines.push('  This file was generated by ForgeMapToolkit for your personal use.');
-        lines.push('  You are free to modify these generated files without attribution.');
-        lines.push('  The tool itself (ForgeMapToolkit) may not be used commercially.');
-        lines.push('');
-        lines.push('  Full license: https://creativecommons.org/licenses/by-nc/4.0/legalcode');
-        lines.push('');
-        lines.push(thick);
-        lines.push('  ForgeMapToolkit · https://github.com/timmasalme/ForgeMapToolkit');
-        lines.push(thick);
 
-        await window.electronAPI.invoke('write-file', {
-          filePath: `${mapFolderPath}\\CustomProps_Generation_README.txt`,
-          content:  lines.join('\n'),
+        const readmeContent = buildReadme({
+          tool:    'Custom Props Tab',
+          mapName: finalMapName,
+          mapSize: mapInfo?.ok ? `${mapInfo.mapSize} × ${mapInfo.mapSize} (${mapInfo.km} km)` : '—',
+          sections: [
+            { title: 'MAP SETTINGS (extra)',                          entries: [['Output Dir', `${finalMapName}\\env\\props\\`]] },
+            { title: 'ALBEDO CHANGES (Texture Adjustments per Prop)', lines: albedoLines },
+            { title: 'LINKED PROP GROUPS',                            lines: groupLines },
+            { title: 'ALL CUSTOM PROPS',                              lines: allPropsLines },
+          ],
+          footer: [
+            'Creative Commons Attribution-NonCommercial 4.0 International — Copyright (c) 2026 timmasalme',
+            'Free to modify these generated files without attribution; the tool itself may not be used commercially.',
+            'Full license: https://creativecommons.org/licenses/by-nc/4.0/legalcode',
+            'ForgeMapToolkit · https://github.com/ForgeMapToolKit/ForgeMapToolkit',
+          ],
         });
+        await writeReadme(`${mapFolderPath}\\CustomProps_Generation_README.txt`, readmeContent);
       }
 
       // ── Auto-open export folder ───────────────────────────────────────────────
@@ -575,7 +536,6 @@ export default function CustomPropsTab({ settings, shared = {}, onSharedChange =
         ]}
         activeSection={activeSection}
         onSelect={setActiveSection}
-        railStorageKey="customprops-rail-pinned"
         navLabel="Custom Props navigation"
         asideCaption="PROP DETAIL"
         asideSlot={

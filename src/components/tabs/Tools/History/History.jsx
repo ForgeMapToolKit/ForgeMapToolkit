@@ -1,11 +1,9 @@
 /**
  * History.jsx  —  scmap Diff Viewer + Inline Lua Editor
  *
- * Layout: identical structure to CustomProps.jsx
- *   .hist-tab  →  padding: 40px 20px, animation
- *   .hist-grid →  grid-template-columns: 1fr 1fr, gap: 30px
- *   Left col:  Filter card + Entry list card
- *   Right col: Detail card (fills height)
+ * On TabLayout (layoutMode="x", controlsWidth="half"):
+ *   Controls column → Filter block (search + tab pills + clear) + Entries list
+ *   Aside           → Selected snapshot: file diffs, side-by-side viewer, Lua editor
  *
  * Diff: side-by-side BEFORE | AFTER with char-level highlights
  * Editor: syntax-highlighted overlay + transparent textarea (no mode toggle)
@@ -13,17 +11,16 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import ReactDOM from 'react-dom';
+import '../../../Shared/shared.css';
+import '../../../Shared/trace.css';
+import '../../../Shared/DesignSystem/index.css';
+import TabLayout from '../../../Shared/Ui/TabLayout/TabLayout';
 import HistoryHelpModal from '../../HelpModals/History_help.jsx';
 import {
-  getHistory,
-  getAllHistory,
-  getTabsWithHistory,
-  clearTabHistory,
   formatBytes,
   commitHistoryEntry,
   applyInvertedDiff,
 } from '../../../../../utils/ScmapHistoryTracker.js';
-import '../../../shared/shared.css';
 import './History.css';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -237,7 +234,7 @@ const SideBySideDiff = ({ diff }) => {
                       </span>
                       <span className={`hist-code${lClass==='equal'?' equal':''}`}>
                         {lClass==='equal'
-                          ? (before.line || '\u00a0')
+                          ? (before.line || ' ')
                           : before.charSegs
                             ? <CharLine segs={before.charSegs} isOld />
                             : <SyntaxLine line={before.line||''} />
@@ -259,7 +256,7 @@ const SideBySideDiff = ({ diff }) => {
                       </span>
                       <span className={`hist-code${rClass==='equal'?' equal':''}`}>
                         {rClass==='equal'
-                          ? (after.line || '\u00a0')
+                          ? (after.line || ' ')
                           : after.charSegs
                             ? <CharLine segs={after.charSegs} isOld={false} />
                             : <SyntaxLine line={after.line||''} />
@@ -443,7 +440,7 @@ function LuaEditorModal({ filename, content, folderPath, contentDiff, onClose, o
               onClick={handleSave}
               disabled={!btnActive}
             >{btnLabel}</button>
-            <button className="lua-modal-close-btn" onClick={onClose} title="Close (Esc)">&#x2715;</button>
+            <button className="ctrl-btn-close" onClick={onClose} title="Close (Esc)">&#x2715;</button>
           </div>
         </div>
 
@@ -720,7 +717,7 @@ const FileChangeCard = ({ item, kind, folderPath, onRefresh }) => {
         onClick={handleRowClick}
       >
         {/* Dot */}
-        <div style={{width:7,height:7,borderRadius:'50%',background:dotColor,flexShrink:0}}/>
+        <span className="hist-file-dot" style={{background:dotColor}}/>
 
         <span className="hist-file-name">{item.name}</span>
 
@@ -741,10 +738,10 @@ const FileChangeCard = ({ item, kind, folderPath, onRefresh }) => {
         {kind === 'modified' && (
           <span className="hist-file-size">
             {formatBytes(item.before?.size)}
-            <span style={{color:'rgba(255,255,255,0.12)',margin:'0 4px'}}>/</span>
+            <span className="hist-file-size-sep">/</span>
             {formatBytes(item.after?.size)}
             {item.sizeDelta !== 0 && (
-              <span style={{marginLeft:5,fontWeight:700,color:item.sizeDelta>0?'var(--diff-add)':'var(--diff-rem)'}}>
+              <span className="hist-file-size-delta" style={{color:item.sizeDelta>0?'var(--diff-add)':'var(--diff-rem)'}}>
                 ({item.sizeDelta>0?'+':''}{formatBytes(item.sizeDelta)})
               </span>
             )}
@@ -832,27 +829,21 @@ const FileChangeCard = ({ item, kind, folderPath, onRefresh }) => {
   );
 };
 
-// ─── Detail section heading ───────────────────────────────────────────────────
+// ─── Detail section heading — same tick language as .ctrl-card-section, ───────
+// ─── parametrised by the semantic add/rem/mod colour (Role 3, not --tab-color) ─
 
 const SectionTitle = ({ label, color, count }) => (
-  <h3 className="hist-detail-section-title">
+  <div className="hist-section-label" style={{ '--section-c': color }}>
     {label}
-    {count !== undefined && (
-      <span style={{
-        fontSize:'0.6rem', padding:'1px 8px',
-        background:`${color}18`, color,
-        border:`1px solid ${color}30`,
-        marginLeft:8, fontWeight:600,
-      }}>{count}</span>
-    )}
-  </h3>
+    {count !== undefined && <span className="hist-section-count">{count}</span>}
+  </div>
 );
 
 // ─── SnapshotRestorePanel — used for tabs that skip LCS diff (e.g. treemap) ──
 // Shows a summary of what changed by name/size and a single "Restore" button
 // that writes ALL before.files back to disk and repacks.
 
-const SnapshotRestorePanel = ({ entry, accentColor, onRefresh }) => {
+const SnapshotRestorePanel = ({ entry, onRefresh }) => {
   const { summary, before } = entry;
   const folder = entry.before?.folderPath ?? entry.after?.folderPath ?? null;
   const [restoreState, setRestoreState] = useState('idle'); // idle|confirm|running|done|error
@@ -946,15 +937,15 @@ const SnapshotRestorePanel = ({ entry, accentColor, onRefresh }) => {
       {/* Restore block */}
       {folder && (
         <div className="hist-detail-section">
-          <SectionTitle label="Restore Snapshot" color={accentColor}/>
-          <div className="hist-info-card" style={{marginBottom: 12}}>
+          <SectionTitle label="Restore Snapshot" color="var(--tab-color)"/>
+          <div className="hist-info-card hist-info-card--gap">
             <span className="hist-info-icon">i</span>
             <span className="hist-info-text">
               Restores <strong>all</strong> Lua files from this snapshot back to disk and repacks the .scmap.
               Binary files (DDS, RAW) are not affected. Line-by-line editing is not available for TreeMap snapshots.
             </span>
           </div>
-          <div className="hist-undo-bar" style={{marginTop: 0}}>
+          <div className="hist-undo-bar hist-undo-bar--flush">
             {restoreState === 'idle' && (
               <button className="hist-undo-bar-btn" onClick={handleRestore}>
                 <span className="hist-undo-bar-icon">↩</span>
@@ -994,7 +985,7 @@ const SnapshotRestorePanel = ({ entry, accentColor, onRefresh }) => {
   );
 };
 
-// ─── Entry detail panel (right column content) ───────────────────────────────
+// ─── Entry detail panel (aside content) ───────────────────────────────────────
 
 const EntryDetail = ({ entry, accentColor, onRefresh }) => {
   const { diff, summary, mapName, timestamp, tabId } = entry;
@@ -1005,8 +996,8 @@ const EntryDetail = ({ entry, accentColor, onRefresh }) => {
   const isSnapshotRestoreMode = diff === null;
 
   return (
-    <>
-      {/* Header — mirrors .cpt-detail-header */}
+    <div className="hist-detail">
+      {/* Header */}
       <div className="hist-detail-header">
         <div className="hist-detail-dot" style={{background:accentColor, boxShadow:`0 0 10px ${accentColor}`}}/>
         <div className="hist-detail-info">
@@ -1019,7 +1010,7 @@ const EntryDetail = ({ entry, accentColor, onRefresh }) => {
             {(summary.added??0)>0    && <span className="hist-summary-pill add">+{summary.added} added</span>}
             {(summary.removed??0)>0  && <span className="hist-summary-pill rem">-{summary.removed} removed</span>}
             {(summary.modified??0)>0 && <span className="hist-summary-pill mod">~{summary.modified} modified</span>}
-            {total===0 && <span style={{fontSize:'0.72rem',color:'rgba(255,255,255,0.2)',fontFamily:'Poppins,sans-serif'}}>No scmap changes</span>}
+            {total===0 && <span className="hist-detail-nochange">No scmap changes</span>}
           </div>
         </div>
 
@@ -1030,7 +1021,7 @@ const EntryDetail = ({ entry, accentColor, onRefresh }) => {
 
       {/* Snapshot-restore mode: no line diffs, just restore button */}
       {isSnapshotRestoreMode ? (
-        <SnapshotRestorePanel entry={entry} accentColor={accentColor} onRefresh={onRefresh}/>
+        <SnapshotRestorePanel entry={entry} onRefresh={onRefresh}/>
       ) : (
       /* Scrollable sections — normal diff mode */
       <div className="hist-detail-scroll">
@@ -1064,7 +1055,7 @@ const EntryDetail = ({ entry, accentColor, onRefresh }) => {
 
         {(diff.unchanged??[]).length > 0 && (
           <div className="hist-detail-section">
-            <SectionTitle label="Unchanged" color="rgba(255,255,255,0.2)" count={diff.unchanged.length}/>
+            <SectionTitle label="Unchanged" color="var(--ink-22)" count={diff.unchanged.length}/>
             <div className="hist-unchanged-pills">
               {diff.unchanged.map(f => (
                 <span key={f.name} className="hist-unchanged-pill">{f.name}</span>
@@ -1084,204 +1075,13 @@ const EntryDetail = ({ entry, accentColor, onRefresh }) => {
 
       </div>
       )}
-    </>
-  );
-};
-
-
-// ─── Help Modal ───────────────────────────────────────────────────────────────
-
-const HIST_COLOR       = '#FF8AFF';
-const HIST_GLOW        = 'rgba(255,138,255,0.35)';
-const HIST_GLOW_STRONG = 'rgba(255,138,255,0.6)';
-
-const HIST_HELP_TABS = [
-  { id: 'main',     label: '⊞ Interface Guide' },
-  { id: 'advanced', label: '⚙ Advanced Guide'  },
-];
-
-// ── Info cards for every clickable element in the UI replica ─────────────────
-const HIST_INFO = {
-
-  search: {
-    title: 'Search',
-    desc: 'Filters the snapshot list in real time. Type any part of a map name or a tab name (e.g. "kaali", "Props", "Wreckages") and the list updates instantly to show only matching entries.',
-    details: [
-      ['Matches', 'Map name and tab name — both fields are searched'],
-      ['Case',    'Case-insensitive — "kaali" matches "Kaali"'],
-      ['Clear',   'Delete the text to show all entries again'],
-    ],
-    tip: 'If you are looking for changes from a specific tab, type the tab name directly — it is faster than using the filter pills.',
-  },
-
-  filterpills: {
-    title: 'Tab Filter Pills',
-    desc: 'Narrows the snapshot list to show only entries that came from a specific toolkit tab. Only tabs that actually have saved snapshots appear as pills — tabs with no history are hidden.',
-    details: [
-      ['"All" pill',    'Shows every snapshot from every tab, sorted newest first'],
-      ['Colored pills', 'Each tab has its own accent color — the active pill glows'],
-      ['Clear button',  'Only visible when a specific tab is selected (not "All")'],
-    ],
-    tip: 'When "All" is active, each entry card shows a colored badge telling you which tab generated it.',
-  },
-
-  entrycard: {
-    title: 'Snapshot Entry Card',
-    desc: 'Each card represents one complete generate run. It shows the map name, the exact timestamp, and colored chips counting how many files changed. Clicking a card loads the full diff in the right panel.',
-    details: [
-      ['Map name',    'Derived from the scmap folder name'],
-      ['Timestamp',   'Date and time down to the second (DD.MM.YY HH:MM:SS)'],
-      ['+N chip',     'Files added — green'],
-      ['-N chip',     'Files removed — red'],
-      ['~N chip',     'Files modified — amber'],
-      ['"no changes"','Shown in faint text when the generation produced zero file changes'],
-    ],
-    tip: 'A card showing only "no changes" means you ran Generate but the output files were bit-for-bit identical to before — usually because nothing in the settings changed.',
-  },
-
-  clearhistory: {
-    title: 'Clear History',
-    desc: 'Removes all snapshots for the currently selected tab. Requires a confirmation step — you have to click "Yes, clear" to confirm. The action cannot be undone.',
-    details: [
-      ['Scope',     'Clears only the tab currently selected in the filter pills'],
-      ['"All" view', 'No clear button — select a specific tab first'],
-      ['Persistent', 'History is saved to disk — clearing removes it permanently'],
-    ],
-    tip: 'There is no bulk "clear all" option. If you need to clear everything, select each tab individually and clear them one at a time.',
-  },
-
-  detailheader: {
-    title: 'Detail Header',
-    desc: 'Shows the summary information for the selected snapshot: map name, timestamp, folder path, summary pills, and the source tab badge.',
-    details: [
-      ['Dot color',    'Matches the accent color of the tab that generated this snapshot'],
-      ['Folder path',  'The folder on disk where the scmap files live'],
-      ['Summary pills','Quick count of added / removed / modified files for this snapshot'],
-      ['Tab badge',    'Shows which toolkit tab triggered this snapshot (e.g. "Wreckages")'],
-    ],
-    tip: 'The folder path in the header is the same path that the Lua editor uses to save files — if this path is missing, the Save & Repack button will be inactive.',
-  },
-
-  filecard: {
-    title: 'File Change Card',
-    desc: 'Each row represents one file that changed in this snapshot. The row shows the filename, the file category label, the before/after size, and action hints. Clicking opens the content view.',
-    details: [
-      ['Lua files',   'Click to open the full-screen split editor — left pane = before (read-only), right pane = after (editable)'],
-      ['Binary files','Click to expand a size comparison — no text diff available for .dds or .raw'],
-      ['Text files',  'Click to expand an inline side-by-side diff'],
-      ['↩ Undo',      'Appears on modified Lua files — restores the before-state content to disk and repacks'],
-    ],
-    tip: 'Binary files (DDS, RAW) can only show size changes — the actual pixel data is not diffed. If a DDS file shows a size delta of 0 but you know it changed, it was re-saved at identical file size.',
-  },
-
-  diffview: {
-    title: 'Side-by-Side Diff',
-    desc: 'Shows exactly which lines changed between before and after. The diff is computed using a line-level LCS algorithm, with a secondary character-level diff applied to lines that were replaced (one removed + one added at the same position).',
-    details: [
-      ['Left pane',   'Before — removed lines highlighted in red'],
-      ['Right pane',  'After — added lines highlighted in green'],
-      ['Equal lines', 'Shown in both panes, dimmed'],
-      ['Hatched cell','The other side has a line here, but this side does not'],
-      ['Char diff',   'Red strikethrough = removed chars within a line; green bg = added chars'],
-      ['Context',     'By default ±2 lines around each change — click "show all N lines" to expand'],
-    ],
-    tip: 'The diff toolbar shows "+N lines / -N lines" counts. Click "show all N lines" to see the full file with all equal lines visible.',
-  },
-
-  luaeditor: {
-    title: 'Lua Editor — Split View',
-    desc: 'A full-screen editor that opens when you click a .lua file. Split into a read-only before pane on the left and an editable after pane on the right. Both panes scroll in sync.',
-    details: [
-      ['Left pane (Before)', 'Read-only. Shows the file as it was before the generation. Removed lines have a red bar in the gutter.'],
-      ['Right pane (After)', 'Editable. Fully live — type directly into it. Added lines have a green bar in the gutter.'],
-      ['Syntax highlight',   'Keywords, strings, numbers, comments, operators — all tokenised client-side'],
-      ['Scroll sync',        'Scrolling either pane moves both simultaneously'],
-      ['Save & Repack',      'Writes the edited content to disk and re-packs the scmap folder automatically'],
-      ['ESC / click outside','Closes the editor. Unsaved changes are lost.'],
-    ],
-    tip: 'The editor uses virtualised rendering — even files with 10,000+ lines open instantly. Only the lines near the viewport are actually rendered.',
-  },
-
-  savepack: {
-    title: 'Save & Repack',
-    desc: 'Writes your edited Lua content back to disk and immediately re-packs the entire scmap folder into a fresh .scmap binary. Two steps happen in sequence — first the file write, then the scmap-pack IPC call.',
-    details: [
-      ['Active when',    'You have made at least one change in the right (After) pane'],
-      ['Step 1',         'Writes edited content to the .lua file path using write-file IPC'],
-      ['Step 2',         'Calls scmap-pack on the parent folder — same as clicking ⬆ Pack in the SCMAP Tool'],
-      ['On success',     'Button label changes to "saved & repacked" briefly'],
-      ['On failure',     'Error message shown at top of editor with exact reason'],
-      ['Inactive when',  'folderPath is null — the file path is unknown and the save cannot target a location'],
-    ],
-    tip: 'After saving, the new snapshot created by Save & Repack appears in the History list under the "History" source tab — so you can always compare your manual edits against the original.',
-  },
-
-  unchanged: {
-    title: 'Unchanged Files',
-    desc: 'Files that were identical before and after the generation are listed here as compact pills instead of full rows. This keeps the detail view focused on what actually changed.',
-    details: [
-      ['Pill format',  'Just the filename — no size, no diff, no actions'],
-      ['Still tracked', 'These files ARE in the snapshot — they just produced no diff'],
-    ],
-    tip: 'A high number of unchanged files alongside zero modified files usually means the generation ran but found no setting changes to apply — check if your configuration actually changed before generating.',
-  },
-};
-
-// ── Info panel component ──────────────────────────────────────────────────────
-function HistInfoPanel({ sel }) {
-  return (
-    <div className="help-adv-layout" style={{ padding: 0 }}>
-      <div className="help-adv-hero" style={{ marginBottom: '24px' }}>
-        <div className="help-adv-hero-content">
-          <h2 className="help-adv-hero-title" style={{ fontSize: '1.6rem' }}>{sel.title}</h2>
-          <p className="help-adv-hero-desc">{sel.desc}</p>
-        </div>
-      </div>
-      <div className="help-adv-structure">
-        <h3 className="help-adv-section-header">
-          <span className="help-adv-section-num">01</span>Details
-        </h3>
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', padding: '20px 24px', marginTop: '24px' }}>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {sel.details.map(([label, value], i) => (
-              <li key={i} style={{ display: 'flex', gap: '12px', fontSize: '0.88rem', lineHeight: 1.6 }}>
-                <strong style={{ color: HIST_COLOR, minWidth: '150px', flexShrink: 0 }}>{label}:</strong>
-                <span style={{ color: 'rgba(255,255,255,0.6)' }}>{value}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      <div className="help-adv-note" style={{ marginTop: '16px' }}>
-        <strong>Tip: </strong>{sel.tip}
-      </div>
     </div>
   );
-}
+};
 
-// ── Clickable wrapper ─────────────────────────────────────────────────────────
-function HSel({ id, sel, setSel, children, style, className }) {
-  const active = sel === id;
-  return (
-    <div
-      className={className}
-      onClick={e => { e.stopPropagation(); setSel(active ? null : id); }}
-      style={{
-        cursor: 'pointer',
-        outline: active ? `2px solid ${HIST_COLOR}` : '2px solid transparent',
-        outlineOffset: '2px',
-        boxShadow: active ? `0 0 18px ${HIST_GLOW}` : 'none',
-        transition: 'outline 0.15s ease, box-shadow 0.15s ease',
-        ...style,
-      }}
-    >{children}</div>
-  );
-}
+// ─── Main HistoryTab component ─────────────────────────────────────────────────
 
-
-// ── Main HistoryTab component ─────────────────────────────────────────────────
-
-function HistoryTab({ settings, shared }) {
+function HistoryTab() {
   const api = window.electronAPI;
 
   // ── State ─────────────────────────────────────────────────────────────────
@@ -1342,7 +1142,7 @@ function HistoryTab({ settings, shared }) {
     () => allEntries.find(e => e.id === selectedId) ?? null,
     [allEntries, selectedId]
   );
-  const accentColor = selectedEntry ? (TAB_COLORS[selectedEntry.tabId] || HIST_COLOR) : HIST_COLOR;
+  const accentColor = selectedEntry ? (TAB_COLORS[selectedEntry.tabId] || 'var(--tab-color)') : 'var(--tab-color)';
 
   // ── Clear history ─────────────────────────────────────────────────────────
   const handleClear = useCallback(async () => {
@@ -1366,10 +1166,37 @@ function HistoryTab({ settings, shared }) {
     }
   }, [clearState, allEntries, activeTab, refresh]);
 
-  return (
-    <div className="hist-tab">
+  const sectionMeta = {
+    id: 'archive', index: '01', label: 'History',
+    desc: 'Every recorded generation, browsable and reversible.',
+  };
 
-      {/* Help modal */}
+  // ── Aside (selected snapshot detail) ───────────────────────────────────────
+  const asideSlot = selectedEntry ? (
+    <EntryDetail
+      key={selectedEntry.id}
+      entry={selectedEntry}
+      accentColor={accentColor}
+      onRefresh={refresh}
+    />
+  ) : (
+    <div className="hist-empty-state">
+      <div className="hist-empty-icon">⟵</div>
+      <div className="hist-empty-title">Select a snapshot</div>
+      <div className="hist-empty-hint">Click any entry on the left to view its file changes.</div>
+    </div>
+  );
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  return (
+    <div className="hist-tab trace-tab">
+
+      <button
+        className="help-btn"
+        onClick={() => { setShowHelp(h => !h); setHelpSelected(null); }}
+        title="Help Guide"
+      >?</button>
+
       {showHelp && (
         <HistoryHelpModal
           onClose={() => setShowHelp(false)}
@@ -1380,149 +1207,124 @@ function HistoryTab({ settings, shared }) {
         />
       )}
 
-      <div className="hist-grid">
+      <TabLayout
+        sections={[sectionMeta]}
+        activeSection="archive"
+        onSelect={() => {}}
+        controlsWidth="half"
+        navLabel="History console navigation"
+        asideSlot={asideSlot}
+        asideCaption={selectedEntry ? 'SNAPSHOT' : 'DIFF VIEWER'}
+      >
+        <div className="ctrl-col">
 
-        {/* ── LEFT COLUMN ────────────────────────────────────────────────── */}
-        <div className="hist-left-col">
+          {/* Filter block */}
+          <div className="ctrl-block">
+            <div className="ctrl-subtitle">Snapshots</div>
+            <div className="ctrl-content">
+              <div className="ctrl-field">
+                <input
+                  className="ctrl-input ctrl-input--text"
+                  placeholder="Filter by map name or tab…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
 
-          {/* Filter + Search card */}
-          <div className="hist-card" style={{ padding: '24px 28px', marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <span className="hist-section-title" style={{ fontSize: '1rem', margin: 0 }}>
-                <span className="hist-section-icon small">⏱</span>
-                History
-              </span>
-              <button className="help-btn" onClick={() => setShowHelp(h => !h)} title="Help">?</button>
-            </div>
-
-            {/* Search */}
-            <input
-              className="hist-search-input"
-              placeholder="Filter by map name or tab…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-
-            {/* Tab filter pills */}
-            <div className="hist-filter-row" style={{ marginTop: 12 }}>
-              <button
-                className={`hist-filter-pill${activeTab === 'all' ? ' active' : ''}`}
-                onClick={() => { setActiveTab('all'); setClearState('idle'); }}
-              >All</button>
-              {tabsWithHistory.map(tabId => (
+              <div className="hist-filter-row">
                 <button
-                  key={tabId}
-                  className={`hist-filter-pill${activeTab === tabId ? ' active' : ''}`}
-                  style={activeTab === tabId ? { '--hist-color': TAB_COLORS[tabId] || HIST_COLOR } : {}}
-                  onClick={() => { setActiveTab(tabId); setClearState('idle'); setSelectedId(null); }}
-                >{TAB_LABELS[tabId] || tabId}</button>
-              ))}
-            </div>
-
-            {/* Clear history row — only when a specific tab is selected */}
-            {activeTab !== 'all' && (
-              <div className="hist-clear-row" style={{ marginTop: 12 }}>
-                {clearState === 'idle' && (
-                  <button className="hist-clear-btn" onClick={handleClear}>Clear history</button>
-                )}
-                {clearState === 'confirm' && (
-                  <>
-                    <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginRight: 8 }}>
-                      Delete all {TAB_LABELS[activeTab] || activeTab} history?
-                    </span>
-                    <button className="hist-clear-yes" onClick={handleClear}>Yes, clear</button>
-                    <button className="hist-clear-no" onClick={() => setClearState('idle')}>Cancel</button>
-                  </>
-                )}
+                  className={`hist-filter-pill${activeTab === 'all' ? ' active' : ''}`}
+                  onClick={() => { setActiveTab('all'); setClearState('idle'); }}
+                >All</button>
+                {tabsWithHistory.map(tabId => (
+                  <button
+                    key={tabId}
+                    className={`hist-filter-pill${activeTab === tabId ? ' active' : ''}`}
+                    style={{ '--pill-c': TAB_COLORS[tabId] || 'var(--tab-color)' }}
+                    onClick={() => { setActiveTab(tabId); setClearState('idle'); setSelectedId(null); }}
+                  >{TAB_LABELS[tabId] || tabId}</button>
+                ))}
               </div>
-            )}
-          </div>
 
-          {/* Entry list card */}
-          <div className="hist-card" style={{ padding: '20px 0', marginBottom: 0 }}>
-            {filtered.length === 0 ? (
-              <div className="hist-empty-state">
-                <div className="hist-empty-icon">⏱</div>
-                <div className="hist-empty-title">No history yet</div>
-                <div className="hist-empty-hint">
-                  {search ? 'No entries match your search.' : 'Run a generation to record your first snapshot.'}
-                </div>
-              </div>
-            ) : (
-              <div className="hist-entry-list">
-                {filtered.map(entry => {
-                  const color   = TAB_COLORS[entry.tabId] || HIST_COLOR;
-                  const isSel   = entry.id === selectedId;
-                  const sum     = entry.summary ?? {};
-                  const hasChg  = (sum.added??0) + (sum.removed??0) + (sum.modified??0) > 0;
-                  return (
-                    <div
-                      key={entry.id}
-                      className={`hist-entry-card${isSel ? ' selected' : ''}`}
-                      onClick={() => setSelectedId(isSel ? null : entry.id)}
-                    >
-                      <div className="hist-entry-header">
-                        <div
-                          className="hist-entry-dot"
-                          style={{
-                            background: isSel ? color : 'transparent',
-                            border: `1.5px solid ${isSel ? color : 'rgba(255,255,255,0.12)'}`,
-                            boxShadow: isSel ? `0 0 8px ${color}` : 'none',
-                          }}
-                        />
-                        <div className="hist-entry-info">
-                          <span className="hist-entry-map">{entry.mapName || 'Unknown'}</span>
-                          <span className="hist-entry-ts">{formatTs(entry.timestamp)}</span>
-                          <div className="hist-entry-badges">
-                            {!isSel && (
-                              <span style={{
-                                fontSize: '0.62rem', padding: '1px 7px',
-                                background: `${color}18`, color,
-                                border: `1px solid ${color}30`,
-                                borderRadius: 4, fontWeight: 600,
-                              }}>{TAB_LABELS[entry.tabId] || entry.tabId}</span>
-                            )}
-                            {hasChg ? (
-                              <>
-                                {(sum.added   ?? 0) > 0 && <span className="hist-entry-chip add">+{sum.added}</span>}
-                                {(sum.removed ?? 0) > 0 && <span className="hist-entry-chip rem">-{sum.removed}</span>}
-                                {(sum.modified?? 0) > 0 && <span className="hist-entry-chip mod">~{sum.modified}</span>}
-                              </>
-                            ) : (
-                              <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.2)' }}>no changes</span>
-                            )}
-                          </div>
-                        </div>
+              {/* Clear history — only when a specific tab is selected */}
+              {activeTab !== 'all' && (
+                <>
+                  {clearState === 'idle' && (
+                    <button className="ctrl-btn-danger" onClick={handleClear}>Clear {TAB_LABELS[activeTab] || activeTab} History</button>
+                  )}
+                  {clearState === 'confirm' && (
+                    <div className="hist-undo-bar-confirm hist-undo-bar-confirm--flush">
+                      <span className="hist-undo-bar-confirm-msg">
+                        <span className="hist-undo-bar-confirm-icon">⚠</span>
+                        Delete all {TAB_LABELS[activeTab] || activeTab} history? This cannot be undone.
+                      </span>
+                      <div className="hist-undo-bar-confirm-actions">
+                        <button className="hist-undo-bar-yes" onClick={handleClear}>Yes, clear</button>
+                        <button className="hist-undo-bar-no"  onClick={() => setClearState('idle')}>Cancel</button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* ── RIGHT COLUMN ───────────────────────────────────────────────── */}
-        <div className="hist-right-col">
-          <div className="hist-card hist-card-fill">
-            {selectedEntry ? (
-              <EntryDetail
-                key={selectedEntry.id}
-                entry={selectedEntry}
-                accentColor={accentColor}
-                onRefresh={refresh}
-              />
-            ) : (
-              <div className="hist-empty-state" style={{ flex: 1, justifyContent: 'center' }}>
-                <div className="hist-empty-icon">⟵</div>
-                <div className="hist-empty-title">Select a snapshot</div>
-                <div className="hist-empty-hint">Click any entry on the left to view its file changes.</div>
-              </div>
-            )}
+          {/* Entry list block */}
+          <div className="ctrl-block">
+            <div className="ctrl-subtitle">Entries<span className="hist-entries-count">{filtered.length}</span></div>
+            <div className="ctrl-content ctrl-content--flush">
+              {filtered.length === 0 ? (
+                <div className="hist-empty-state hist-empty-state--inline">
+                  <div className="hist-empty-icon">⏱</div>
+                  <div className="hist-empty-title">No history yet</div>
+                  <div className="hist-empty-hint">
+                    {search ? 'No entries match your search.' : 'Run a generation to record your first snapshot.'}
+                  </div>
+                </div>
+              ) : (
+                <div className="hist-entry-list">
+                  {filtered.map(entry => {
+                    const color   = TAB_COLORS[entry.tabId] || 'var(--tab-color)';
+                    const isSel   = entry.id === selectedId;
+                    const sum     = entry.summary ?? {};
+                    const hasChg  = (sum.added??0) + (sum.removed??0) + (sum.modified??0) > 0;
+                    return (
+                      <button
+                        type="button"
+                        key={entry.id}
+                        className={`station hist-entry${isSel ? ' active' : ''}`}
+                        onClick={() => setSelectedId(isSel ? null : entry.id)}
+                      >
+                        <div className="hist-entry-row">
+                          <span className="hist-entry-map">{entry.mapName || 'Unknown'}</span>
+                          <span className="hist-entry-ts">{formatTs(entry.timestamp)}</span>
+                        </div>
+                        <div className="hist-entry-badges">
+                          {!isSel && (
+                            <span className="hist-source-badge" style={{ '--pill-c': color }}>
+                              {TAB_LABELS[entry.tabId] || entry.tabId}
+                            </span>
+                          )}
+                          {hasChg ? (
+                            <>
+                              {(sum.added   ?? 0) > 0 && <span className="hist-stat-chip add">+{sum.added}</span>}
+                              {(sum.removed ?? 0) > 0 && <span className="hist-stat-chip rem">-{sum.removed}</span>}
+                              {(sum.modified?? 0) > 0 && <span className="hist-stat-chip mod">~{sum.modified}</span>}
+                            </>
+                          ) : (
+                            <span className="hist-entry-nochange">no changes</span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-      </div>
+        </div>
+      </TabLayout>
     </div>
   );
 }

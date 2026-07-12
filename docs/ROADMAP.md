@@ -66,8 +66,8 @@ Sortiert nach **Hebel = Wert ÷ (Risiko × Abhängigkeit)**.
 - [x] **Tab-Farb-Registry zentralisiert**: `Shared/DesignSystem/tokens.css` §11
   PER-TAB ACCENT REGISTRY ist die einzige Quelle; `Core/Home/Data/toolRegistry.js`
   (Nav-Metadaten) + `Core/tabRoutes.jsx` (Render-Wiring) referenzieren sie.
-- [ ] **Feature #3 — Banner-Akzent folgt Hover-Tab** (Homepage). Nicht erneut
-  verifiziert seit 15.06. — Status unklar, vor Weiterarbeit kurz gegenchecken.
+- [x] **Feature #3 — Banner-Akzent folgt Hover-Tab** (Homepage). Bestätigt
+  2026-07-11 — Banner-Glow wechselt beim Hover über einen Tab korrekt die Farbe.
 
 ### Phase 1 — Logik-Konsolidierung (entlastet jede spätere Tab-Migration)
 - [x] `Shared/MapLogic` (`usePersistentState`, `useMapInfo`, `useScmapPreview`,
@@ -76,10 +76,42 @@ Sortiert nach **Hebel = Wert ÷ (Risiko × Abhängigkeit)**.
   Ein separater `useEmitterCategories`-Hook wurde **nicht** gebaut; Kategorie-Matching
   läuft stattdessen über `EmitterToggleBlock` direkt in der Entity-Karte (Declare-
   Source/Inherit-Modell) — siehe `TAB_CONTRACT.md §2`.
-- [ ] Adoption auf die restlichen Tabs (Phase 2) ausweiten — dort größtenteils noch
-  offen; nicht erneut verifiziert.
-- [ ] Gemeinsame, noch fehlende Utilities identifizieren (Library-Loader,
-  README-Bau, Folder-Picker-Bestätigung) und nach `Shared/` ziehen.
+- [x] **Adoption auf alle Tabs ausgeweitet** (2026-07-11) — repo-weiter Grep auf
+  den rohen `read-map-info`-IPC-Call (der zuverlässigste Marker für eine
+  `useMapInfo`-Duplikation) fand nur noch 2 Tabs mit eigener Logik statt
+  Shared-Hooks: `MapResizer` (11 handgeschriebene `useState`+`onSharedChange`-Paare
+  statt `usePersistentState`, eigener `read-map-info`-Fetch statt `useMapInfo`)
+  und `AdaptiveMapHelper` (eigener SCMAP-Preview- + Map-Info-Fetch statt
+  `useMapInfo`/`useScmapPreview`). Beide umgebaut, dazu `SkyboxGenerator`s 3 rohe
+  `write-file`/`read-file`-Calls auf `writeFile`/`readFile` umgestellt. Alle
+  anderen Tabs waren bereits sauber oder hatten dokumentierte, legitime
+  Ausnahmen (z. B. Trees' `propCards` — nicht-serialisierbare Image-Objekte,
+  kommentiert im Code; Trees/RockErosion chunked props.lua statt
+  `injectPropsLua`, Absicht wegen Multi-File-Split). Live im Preview verifiziert
+  (Map Resizer, Adaptive Map Helper, Skybox Generator — keine Konsolenfehler).
+- [x] **Gemeinsame Utilities identifiziert und konsolidiert** (2026-07-11):
+  - **README-Bau** — zentraler `utils/readmeGenerator.js` existierte bereits
+    und wurde von 7 Tabs genutzt; `CustomProps` und `AdaptiveMapHelper` bauten
+    ihr README noch komplett von Hand (eigene Box-Zeichnung, eigene Divider).
+    Beide umgebaut auf `generateReadme`/`writeReadme`.
+  - **Folder-Picker-Bestätigung** — kein Konsolidierungsfall: die
+    `selectEmitterBpFolder`/`selectMapsFolder`-Funktionen in `Wreckage`/`Props`
+    waren totes Legacy-Code (nirgends mehr verdrahtet, kein `onClick` referenziert
+    sie) — Emitter-Pfad wird inzwischen hardcodiert relativ zum App-Root gesetzt,
+    Maps-Ordner kommt aus dem Settings-Tab. Ersatzlos aus beiden Tabs entfernt,
+    kein neuer Shared-Helper nötig.
+  - **Library-Loader** — geprüft, **keine echte Duplikation**: `SkyboxLibrary`
+    lädt Community-Assets von GitHub (`skybox-library-load/-fetch`, eigener
+    Disk-Cache in `skybox.js`), während `UnitLibrary`/`PropsLibrary` auf
+    lokalen Spieldaten arbeiten und `EmitterLibrary` einen separaten
+    `library-load`-Kanal (`scanner.js`, Basis-Emitter + `scan-map-emitters`
+    für Custom) nutzt — strukturell unterschiedliche Systeme, kein
+    gemeinsamer Loader zum Extrahieren. Falls Props/Emitter künftig auch
+    community-geteilte Assets browsbar machen sollen (analog zu Custom-
+    Skyboxen), ist das ein Feature-Gap, keine Code-Duplikation — separates
+    Thema, nicht Teil dieser Konsolidierung.
+  - Alle Änderungen im Preview gegengecheckt (Wreckage, Props, CustomProps,
+    AdaptiveMapHelper — sauberer Mount, keine Konsolenfehler).
 
 ### Phase 2 — UI-Migration aller Tabs (Feature #1 + #2, das große Stück)
 Pro Tab nach Contract: **`TabLayout`**-Shell (vier Varianten X/Y/Z/W, siehe
@@ -89,14 +121,49 @@ Pro Tab nach Contract: **`TabLayout`**-Shell (vier Varianten X/Y/Z/W, siehe
 
 - [x] **Placement — Wreckage, Props, Emitter**: fertig, Gold-Standard, verifiziert
   2026-07-08. `layoutMode="x"` (Controls + Aside/MapPreview).
-- [ ] **Welle 1 (klein/formlastig)** — PreviewImage, Stars, History, Settings
-  → vsl. `layoutMode="y"` (Standby-Field statt Preview)
-- [ ] **Welle 2** — MapResizer, AdaptiveMapHelper, CoOp, Contributions
-  → gemischt `x·half` / `w` (AdaptiveMapHelper hat ein dominantes Canvas)
-- [ ] **Welle 3 (groß, viel State)** — RockErosion, Trees, SkyboxGenerator, CustomProps
-  → gemischt `x·fixed` / `z·parallel`
-- [ ] **Welle 4** — Library-Overlays + Guides visuell ans System angleichen
+- [x] **Welle 1 (klein/formlastig)** — PreviewImage, Stars, History auf `TabLayout`
+  verifiziert (2026-07-11, Grep + Preview-Mount-Check). **Settings** bewusst
+  **ausgenommen** — laut `docs/LAYOUTS.md` "Exempt from this system —
+  self-contained settings shell", keine `TabLayout`-Migration vorgesehen.
+- [x] **Welle 2** — MapResizer, AdaptiveMapHelper, Contributions auf `TabLayout`
+  verifiziert (2026-07-11). **CoOp/CoopVersioner** ist **kein echter Fall**:
+  `Tabs/CoOp/CoOp.jsx` (`CoopVersioner`) ist nirgends in `core/tabRoutes.jsx`,
+  `Navbar` oder `toolRegistry.js` referenziert — die Komponente ist unerreichbarer
+  Legacy-Code, kein navigierbarer Tab. Migration ergibt erst Sinn, wenn geklärt
+  ist, ob das Feature reaktiviert oder gelöscht wird (siehe Notiz unten).
+- [x] **Welle 3 (groß, viel State)** — RockErosion, Trees, SkyboxGenerator,
+  CustomProps auf `TabLayout` verifiziert (2026-07-11).
+- [x] **Welle 4a — Library-Overlays auf Design-Tokens migriert** (2026-07-11):
+  Alle 4 Overlays (`UnitLibrary`, `SkyboxLibrary`, `EmitterLibrary`,
+  `PropsLibrary`) durchgegangen, kleinste zuerst. Pro Datei behoben:
+  hartkodierte UI-Chrome-Farben (Weiß/Cyan/Orange) → `var(--ink-*)` bzw.
+  `var(--tab-color)`; neuer geteilter Token `--source-custom-color/-glow`
+  (`tokens.css`) ersetzt das in Props+Emitter identisch duplizierte `#f0a040`
+  für "Custom"-Kategorie-Markierung; Filter-Panel-§5-Verstoß (Surface+Border
+  gleichzeitig) in Props/Emitter behoben; "cheap count pills" (`.el-section-badge`,
+  `.pl-type-selected-badge`, `.sl-img-count`) auf reinen Text ohne Box reduziert
+  (Vorlage: `.ul-subcat-count`, das es schon richtig machte); Apply/Confirm-Buttons
+  auf Secondary-CTA-Spezifikation (Border in Akzentfarbe, kein Fill im
+  Ruhezustand) umgestellt; `PropsLibrary`s eigene `--tab-accent`-Variable auf
+  die System-Konvention `--tab-color`/`--tab-glow` umbenannt. Legitime
+  Datenfarben (Fraktionsfarben, Economy Mass/Energy/Time, UV/Cirrus-Layer)
+  bewusst unangetastet gelassen. Alle 4 im Preview gegengecheckt (Overlay öffnen,
+  Custom-Kategorie, Filter-Panel, Buttons — keine Konsolenfehler, Farben per
+  `preview_inspect` stichprobenartig bestätigt).
+  **Nicht gemacht** (bewusst außerhalb des Scopes, siehe Konsolidierungsnotiz):
+  keine Migration auf `EntityCard`/`EntityCardGrid` — strukturell zu
+  unterschiedliche Layouts (horizontale Fraktions-Karten vs. vertikale
+  Prop-Karten vs. Emitter-Liste vs. Skybox-Karten+Carousel), hohes
+  Risiko für wenig Nutzen.
+  **Fund dabei (nicht behoben, separates Ticket)**: `PropsLibrary.jsx` rendert
+  `<PropTextureEditor>`, aber importiert/definiert nur `TextureEditor` — die
+  Texture-Editor-Übergabe nach "Apply" wirft vermutlich einen ReferenceError.
+  Vorbestehender Bug, nicht durch diese Migration verursacht.
+- [ ] **Welle 4b — Guides** ist noch **kein echter Tab** — `core/tabRoutes.jsx`
+  rendert dafür nur einen `GuidesPlaceholder` ("Guides — SOON"); `GuideSection.jsx`
+  existiert als Datei, ist aber nicht verdrahtet. Bleibt offen.
 - [ ] **Cleanup** — `Tabs/HelpModals/` auflösen, sobald Phase 3 (unten) durch ist
+  — weiterhin korrekt offen, alle 13 Legacy-Help-Dateien noch vorhanden.
 
 Layout-Typ pro Tab/Sektion ist in `docs/LAYOUTS.md` "Tab Overview" vorgemerkt,
 gilt aber nur als Absichtserklärung, bis der jeweilige Tab tatsächlich migriert ist
@@ -121,6 +188,11 @@ gilt aber nur als Absichtserklärung, bis der jeweilige Tab tatsächlich migrier
   (Map laden → Preview → Platzieren → Generate → SCMAP-Repack **und** Raw-Lua).
 - [ ] Bekannte Risiko-Pfade gezielt prüfen: SCMAP unpack/pack, Mirror-Logik,
   Koordinaten-Parsing, Texture-Ops.
+- [ ] **Custom-Skybox-Rendering-Fix (Albedo)**: manche `.scmskybox`-Assets, die
+  über die SkyboxLibrary bereitgestellt werden, haben ein Rendering-Problem mit
+  ihrer Custom-Albedo-Textur. Ist spielseitig (wie SC das Skybox-Rendering
+  handhabt), kein Toolkit-Bug — User untersucht/fixt das selbst zu einem
+  späteren Zeitpunkt. Danach ggf. 1-2 weitere Custom-Skyboxen erstellen.
 
 ### Phase 5 — Security-Audit (Feature #6)
 Baseline ist gut; der Audit ist read-only und kann früh laufen. Fokus:

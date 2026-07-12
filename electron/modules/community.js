@@ -25,10 +25,10 @@ const { safeStorage } = require('electron');
 // ── Config ────────────────────────────────────────────────────────────────────
 // MAINTAINER_TOKEN: used for submissions from users WITHOUT a GitHub account.
 // Create a fine-grained PAT at github.com/settings/tokens with:
-//   - Repository: timmasalme/ForgeMapToolkit-Assets
+//   - Repository: ForgeMapToolKit/ForgeMapToolkit-Assets
 //   - Permissions: Contents (read+write), Pull requests (read+write)
 // Store it in userData/contrib_token.json (gitignored, never in source).
-const CONTRIB_OWNER        = 'timmasalme';
+const CONTRIB_OWNER        = 'ForgeMapToolKit';
 const CONTRIB_REPO         = 'ForgeMapToolkit-Assets';
 const CONTRIB_TOKEN_FILE   = path.join(app.getPath('userData'), 'contrib_token.json');
 const CONTRIB_AUTH_FILE    = path.join(app.getPath('userData'), 'contrib_auth.json');

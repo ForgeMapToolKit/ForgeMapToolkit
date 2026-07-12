@@ -257,7 +257,7 @@ function GuideImage({ src, alt, widthPct, widthPx, assetCache, setAssetCache }) 
         if (window.electronAPI?.invoke) {
           result = await window.electronAPI.invoke('read-guide-asset', src);
         } else {
-          const GITHUB_RAW = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/guides/assets';
+          const GITHUB_RAW = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/guides/assets';
           const url = `${GITHUB_RAW}/${src.replace(/\\/g, '/')}`;
           const res = await fetch(url);
           if (!res.ok) return;
@@ -381,7 +381,7 @@ function VideoClip({ src, widthPct, assetCache, setAssetCache }) {
         if (window.electronAPI?.invoke) {
           result = await window.electronAPI.invoke('read-guide-asset', src);
         } else {
-          const GITHUB_RAW = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/guides/assets';
+          const GITHUB_RAW = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/guides/assets';
           const url = `${GITHUB_RAW}/${src.replace(/\\/g, '/')}`;
           const res = await fetch(url);
           if (!res.ok) return;
@@ -521,7 +521,7 @@ function HtmlEmbedBlock({ src, widthPct, assetCache, setAssetCache }) {
           if (result?.content) text = result.content;
           else { setError(true); return; }
         } else {
-          const GITHUB_RAW = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/guides/assets';
+          const GITHUB_RAW = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/guides/assets';
           const res = await fetch(`${GITHUB_RAW}/${src}`);
           if (!res.ok) { setError(true); return; }
           text = await res.text();
@@ -837,7 +837,7 @@ function HtmlViewer({ htmlFile, onHeadingsReady }) {
 // ContentViewer — renders a single guide
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const GITHUB_PAGES_GUIDE_BASE = 'https://timmasalme.github.io/ForgeMapToolkit-Assets/guides/content';
+const GITHUB_PAGES_GUIDE_BASE = 'https://forgemaptoolkit.github.io/ForgeMapToolkit-Assets/guides/content';
 
 function ContentViewer({ guide, category, onHeadingsReady }) {
   const [loading,   setLoading]   = useState(true);
@@ -1138,7 +1138,7 @@ function CategoryThumbnail({ categoryId, color, guideThumb }) {
         if (window.electronAPI?.invoke) {
           result = await window.electronAPI.invoke('read-guide-asset', path);
         } else {
-          const url = `https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/guides/assets/${path}`;
+          const url = `https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/guides/assets/${path}`;
           const res = await fetch(url);
           if (!res.ok) return false;
           result = { type: 'img', src: url };
@@ -1154,7 +1154,7 @@ function CategoryThumbnail({ categoryId, color, guideThumb }) {
         if (window.electronAPI?.invoke) {
           result = await window.electronAPI.invoke('read-guide-asset', path);
         } else {
-          const url = `https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/guides/assets/${path}`;
+          const url = `https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/guides/assets/${path}`;
           const res = await fetch(url);
           if (!res.ok) return false;
           result = { type: 'svg', content: await res.text() };
@@ -2583,7 +2583,7 @@ function GuideEditor({ onClose }) {
 
   const htmlToMd = useCallback((html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    const GITHUB_RAW = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/guides/assets/';
+    const GITHUB_RAW = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/guides/assets/';
     const convert = (node) => {
       if (node.nodeType === Node.TEXT_NODE) return node.textContent;
       if (node.nodeType !== Node.ELEMENT_NODE) return '';

@@ -313,13 +313,50 @@ hidden until output exists.
 | AdaptiveMapHelperTab | TABLES | W | output | Header + code output |
 | PreviewImageTab | all | Z | parallel | Mapconfig + Preview (`align-self: start`) |
 | HistoryTab | all | X | half | Snapshots + Diff Viewer |
-| ContributionsTab | all | Z | exclusive | Single vs. Merged upload, 2nd Rail (Asset-Type) |
+| ContributionsTab | Upload | Z | exclusive | Single vs. Merged Folder (reactive dim, tab-computed — see below), 2nd Rail = Asset Type |
+| ContributionsTab | Download | W | canvas | Top bar (counts) + toolbar (type filter + search) + asset grid |
+| ContributionsTab | Leaderboard | W | output | Ranked contributor list / contributor profile drill-down |
 | SettingsTab | — | — | — | Exempt from this system — self-contained settings shell with its own internal layout. No `TabLayout`. |
 
-> Note (2026-07-08): only the `WreckageTab`/`PropsTab`/`EmitterTab` (→ Layout X ·
-> fixed) rows above are verified against shipped code. The rest of this table
-> reflects the intended assignment for tabs not yet migrated — treat as a plan,
-> not a confirmed fact, until that tab is actually on `TabLayout`. See
+> Note (2026-07-11): `WreckageTab`/`PropsTab`/`EmitterTab` (Layout X · fixed),
+> `ScmapTab`/`HistoryTab` (Layout X · half), and `ContributionsTab` (Layout Z ·
+> exclusive + Layout W · canvas/output, mixed per section on one `TabLayout`
+> instance by swapping `layoutMode` reactively) are verified against shipped
+> code. Building `ContributionsTab` surfaced four real gaps in
+> `TabLayout.jsx`/`layout.css` that are now fixed (all shared code, every
+> future Z/W tab benefits):
+> 1. Z·exclusive's dimming only engages when `activeGroup` is literally
+>    `'a'`/`'b'` — `secondRail` can safely be reused for an unrelated N-way
+>    selector (e.g. asset type) without dimming both columns.
+> 2. `secondRail` used to render as a horizontal nav row squeezed into the
+>    section header — it's now a real second sidepanel: a full-height
+>    vertical column next to the main console rail, matching the ASCII in
+>    the Z·exclusive section above (`MAIN RAIL | 2ND RAIL | GROUP A | GROUP
+>    B`). New wrapper markup: `LayoutZ` returns `.layout-z-outer` (flex row)
+>    containing `.layout-z-second-rail` + the original `.layout-z` column.
+> 3. Layout Z gained `headerExtra`/`footerExtra` — full-width slots
+>    above/below the two-column grid for content that belongs to neither
+>    group (an auth panel, a notes+submit row).
+> 4. `.layout-z-grid` used to be `flex:1; min-height:0` inside a hard-clipped
+>    (`overflow:hidden`) column — a tall `headerExtra`/`footerExtra` could
+>    squeeze the grid to ~0px with **no way to scroll to the rest**: the
+>    content wasn't gone, just unreachably clipped. `.layout-z` now scrolls
+>    as one unit (`overflow-y:auto`) and the grid sizes to its own content
+>    (CSS Grid's default row auto-sizing), same principle Layout X already
+>    uses for `.section-content`.
+> Also: `.workspace` was `display:flex` with no `flex-direction` (default
+> `row`) — anything passed via `toolbarSlot` rendered *beside* the rail
+> instead of stacked above it. Added `flex-direction: column`. Latent since
+> `toolbarSlot` had never shipped with real content before Contributions.
+>
+> Separately, note that *reactive* dimming ("no toggle — the active path
+> emerges from the first input") is NOT something `TabLayout` computes for
+> you — each tab derives its own `activeSide` from which fields have data
+> and applies its own dim class; `TabLayout`'s a/b dimming (point 1 above) is
+> the separate, narrower explicit-selection mechanism. The rest of this
+> table reflects the intended assignment for tabs not yet migrated —
+> treat as a plan, not a confirmed fact, until that tab is actually on
+> `TabLayout`. See
 > `docs/ROADMAP.md` Phase 2 for migration status.
 
 ---

@@ -26,7 +26,7 @@ const ASSETS_ROOT  = path.join(__dirname, '../../src/guides/assets');
 // Stored in userData so it survives app updates and is writable in packaged builds.
 const ASSET_CACHE_ROOT = path.join(app.getPath('userData'), 'guide_asset_cache');
 
-const ASSETS_RAW_BASE = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/guides/assets';
+const ASSETS_RAW_BASE = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/guides/assets';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Path safety — used everywhere a user-supplied path touches the filesystem
@@ -501,8 +501,8 @@ function wrapGuideHtml(bodyHtml, title = '') {
 <meta charset="UTF-8">
 <meta name="guide-format" content="forge-map-toolkit-v1">
 <title>${escHtml(title)}</title>
-<link rel="icon" href="https://timmasalme.github.io/ForgeMapToolkit-Assets/img/favicon.ico">
-<link rel="stylesheet" href="https://timmasalme.github.io/ForgeMapToolkit-Assets/guides/assets/guide-standalone.css">
+<link rel="icon" href="https://forgemaptoolkit.github.io/ForgeMapToolkit-Assets/img/favicon.ico">
+<link rel="stylesheet" href="https://forgemaptoolkit.github.io/ForgeMapToolkit-Assets/guides/assets/guide-standalone.css">
 ${hlCss}</head>
 <body class="gs-guide-body">
 ${bodyHtml}

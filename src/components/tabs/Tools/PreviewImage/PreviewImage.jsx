@@ -269,7 +269,6 @@ const PreviewImageTab = ({ settings }) => {
         sections={sections}
         activeSection={activeSection}
         onSelect={setActiveSection}
-        railStorageKey="previewimage-rail-pinned"
         navLabel="Preview image navigation"
         asideSlot={asideSlot}
         asideCaption={null}

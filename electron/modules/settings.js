@@ -67,7 +67,7 @@ const SETTINGS_FILE  = path.join(USER_DATA, 'settings.json');
 const LIBRARIES_FILE = path.join(USER_DATA, 'libraries.json');
 const CIVILIANS_FILE = path.join(USER_DATA, 'civilians_custom_presets.json');
 const SCMAP_DIR      = path.join(USER_DATA, 'scmap');
-const GITHUB_REPO    = 'timmasalme/ForgeMapToolkit';
+const GITHUB_REPO    = 'ForgeMapToolKit/ForgeMapToolkit';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SETTINGS

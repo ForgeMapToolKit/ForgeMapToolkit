@@ -363,7 +363,7 @@ for (const [filePath, file] of Object.entries(zip.files)) {
               if (lodAlbMatch) {
                 const lodN = lodAlbMatch[1];
                 if (!lodPreviewUrls[lodN]) {
-                  lodPreviewUrls[lodN] = `https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/props/${filename.replace(/\.dds$/i, '.png')}`;
+                  lodPreviewUrls[lodN] = `https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/props/${filename.replace(/\.dds$/i, '.png')}`;
                   log.debug(`  [PROP] ${propId}: LOD${lodN} -> ${lodPreviewUrls[lodN]}`);
                 }
               }
@@ -405,7 +405,7 @@ for (const [filePath, file] of Object.entries(zip.files)) {
           // All preview PNGs are flat in /props/ folder on GitHub
           const previewUrl = noPreview
             ? null
-            : `https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/props/${albedoForPreview}`;
+            : `https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/props/${albedoForPreview}`;
 
           result.props.push({
             id: propId, name: propName, helpText,
@@ -458,7 +458,7 @@ for (const [unitId, { file, normPath, scdFile: src }] of Object.entries(unitBpEn
 
   const faction = bpFaction || unitFaction(unitId);
 
-const previewUrl = `https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/units/${unitId.toUpperCase()}.png`;
+const previewUrl = `https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/units/${unitId.toUpperCase()}.png`;
 
 result.units.push({
   id:             unitId,
@@ -513,7 +513,7 @@ async function scanCustomEmitterFolder(folderPath, customTags) {
 async function scanNomadsFolder() {
   const result = { units: [] };
 
-  const RAW_BASE = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main';
+  const RAW_BASE = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main';
 
   // ── helper: HTTP GET → string ───────────────────────────────────────────────
   const httpGet = (url) => new Promise((resolve, reject) => {
@@ -535,7 +535,7 @@ async function scanNomadsFolder() {
   // Using the Git Trees API with recursive=1 — counts as 1 rate-limit hit total
   let bpPaths;
   try {
-    const treeUrl = 'https://api.github.com/repos/timmasalme/ForgeMapToolkit-Assets/git/trees/main?recursive=1';
+    const treeUrl = 'https://api.github.com/repos/ForgeMapToolKit/ForgeMapToolkit-Assets/git/trees/main?recursive=1';
     const { status, body } = await httpGet(treeUrl);
     if (status !== 200) {
       log.warn(`Nomads: Git Tree API returned ${status}, skipping Nomads scan`);
@@ -626,7 +626,7 @@ async function checkPreviewCoverage(units) {
   return new Promise(resolve => {
     const req = https.get({
       hostname: 'api.github.com',
-      path: '/repos/timmasalme/ForgeMapToolkit-Assets/contents/units',
+      path: '/repos/ForgeMapToolKit/ForgeMapToolkit-Assets/contents/units',
       headers: { 'User-Agent': 'forgemaptoolkit' },
     }, res => {
       let data = '';

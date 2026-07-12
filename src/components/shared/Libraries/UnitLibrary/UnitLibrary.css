@@ -116,11 +116,11 @@
 /* Hover: use faction color for glow background */
 .ul-faction-item:hover {
   background: var(--fs, var(--sheen-040));
-  color: var(--fc, rgba(255, 255, 255, 0.85));
+  color: var(--fc, var(--ink-85));
 }
 
 .ul-faction-item:hover .ul-faction-name {
-  color: var(--fc, rgba(255, 255, 255, 0.85));
+  color: var(--fc, var(--ink-85));
   text-shadow: 0 0 12px var(--fg, transparent);
 }
 
@@ -128,10 +128,10 @@
 .ul-faction-item.active {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--fc, #fff) 6%, transparent) 0%,
+    color-mix(in srgb, var(--fc, var(--ink-100)) 6%, transparent) 0%,
     transparent 100%
   );
-  color: var(--fc, #fff);
+  color: var(--fc, var(--ink-100));
 }
 
 /* Glowing left bar */
@@ -140,8 +140,8 @@
   position: absolute;
   left: 0; top: 6px; bottom: 6px;
   width: 2px;
-  background: var(--fc, #fff);
-  box-shadow: 0 0 8px var(--fg, rgba(255,255,255,0.5)),
+  background: var(--fc, var(--ink-100));
+  box-shadow: 0 0 8px var(--fg, var(--ink-50)),
               0 0 20px var(--fg, var(--ink-15));
   border-radius: 0 2px 2px 0;
 }
@@ -179,8 +179,8 @@
 .ul-faction-item:hover .ul-faction-count { color: var(--ink-28); }
 
 .ul-faction-item.active .ul-faction-name {
-  color: var(--fc, #fff);
-  text-shadow: 0 0 18px var(--fg, rgba(255,255,255,0.25));
+  color: var(--fc, var(--ink-100));
+  text-shadow: 0 0 18px var(--fg, var(--ink-25));
   font-weight: 700;
 }
 
@@ -245,8 +245,8 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--fc, #fff);
-  text-shadow: 0 0 28px var(--fg, rgba(255,255,255,0.15));
+  color: var(--fc, var(--ink-100));
+  text-shadow: 0 0 28px var(--fg, var(--ink-15));
 }
 
 .ul-header-right {
@@ -289,10 +289,10 @@
 }
 
 .ul-close-btn:hover {
-  background: rgba(255, 40, 40, 0.1);
-  border-color: rgba(255, 70, 70, 0.35);
-  color: #ff5555;
-  box-shadow: inset 0 0 14px rgba(255,0,0,0.08);
+  background: color-mix(in srgb, var(--status-err) 15%, transparent);
+  border-color: color-mix(in srgb, var(--status-err) 40%, transparent);
+  color: var(--status-err-bright);
+  box-shadow: inset 0 0 14px color-mix(in srgb, var(--status-err) 10%, transparent);
 }
 
 /* ── Toolbar ──────────────────────────────────────────────────────────────── */
@@ -320,7 +320,7 @@
   padding: 8px 38px 8px 38px;
   background: var(--sheen-028);
   border: 1px solid var(--line-medium);
-  color: #fff;
+  color: var(--ink-92);
   font-family: 'Poppins', sans-serif;
   font-size: 0.85rem;
   outline: none;
@@ -331,7 +331,7 @@
 .ul-search:focus {
   border-color: var(--ink-25);
   background: var(--sheen-045);
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 0 18px rgba(255,255,255,0.03);
+  box-shadow: 0 0 0 1px var(--line-medium), 0 0 18px var(--sheen-028);
 }
 
 .ul-search::placeholder {
@@ -373,7 +373,7 @@
   background: var(--surface-code);
   border-color: var(--ink-28);
   color: var(--ink-85);
-  box-shadow: 0 0 8px rgba(255,255,255,0.03);
+  box-shadow: 0 0 8px var(--sheen-028);
 }
 
 .ul-filter-btn:hover {
@@ -407,8 +407,6 @@
   padding: 9px 32px;
   background: var(--sheen-014);
   border: none;
-  border-top: 1px solid var(--sheen-028);
-  border-bottom: 1px solid var(--sheen-022);
   cursor: pointer;
   text-align: left;
   transition: background 0.15s ease;
@@ -424,7 +422,7 @@
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--ac, rgba(255,255,255,0.48));
+  color: var(--ac, var(--ink-45));
   padding-left: 13px;
   position: relative;
 }
@@ -488,15 +486,15 @@
 .ul-unit-card::before {
   content: '';
   position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
-  background: var(--hc, #fff);
-  box-shadow: 0 0 8px var(--hc, rgba(255,255,255,0.5));
+  background: var(--hc, var(--ink-100));
+  box-shadow: 0 0 8px var(--hc, var(--ink-50));
   opacity: 0;
   transition: opacity 0.18s ease;
 }
 
 .ul-unit-card:hover {
-  background: color-mix(in srgb, var(--hc, #fff) 5%, transparent);
-  border-color: color-mix(in srgb, var(--hc, #fff) 18%, transparent);
+  background: color-mix(in srgb, var(--hc, var(--ink-100)) 5%, transparent);
+  border-color: color-mix(in srgb, var(--hc, var(--ink-100)) 18%, transparent);
   transform: translateX(2px);
 }
 .ul-unit-card:hover::before { opacity: 0.4; }
@@ -544,7 +542,7 @@
 .ul-unit-name {
   font-size: 0.77rem;
   font-weight: 500;
-  color: rgba(255,255,255,0.76);
+  color: var(--ink-72);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

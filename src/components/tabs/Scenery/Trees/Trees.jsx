@@ -1116,7 +1116,6 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
         asideSlot={previewSlot}
         asideCaption={null}
         ghostLabel="TREEMAP"
-        railStorageKey="treemap-rail-pinned"
         navLabel="TreeMap console navigation"
       >
         {sectionContent[activeSection]}

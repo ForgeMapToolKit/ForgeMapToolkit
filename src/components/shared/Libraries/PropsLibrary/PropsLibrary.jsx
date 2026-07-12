@@ -92,8 +92,8 @@ function RangeSlider({ label, min, max, low, high, onChangeLow, onChangeHigh, di
 
 // ════════════════════════════════════════════════════════════════════════════
 export default function PropsLibraryOverlay({ onConfirm, onClose, mapName, mapsFolder, noTextureEditor = false, onMountReloadRef,
-  accentColor = '#ffffff',
-  accentGlow  = 'rgba(255,255,255,0.2)',
+  accentColor = 'var(--ink-100)',
+  accentGlow  = 'var(--ink-20)',
 }) {
   const [rawProps, setRawProps]             = useState([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
@@ -385,7 +385,7 @@ const handleTextureEditorBack = () => {
 };
 
   const activeColor = useMemo(() => {
-    if (selectedCategory === '__custom__') return { color: '#f0a040', glow: 'rgba(240,160,64,0.3)' };
+    if (selectedCategory === '__custom__') return { color: 'var(--source-custom-color)', glow: 'var(--source-custom-glow)' };
     return { color: accentColor, glow: accentGlow };
   }, [selectedCategory, accentColor, accentGlow]);
 
@@ -409,7 +409,7 @@ return (
 {!showTextureEditor && (
   <>
       <div className="pl-backdrop" onClick={onClose} />
-      <div className="pl-window" style={{"--tab-accent": accentColor}}>
+      <div className="pl-window" data-suite-overlay style={{'--tab-color': accentColor, '--tab-glow': accentGlow}}>
 
         {/* ── Sidebar ── */}
         <div className="pl-sidebar">
@@ -430,7 +430,11 @@ return (
             {/* Custom Map Props */}
             <button className={`pl-biome-item pl-custom-item ${selectedCategory==='__custom__'?'active':''}`}
               onClick={() => setSelectedCategory('__custom__')}
-              style={{'--bc': '#f0a040', '--bg': 'rgba(240,160,64,0.08)', '--bs': 'rgba(240,160,64,0.04)'}}>
+              style={{
+                '--bc': 'var(--source-custom-color)',
+                '--bg': 'color-mix(in srgb, var(--source-custom-color) 8%, transparent)',
+                '--bs': 'color-mix(in srgb, var(--source-custom-color) 4%, transparent)',
+              }}>
               <svg className="pl-custom-folder-icon" viewBox="0 0 16 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 2.5C1 1.67 1.67 1 2.5 1H6l1.5 2H13.5C14.33 3 15 3.67 15 4.5V10.5C15 11.33 14.33 12 13.5 12H2.5C1.67 12 1 11.33 1 10.5V2.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
               </svg>
@@ -711,7 +715,7 @@ function PropCard({ prop, isSelected, onToggle, showCategory }) {
           </span>
         </div>
         {showCategory && prop.biome && (
-          <div className="pl-prop-biome-tag" style={{color:'var(--tab-accent, rgba(255,255,255,0.5))'}}>
+          <div className="pl-prop-biome-tag" style={{color:'var(--tab-color, var(--ink-50))'}}>
             {prop.biome}{prop.propType ? ` / ${prop.propType}` : ''}
           </div>
         )}

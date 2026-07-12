@@ -698,7 +698,6 @@ const RockErosionTab = ({ settings, shared = {}, onSharedChange = () => {}, onRe
         asideSlot={previewSlot}
         asideCaption={null}
         ghostLabel="EROSION"
-        railStorageKey="re-rail-pinned"
         navLabel="Rock Erosion console navigation"
       >
         {sectionContent[activeSection]}

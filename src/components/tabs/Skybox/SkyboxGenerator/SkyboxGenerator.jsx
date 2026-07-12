@@ -15,7 +15,7 @@ import '../../../Shared/trace.css';
 import './SkyboxGenerator.css';
 
 // ── Shared Infrastruktur ──────────────────────────────────────────────────────
-import { usePersistentState, useMapInfo } from '../../../Shared/MapLogic';
+import { usePersistentState, useMapInfo, writeFile, readFile } from '../../../Shared/MapLogic';
 import TabLayout                          from '../../../Shared/Ui/TabLayout/TabLayout';
 
 // ── Libraries & Modals ───────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ import {
 } from './utils.js';
 
 // ─────────────────────────────────────────────────────────────────
-const ASSETS_RAW = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main';
+const ASSETS_RAW = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main';
 const REF_SIZE   = 1024;
 
 // ══════════════════════════════════════════════════════════════════
@@ -415,9 +415,7 @@ const SkyboxGeneratorTab = ({
       const fileName = maxIdx > 0 ? `skybox_export${maxIdx + 1}.scmskybox`
                      : hasSingle  ? `skybox_export1.scmskybox`
                      : `skybox_export.scmskybox`;
-      const writeRes = await window.electronAPI.invoke('write-file',
-        { filePath: `${mapFolderPath}\\${fileName}`, content });
-      if (!writeRes?.success) throw new Error(`Write failed: ${writeRes?.error}`);
+      await writeFile(`${mapFolderPath}\\${fileName}`, content);
       await luxuryAlert(`✓ Exported to ${fileName}`, 'Exported', 'success');
     } catch (e) {
       await luxuryAlert(e.message, 'Export Failed', 'error');
@@ -444,16 +442,16 @@ const SkyboxGeneratorTab = ({
       const unpackedFolder = unpackRes.outputFolder;
       const snapBefore   = (await window.electronAPI.invoke('scmap-snapshot-folder',
         { folderPath: unpackedFolder }))?.snapshot ?? null;
-      const dataLuaPath  = `${unpackedFolder}\\data.lua`;
-      const readRes      = await window.electronAPI.invoke('read-file', { path: dataLuaPath });
-      if (!readRes?.success) throw new Error(`data.lua read failed: ${readRes?.error}`);
+      const dataLuaPath   = `${unpackedFolder}\\data.lua`;
+      const dataLuaBefore = await readFile(dataLuaPath);
+      if (!dataLuaBefore) throw new Error('data.lua read failed');
       const luaBlock = buildSkyboxLuaBlock({
         mapSize, horizonHeight, horizonColor, zenithColor, zenithHeight,
         subtractHeight, subdivAxis, subdivHeight, decalGlowMult, albedo, glow,
         cirrusMult, cirrusColor, cirrusTexture, cirrusLayers, planets,
         generateStarPlanets,
       });
-      let dataLua = readRes.content;
+      let dataLua = dataLuaBefore;
       const skyboxRegex = /skyBox = \{[\s\S]*?\n    \}/;
       if (skyboxRegex.test(dataLua)) {
         dataLua = dataLua.replace(skyboxRegex, luaBlock);
@@ -467,8 +465,7 @@ const SkyboxGeneratorTab = ({
       }
       dataLua = dataLua.replace(/(\bversion\s*=\s*)(\d+)(\s*,)/, (m, pre, num, post) =>
         parseInt(num, 10) !== 60 ? `${pre}60${post}` : m);
-      const writeRes = await window.electronAPI.invoke('write-file', { filePath: dataLuaPath, content: dataLua });
-      if (!writeRes?.success) throw new Error(`Write failed: ${writeRes?.error}`);
+      await writeFile(dataLuaPath, dataLua);
       const snapAfter  = (await window.electronAPI.invoke('scmap-snapshot-folder',
         { folderPath: unpackedFolder }))?.snapshot ?? null;
       if (snapBefore && snapAfter) onRecordSnapshot('skybox-generator', finalName, snapBefore, snapAfter);
@@ -793,7 +790,6 @@ const configProps = {
         sections={sections}
         activeSection={activeSection}
         onSelect={setActiveSection}
-        railStorageKey="skybox-gen-section"
         asideSlot={asideBySection[activeSection]}
         asideCaption={null}
         asideMirror={null}

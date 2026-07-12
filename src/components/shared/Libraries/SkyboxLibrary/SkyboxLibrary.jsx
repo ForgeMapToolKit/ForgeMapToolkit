@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../../DesignSystem/index.css';
 import './SkyboxLibrary.css';
 
 const UV_COLORS = ['#ff4444','#44ff44','#4444ff','#ffff44','#ff44ff','#44ffff','#ff8844','#88ff44'];
@@ -130,7 +131,7 @@ function DetailView({ skybox, mapName, mapsFolderPath, onApply, onBack }) {
                   <span style={{ color: UV_COLORS[i % UV_COLORS.length], minWidth: '22px', fontWeight: 700 }}>L{i+1}</span>
                   <span>freqX: {l.frequency?.x ?? l.FrequencyX}</span>
                   <span>speed: {l.Speed ?? l.speed}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  <span style={{ color: 'var(--ink-25)' }}>
                     dir: ({l.Direction?.x ?? l.DirectionX}, {l.Direction?.y ?? l.DirectionY})
                   </span>
                 </div>
@@ -160,35 +161,29 @@ function DetailView({ skybox, mapName, mapsFolderPath, onApply, onBack }) {
             <div className="sl-detail-section" style={{ marginTop: '14px' }}>
               <div className="sl-detail-section-label">Texture Resolution</div>
               {albedoResolutions.length > 0 && (
-                <div style={{ marginBottom: '10px' }}>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>Albedo</div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div className="sl-res-group">
+                  <div className="sl-res-group-label">Albedo</div>
+                  <div className="sl-res-row">
                     {albedoResolutions.map(r => (
-                      <button key={r} onClick={() => setAlbedoRes(r)} style={{
-                        padding: '5px 12px', fontSize: '0.78rem', fontFamily: 'monospace',
-                        cursor: 'pointer', border: '1px solid',
-                        borderColor: albedoRes === r ? '#00DDFF' : 'rgba(255,255,255,0.12)',
-                        background:  albedoRes === r ? 'rgba(0,221,255,0.12)' : 'transparent',
-                        color:       albedoRes === r ? '#00DDFF' : 'rgba(255,255,255,0.45)',
-                        transition: 'all 0.15s',
-                      }}>{r}</button>
+                      <button
+                        key={r}
+                        className={`sl-res-btn${albedoRes === r ? ' active' : ''}`}
+                        onClick={() => setAlbedoRes(r)}
+                      >{r}</button>
                     ))}
                   </div>
                 </div>
               )}
               {glowResolutions.length > 0 && (
-                <div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>Glow</div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div className="sl-res-group">
+                  <div className="sl-res-group-label">Glow</div>
+                  <div className="sl-res-row">
                     {glowResolutions.map(r => (
-                      <button key={r} onClick={() => setGlowRes(r)} style={{
-                        padding: '5px 12px', fontSize: '0.78rem', fontFamily: 'monospace',
-                        cursor: 'pointer', border: '1px solid',
-                        borderColor: glowRes === r ? '#00DDFF' : 'rgba(255,255,255,0.12)',
-                        background:  glowRes === r ? 'rgba(0,221,255,0.12)' : 'transparent',
-                        color:       glowRes === r ? '#00DDFF' : 'rgba(255,255,255,0.45)',
-                        transition: 'all 0.15s',
-                      }}>{r}</button>
+                      <button
+                        key={r}
+                        className={`sl-res-btn${glowRes === r ? ' active' : ''}`}
+                        onClick={() => setGlowRes(r)}
+                      >{r}</button>
                     ))}
                   </div>
                 </div>
@@ -204,7 +199,7 @@ function DetailView({ skybox, mapName, mapsFolderPath, onApply, onBack }) {
               ⚠ Set Map Name + Maps Folder in Props tab to auto-copy texture files.
             </div>
           )}
-          <button className="sl-apply-btn" onClick={handleApply}>
+          <button className="ftr-preview-readmore" onClick={handleApply}>
             ⬇ Apply{skybox.isCustom ? ' + Copy DDS' : ''}
           </button>
         </div>
@@ -231,7 +226,10 @@ export default function SkyboxLibraryOverlay({ onApply, onClose, onReload, mapNa
   return (
     <>
       <div className="sl-backdrop" onClick={onClose} />
-      <div className="sl-window" style={tabColor ? { "--skybox-generator-color": tabColor, "--skybox-generator-glow": tabGlow || tabColor } : undefined}>
+      <div className="sl-window" data-suite-overlay style={tabColor ? {
+        "--skybox-generator-color": tabColor, "--skybox-generator-glow": tabGlow || tabColor,
+        "--tab-color": tabColor, "--tab-glow": tabGlow || tabColor,
+      } : undefined}>
 
         {/* ── Sidebar ── */}
         <div className="sl-sidebar">
@@ -260,14 +258,14 @@ export default function SkyboxLibraryOverlay({ onApply, onClose, onReload, mapNa
               <span className="sl-header-name">
                 {selectedSkybox ? selectedSkybox.name : (selectedCategory || 'Skybox Library')}
               </span>
-              {loading && <span style={{ fontSize: '0.72rem', color: 'rgba(0,221,255,0.45)', fontWeight: 400 }}>⟳ Loading…</span>}
+              {loading && <span style={{ fontSize: '0.72rem', color: 'color-mix(in srgb, var(--skybox-generator-color) 45%, transparent)', fontWeight: 400 }}>⟳ Loading…</span>}
             </div>
             <div className="sl-header-right">
               {selectedSkybox
-                ? <button className="sl-back-btn" onClick={() => setSelectedSkybox(null)}>← Back</button>
-                : <button className="sl-reload-btn" onClick={onReload} disabled={loading}>↺ Reload</button>
+                ? <button className="ctrl-btn-meta" onClick={() => setSelectedSkybox(null)}>← Back</button>
+                : <button className="ctrl-btn-add" onClick={onReload} disabled={loading}>↺ Reload</button>
               }
-              <button className="sl-close-btn" onClick={onClose}>✕</button>
+              <button className="ctrl-btn-close" onClick={onClose}>✕</button>
             </div>
           </div>
 
@@ -307,7 +305,7 @@ export default function SkyboxLibraryOverlay({ onApply, onClose, onReload, mapNa
           {!selectedSkybox && (
             <div className="sl-footer">
               <span className="sl-footer-count">{totalCount} skyboxes in {categories.length} categories</span>
-              <button className="sl-footer-cancel" onClick={onClose}>Close</button>
+              <button className="ctrl-btn-meta" onClick={onClose}>Close</button>
             </div>
           )}
         </div>

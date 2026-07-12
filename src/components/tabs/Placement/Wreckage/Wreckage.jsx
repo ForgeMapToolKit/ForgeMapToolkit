@@ -269,7 +269,7 @@ const WreckageTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecor
 
   // -- Library Adapters ---------------------------------------------------------
 
-const UNIT_PREVIEW_BASE_URL = 'https://timmasalme.github.io/ForgeMapToolkit-Assets/units/';
+const UNIT_PREVIEW_BASE_URL = 'https://forgemaptoolkit.github.io/ForgeMapToolkit-Assets/units/';
 
 const adaptUnitsToLibrary = (units = []) => {
   const FACTION_TAGS = ['uef','cybran','aeon','seraphim','nomads','operations','civilian','dev'];
@@ -350,7 +350,7 @@ const adaptUnitsToLibrary = (units = []) => {
       bpCategories:   u.bpCategories  || [],
       classification: u.classification || null,
       strategicIcon:  u.strategicIcon  || null,
-      preview: `https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/units/${u.id.toUpperCase()}.png`,
+      preview: `https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/units/${u.id.toUpperCase()}.png`,
     });
   }
 
@@ -1121,34 +1121,6 @@ const handleImageUpload = async (e) => {
   const copyFile    = async (src, dest)          => { const r = await window.electronAPI.invoke('copy-file',   { src, dest });         if (!r?.success) throw new Error(r?.error || 'copy-file failed'); };
   const listDir     = async (dirPath)            => { const r = await window.electronAPI.invoke('list-dir',    { dirPath });           if (!r?.success) throw new Error(r?.error || 'list-dir failed'); return r.entries; };
 
-  // -- Folder Pickers ------------------------------------------------------------
-
-  const selectEmitterBpFolder = async () => {
-    const res = await window.electronAPI.invoke('settings-pick-folder', { title: 'Select Emitter.bp Folder' });
-    if (!res.success) return;
-    const folderPath = res.path;
-    const folderName = folderPath.split('\\').pop() || folderPath.split('/').pop();
-    if (!folderName.toLowerCase().includes('emitter')) {
-      const ok = await luxuryConfirm(`Warning: Folder is named "${folderName}", not "emitter.bp".\n\nContinue anyway?`, 'Warning', 'Continue Anyway', 'Cancel');
-      if (!ok) return;
-    }
-    setEmitterBpFolderPath(folderPath);
-    await luxuryAlert(`? Emitter.bp folder selected: ${folderName}`, 'Success', 'success');
-  };
-
-  const selectMapsFolder = async () => {
-    const res = await window.electronAPI.invoke('settings-pick-folder', { title: 'Select Maps Folder' });
-    if (!res.success) return;
-    const folderPath = res.path;
-    const folderName = folderPath.split('\\').pop() || folderPath.split('/').pop();
-    if (folderName.toLowerCase() !== 'maps') {
-      const ok = await luxuryConfirm(`Warning: Folder is named "${folderName}", not "maps".\n\nContinue anyway?`, 'Warning', 'Continue Anyway', 'Cancel');
-      if (!ok) return;
-    }
-    setMapsFolderPath(folderPath);
-    await luxuryAlert(`? Maps folder selected: ${folderName}`, 'Success', 'success');
-  };
-
   // -- Generate ------------------------------------------------------------------
 
   const generateFiles = async () => {
@@ -1833,7 +1805,6 @@ TypeClass = ${instanceName}`;
         asideSlot={previewSlot}
         asideCaption={null}
         ghostLabel="WRECKAGES"
-        railStorageKey="wrc-rail-pinned"
         navLabel="Wreckage console navigation"
       >
         {sectionContent[activeSection]}

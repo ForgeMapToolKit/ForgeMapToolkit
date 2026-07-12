@@ -99,8 +99,10 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
 - **`Shared/Ui/TabLayout/TabLayout.jsx`**: die Konsolen-Shell (Sektions-Rail,
   Aside-/Standby-/Grid-/Toolbar-Slot je nach `layoutMode`). Nimmt `sections`,
   `activeSection`, `onSelect`, `layoutMode` (`'x'|'y'|'z'|'w'`, s.
-  `docs/LAYOUTS.md`), `asideSlot`, `asideMirror`, `asideCaption`, `renderEyebrow`,
-  `railStorageKey`. Placement-Tabs nutzen ausschließlich `layoutMode="x"`.
+  `docs/LAYOUTS.md`), `asideSlot`, `asideMirror`, `asideCaption`, `renderEyebrow`.
+  Rail-Pin/Collapse-Status ist app-weit, nicht pro Tab — persistiert intern unter
+  einem einzigen `localStorage`-Key (`RAIL_PINNED_KEY`), kein `railStorageKey`-Prop
+  mehr. Placement-Tabs nutzen ausschließlich `layoutMode="x"`.
 - **`Shared/Libraries/{UnitLibrary,EmitterLibrary,PropsLibrary}`**: die
   Overlay-Bibliotheken (z. B. `UnitLibraryOverlay`, `EmitterLibraryOverlay`),
   eigenständig importiert, nicht Teil von `EntityPanel`.

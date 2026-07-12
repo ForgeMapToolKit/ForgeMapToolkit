@@ -5,7 +5,7 @@
  */
 
 // ── Konstanten ────────────────────────────────────────────────────
-export const ASSETS_RAW = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main';
+export const ASSETS_RAW = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main';
 
 export const DEFAULT_UV_ROWS = [
   { x: '0.0', y: '0.0', z: '0.5', w: '0.5', weight: '0.25' },
@@ -349,7 +349,7 @@ export const generateSkyboxJson = ({
     "============================================================",
     " LICENSE: Creative Commons Attribution-NonCommercial 4.0",
     " Full license: https://creativecommons.org/licenses/by-nc/4.0/",
-    " Repository:   https://github.com/timmasalme/ForgeMapToolkit-Assets",
+    " Repository:   https://github.com/ForgeMapToolKit/ForgeMapToolkit-Assets",
     "============================================================",
   ];
 

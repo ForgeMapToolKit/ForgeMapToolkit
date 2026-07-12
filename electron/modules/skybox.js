@@ -26,8 +26,8 @@ const { readSettings }                               = require('./settings');
 const SKYBOX_CACHE_FILE = path.join(app.getPath('userData'), 'skybox_library_cache.json');
 const SKYBOX_CACHE_TTL  = 24 * 60 * 60 * 1000; // 24 hours
 
-const API_BASE_SKYBOX   = 'https://api.github.com/repos/timmasalme/ForgeMapToolkit-Assets';
-const ASSETS_RAW_SKYBOX = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main';
+const API_BASE_SKYBOX   = 'https://api.github.com/repos/ForgeMapToolKit/ForgeMapToolkit-Assets';
+const ASSETS_RAW_SKYBOX = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main';
 
 function readSkyboxCache() {
   try {

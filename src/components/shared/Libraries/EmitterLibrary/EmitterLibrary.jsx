@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import '../../DesignSystem/index.css';
 import './EmitterLibrary.css';
 
 const SORT_OPTIONS = [
@@ -22,8 +23,8 @@ function cleanMapName(name) {
 // ════════════════════════════════════════════════════════════════════════════
 export default function EmitterLibraryOverlay({
   onConfirm, onClose, mapName, mapsFolder,
-  accentColor = '#ffffff',
-  accentGlow  = 'rgba(255,255,255,0.2)',
+  accentColor = 'var(--ink-100)',
+  accentGlow  = 'var(--ink-20)',
 }) {
   const [gameEmitters,   setGameEmitters]   = useState([]);
   const [customEmitters, setCustomEmitters] = useState([]);
@@ -208,8 +209,8 @@ export default function EmitterLibraryOverlay({
   };
 
   const isCustomView = selectedCategory === '__custom__';
-  const headerColor = isCustomView ? '#f0a040' : accentColor;
-  const headerGlow  = isCustomView ? 'rgba(240,160,64,0.3)' : accentGlow;
+  const headerColor = isCustomView ? 'var(--source-custom-color)' : accentColor;
+  const headerGlow  = isCustomView ? 'var(--source-custom-glow)' : accentGlow;
 
   const activeLabel = selectedCategory === '__all__'
     ? 'All Emitters'
@@ -220,7 +221,7 @@ export default function EmitterLibraryOverlay({
   return (
     <>
       <div className="el-backdrop" onClick={onClose} />
-      <div className="el-window">
+      <div className="el-window" data-suite-overlay style={{ '--bc': accentColor, '--bg': accentGlow, '--tab-color': accentColor, '--tab-glow': accentGlow }}>
 
         {/* ── Sidebar ── */}
         <div className="el-sidebar">
@@ -245,7 +246,7 @@ export default function EmitterLibraryOverlay({
             <button
               className={`el-cat-item el-custom-item ${selectedCategory === '__custom__' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('__custom__')}
-              style={{'--bc': '#f0a040', '--bg': 'rgba(240,160,64,0.08)'}}>
+              style={{'--bc': 'var(--source-custom-color)', '--bg': 'var(--source-custom-glow-strong)'}}>
               <svg className="el-custom-folder-icon" viewBox="0 0 16 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 2.5C1 1.67 1.67 1 2.5 1H6l1.5 2H13.5C14.33 3 15 3.67 15 4.5V10.5C15 11.33 14.33 12 13.5 12H2.5C1.67 12 1 11.33 1 10.5V2.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
               </svg>
@@ -288,15 +289,15 @@ export default function EmitterLibraryOverlay({
             </div>
             <div className="el-header-right">
               {isCustomView ? (
-                <button className="el-reload-btn" onClick={handleRescanCustom} disabled={customLoading}>
+                <button className="ctrl-btn-add" onClick={handleRescanCustom} disabled={customLoading}>
                   {customLoading ? '⟳ Scanning…' : '↺ Rescan'}
                 </button>
               ) : (
-                <button className="el-reload-btn" onClick={handleReload} disabled={gameLoading}>
+                <button className="ctrl-btn-add" onClick={handleReload} disabled={gameLoading}>
                   {gameLoading ? '⟳ Scanning…' : '↺ Rescan'}
                 </button>
               )}
-              <button className="el-close-btn" onClick={onClose}>✕</button>
+              <button className="ctrl-btn-close" onClick={onClose}>✕</button>
             </div>
           </div>
 
@@ -360,7 +361,7 @@ export default function EmitterLibraryOverlay({
                 <div className="el-fp-divider" />
                 <div className="el-fp-section el-fp-row-section">
                   <span className="el-fp-result-count">{visibleEmitters.length} emitters visible</span>
-                  {filtersActive && <button className="el-fp-reset-btn" onClick={resetFilters}>✕ Reset</button>}
+                  {filtersActive && <button className="ctrl-btn-danger" onClick={resetFilters}>✕ Reset</button>}
                 </div>
               </div>
             )}
@@ -406,15 +407,15 @@ export default function EmitterLibraryOverlay({
           {/* Footer */}
           <div className="el-footer">
             <div className="el-footer-left">
-              <button className="el-footer-btn" onClick={selectAll} disabled={visibleEmitters.length === 0}>
+              <button className="ctrl-btn-add" onClick={selectAll} disabled={visibleEmitters.length === 0}>
                 Select All ({visibleEmitters.length})
               </button>
-              <button className="el-footer-btn" onClick={clearAll} disabled={selected.size === 0}>Clear</button>
+              <button className="ctrl-btn-add" onClick={clearAll} disabled={selected.size === 0}>Clear</button>
               {selected.size > 0 && <span className="el-footer-count">{selected.size} selected</span>}
             </div>
             <div className="el-footer-right">
-              <button className="el-footer-cancel" onClick={onClose}>Cancel</button>
-              <button className="el-footer-confirm" onClick={handleConfirm} disabled={selected.size === 0}>
+              <button className="ctrl-btn-meta" onClick={onClose}>Cancel</button>
+              <button className="ftr-preview-readmore" onClick={handleConfirm} disabled={selected.size === 0}>
                 Apply {selected.size > 0 ? `(${selected.size})` : ''}
               </button>
             </div>
@@ -429,9 +430,9 @@ export default function EmitterLibraryOverlay({
 function EmitterSection({ category, emitters, selected, onToggle, accentColor, accentGlow, isCustomSection }) {
   const [collapsed, setCollapsed] = useState(false);
   const selectedCount = emitters.filter(e => selected.has(e.id)).length;
-  // Custom sections use orange, others use the tab accent
-  const sectionColor = isCustomSection ? '#f0a040' : accentColor;
-  const sectionGlow  = isCustomSection ? 'rgba(240,160,64,0.3)' : accentGlow;
+  // Custom sections use the source-marker color, others use the tab accent
+  const sectionColor = isCustomSection ? 'var(--source-custom-color)' : accentColor;
+  const sectionGlow  = isCustomSection ? 'var(--source-custom-glow)' : accentGlow;
   return (
     <div className="el-section">
       <button className="el-section-header" onClick={() => setCollapsed(v => !v)}>
@@ -457,31 +458,26 @@ function EmitterSection({ category, emitters, selected, onToggle, accentColor, a
   );
 }
 
-// ── EmitterCard ───────────────────────────────────────────────────────────────
-function EmitterCard({ emitter, isSelected, onToggle, accentColor, accentGlow }) {
+// ── EmitterCard — a Settings-ledger-style row: tick | check | name | path | source ──
+function EmitterCard({ emitter, isSelected, onToggle, accentColor }) {
   const isMapCustom = emitter.source === 'map-custom';
   const isToolkit   = emitter.source === 'toolkit';
-  const isCustom    = isMapCustom || isToolkit;
-  const hg = accentColor ? `${accentColor}14` : 'rgba(255,255,255,0.06)';
   return (
-    <div
-      className={`el-emitter-card ${isSelected ? 'selected' : ''} ${isCustom ? 'is-custom' : ''}`}
+    <button
+      type="button"
+      className={`el-row ${isSelected ? 'selected' : ''}`}
       onClick={() => onToggle(emitter.id)}
       title={emitter.gamePath || emitter.id}
-      style={{'--hc': accentColor, '--hg': hg}}>
-      <div className={`el-emitter-check ${isSelected ? 'checked' : ''}`}>
-        {isSelected && <span>✓</span>}
-      </div>
-      <div className="el-emitter-info">
-        <div className="el-emitter-name">{emitter.name || emitter.id}</div>
-        <div className="el-emitter-path">{emitter.gamePath || emitter.id}</div>
-        {isMapCustom && (
-          <span className="el-custom-tag" style={{color: accentColor, background: `color-mix(in srgb, ${accentColor} 10%, transparent)`, borderColor: `color-mix(in srgb, ${accentColor} 25%, transparent)`}}>map</span>
-        )}
-        {isToolkit && (
-          <span className="el-custom-tag el-custom-tag--toolkit">toolkit</span>
-        )}
-      </div>
-    </div>
+      style={{ '--hc': accentColor }}>
+      <span className="el-row-tick" aria-hidden="true" />
+      <span className={`el-row-check ${isSelected ? 'checked' : ''}`} aria-hidden="true">
+        {isSelected && '✓'}
+      </span>
+      <span className="el-row-name">{emitter.name || emitter.id}</span>
+      <span className="el-row-path">{emitter.gamePath || emitter.id}</span>
+      {isMapCustom && <span className="el-custom-tag el-custom-tag--map">map</span>}
+      {isToolkit && <span className="el-custom-tag el-custom-tag--toolkit">toolkit</span>}
+      <span className="el-row-trace" aria-hidden="true" />
+    </button>
   );
 }

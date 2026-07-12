@@ -803,7 +803,6 @@ TypeClass = ${pairName}`;
         onSelect={setActiveSection}
         ghostLabel="EMITTERS"
         asideCaption={null}
-        railStorageKey="em-rail-pinned"
         navLabel="Emitter console navigation"
 
         asideSlot={

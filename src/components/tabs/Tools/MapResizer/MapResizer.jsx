@@ -7,6 +7,7 @@ import '../../../Shared/trace.css';
 import './MapResizer.css';
 import { luxuryAlert, luxuryConfirm } from '../../../Shared/Ui/Notifications/notifications';
 import MapResizerHelpModal from '../../HelpModals/MapResizer_help.jsx';
+import { usePersistentState, useMapInfo, finalizeMapName } from '../../../Shared/MapLogic';
 
 // ── Size Options ───────────────────────────────────────────────────────────────
 
@@ -70,29 +71,17 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
   // ── Shared State ──────────────────────────────────────────────────────────────
 
-  const [mapName,          setMapNameState]          = useState(s.mr_mapName          ?? '');
-  const [mapsFolderPath,   setMapsFolderPathState]   = useState(s.mr_mapsFolderPath   ?? settings?.mapsFolder ?? '');
-  const [targetSize,       setTargetSizeState]       = useState(s.mr_targetSize       ?? 512);
-  const [scaleProps,       setScalePropsState]       = useState(s.mr_scaleProps       ?? true);
-  const [scaleDecals,      setScaleDecalsState]      = useState(s.mr_scaleDecals      ?? true);
-  const [scaleMarkers,     setScaleMarkersState]     = useState(s.mr_scaleMarkers     ?? true);
-  const [scaleAreas,       setScaleAreasState]       = useState(s.mr_scaleAreas       ?? true);
-  const [scaleTextures,    setScaleTexturesState]    = useState(s.mr_scaleTextures    ?? true);
-  const [scaleSkybox,      setScaleSkyboxState]      = useState(s.mr_scaleSkybox      ?? true);
-  const [scaleFog,         setScaleFogState]         = useState(s.mr_scaleFog         ?? true);
-  const [createNewVersion, setCreateNewVersionState] = useState(s.mr_createNewVersion ?? true);
-
-  const setMapName          = v => { setMapNameState(v);          onSharedChange('mr_mapName', v); };
-  const setMapsFolderPath   = v => { setMapsFolderPathState(v);   onSharedChange('mr_mapsFolderPath', v); };
-  const setTargetSize       = v => { setTargetSizeState(v);       onSharedChange('mr_targetSize', v); };
-  const setScaleProps       = v => { setScalePropsState(v);       onSharedChange('mr_scaleProps', v); };
-  const setScaleDecals      = v => { setScaleDecalsState(v);      onSharedChange('mr_scaleDecals', v); };
-  const setScaleMarkers     = v => { setScaleMarkersState(v);     onSharedChange('mr_scaleMarkers', v); };
-  const setScaleAreas       = v => { setScaleAreasState(v);       onSharedChange('mr_scaleAreas', v); };
-  const setScaleTextures    = v => { setScaleTexturesState(v);    onSharedChange('mr_scaleTextures', v); };
-  const setScaleSkybox      = v => { setScaleSkyboxState(v);      onSharedChange('mr_scaleSkybox', v); };
-  const setScaleFog         = v => { setScaleFogState(v);         onSharedChange('mr_scaleFog', v); };
-  const setCreateNewVersion = v => { setCreateNewVersionState(v); onSharedChange('mr_createNewVersion', v); };
+  const [mapName,          setMapName]          = usePersistentState(s, 'mr_mapName', '', onSharedChange);
+  const [mapsFolderPath,   setMapsFolderPath]   = usePersistentState(s, 'mr_mapsFolderPath', settings?.mapsFolder ?? '', onSharedChange);
+  const [targetSize,       setTargetSize]       = usePersistentState(s, 'mr_targetSize', 512, onSharedChange);
+  const [scaleProps,       setScaleProps]       = usePersistentState(s, 'mr_scaleProps', true, onSharedChange);
+  const [scaleDecals,      setScaleDecals]      = usePersistentState(s, 'mr_scaleDecals', true, onSharedChange);
+  const [scaleMarkers,     setScaleMarkers]     = usePersistentState(s, 'mr_scaleMarkers', true, onSharedChange);
+  const [scaleAreas,       setScaleAreas]       = usePersistentState(s, 'mr_scaleAreas', true, onSharedChange);
+  const [scaleTextures,    setScaleTextures]    = usePersistentState(s, 'mr_scaleTextures', true, onSharedChange);
+  const [scaleSkybox,      setScaleSkybox]      = usePersistentState(s, 'mr_scaleSkybox', true, onSharedChange);
+  const [scaleFog,         setScaleFog]         = usePersistentState(s, 'mr_scaleFog', true, onSharedChange);
+  const [createNewVersion, setCreateNewVersion] = usePersistentState(s, 'mr_createNewVersion', true, onSharedChange);
 
   // ── Settings Sync ─────────────────────────────────────────────────────────────
 
@@ -102,7 +91,6 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
   // ── Local UI State ────────────────────────────────────────────────────────────
 
-  const [mapInfo,         setMapInfo]         = useState(null);
   const [running,         setRunning]         = useState(false);
   const [activeSection,   setActiveSection]   = useState('configuration');
   const [showHelp,        setShowHelp]        = useState(false);
@@ -112,24 +100,20 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
   // ── Auto-read map info ────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    const name   = (mapName || '').trim();
-    const folder = (mapsFolderPath || settings?.mapsFolder || '').trim();
-    if (!name || !folder) { setMapInfo(null); return; }
-    const finalName = /\.v\d{4}$/.test(name) ? name : name + '.v0001';
-    const mapFolder = folder + '\\' + finalName;
-    window.electronAPI.invoke('read-map-info', { mapFolderPath: mapFolder }).then(res => {
-      if (res?.success) {
-        setMapInfo({ ok: true, fromSize: res.mapSize, km: res.km, playableSize: res.playableSize, mapFolder });
-      } else {
-        setMapInfo({ ok: false, error: 'save.lua not found or unreadable' });
-      }
-    }).catch(() => setMapInfo(null));
-  }, [mapName, mapsFolderPath, settings?.mapsFolder]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { mapInfo: fetchedMapInfo } = useMapInfo({ mapName, mapsFolderPath, settings });
+
+  // Optimistic override so the UI reflects the new size right after an
+  // in-place resize, without waiting for a mapName/folder change to
+  // re-trigger useMapInfo's fetch. Cleared whenever the target map changes.
+  const [resizedTo, setResizedTo] = useState(null);
+  useEffect(() => { setResizedTo(null); }, [mapName, mapsFolderPath, settings?.mapsFolder]);
+  const mapInfo = fetchedMapInfo?.ok && resizedTo != null
+    ? { ...fetchedMapInfo, mapSize: resizedTo }
+    : fetchedMapInfo;
 
   // ── Computed ──────────────────────────────────────────────────────────────────
 
-  const factor    = mapInfo?.ok ? targetSize / mapInfo.fromSize : null;
+  const factor    = mapInfo?.ok ? targetSize / mapInfo.mapSize : null;
   const sameSize  = factor === 1;
   const canResize = mapInfo?.ok && !running && !sameSize;
 
@@ -137,7 +121,9 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
 
   const handleResize = async () => {
     if (!mapInfo?.ok) return;
-    const { mapFolder, fromSize } = mapInfo;
+    const folder    = (mapsFolderPath || settings?.mapsFolder || '').trim();
+    const mapFolder = folder + '\\' + finalizeMapName(mapName);
+    const fromSize  = mapInfo.mapSize;
     const f = targetSize / fromSize;
 
     const confirmed = await luxuryConfirm({
@@ -192,7 +178,7 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
       });
       if (!scenRes.success) throw new Error(scenRes.error);
 
-      setMapInfo(prev => ({ ...prev, fromSize: targetSize }));
+      setResizedTo(targetSize);
 
       if (newVersionName) {
         setMapName(newVersionName);
@@ -318,8 +304,8 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
                   key={opt.value}
                   option={opt}
                   selected={targetSize === opt.value}
-                  isCurrent={mapInfo?.ok && mapInfo.fromSize === opt.value}
-                  disabled={running || (mapInfo?.ok && mapInfo.fromSize === opt.value)}
+                  isCurrent={mapInfo?.ok && mapInfo.mapSize === opt.value}
+                  disabled={running || (mapInfo?.ok && mapInfo.mapSize === opt.value)}
                   onClick={setTargetSize}
                 />
               ))}
@@ -335,10 +321,10 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
             <div className="mr-size-preview">
               <div className="mr-size-preview-side">
                 <span className="mr-size-preview-label">Current</span>
-                <span className="mr-size-preview-value">{mapInfo?.ok ? mapInfo.fromSize : '—'}</span>
+                <span className="mr-size-preview-value">{mapInfo?.ok ? mapInfo.mapSize : '—'}</span>
                 {mapInfo?.ok && <span className="mr-size-preview-km">{mapInfo.km}</span>}
               </div>
-              <ScaleArrow fromSize={mapInfo?.ok ? mapInfo.fromSize : null} toSize={targetSize} />
+              <ScaleArrow fromSize={mapInfo?.ok ? mapInfo.mapSize : null} toSize={targetSize} />
               <div className="mr-size-preview-side">
                 <span className="mr-size-preview-label">Target</span>
                 <span className="mr-size-preview-value">{targetSize}</span>
@@ -383,7 +369,6 @@ const MapResizerTab = ({ settings, shared = {}, onSharedChange = () => {} }) => 
         sections={sections}
         activeSection={activeSection}
         onSelect={setActiveSection}
-        railStorageKey="mapresizer-rail-pinned"
         navLabel="Map resizer navigation"
         asideSlot={asideSlot}
         asideCaption={null}

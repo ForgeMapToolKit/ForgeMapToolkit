@@ -398,7 +398,7 @@ export default function UnitLibraryOverlay({ unitLibrary, onSelect, onClose, onR
   return (
     <>
       <div className="ul-backdrop" onClick={onClose} />
-      <div className="ul-window">
+      <div className="ul-window" data-suite-overlay>
 
         {/* ── Sidebar ── */}
         <div className="ul-sidebar">
@@ -410,7 +410,7 @@ export default function UnitLibraryOverlay({ unitLibrary, onSelect, onClose, onR
             <button
               className={`ul-faction-item ${isAll ? 'active' : ''}`}
               onClick={() => setSelectedFaction('__all__')}
-              style={{ '--fc': '#fff', '--fg': 'rgba(255,255,255,0.45)', '--fs': 'rgba(255,255,255,0.06)' }}
+              style={{ '--fc': 'var(--ink-100)', '--fg': 'var(--ink-45)', '--fs': 'var(--sheen-055)' }}
             >
               
               <div className="ul-faction-info">
@@ -423,7 +423,7 @@ export default function UnitLibraryOverlay({ unitLibrary, onSelect, onClose, onR
             <div className="ul-faction-sep" />
 
             {factions.map(f => {
-              const fc = FACTION_CONFIG[f.id] || { color: '#888', glow: 'rgba(136,136,136,0.4)', glowStrong: 'rgba(136,136,136,0.08)' };
+              const fc = FACTION_CONFIG[f.id] || { color: 'var(--ink-55)', glow: 'var(--ink-40)', glowStrong: 'var(--sheen-045)' };
               const active = selectedFaction === f.id;
               return (
                 <button
@@ -450,12 +450,12 @@ export default function UnitLibraryOverlay({ unitLibrary, onSelect, onClose, onR
           {/* Header */}
           <div
             className="ul-header"
-            style={{ '--fc': isAll ? '#fff' : (cfg.color || '#fff'), '--fg': isAll ? 'rgba(255,255,255,0.3)' : (cfg.glow || 'rgba(255,255,255,0.3)') }}
+            style={{ '--fc': isAll ? 'var(--ink-100)' : (cfg.color || 'var(--ink-100)'), '--fg': isAll ? 'var(--ink-30)' : (cfg.glow || 'var(--ink-30)') }}
           >
             <div className="ul-header-left">
               {isAll ? (
                 <div className="ul-header-badge">
-                  <span className="ul-header-name" style={{ color: '#fff', textShadow: '0 0 24px rgba(255,255,255,0.2)' }}>All Factions</span>
+                  <span className="ul-header-name" style={{ color: 'var(--ink-100)', textShadow: '0 0 24px var(--ink-20)' }}>All Factions</span>
                 </div>
               ) : (
                 <div className="ul-header-badge">
@@ -573,7 +573,7 @@ function AllSubcatView({ allUnits, activeFilters, onSelect, sortOverrides }) {
     <div className="ul-faction-view">
       {groups.map(g => (
         <SubcategorySection key={g.label} label={g.label} units={g.units}
-          accentColor="rgba(255,255,255,0.45)" onSelect={onSelect} showFaction sortOverrides={sortOverrides} />
+          accentColor="var(--ink-45)" onSelect={onSelect} showFaction sortOverrides={sortOverrides} />
       ))}
     </div>
   );
@@ -589,7 +589,7 @@ function SearchResultsView({ results, query, onSelect, sortOverrides }) {
   return (
     <div className="ul-faction-view">
       <SubcategorySection label={`${results.length} Results`} units={sortByIdScheme(results, sortOverrides)}
-        accentColor="rgba(255,255,255,0.4)" onSelect={onSelect} showFaction />
+        accentColor="var(--ink-40)" onSelect={onSelect} showFaction />
     </div>
   );
 }
@@ -666,7 +666,7 @@ function UnitCard({ unit, onSelect, showFaction, isNewTier }) {
     });
   };
   const previewUrl = unit.preview ||
-    `https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main/units/${(unit.id || '').toUpperCase()}.png`;
+    `https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main/units/${(unit.id || '').toUpperCase()}.png`;
   const factionCfg = unit.factionId ? FACTION_CONFIG[unit.factionId] : null;
 
   return (

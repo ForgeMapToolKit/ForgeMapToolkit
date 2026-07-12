@@ -66,7 +66,10 @@ tracker. Core props: `sections`, `activeSection`, `onSelect`, `children`,
 (`controlsWidth`/`asideSlot`/`asideCaption`/`asideMirror` for X; `ghostLabel`/
 `readout` for Y; `groupMode`/`secondRail`/`activeGroup`/`onGroupSelect`/`groupSlotB`
 for Z; `canvasToolbar`/`topBar`/`toolbar` for W), and shell props `toolbarSlot`,
-`renderEyebrow`, `railStorageKey`, `navLabel`, `bootMs`. All three gold-standard
+`renderEyebrow`, `navLabel`, `bootMs`. Rail pin/collapse state is app-wide, not
+per-tab — `TabLayout` persists it to a single shared `localStorage` key
+(`RAIL_PINNED_KEY` in `TabLayout.jsx`), so it carries over across tabs and
+across sessions; there is no per-tab override for it. All three gold-standard
 tabs use `layoutMode="x"` (Placement tabs are canvas + controls).
 
 **`Shared/Ui/EntityPanel/EntityPanel.jsx`** — reusable feature components (the big
@@ -184,7 +187,6 @@ const [activeSection, setActiveSection] = useState('config');
   activeSection={activeSection}
   onSelect={setActiveSection}
   renderEyebrow={(s) => `… — ${s.index} — … CONSOLE`}
-  railStorageKey="<feature>-rail-pinned"
   navLabel="<feature> console navigation"
   asideSlot={/* <MapPreview …/> — §3.6 */}
   asideMirror={/* mirror-mode Dropdown */}

@@ -266,38 +266,6 @@ const handlePropsLibraryConfirm = (selectedProps) => {
     }
   };
 
-  const selectEmitterBpFolder = async () => {
-    const res = await window.electronAPI.invoke('settings-pick-folder', { title: 'Select Emitter.bp Folder' });
-    if (!res.success) return;
-    const folderPath = res.path;
-    const folderName = folderPath.split('\\').pop() || folderPath.split('/').pop();
-    if (!folderName.toLowerCase().includes('emitter')) {
-      const ok = await luxuryConfirm(
-        `Warning: The selected directory is named "${folderName}".\n\nNormally the "emitter.bp" folder should be selected.\n\nContinue anyway?`,
-        'Warning', 'Continue Anyway', 'Cancel'
-      );
-      if (!ok) return;
-    }
-    setEmitterBpFolderPath(folderPath);
-    await luxuryAlert(`✓ Emitter.bp folder selected: ${folderName}\n\nThis setting is saved and does not need to be set again.`, 'Success', 'success');
-  };
-
-  const selectMapsFolder = async () => {
-    const res = await window.electronAPI.invoke('settings-pick-folder', { title: 'Select Maps Folder' });
-    if (!res.success) return;
-    const folderPath = res.path;
-    const folderName = folderPath.split('\\').pop() || folderPath.split('/').pop();
-    if (folderName.toLowerCase() !== 'maps') {
-      const ok = await luxuryConfirm(
-        `Warning: The selected directory is named "${folderName}".\n\nNormally the "maps" folder should be selected.\n\nContinue anyway?`,
-        'Warning', 'Continue Anyway', 'Cancel'
-      );
-      if (!ok) return;
-    }
-    setMapsFolderPath(folderPath);
-    await luxuryAlert(`✓ Maps folder selected: ${folderName}\n\nThis setting is saved and does not need to be set again.`, 'Success', 'success');
-  };
-
 // -- Direct Emitter Management per Prop ---------------------------------------
 
 const getEmitterName = (path) => {
@@ -1253,7 +1221,6 @@ TypeClass = ${instanceName}`;
         }
         ghostLabel="PROPS"
         asideCaption={null}
-        railStorageKey="pt-rail-pinned"
         navLabel="Props console navigation"
       >
         {activePtSection === 'config' && <PropsConfiguration {...configProps} />}

@@ -15,7 +15,7 @@ const https = require('https');
 
 const { log } = require('./logger');
 
-const ASSETS_RAW      = 'https://raw.githubusercontent.com/timmasalme/ForgeMapToolkit-Assets/main';
+const ASSETS_RAW      = 'https://raw.githubusercontent.com/ForgeMapToolKit/ForgeMapToolkit-Assets/main';
 const DOWNLOADS_BASE  = `${ASSETS_RAW}/guides/downloads`;
 const MANIFEST_URL    = `${DOWNLOADS_BASE}/manifest.json`;
 

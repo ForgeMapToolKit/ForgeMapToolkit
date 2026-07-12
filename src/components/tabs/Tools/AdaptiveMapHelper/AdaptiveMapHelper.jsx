@@ -5,7 +5,8 @@ import './AdaptiveMapHelper.css';
 import AMHHelpModal from '../../HelpModals/AdaptiveMapHelper_help.jsx';
 import TabLayout from '../../../Shared/Ui/TabLayout/TabLayout';
 import { OutputChecklist } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
-import { usePersistentState } from '../../../Shared/MapLogic';
+import { usePersistentState, useMapInfo, useScmapPreview } from '../../../Shared/MapLogic';
+import { generateReadme as buildReadme, writeReadme } from '../../../../../utils/readmeGenerator';
 import MapCanvas from './MapCanvas.jsx';
 import {
   ICON_MASS, ICON_ENERGY, ICON_ACU, getAcuIcon,
@@ -18,15 +19,19 @@ export default function AdaptiveMapHelper({ settings, shared={}, onSharedChange=
 
   const [mapName, setMapName] = usePersistentState(shared, 'amh_mapName', '', onSharedChange);
 
-  const [mapInfo,       setMapInfo]       = useState(null);
-  const [mapSize,       setMapSize]       = useState(1024);
   const [parsed,        setParsed]        = useState(null);
   const [assignments,   setAssignments]   = useState({});
   const [activeSection, setActiveSection] = useState('canvas');
   const [generatedCode, setGeneratedCode] = useState('');
-  const [previewDataUrl,setPreviewDataUrl]= useState(null);
-  const [previewLoading,setPreviewLoading]= useState(false);
   const previewInputRef = useRef();
+
+  const { mapInfo } = useMapInfo({ mapName, mapsFolderPath: settings?.mapsFolder, settings });
+  const {
+    previewImageData: previewDataUrl,
+    setPreviewImageData: setPreviewDataUrl,
+    previewLoading,
+  } = useScmapPreview({ mapName, mapsFolderPath: settings?.mapsFolder, settings });
+  const mapSize = mapInfo?.playableSize || 1024;
   const [mirrorMode,    setMirrorMode]    = useState(false);
   const [quickArmy,     setQuickArmy]     = useState(null); // army key or null
   const [adaptiveStatus, setAdaptiveStatus] = useState(null); // null | 'running' | 'done' | 'error' | 'already'
@@ -48,35 +53,11 @@ export default function AdaptiveMapHelper({ settings, shared={}, onSharedChange=
   })();
 
 
-  // Reset preview when map changes
+  // Reset UI-only state when map changes — the preview itself is reset
+  // internally by useScmapPreview.
   useEffect(() => {
-    setPreviewDataUrl(null);
     setMetaOpen(false);
   }, [mapName, settings?.mapsFolder]);
-
-  const loadPreviewFromScmap = async (mapFolderPath) => {
-    try {
-      setPreviewLoading(true);
-      const dirRes = await window.electronAPI.invoke('list-dir', { dirPath: mapFolderPath });
-      if (!dirRes?.success) return;
-      const scmapEntry = dirRes.entries.find(e => !e.isDirectory && e.name.toLowerCase().endsWith('.scmap'));
-      if (!scmapEntry) return;
-      const scmapPath = mapFolderPath + '\\' + scmapEntry.name;
-      const unpackRes = await window.electronAPI.invoke('scmap-unpack', { scmapPath });
-      if (!unpackRes?.success) return;
-      const unpackDir = await window.electronAPI.invoke('list-dir', { dirPath: unpackRes.outputFolder });
-      if (!unpackDir?.success) return;
-      const previewEntry = unpackDir.entries.find(e => /^previewimage/i.test(e.name));
-      if (!previewEntry) return;
-      const ddsPath = unpackRes.outputFolder + '\\' + previewEntry.name;
-      const ddsRes = await window.electronAPI.invoke('dds-to-dataurl', { filePath: ddsPath });
-      if (ddsRes?.success && ddsRes.dataUrl) setPreviewDataUrl(ddsRes.dataUrl);
-    } catch (e) {
-      console.warn('[AMH] preview load failed:', e);
-    } finally {
-      setPreviewLoading(false);
-    }
-  };
 
   const handleCustomPreviewUpload = (e) => {
     const file = e.target.files?.[0];
@@ -87,22 +68,14 @@ export default function AdaptiveMapHelper({ settings, shared={}, onSharedChange=
     e.target.value = '';
   };
 
+  // Parse _save.lua for army/mass/hydrocarbon markers — tab-specific parsing,
+  // no shared MapLogic hook covers this.
   useEffect(() => {
     const name   = (mapName||'').trim();
     const folder = (settings?.mapsFolder||'').trim();
-    if (!name||!folder) { setMapInfo(null); setParsed(null); return; }
+    if (!name||!folder) { setParsed(null); return; }
     const finalName     = /\.v\d{4}$/.test(name) ? name : name+'.v0001';
     const mapFolderPath = folder+'\\'+finalName;
-
-    window.electronAPI.invoke('read-map-info',{mapFolderPath}).then(res=>{
-      if (res?.success) {
-        setMapInfo({ok:true, mapSize:res.mapSize, km:res.km, playableSize:res.playableSize});
-        setMapSize(res.playableSize||1024);
-      } else setMapInfo({ok:false});
-    }).catch(()=>setMapInfo({ok:false}));
-
-    // Load preview image from scmap
-    loadPreviewFromScmap(mapFolderPath);
 
     window.electronAPI.invoke('list-dir',{dirPath:mapFolderPath}).then(async res=>{
       if (!res?.success) { setParsed(null); return; }
@@ -120,13 +93,7 @@ export default function AdaptiveMapHelper({ settings, shared={}, onSharedChange=
   const removeAssignment = key => setAssignments(prev=>{ const n={...prev}; delete n[key]; return n; });
 
   // ── README ──────────────────────────────────────────────────────────────────
-  const buildReadme = (finalName, mapsFolder, writtenFiles) => {
-    const now     = new Date();
-    const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    const divider = '─'.repeat(70);
-    const thick   = '═'.repeat(70);
-
+  const buildAmhReadme = (finalName, mapsFolder, writtenFiles) => {
     const spwnMex = {}, spwnHydro = {};
     Object.entries(assignments).forEach(([key, a]) => {
       if (!a?.army) return;
@@ -134,47 +101,37 @@ export default function AdaptiveMapHelper({ settings, shared={}, onSharedChange=
       (bucket[a.army] ||= []).push(key);
     });
 
-    const lines = [];
-    lines.push(thick);
-    lines.push('  ADAPTIVE MAP HELPER — GENERATION README');
-    lines.push('  ForgeMapToolkit');
-    lines.push(thick);
-    lines.push('');
-    lines.push(`  Generated  : ${dateStr} at ${timeStr}`);
-    lines.push(`  Map        : ${finalName}`);
-    lines.push(`  Maps Folder: ${mapsFolder}`);
-    lines.push('');
-    lines.push(divider);
-    lines.push('  FILES WRITTEN');
-    lines.push(divider);
-    writtenFiles.forEach(f => lines.push(`  ${f}`));
-    lines.push('');
-    lines.push(divider);
-    lines.push('  ARMY ASSIGNMENTS');
-    lines.push(divider);
-    lines.push(`  Players  : ${maxPlayers}`);
-    lines.push(`  Assigned : ${assigned} / ${totalMarkers} markers`);
-    lines.push('');
+    const armyLines = [];
     armyList.filter(a => a !== 'ARMY_17').forEach(army => {
       const mex   = spwnMex[army]   || [];
       const hydro = spwnHydro[army] || [];
       if (mex.length === 0 && hydro.length === 0) return;
-      lines.push(`  ${army}`);
-      if (mex.length)   lines.push(`    Mass       : ${mex.join(', ')}`);
-      if (hydro.length) lines.push(`    Hydrocarbon: ${hydro.join(', ')}`);
+      armyLines.push(`  ${army}`);
+      if (mex.length)   armyLines.push(`    Mass       : ${mex.join(', ')}`);
+      if (hydro.length) armyLines.push(`    Hydrocarbon: ${hydro.join(', ')}`);
     });
-    lines.push('');
-    lines.push(thick);
-    lines.push('  COPYRIGHT');
-    lines.push(thick);
-    lines.push('');
-    lines.push('  Creative Commons Attribution-NonCommercial 4.0 International');
-    lines.push('  Copyright (c) 2026 timmasalme');
-    lines.push('');
-    lines.push('  This file was generated by ForgeMapToolkit for your personal use.');
-    lines.push('  ForgeMapToolkit · https://github.com/timmasalme/ForgeMapToolkit');
-    lines.push(thick);
-    return lines.join('\n');
+
+    return buildReadme({
+      tool:    'Adaptive Map Helper',
+      mapName: finalName,
+      mapSize: mapInfo?.ok ? `${mapInfo.mapSize} × ${mapInfo.mapSize} (${mapInfo.km} km)` : '—',
+      sections: [
+        { title: 'MAP SETTINGS (extra)', entries: [['Maps Folder', mapsFolder]] },
+        { title: 'FILES WRITTEN',        lines: writtenFiles.map(f => `  ${f}`) },
+        {
+          title:   'ARMY ASSIGNMENTS',
+          entries: [['Players', maxPlayers], ['Assigned', `${assigned} / ${totalMarkers} markers`]],
+          lines:   ['', ...armyLines],
+        },
+      ],
+      footer: [
+        'Creative Commons Attribution-NonCommercial 4.0 International',
+        'Copyright (c) 2026 timmasalme',
+        '',
+        'This file was generated by ForgeMapToolkit for your personal use.',
+        'ForgeMapToolkit · https://github.com/ForgeMapToolKit/ForgeMapToolkit',
+      ],
+    });
   };
 
   // ── Write tables.lua (+ options/script unless tablesOnly, + README if enabled) ──
@@ -200,9 +157,9 @@ export default function AdaptiveMapHelper({ settings, shared={}, onSharedChange=
     }
 
     if (generateReadme) {
-      const readme = buildReadme(finalName, mapsFolder, writtenFiles);
+      const readme = buildAmhReadme(finalName, mapsFolder, writtenFiles);
       writes.push(
-        window.electronAPI.invoke('write-file', { filePath: `${mapFolderPath}\\AdaptiveMapHelper_Generation_README.txt`, content: readme }),
+        writeReadme(`${mapFolderPath}\\AdaptiveMapHelper_Generation_README.txt`, readme),
       );
     }
 
@@ -425,7 +382,6 @@ export default function AdaptiveMapHelper({ settings, shared={}, onSharedChange=
         ]}
         activeSection={activeSection}
         onSelect={setActiveSection}
-        railStorageKey="amh-rail-pinned"
         navLabel="Adaptive Map Helper navigation"
         canvasToolbar={canvasToolbarOn}
         topBar={topBar}

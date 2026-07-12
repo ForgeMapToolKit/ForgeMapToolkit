@@ -22,6 +22,7 @@
 .workspace {
   position: relative;
   display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -733,35 +734,58 @@ html[data-theme="light"] .section-desc {
 
 /* ── Layout Z — Full Width + Internal Grid ───────────────────────── */
 
+/* Outer row: [2nd rail?] [layout-z]. The 2nd rail (Z·exclusive only) is a
+   true second sidepanel — full height, next to the main console rail — not
+   content squeezed into the section header. Matches the ASCII in
+   docs/LAYOUTS.md: "MAIN RAIL | 2ND RAIL | GROUP A | GROUP B". */
+.layout-z-outer {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* The whole Z body (header, headerExtra, grid, footerExtra) scrolls as one
+   unit — same principle as Layout X's .section-content. Forcing only the
+   grid to flex:1/min-height:0 (the old approach) meant a tall headerExtra/
+   footerExtra (an auth panel, a notes+submit row) could squeeze the grid to
+   ~0px with no way to reach it — content wasn't gone, just uncscrollably
+   clipped. Letting the column scroll and the grid size to its own content
+   (CSS Grid's default row-auto-sizing — the taller of Group A/B wins) fixes
+   that without introducing nested/competing scrollbars. */
 .layout-z {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .layout-z-header {
   flex-shrink: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-xl);
   padding-right: var(--space-3xl);
 }
 
+/* Full-width content above/below the two-column grid — belongs to neither
+   group alone (an auth panel, a shared field, a notes+submit row). */
+.layout-z-header-extra,
+.layout-z-footer-extra {
+  flex-shrink: 0;
+  padding: 0 var(--space-3xl);
+}
+.layout-z-header-extra { padding-top: var(--space-lg); }
+.layout-z-footer-extra { padding-bottom: var(--space-xl); }
+
 .layout-z-grid {
-  flex: 1;
-  min-height: 0;
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  overflow: hidden;
+  align-items: start;
 }
 
 .layout-z-group {
   min-width: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
   padding: var(--space-xl) var(--space-3xl) var(--space-4xl);
   transition: opacity 0.25s var(--ease-decay);
 }
@@ -775,40 +799,51 @@ html[data-theme="light"] .section-desc {
   opacity: 0.4;
 }
 
-/* Second rail — Z · exclusive only */
+/* ── Second rail — Z · exclusive only ─────────────────────────────
+   A real vertical sidepanel: fixed width, full height, own scroll.
+   Same tick language as .rail-item (left accent bar = selection), just
+   without the collapse/pin mechanic of the main console rail. */
 .layout-z-second-rail {
+  flex-shrink: 0;
+  width: 168px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-bottom: var(--space-xl);
-  flex-shrink: 0;
+  padding: var(--space-2xl) var(--space-sm) var(--space-xl);
+  border-right: 1px solid var(--line-medium);
+  overflow-y: auto;
 }
 
 .layout-z-rail-item {
-  padding: var(--space-xs) var(--space-md);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
   background: none;
-  border: 1px solid var(--line-subtle);
-  border-radius: 2px;
+  border: none;
+  border-left: 2px solid transparent;
+  font-family: var(--font-display);
   font-size: var(--text-xs);
   font-weight: var(--weight-semi);
   letter-spacing: var(--track-wider);
   text-transform: uppercase;
   color: var(--ink-28);
   cursor: pointer;
+  text-align: left;
   white-space: nowrap;
-  transition: color var(--dur-base), border-color var(--dur-base), background var(--dur-base);
+  transition: color var(--dur-base) linear, border-color var(--dur-base) linear, background var(--dur-base) linear;
 }
 
 .layout-z-rail-item:hover {
   color: var(--ink-55);
-  border-color: var(--line-medium);
   background: rgba(255, 255, 255, 0.03);
 }
 
 .layout-z-rail-item.active {
   color: var(--tab-color);
-  border-color: var(--tab-color);
-  box-shadow: 0 0 8px var(--tab-glow);
+  border-left-color: var(--tab-color);
+  background: color-mix(in srgb, var(--tab-color) 7%, transparent);
+  box-shadow: inset 0 0 24px -14px var(--tab-glow);
 }
 
 /* ── Layout W — Full Width + Top Bar ─────────────────────────────── */

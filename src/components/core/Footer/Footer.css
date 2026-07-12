@@ -276,15 +276,17 @@
 
 .hc-overlay,
 .help-modal-overlay,
-[data-help-modal] {
+[data-help-modal],
+[data-suite-overlay] {
   z-index: 9999 !important;
 }
 
-/* ── Chrome-overlay retraction when HelpConsole is open ─────────────────── */
+/* ── Chrome-overlay retraction when HelpConsole (or any [data-suite-overlay],
+   e.g. the asset Library overlays) is open ─────────────────────────────── */
 
-.forgemaptoolkit:has(.hc-overlay) .ftr-root,
-.forgemaptoolkit:has(.hc-overlay) .ftr-panel,
-.forgemaptoolkit:has(.hc-overlay) .ftr-backdrop {
+.forgemaptoolkit:has(.hc-overlay, [data-suite-overlay]) .ftr-root,
+.forgemaptoolkit:has(.hc-overlay, [data-suite-overlay]) .ftr-panel,
+.forgemaptoolkit:has(.hc-overlay, [data-suite-overlay]) .ftr-backdrop {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;

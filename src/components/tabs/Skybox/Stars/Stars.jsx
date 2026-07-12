@@ -320,7 +320,6 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
         sections={sections}
         activeSection={activeSection}
         onSelect={setActiveSection}
-        railStorageKey="st-rail-pinned"
         asideSlot={asideBySection[activeSection]}
         asideCaption={null}
         asideMirror={null}
