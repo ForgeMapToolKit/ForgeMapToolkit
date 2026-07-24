@@ -301,6 +301,11 @@
   --rockerosion-glow:        rgba(255, 175, 0, 0.35);
   --rockerosion-glow-strong: rgba(255, 175, 0, 0.60);
 
+  /* Terrain Type — Teal */
+  --terraintype-color:       #3EC6A6;
+  --terraintype-glow:        rgba(62, 198, 166, 0.35);
+  --terraintype-glow-strong: rgba(62, 198, 166, 0.60);
+
   /* Stars — Purple */
   --stars-color:       #8A12BD;
   --stars-glow:        rgba(138, 18, 189, 0.35);
@@ -310,6 +315,16 @@
   --skybox-generator-color:       #3B76FF;
   --skybox-generator-glow:        rgba(59, 118, 255, 0.35);
   --skybox-generator-glow-strong: rgba(59, 118, 255, 0.60);
+
+  /* Wave Normals — Ocean azure */
+  --wavenormals-color:       #00A3E0;
+  --wavenormals-glow:        rgba(0, 163, 224, 0.35);
+  --wavenormals-glow-strong: rgba(0, 163, 224, 0.60);
+
+  /* Node Editor — Signal green */
+  --node-editor-color:       #2FE39B;
+  --node-editor-glow:        rgba(47, 227, 155, 0.35);
+  --node-editor-glow-strong: rgba(47, 227, 155, 0.60);
 
   /* SCMAP Tool — Yellow */
   --scmaptool-color:       #FFFA00;

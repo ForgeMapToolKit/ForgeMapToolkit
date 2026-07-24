@@ -9,7 +9,7 @@
 export const LS_KEY = 'fmtk_shared_state';
 
 /** Prefixes whose keys are persisted to localStorage across sessions. */
-export const PERSIST_PREFIX = ['tm_', 're_'];
+export const PERSIST_PREFIX = ['tm_', 're_', 'ne_'];
 
 /** Per-tab map-name keys that a saved settings.mapName is projected into. */
 export const MAP_NAME_SHARED_KEYS = [
@@ -22,6 +22,8 @@ export const MAP_NAME_SHARED_KEYS = [
   'sb_mapName',  // Stars + SkyboxGenerator (same key)
   'amh_mapName', // AdaptiveMapHelper
   'mr_mapName',  // MapResizer
+  'wn_mapName',  // WaveNormals
+  'tt_mapName',  // TerrainType
 ];
 
 /** Read the persisted slice of the shared store from localStorage. */

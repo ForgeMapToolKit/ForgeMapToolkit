@@ -229,6 +229,10 @@ html[data-theme="light"] {
   --rockerosion-glow:           rgba(38,128,192,0.22);
   --rockerosion-glow-strong:    rgba(38,128,192,0.44);
 
+  --terraintype-color:          #4FA9DA;
+  --terraintype-glow:           rgba(38,128,192,0.22);
+  --terraintype-glow-strong:    rgba(38,128,192,0.44);
+
   --stars-color:                #4FA9DA;
   --stars-glow:                 rgba(38,128,192,0.22);
   --stars-glow-strong:          rgba(38,128,192,0.44);

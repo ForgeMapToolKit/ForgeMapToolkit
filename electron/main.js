@@ -41,11 +41,15 @@ require('./modules/file-ipc');
 require('./modules/props');
 require('./modules/community');
 require('./modules/scmap');
-require('./modules/map-resizer');
+require('./modules/node-editor');
+require('./modules/terraintype');
+require('./modules/map-resizer').register();
 require('./modules/preview');
 require('./modules/cli-runner');
 require('./modules/cli-session-store');
 require('./modules/editor-bridge').register();
+require('./modules/dds').register();
+require('./modules/texture-scanner');
 registerSettingsIpc();
 
 // ── withPathGuard: inject readSettings + log ──────────────────────────────────
@@ -271,6 +275,11 @@ function installCSP() {
     "img-src 'self' data: file: https://raw.githubusercontent.com https://avatars.githubusercontent.com",
     "media-src 'self' data:",
     `connect-src 'self'${devExtra}`,
+    // Wave Normals bakes its ocean simulation in a module worker — four 2D
+    // FFTs per layer would otherwise lock the renderer for seconds. Without an
+    // explicit worker-src this falls back to default-src 'none' and the worker
+    // never starts. 'self' only: no blob:, no remote origins.
+    `worker-src 'self'${isDev ? ' http://localhost:5173' : ''}`,
     "font-src 'self' https://fonts.gstatic.com",
     "object-src 'none'",
     "base-uri 'self'",

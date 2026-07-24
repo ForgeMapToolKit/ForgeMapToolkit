@@ -148,6 +148,106 @@ ipcMain.handle('scmap-unpack', withPathGuard(
   }
 }));
 
+// ── scmap-read-terrain ────────────────────────────────────────────────────────
+// Lightweight read of the real elevation data straight out of the .scmap binary
+// (no folder unpack) — used by TreeMap/RockErosion to place markers at the
+// actual terrain height, mask out water and compute real slope, instead of the
+// y=0 placeholder the engine silently corrects for at load time.
+ipcMain.handle('scmap-read-terrain', withPathGuard(
+  ({ scmapPath }) => [scmapPath],
+  async (event, { scmapPath }) => {
+  try {
+    const buf  = fs.readFileSync(scmapPath);
+    const data = scmapUtils.readDatastream(buf);
+    return {
+      success: true,
+      size: data.size,
+      heightmapScale: data.heightmapScale,
+      heightmap: data.heightmap.data,
+      waterPresent: data.waterSettings.waterPresent,
+      waterElevation: data.waterSettings.elevation,
+    };
+  } catch (err) {
+    log.error('[scmap] scmap-read-terrain failed:', err);
+    return { success: false, error: err.message };
+  }
+}));
+
+// ── scmap-patch-water ────────────────────────────────────────────────────────
+// Patches the water settings inside an unpacked map's data.lua so the four wave
+// normal textures, their movement vectors and repeat rates point at a generated
+// set — no manual editing. Symmetric with exportScmapData: parse data.lua, patch
+// the waterSettings table, luaSerialize back. The caller (Wave Normals export)
+// runs scmap-unpack before and scmap-pack after, the same proven cycle the props
+// injector uses.
+ipcMain.handle('scmap-patch-water', withPathGuard(
+  ({ folder }) => [folder],
+  async (event, { folder, waveTextures, waveNormalRepeats, liftSun = false }) => {
+    try {
+      const dataLuaPath = path.join(folder, 'data.lua');
+      if (!fs.existsSync(dataLuaPath)) {
+        return { success: false, error: `data.lua not found in ${folder}` };
+      }
+
+      const data = scmapUtils.parseLuaDataFile(fs.readFileSync(dataLuaPath, 'utf8'));
+      const ws = data.waterSettings;
+      if (!ws) return { success: false, error: 'data.lua has no waterSettings block' };
+
+      if (!Array.isArray(waveTextures) || waveTextures.length !== 4) {
+        return { success: false, error: 'waveTextures must be exactly 4 entries' };
+      }
+
+      const before = { sunDirection: ws.sunDirection };
+
+      // The four NormalSampler slots, in order. Keep any fields we don't own.
+      ws.waveTextures = waveTextures.map((t) => ({
+        movement: [Number(t.movement?.[0] ?? 0), Number(t.movement?.[1] ?? 0)],
+        path: String(t.path || ''),
+      }));
+
+      if (Array.isArray(waveNormalRepeats) && waveNormalRepeats.length === 4) {
+        ws.waveNormalRepeats = waveNormalRepeats.map(Number);
+      }
+
+      // The stock water sun points ~74° BELOW the horizon (y < 0), which routes
+      // calculateSunReflection into a legacy path with the specular highlight
+      // off — the reason FA water looks matte on nearly every map. Optionally
+      // flip it above the horizon, keeping azimuth, so the new normals actually
+      // catch a sun. Opt-in: it changes the whole water look.
+      // NOTE: parseLuaDataFile returns Lua tables as 1-indexed objects
+      // ({1:x, 2:y, 3:z}), not JS arrays — so the components are at keys 1/2/3,
+      // not 0/1/2. (Assigning a plain 0-indexed JS array back is fine; luaSerialize
+      // re-emits it as a 1-indexed Lua array.) Reading the y component at the
+      // wrong index is exactly how a sun-lift can silently do nothing.
+      let sunLifted = false;
+      const sd = ws.sunDirection;
+      const sy = sd != null ? Number(sd[2] ?? sd[1]) : NaN;   // Lua [2] = y; fall back to [1] if array
+      if (liftSun && Number.isFinite(sy) && sy < 0) {
+        const x = Number(sd[1] ?? sd[0]);
+        const z = Number(sd[3] ?? sd[2]);
+        const len = Math.hypot(x, sy, z) || 1;
+        const ny = Math.max(0.42 * len, Math.abs(sy));   // floor ~25° elevation
+        const vl = Math.hypot(x, ny, z) || 1;
+        ws.sunDirection = [x / vl, ny / vl, z / vl];
+        sunLifted = true;
+      }
+
+      fs.writeFileSync(dataLuaPath, scmapUtils.luaSerialize(data));
+      log.info(`[scmap] patched water settings in ${dataLuaPath} (sunLifted=${sunLifted})`);
+
+      return {
+        success: true,
+        sunLifted,
+        sunDirection: ws.sunDirection,
+        before,
+      };
+    } catch (err) {
+      log.error('[scmap] scmap-patch-water failed:', err);
+      return { success: false, error: err.message };
+    }
+  },
+));
+
 // ── scmap-pack ───────────────────────────────────────────────────────────────
 // Reads an unpacked folder from public/scmap/<mapName>/ and writes a .scmap.
 // Accepts two calling conventions:

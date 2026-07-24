@@ -30,7 +30,7 @@ export function useScmapPreview({ mapName, mapsFolderPath, settings }) {
       .then(dataUrl => { if (!cancelled && dataUrl) setPreviewImageData(dataUrl); })
       .finally(() => { if (!cancelled) setPreviewLoading(false); });
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [mapName, mapsFolderPath, settings?.mapsFolder]);
 
   // Decode data URL → Image for canvas drawing.

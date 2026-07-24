@@ -1,0 +1,225 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CONTENT PRIMITIVES — shared prose / opt-in content blocks
+   Single source for building blocks that appear in MORE THAN ONE
+   content surface: the Footer article viewer (FooterContentViewer,
+   hand-authored HTML, class written by the article author) and the
+   HelpConsole Sections (CodeSection.jsx, ShortcutsSection.jsx,
+   React-rendered). One definition means a code window or a shortcuts
+   grid looks identical everywhere it appears instead of two families
+   of near-duplicate rules drifting apart.
+
+   Every value is a design-system token; the one dynamic accent is the
+   inherited --tab-color.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════
+   CODE — terminal-style window
+   Markup: <div class="cp-code"><div class="cp-code__header">…</div>
+   <div class="cp-code__scroll"><pre class="cp-code__pre"><code>…
+   </code></pre></div></div>
+
+   Deliberately NOT given the left-accent-border-on-tinted-surface
+   treatment .cp-callout owns — a code block sharing that look just
+   reads as "another callout." A near-black bordered box with its own
+   filled title bar reads as a distinct register: something you'd run,
+   not something you'd read.
+   ══════════════════════════════════════════════════════════════════ */
+
+.cp-code {
+  margin: 0 0 var(--space-md);
+  background: var(--surface-canvas);
+  border: 1px solid var(--line-ghost-border);
+  border-radius: var(--space-2xs);
+  overflow: hidden;
+}
+
+/* Whole bar wears the filled-tab-color / on-accent-text / uppercase
+   font-display look — chrome, not a button inviting a click, so no
+   hover state or glow of its own. */
+.cp-code__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--tab-color);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-snug);
+  text-transform: uppercase;
+  color: var(--text-on-accent);
+}
+
+.cp-code__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--text-body-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp-code__lang {
+  flex: 0 0 auto;
+  font-size: var(--text-xs);
+  opacity: 0.65;
+}
+
+.cp-code__scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-12) transparent;
+}
+.cp-code__scroll::-webkit-scrollbar { height: var(--size-scrollbar); }
+.cp-code__scroll::-webkit-scrollbar-thumb { background: var(--surface-scrollbar); }
+.cp-code__scroll::-webkit-scrollbar-thumb:hover { background: var(--tab-color); }
+
+.cp-code__pre {
+  margin: 0;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink-72);
+  white-space: pre;
+  tab-size: 2;
+  -webkit-font-smoothing: antialiased;
+}
+.cp-code__pre code {
+  /* Reset inline-code overrides — the terminal box owns its own surface. */
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* optional per-line layout (React-rendered code only — hand-authored
+   Footer articles print one flat <pre><code> and never opt into this) */
+.cp-code__line { display: flex; }
+.cp-code__line-num {
+  display: inline-block;
+  min-width: 28px;
+  color: var(--ink-15);
+  text-align: right;
+  margin-right: var(--space-lg);
+  user-select: none;
+  flex-shrink: 0;
+}
+.cp-code__line-body { flex: 1; min-width: 0; }
+
+/* syntax tokens — same VS Code dark palette everywhere a snippet
+   renders, whether hand-authored static HTML or CodeSection.jsx's
+   tokenizer output. cp-tok-key / cp-tok-bool exist only for the JSON
+   tokenizer (React side) and deliberately reuse the ident/keyword
+   tokens rather than inventing new colors. */
+.cp-tok-keyword  { color: var(--code-keyword); }
+.cp-tok-string   { color: var(--code-string); }
+.cp-tok-number   { color: var(--code-number); }
+.cp-tok-comment  { color: var(--code-comment); font-style: italic; }
+.cp-tok-operator { color: var(--code-default); }
+.cp-tok-ident    { color: var(--code-ident); }
+.cp-tok-key      { color: var(--code-ident); }
+.cp-tok-bool     { color: var(--code-keyword); }
+.cp-tok-plain    { color: var(--code-default); }
+.cp-tok-cmd      { color: var(--code-cmd); }
+.cp-tok-flag     { color: var(--code-number); }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   KEYBOARD KEY — <kbd> chip
+   .cp-kbd is the class React components (ShortcutsSection) apply
+   explicitly; .fcv-content kbd covers hand-authored Footer articles,
+   which just type a bare <kbd> tag with no class. Same declarations,
+   two selectors, so both authoring paths render identically.
+   ══════════════════════════════════════════════════════════════════ */
+
+.cp-kbd,
+.fcv-content kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2xs) var(--space-xs);
+  background: var(--surface-face-a);
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-snug);
+  color: var(--ink-72);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   SHORTCUTS — action / key-combo register
+   Markup: <div class="cp-shortcuts"><div class="cp-shortcuts__row">
+   <span class="cp-shortcuts__action">…</span>
+   <span class="cp-shortcuts__combo"><kbd>…</kbd></span></div>…</div>
+
+   A single two-column grid across every row (not per-row flex) so key
+   badges land in one aligned column regardless of action-text length.
+   ══════════════════════════════════════════════════════════════════ */
+
+.cp-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0;
+  margin: 0 0 var(--space-md);
+}
+
+.cp-shortcuts__row { display: contents; }
+
+.cp-shortcuts__action,
+.cp-shortcuts__combo {
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--line-faint);
+  display: flex;
+  align-items: center;
+}
+
+.cp-shortcuts__action {
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-60);
+}
+
+.cp-shortcuts__combo {
+  gap: var(--space-2xs);
+  justify-content: flex-end;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   CALLOUT / NOTES — opt-in aside box
+   .cp-callout is the plain form; .cp-notes is the same box with a
+   small mono eyebrow label so a "Notes" aside reads as its own
+   semantic block instead of a second, unlabeled callout sitting next
+   to one. Same treatment on purpose — the box was never the problem.
+   ══════════════════════════════════════════════════════════════════ */
+
+.cp-callout,
+.cp-notes {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
+  background: var(--surface-ghost);
+  border-left: 2px solid var(--tab-color);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-55);
+}
+
+.cp-callout p:last-child,
+.cp-notes p:last-child { margin-bottom: 0; }
+
+.cp-notes__label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--tab-color);
+}

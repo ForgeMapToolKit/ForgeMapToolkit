@@ -214,7 +214,7 @@ process.on('uncaughtException', (err) => {
   log.error('UNCAUGHT EXCEPTION:', err);
   try { logStream.write(`[FATAL] ${err.stack}\n`); } catch (_) {}
   try {
-    for (const win of BrowserWindow.getAllWindows()) {
+    for (const win of _BrowserWindow.getAllWindows()) {
       if (!win.isDestroyed()) win.webContents.send('app-error', {
         title:   'Unexpected Error',
         message: err.message || String(err),
@@ -230,7 +230,7 @@ process.on('unhandledRejection', (reason) => {
     ? reason.message
     : (typeof reason === 'string' ? reason : JSON.stringify(reason));
   try {
-    for (const win of BrowserWindow.getAllWindows()) {
+    for (const win of _BrowserWindow.getAllWindows()) {
       if (!win.isDestroyed()) win.webContents.send('app-error', {
         title:   'Unexpected Error',
         message: msg || 'Unhandled rejection',

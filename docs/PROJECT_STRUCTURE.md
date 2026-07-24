@@ -107,6 +107,13 @@ ForgeMapToolkit
 │       │   │   └── UnitLibrary/
 │       │   ├── MapLogic/                   ← hooks + IO, no CSS
 │       │   │   ├── index.js                ← usePersistentState, useMapInfo, useScmapPreview, scmapIO, mapGeometry, mapCanvas, imageChannels
+│       │   ├── Ocean/                      ← FFT ocean simulator (no DOM/React — runs in a worker)
+│       │   │   ├── fft.js                  ← radix-2 FFT; the inverse is unnormalised on purpose
+│       │   │   ├── random.js               ← seeded xorshift128+ / Gaussian
+│       │   │   ├── spectrum.js             ← Phillips / PM / JONSWAP / TMA + dispersion + spreading
+│       │   │   ├── ocean.js                ← h̃₀, time evolution, the four packed inverse transforms
+│       │   │   ├── bake.js                 ← Jacobian normals, det(J) foam, Lagrangian→Eulerian scatter, mips
+│       │   │   └── faWater.js              ← water2.fx contract: slots, bands, ×4 sum compensation, threshold solver
 │       │   └── Ui/
 │       │       ├── EntityPanel/            ← EntityPanel.jsx (EntityCard, CoordinateList, OutputChecklist, MapPreview, EmitterToggleBlock, …)
 │       │       ├── HelpPanel/              ← HelpPanel.jsx + Sections/ (Workflow, Media, Troubleshoot, Shortcuts, Code)
@@ -123,7 +130,11 @@ ForgeMapToolkit
 │           │   ├── CustomProps/
 │           │   │   └── TextureEditor/
 │           │   ├── RockErosion/
-│           │   └── Trees/
+│           │   ├── Trees/
+│           │   └── WaveNormals/            ← built on the shared UI system (Layout X · half)
+│           │       ├── bakeWorker.js       ← runs Shared/Ocean off the renderer thread
+│           │       ├── useBake.js          ← worker lifecycle + layer results
+│           │       └── renderPreview.js    ← CPU composite using the exact shader reconstruction
 │           │
 │           ├── Skybox                      ← not yet fully migrated
 │           │   ├── SkyboxGenerator/

@@ -16,6 +16,23 @@ const { log } = require('./logger');
 const { readSettings, SCMAP_DIR } = require('./settings');
 const scmapUtils = require('../../utils/scmap');
 const { execFile, execFileSync } = require('child_process');
+const { withPathGuard: _withPathGuardBase } = require('./security');
+function withPathGuard(pathExtractor, handler) {
+  return _withPathGuardBase(pathExtractor, handler, readSettings, log);
+}
+
+// 'editorPath' is a full executable path handed to execFile() below as the
+// COMMAND itself, not just an argument — unlike a file read/write path,
+// isPathAllowed()'s root-prefix check doesn't fit here (the editor .exe
+// isn't guaranteed to live under mapsFolder/fafPath/etc). Instead, only
+// accept it when it matches the path the user actually configured in
+// Settings → Game Paths, so a caller can't substitute an arbitrary
+// executable to run.
+function isConfiguredEditorPath(candidate) {
+  const configured = readSettings().editorPath;
+  if (!configured || !candidate) return false;
+  return path.resolve(candidate) === path.resolve(configured);
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PREVIEW IMAGE — IPC HANDLERS
@@ -28,7 +45,9 @@ const { execFile, execFileSync } = require('child_process');
 // Args: { mapFolder }  — absolute path to the source map folder
 // Returns: { success, newMapFolder, newVersionName } | { success: false, error }
 
-ipcMain.handle('mr-duplicate-map-version', async (event, { mapFolder }) => {
+ipcMain.handle('mr-duplicate-map-version', withPathGuard(
+  ({ mapFolder }) => [mapFolder],
+  async (event, { mapFolder }) => {
   try {
     if (!fs.existsSync(mapFolder)) {
       return { success: false, error: `Map folder not found: ${mapFolder}` };
@@ -131,7 +150,7 @@ ipcMain.handle('mr-duplicate-map-version', async (event, { mapFolder }) => {
     log.error('[mr-duplicate-map-version] failed:', e);
     return { success: false, error: e.message };
   }
-});
+}));
 
 // ── make-map-adaptive ─────────────────────────────────────────────────────────
 // Renames a map folder and all its files/Lua references to include the
@@ -425,7 +444,29 @@ ipcMain.handle('make-map-adaptive', async (event, { mapFolder }) => {
 // Returns: { success, pngPath } | { success: false, error }
 
 ipcMain.handle('preview-render', async (event, { editorPath, width, height, scenarioPath, outputFolder, renderProps = true }) => {
+  // Declared here (not inside the try{} below) so the catch{} block can also
+  // call restoreScenario() — a const/let declared inside try{} is out of
+  // scope in the paired catch{}, which silently swallowed restore failures
+  // (the catch-block call site wraps it in its own try/catch) whenever
+  // preview-render threw after props had been stripped from the scenario.
+  let scenarioBackup = null;
+  const restoreScenario = () => {
+    if (scenarioBackup !== null) {
+      try {
+        fs.writeFileSync(scenarioPath, scenarioBackup, 'utf8');
+        log.info('[preview-render] scenario restored after render');
+      } catch (e) {
+        log.error('[preview-render] failed to restore scenario:', e.message);
+      }
+      scenarioBackup = null;
+    }
+  };
+
   try {
+    if (!isConfiguredEditorPath(editorPath)) {
+      log.warn('[preview-render] Blocked editorPath not matching configured Map Editor path:', editorPath);
+      return { success: false, error: 'editorPath does not match the configured Map Editor path' };
+    }
     if (!fs.existsSync(editorPath)) {
       return { success: false, error: `Editor not found: ${editorPath}` };
     }
@@ -474,8 +515,8 @@ ipcMain.handle('preview-render', async (event, { editorPath, width, height, scen
     // ── Optionally strip props from scenario before render ───────────────────
     // If renderProps === false, we temporarily blank out the Props table in the
     // _scenario.lua so the editor renders the map without any props.
-    // The original file is restored after the render completes (or fails).
-    let scenarioBackup = null;
+    // The original file is restored after the render completes (or fails),
+    // via restoreScenario() declared above the outer try{}.
     if (!renderProps && fs.existsSync(scenarioPath)) {
       try {
         scenarioBackup = fs.readFileSync(scenarioPath, 'utf8');
@@ -492,18 +533,6 @@ ipcMain.handle('preview-render', async (event, { editorPath, width, height, scen
         scenarioBackup = null; // don't attempt restore if write failed
       }
     }
-
-    const restoreScenario = () => {
-      if (scenarioBackup !== null) {
-        try {
-          fs.writeFileSync(scenarioPath, scenarioBackup, 'utf8');
-          log.info('[preview-render] scenario restored after render');
-        } catch (e) {
-          log.error('[preview-render] failed to restore scenario:', e.message);
-        }
-        scenarioBackup = null;
-      }
-    };
     // ─────────────────────────────────────────────────────────────────────────
 
     log.info(`[preview-render] calling: "${editorPath}" -renderPreviewImage ${width} ${height} "${scenarioPath}" "${pngPath}"`);
@@ -703,7 +732,11 @@ ipcMain.handle('preview-image-step', async (event, { step, mapName, width, heigh
 
     } else if (step === 'render') {
       // ── Step 2: render PNG via Map Editor ────────────────────────────────
-      if (!editorPath || !fs.existsSync(editorPath)) {
+      if (!isConfiguredEditorPath(editorPath)) {
+        log.warn('[preview-image-step] Blocked editorPath not matching configured Map Editor path:', editorPath);
+        return { ok: false, error: 'editorPath does not match the configured Map Editor path' };
+      }
+      if (!fs.existsSync(editorPath)) {
         return { ok: false, error: `Map Editor not found: ${editorPath || '(not set)'}` };
       }
       // Find the scenario file

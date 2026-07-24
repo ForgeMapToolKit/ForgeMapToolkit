@@ -1,0 +1,186 @@
+/* TerrainType Auto-Paint — tab-specific exceptions only.
+   Layout/chrome come from TabLayout; the layer picker is the shared Dropdown.
+   All values via design-system tokens; the accent maps from the registry. */
+
+.terraintype-tab {
+  --tab-color:       var(--terraintype-color);
+  --tab-glow:        var(--terraintype-glow);
+  --tab-glow-strong: var(--terraintype-glow-strong);
+  background-color: var(--surface-canvas);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
+}
+
+/* ── Legend-rail escape hatch (same pattern as RockErosion/Trees) ── */
+.terraintype-tab .workspace-main-inner--half { overflow: visible; }
+.terraintype-tab .preview-panel              { overflow: visible; }
+
+.terraintype-tab .section-content,
+.terraintype-tab .ec-legend-cards,
+.terraintype-tab .preview-panel-body { scrollbar-width: none; }
+.terraintype-tab .section-content::-webkit-scrollbar,
+.terraintype-tab .ec-legend-cards::-webkit-scrollbar,
+.terraintype-tab .preview-panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── meta / notes ── */
+.tt-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  letter-spacing: 0.03em;
+}
+.tt-meta b { color: var(--tab-color); font-weight: 600; }
+
+.tt-note,
+.tt-error {
+  margin-top: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+.tt-note {
+  background: var(--tab-glow);
+  border: 1px solid var(--tab-glow-strong);
+  color: var(--ink-72);
+}
+.tt-error {
+  background: rgba(254, 24, 24, 0.10);
+  border: 1px solid rgba(254, 24, 24, 0.30);
+  color: #ff9a9a;
+}
+
+/* ── blend controls ── */
+.tt-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--text-xs);
+  color: var(--ink-55);
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: var(--space-xs);
+}
+.tt-toggle input,
+.tt-range { accent-color: var(--tab-color); }
+.tt-range { width: 100%; }
+
+/* ── layer slots ── */
+.tt-slots { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+.tt-slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--ink-09);
+  border: 1px solid var(--line-faint);
+}
+.tt-slot--ignored {
+  opacity: 0.5;
+  background: transparent;
+  border-style: dashed;
+}
+.tt-slot-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+.tt-swatch {
+  width: 12px; height: 12px;
+  border-radius: var(--radius-xs);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  flex: none;
+}
+.tt-slot-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-85);
+}
+.tt-exclude {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-3xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-45);
+  cursor: pointer;
+  user-select: none;
+}
+.tt-exclude input { accent-color: var(--tab-color); }
+.tt-excluded-note {
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--ink-38);
+}
+.tt-cov {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--tab-color);
+}
+.tt-slot-tex {
+  font-size: var(--text-2xs);
+  color: var(--ink-38);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+  align-self: center;
+}
+
+/* ── mask + albedo thumbnails ── */
+.tt-thumbs {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+}
+.tt-thumb-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+}
+.tt-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-faint);
+  background: var(--ink-11);
+  image-rendering: pixelated;
+  display: block;
+}
+.tt-thumb--base,
+.tt-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-30);
+  letter-spacing: 0.05em;
+}
+.tt-thumb-label {
+  font-size: var(--text-3xs);
+  color: var(--ink-35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tt-badge-block {
+  font-size: var(--text-3xs);
+  padding: 1px var(--space-3xs);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--tab-glow-strong);
+  color: var(--tab-color);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── apply ── */
+.tt-apply { min-width: 160px; }

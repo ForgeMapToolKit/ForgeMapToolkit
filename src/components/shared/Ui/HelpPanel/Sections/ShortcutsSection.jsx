@@ -27,17 +27,17 @@ import './sections.css';
 
 export default function ShortcutsSection({ label, items = [] }) {
   return (
-    <div className="hs-section hs-keys">
+    <div className="hs-section">
       {label && <div className="title-section">{label}</div>}
-      <div className="hs-keys__grid">
+      <div className="cp-shortcuts">
         {items.map((it, i) => {
           const keys = Array.isArray(it.keys) ? it.keys : [it.keys];
           return (
-            <div className="hs-keys__row" key={i}>
-              <span className="hs-keys__action">{it.action}</span>
-              <span className="hs-keys__combo">
+            <div className="cp-shortcuts__row" key={i}>
+              <span className="cp-shortcuts__action">{it.action}</span>
+              <span className="cp-shortcuts__combo">
                 {keys.map((k, j) => (
-                  <kbd className="hs-keys__kbd" key={j}>{k}</kbd>
+                  <kbd className="cp-kbd" key={j}>{k}</kbd>
                 ))}
               </span>
             </div>

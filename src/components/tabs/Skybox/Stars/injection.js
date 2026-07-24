@@ -76,7 +76,7 @@ export async function injectStarsIntoScmap({ mapName, mapsFolder, stars, setting
   let dataLua = await readFile(dataLuaPath);
 
   const newPlanetLua = buildPlanetLua(stars);
-  const planetsRegex = /(skyBox\s*=\s*\{[\s\S]*?planets\s*=\s*\{)([\s\S]*?)(\n        \},)/;
+  const planetsRegex = /(skyBox\s*=\s*\{[\s\S]*?planets\s*=\s*\{)([\s\S]*?)(\n {8}\},)/;
   if (!planetsRegex.test(dataLua)) throw new Error('planets section not found in skyBox.');
   dataLua = dataLua.replace(planetsRegex, (_, open, existing, close) => `${open}${existing}${newPlanetLua}${close}`);
   dataLua = dataLua.replace(/(\bversion\s*=\s*)(\d+)(\s*,)/, (m, pre, num, post) =>

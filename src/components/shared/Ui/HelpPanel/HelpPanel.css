@@ -173,24 +173,38 @@
   padding: var(--space-xl) var(--space-3xl) 0;
   overflow: hidden;
 }
-.hc-eyebrow {
+/* Register head — mirrors the footer's .ftr-panel-headline (index + big
+   designation on one baseline) so the help surface names its active SECTION
+   exactly the way the footer names the active TAB. The whole line carriage-
+   prints in as one unit. */
+.hc-headline {
   flex-shrink: 0;
-  font-size: var(--text-3xs);
-  font-weight: var(--weight-semi);
-  letter-spacing: var(--track-eyebrow);
-  text-transform: uppercase;
-  color: var(--ink-16);
-  margin-bottom: 14px;
-  clip-path: inset(0 100% 0 0);
-  animation: hc-print 0.22s var(--ease-out) 0.05s both;
-}
-/* type comes from the .title-main primitive; .hc-hero adds only the
-   carriage-print layout + animation */
-.hc-hero {
-  flex-shrink: 0;
-  margin: 0;
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-sm);
   clip-path: inset(0 100% 0 0);
   animation: hc-print 0.34s var(--ease-out) 0.08s both;
+}
+.hc-index {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  color: var(--ink-16);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.hc-designation {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4.2vw, 3.5rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-tight);
+  color: var(--ink-100);
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
 }
 /* the first section in a content area follows the register head directly —
    it needs no neutral divider of its own (later sections keep theirs). */
@@ -326,9 +340,9 @@
 
 /* ── Reduced motion ─────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .hc-overlay, .hc-col::before, .hc-eyebrow, .hc-hero,
+  .hc-overlay, .hc-col::before, .hc-headline,
   .hc-trace-bloom, .hc-trace-core, .hc-trace-hot, .hc-content { animation: none !important; }
-  .hc-eyebrow, .hc-hero { clip-path: inset(0 0 0 0); }
+  .hc-headline { clip-path: inset(0 0 0 0); }
   .hc-trace-core, .hc-trace-bloom { transform: scaleX(1); opacity: 0.4; }
   .hc-content { opacity: 1; }
 }
@@ -347,25 +361,41 @@
 }
 
 /* ── Typography inside sections ─────────────────────────────────── */
+/* Block heading — the SUBTITLE level, mirroring the tabs' .ctrl-subtitle:
+   colored + a leading vertical phosphor tick, and the first staircase step
+   (§3 size/color decoupled — big neutral designation vs this smaller-but-
+   still-substantial colored subtitle). Grouping comes from the tick + the
+   deeper content indent below, never a horizontal underline. */
 .hc-section h3 {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-left: var(--stair-step);            /* staircase step 1 — subtitle */
   font-family: var(--font-display);
-  font-size: var(--text-sm);
+  font-size: clamp(1.2rem, 1.7vw, 1.5rem);    /* enlarged, matches .ctrl-subtitle */
   font-weight: var(--weight-bold);
-  letter-spacing: var(--track-wide);
+  letter-spacing: var(--track-snug);
   text-transform: uppercase;
-  color: var(--ink-100);
-  padding-bottom: var(--space-xs);
-  border-bottom: 1px solid color-mix(in srgb, var(--tab-color) 20%, var(--line-faint));
+  color: var(--tab-color);
+  text-shadow: 0 0 18px var(--tab-glow);
+}
+.hc-section h3::before {
+  content: '';
+  flex-shrink: 0;
+  width: 2px;
+  height: 1.2em;
+  background: var(--tab-color);
+  box-shadow: 0 0 8px var(--tab-glow-strong);
 }
 
 .hc-section p {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   font-weight: var(--weight-regular);
-  color: var(--ink-55);
-  line-height: 1.65;
+  color: var(--ink-60);
+  line-height: 1.7;
 }
 
 .hc-section ol,
@@ -379,9 +409,9 @@
 
 .hc-section li {
   font-family: var(--font-display);
-  font-size: var(--text-md);
-  color: var(--ink-55);
-  line-height: 1.6;
+  font-size: var(--text-body);
+  color: var(--ink-60);
+  line-height: 1.65;
   padding-left: var(--space-2xs);
 }
 
@@ -390,74 +420,89 @@
   font-weight: var(--weight-bold);
 }
 
-/* ── KV table ───────────────────────────────────────────────────── */
+/* ── Spec list (replaces the old bordered table) ─────────────────────
+   Per UI_PHILOSOPHY the key/value split is carried by COLOR, SIZE and
+   SPACING only — no grid lines, no box, and no per-row marker ticks
+   (many vertical ticks are just "line soup" — §3 caps them at one or two
+   per screen). Each entry reads as its own POINT because the key is a
+   small UPPERCASE ACCENT label — visibly not prose — sitting across a wide
+   gutter from the larger, neutral value, with generous row separation. */
 .hc-kv {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--line-medium);
-  border-radius: 3px;
-  overflow: hidden;
+  gap: var(--space-lg);
 }
 
 .hc-kv__row {
   display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 0;
-  border-bottom: 1px solid var(--line-soft);
-}
-.hc-kv__row:last-child {
-  border-bottom: none;
+  grid-template-columns: minmax(130px, 210px) 1fr;
+  gap: var(--space-xl);
+  align-items: baseline;
 }
 
 .hc-kv__key {
-  padding: var(--space-sm) var(--space-md);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: var(--weight-semi);
-  letter-spacing: var(--track-snug);
-  color: color-mix(in srgb, var(--tab-color) 85%, #fff);
-  background: var(--sheen-028);
-  border-right: 1px solid var(--line-soft);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tab-color) 72%, #fff);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-xs);
   flex-wrap: wrap;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .hc-kv__val {
-  padding: var(--space-sm) var(--space-md);
   font-family: var(--font-display);
-  font-size: var(--text-md);
-  color: var(--ink-55);
-  line-height: 1.55;
+  font-size: var(--text-body);
+  color: var(--ink-60);
+  line-height: 1.65;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   flex-wrap: wrap;
   gap: var(--space-xs);
 }
 
 /* ── Block grouping (h3 + its content) ─────────────────────────── */
-/* Wrap each h3 + following content in .hc-block for correct spacing */
+/* Wrap each h3 + following content in .hc-block for correct spacing.
+   Content steps in one indent past the heading's phosphor tick — the
+   staircase (§3) is what visually binds a heading to its body now that
+   the horizontal underline is gone. */
 .hc-block {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
+.hc-block > :not(h3) {
+  padding-left: calc(var(--stair-step) * 2);   /* staircase step 2 — content */
+}
 
-/* ── Tag / badge ────────────────────────────────────────────────── */
+/* ── Side-by-side code columns ─────────────────────────────────────
+   Three related snippets read as one comparison when set in a row.
+   Each column scrolls its own long lines; on a narrow stage they wrap
+   to stacked full-width blocks. */
+.hc-code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-lg);
+}
+.hc-code-row > .cp-code {
+  flex: 1 1 260px;
+  min-width: 0;
+  margin: 0;
+}
+
+/* ── Inline marker ──────────────────────────────────────────────────
+   A code / identifier term inside prose. Deliberately quiet: it is set
+   apart by a single muted accent tint (plus mono for identifier terms) —
+   no box, no fill, no border, no uppercasing. Just "a different color". */
 .hc-tag {
-  display: inline-block;
   font-family: var(--font-mono);
-  font-size: var(--text-3xs);
-  font-weight: var(--weight-semi);
-  letter-spacing: var(--track-base);
-  text-transform: uppercase;
-  color: var(--tab-color);
-  background: color-mix(in srgb, var(--tab-color) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tab-color) 35%, transparent);
-  border-radius: 2px;
-  padding: 1px 6px;
+  font-size: 0.9em;
+  letter-spacing: var(--track-snug);
+  color: color-mix(in srgb, var(--tab-color) 55%, var(--ink-72));
   white-space: nowrap;
-  line-height: 1.6;
 }

@@ -1810,7 +1810,12 @@ TypeClass = ${instanceName}`;
         {sectionContent[activeSection]}
       </TabLayout>
 
-      <WreckageHelp open={showHelp} onClose={() => setShowHelp(false)} />
+      <WreckageHelp
+        open={showHelp}
+        onClose={() => setShowHelp(false)}
+        contextLabel={WR_SECTIONS.find(s => s.id === activeSection)?.label || ''}
+        mapContext={mapName}
+      />
     </div>
   );
 };

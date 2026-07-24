@@ -75,6 +75,13 @@ body {
   pointer-events: none;
 }
 
+/* Node Editor's split viewport/graph canvas wants the vertical banner
+   register out of the way — only the navbar stays, keyed off
+   .node-editor-tab the same :has() way as the overlay retract above. */
+.forgemaptoolkit:has(.node-editor-tab) .bnr-root {
+  display: none;
+}
+
 /* ── Tab content well ───────────────────────────────────────────────── */
 .tab-content {
   flex: 1;

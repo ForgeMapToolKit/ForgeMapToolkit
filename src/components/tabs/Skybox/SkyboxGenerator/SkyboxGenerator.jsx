@@ -452,7 +452,7 @@ const SkyboxGeneratorTab = ({
         generateStarPlanets,
       });
       let dataLua = dataLuaBefore;
-      const skyboxRegex = /skyBox = \{[\s\S]*?\n    \}/;
+      const skyboxRegex = /skyBox = \{[\s\S]*?\n {4}\}/;
       if (skyboxRegex.test(dataLua)) {
         dataLua = dataLua.replace(skyboxRegex, luaBlock);
       } else {
@@ -568,7 +568,7 @@ const SkyboxGeneratorTab = ({
     const isDds = file.name.toLowerCase().endsWith('.dds');
     if (isDds) {
       try {
-        const filePath = webUtils.getPathForFile(file);
+        const filePath = window.electronAPI.getPathForFile(file);
         const result = await window.electronAPI.invoke('dds-to-dataurl', { filePath });
         if (!result?.success) { await luxuryAlert('DDS load failed: ' + (result?.error || ''), 'DDS Load Failed', 'error'); return; }
         const img = new Image();

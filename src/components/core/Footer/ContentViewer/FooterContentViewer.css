@@ -299,115 +299,13 @@
   margin: var(--space-2xl) 0;
 }
 
-/* ── Code block (terminal-style) ──────────────────────────────────────────
-   Markup: <div class="fcv-code"><div class="fcv-code__header">…</div>
-   <pre class="fcv-code__pre"><code>…</code></pre></div> — opt-in wrapper
-   written by the article author, same convention as .fcv-callout.
-
-   Deliberately NOT given the left-accent-border-on-tinted-surface treatment
-   .fcv-callout already owns — a code block sharing that look just read as
-   "another callout." A near-black bordered box with its own title bar reads
-   as a distinct register instead: something you'd run, not something you'd
-   read. */
-
-.fcv-code {
-  margin: 0 0 var(--space-md);
-  background: var(--surface-canvas);
-  border: 1px solid var(--line-ghost-border);
-  border-radius: var(--space-2xs);
-  overflow: hidden;
-}
-
-/* Whole bar now wears the same filled-tab-color / on-accent-text / uppercase
-   font-display look as .ftr-preview-readmore (ArticlePreview/
-   FooterArticlePreview.css) -- at rest, not on hover, and without its glow
-   box-shadow (this is chrome, not a button inviting a click). Label and lang
-   differ only by weight/opacity now; a second pill nested inside an
-   already-filled bar would just be two accent layers stacked on each
-   other. */
-.fcv-code__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-xs) var(--space-md);
-  background: var(--tab-color);
-  font-family: var(--font-display);
-  font-weight: var(--weight-semi);
-  letter-spacing: var(--track-snug);
-  text-transform: uppercase;
-  color: var(--text-on-accent);
-}
-
-.fcv-code__label {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: var(--text-body-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.fcv-code__lang {
-  flex: 0 0 auto;
-  font-size: var(--text-xs);
-  opacity: 0.65;
-}
-
-.fcv-code__pre {
-  margin: 0;
-  padding: var(--space-md) var(--space-lg);
-  overflow-x: auto;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  line-height: 1.7;
-  color: var(--ink-72);
-}
-
-.fcv-code__pre::-webkit-scrollbar { height: var(--size-scrollbar); }
-.fcv-code__pre::-webkit-scrollbar-thumb { background: var(--surface-scrollbar); }
-.fcv-code__pre::-webkit-scrollbar-thumb:hover { background: var(--tab-color); }
-
-.fcv-code__pre code {
-  /* Reset inline-code overrides — the terminal box owns its own surface. */
-  padding: 0;
-  background: none;
-  border-radius: 0;
-  font-size: inherit;
-  color: inherit;
-}
-
-/* Syntax tokens — same VS Code dark palette as Shared/Ui/HelpPanel/
-   Sections/sections.css's hs-tok-* classes, so a snippet reads consistently
-   whether it's this hand-authored static HTML or CodeSection.jsx's
-   tokenizer output. Apply by hand around words/strings/comments. */
-.fcv-tok-keyword  { color: var(--code-keyword); }
-.fcv-tok-string   { color: var(--code-string); }
-.fcv-tok-number   { color: var(--code-number); }
-.fcv-tok-comment  { color: var(--code-comment); font-style: italic; }
-.fcv-tok-operator { color: var(--code-default); }
-.fcv-tok-ident    { color: var(--code-ident); }
-.fcv-tok-plain    { color: var(--code-default); }
-.fcv-tok-cmd      { color: var(--code-cmd); }
-.fcv-tok-flag     { color: var(--code-number); }
-
-/* ── Keyboard key ──────────────────────────────────────────────────────── */
-
-.fcv-content kbd {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-2xs) var(--space-xs);
-  background: var(--surface-face-a);
-  border: 1px solid var(--line-strong);
-  border-bottom-width: 2px;
-  border-radius: var(--space-2xs);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--track-snug);
-  color: var(--ink-72);
-  line-height: 1;
-  white-space: nowrap;
-}
+/* ── Code block, keyboard key ──────────────────────────────────────────────
+   Moved to Shared/DesignSystem/ContentPrimitives.css as .cp-code / .cp-kbd —
+   shared with HelpConsole's CodeSection.jsx/ShortcutsSection.jsx so a code
+   window or key chip looks identical in both surfaces. Content authors:
+   use class="cp-code" / class="cp-code__header" etc. (see shortcuts.html
+   for a worked example); a bare <kbd> tag still picks up styling via the
+   .fcv-content kbd selector defined alongside .cp-kbd. */
 
 /* ── Table ─────────────────────────────────────────────────────────────── */
 
@@ -444,84 +342,13 @@
   border-bottom: none;
 }
 
-/* ── Callout ───────────────────────────────────────────────────────────── */
-/* Opt-in class written by the article author: <div class="fcv-callout"> */
+/* ── Callout / Notes ────────────────────────────────────────────────────── */
+/* Moved to Shared/DesignSystem/ContentPrimitives.css as .cp-callout /
+   .cp-notes — same shared-primitive rationale as the code block above. */
 
-.fcv-callout {
-  margin: 0 0 var(--space-md);
-  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
-  background: var(--surface-ghost);
-  border-left: 2px solid var(--tab-color);
-  font-family: var(--font-display);
-  font-size: var(--text-body);
-  color: var(--ink-55);
-}
-
-.fcv-callout p:last-child { margin-bottom: 0; }
-
-/* ── Notes (opt-in, distinct from Callout) ────────────────────────────── */
-/* Same box treatment as .fcv-callout on purpose — that look was already
-   working, the problem was never the callout. This only adds a small
-   eyebrow label so a "Notes" aside reads as its own semantic block instead
-   of a second, unlabeled callout sitting right next to one. */
-
-.fcv-notes {
-  margin: 0 0 var(--space-md);
-  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
-  background: var(--surface-ghost);
-  border-left: 2px solid var(--tab-color);
-  font-family: var(--font-display);
-  font-size: var(--text-body);
-  color: var(--ink-55);
-}
-
-.fcv-notes__label {
-  display: block;
-  margin-bottom: var(--space-xs);
-  font-family: var(--font-mono);
-  font-size: var(--text-3xs);
-  font-weight: var(--weight-semi);
-  letter-spacing: var(--track-eyebrow);
-  text-transform: uppercase;
-  color: var(--tab-color);
-}
-
-.fcv-notes p:last-child { margin-bottom: 0; }
-
-/* ── Shortcuts grid (used in shortcuts.html) ───────────────────────────── */
-/* A two-column action / key register. Written as a named class rather than
-   a bare element selector so it doesn't accidentally style unrelated tables
-   or dl elements in other articles. */
-
-.fcv-shortcuts {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0;
-  margin: 0 0 var(--space-md);
-}
-
-.fcv-shortcuts__row {
-  display: contents;
-}
-
-.fcv-shortcuts__action,
-.fcv-shortcuts__combo {
-  padding: var(--space-xs) 0;
-  border-bottom: 1px solid var(--line-faint);
-  display: flex;
-  align-items: center;
-}
-
-.fcv-shortcuts__action {
-  font-family: var(--font-display);
-  font-size: var(--text-body);
-  color: var(--ink-60);
-}
-
-.fcv-shortcuts__combo {
-  gap: var(--space-2xs);
-  justify-content: flex-end;
-}
+/* ── Shortcuts grid ─────────────────────────────────────────────────────── */
+/* Moved to Shared/DesignSystem/ContentPrimitives.css as .cp-shortcuts —
+   shared with HelpConsole's ShortcutsSection.jsx. */
 
 /* ── Search-match highlighting ────────────────────────────────────────────── */
 

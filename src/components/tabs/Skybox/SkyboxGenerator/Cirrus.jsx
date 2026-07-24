@@ -7,8 +7,8 @@
  */
 import React from 'react';
 import { EntityCardGrid, EntityCard, AddTile } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
-import { ColorPicker } from './Configuration.jsx';
-import { PLANET_UV_COLORS } from './utils.js';
+import { ColorPicker } from '../../../Shared/Ui/ColorPicker/ColorPicker.jsx';
+import { PLANET_UV_COLORS, SKYBOX_PRESET_COLORS } from './utils.js';
 
 // ── CirrusLayerDiagram ─────────────────────────────────────────────
 export const CirrusLayerDiagram = ({ layers, cirrusMult }) => {
@@ -151,7 +151,7 @@ const Cirrus = ({
             </div>
             <div className="ctrl-field">
               <div className="ctrl-label">Cirrus Color</div>
-              <ColorPicker value={cirrusColor} onChange={e=>setCirrusColor(e.target.value)}/>
+              <ColorPicker value={cirrusColor} onChange={e=>setCirrusColor(e.target.value)} presets={SKYBOX_PRESET_COLORS}/>
             </div>
           </div>
           <div className="ctrl-field">

@@ -1,0 +1,569 @@
+/**
+ * NodeEditor.css — bespoke layout for the node editor tab.
+ *
+ * This tab owns its chrome (a split-viewport composer, not a section-rail tab),
+ * so it does not use TabLayout. Per UI_PHILOSOPHY §2/§5 and TAB_CONTRACT §5 it
+ * still speaks only the design system: every colour/space/radius/type value is
+ * a token (0 hardcoded hex, the Footer/Navbar gold-standard). The single
+ * identity accent is --tab-color; node-type accents are an object/data colour
+ * (Role 2), used only as small swatches; green/red are feedback (Role 3).
+ */
+
+/* Escape the default .tab-content padding + centered 1400px max-width
+   (ForgeMapToolkit.css) so the editor fills the whole tab edge-to-edge — the
+   same :has() escape hatch the Guides / CLI Terminal / Settings tabs use. */
+.tab-content:has(.node-editor-tab) {
+  padding: 0;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: none;
+}
+
+.node-editor-tab {
+  --tab-color: var(--node-editor-color);
+  --tab-glow: var(--node-editor-glow);
+  --tab-glow-strong: var(--node-editor-glow-strong);
+  /* Freeze/pin feedback (Role 3, like --status-ok/-err) — ice-blue so it never
+     reads as an object colour (Role 2, node accents) or the tab's own accent. */
+  --ne-freeze-color: #5ecdf0;
+  /* Bypass feedback (Role 3) — pink, distinct from freeze/error/compare. */
+  --ne-bypass-color: #ff54c8;
+  /* A|B compare feedback (Role 3) — lime/orange, distinct from every other dot
+     colour and from the blue/purple/amber/rose node-category accents. */
+  --ne-compare-a-color: #c8ff60;
+  --ne-compare-b-color: #ff9d5c;
+
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink-72);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.ne-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--line-faint);
+  background: var(--surface-deep);
+}
+.ne-tool-group { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.ne-tool-label {
+  font-size: var(--text-3xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase;
+  color: var(--ink-40);
+}
+.ne-tool-x { color: var(--ink-40); }
+.ne-tool-spacer { flex: 1 1 auto; }
+.ne-tool-newproject { animation: fmt-content-in var(--dur-base) var(--ease-out); }
+.ne-inline-input {
+  width: 140px;
+  background: var(--surface-sunk); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-sm); color: var(--ink-100);
+  padding: var(--space-3xs) var(--space-xs); font-size: var(--text-md); font-family: inherit;
+  outline: none; transition: border-color var(--dur-fast) var(--ease-out);
+}
+.ne-inline-input:focus { border-color: var(--tab-color); }
+
+.ne-toolbar select,
+.ne-toolbar input,
+.ne-inspector select,
+.ne-inspector input[type="text"],
+.ne-inspector input[type="number"],
+.ne-gradient-controls input[type="number"] {
+  background: var(--surface-sunk);
+  border: 1px solid var(--line-medium);
+  border-radius: var(--radius-sm);
+  color: var(--ink-100);
+  padding: var(--space-3xs) var(--space-xs);
+  font-size: var(--text-md);
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.ne-toolbar input[type="number"] { width: 64px; }
+.ne-toolbar select:focus,
+.ne-toolbar input:focus,
+.ne-inspector input:focus,
+.ne-inspector select:focus { border-color: var(--tab-color); }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.ne-btn {
+  background: var(--surface-face-a);
+  border: 1px solid var(--line-medium);
+  border-radius: var(--radius-sm);
+  color: var(--ink-72);
+  padding: var(--space-2xs) var(--space-md);
+  font-family: inherit; font-size: var(--text-md); font-weight: var(--weight-semi);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.ne-btn:hover { background: var(--surface-face-hover); }
+.ne-btn:disabled { opacity: 0.4; cursor: default; }
+.ne-btn-mini { padding: var(--space-3xs) var(--space-xs); font-size: var(--text-sm); }
+.ne-tool-hist { gap: var(--space-3xs); }
+.ne-btn-icon {
+  padding: var(--space-3xs) var(--space-xs); font-size: var(--text-lg); line-height: 1;
+  min-width: 30px; text-align: center;
+}
+/* Export is the primary CTA — it may carry the strongest treatment (§5). */
+.ne-btn-primary {
+  background: var(--tab-color);
+  border-color: var(--tab-color);
+  color: var(--text-on-accent);
+}
+.ne-btn-primary:hover { box-shadow: 0 0 0 1px var(--tab-color), 0 4px 14px -4px var(--tab-glow); }
+
+/* ── Body layout (Gaea-style) ────────────────────────────────────────────── */
+.ne-body { flex: 1 1 auto; display: flex; min-height: 0; }
+/* Viewport + graph stacked, spanning the full width left of the Properties col. */
+.ne-stage-left { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+/* Graph zone: the graph fills it; the Toolbox docks over its left edge. */
+.ne-graph-zone { flex: 1 1 50%; min-height: 0; position: relative; }
+/* Properties — far-right full-height column (Gaea Transform Properties).
+   Wide enough for the sub-editors (gradient bar, alpha pad, colour picker)
+   to breathe; capped at a share of the viewport so it never swallows the
+   graph on a narrow window. */
+.ne-inspector-col {
+  flex: 0 0 auto; width: min(620px, 46vw);
+  display: flex; flex-direction: column; min-height: 0;
+  border-left: 1px solid var(--line-faint);
+  background: var(--surface-deep);
+  overflow-y: auto;
+}
+
+/* ── Viewport (top half) ─────────────────────────────────────────────────── */
+.ne-viewport { flex: 1 1 50%; min-height: 0; display: flex; flex-direction: column; }
+.ne-viewport-stage {
+  flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; padding: var(--space-md);
+  background-color: var(--surface-canvas);
+  background-image:
+    linear-gradient(45deg, var(--sheen-040) 25%, transparent 25%, transparent 75%, var(--sheen-040) 75%),
+    linear-gradient(45deg, var(--sheen-040) 25%, transparent 25%, transparent 75%, var(--sheen-040) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  cursor: grab;
+  touch-action: none;
+}
+.ne-viewport-stage:active { cursor: grabbing; }
+.ne-viewport-stage.is-compare { cursor: ew-resize; }
+.ne-viewport-stage.is-compare:active { cursor: ew-resize; }
+.ne-viewport-canvas {
+  max-width: 100%; max-height: 100%;
+  image-rendering: pixelated;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--line-medium);
+}
+.ne-viewport-bar {
+  flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-md);
+  min-height: 40px; padding: var(--space-2xs) var(--space-md); border-top: 1px solid var(--line-faint);
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-40);
+  background: var(--surface-deep);
+}
+.ne-viewport-status { color: var(--tab-color); font-family: var(--font-display); }
+.ne-viewport-info { display: flex; align-items: center; gap: var(--space-md); flex: 0 0 auto; white-space: nowrap; }
+
+.ne-freeze-badge, .ne-compare-badge {
+  display: inline-flex; align-items: center; gap: var(--space-2xs);
+  background: var(--surface-ghost); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-sm); color: var(--ink-72);
+  padding: var(--space-3xs) var(--space-sm); font-family: inherit; font-size: var(--text-sm);
+  cursor: pointer; transition: background var(--dur-fast) var(--ease-out);
+}
+.ne-freeze-badge:hover, .ne-compare-badge:hover { background: var(--surface-face-hover); }
+.ne-freeze-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--ne-freeze-color); box-shadow: 0 0 6px var(--ne-freeze-color); }
+.ne-compare-swatch { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+.ne-compare-swatch.is-a { background: var(--ne-compare-a-color); box-shadow: 0 0 6px var(--ne-compare-a-color); }
+.ne-compare-swatch.is-b { background: var(--ne-compare-b-color); box-shadow: 0 0 6px var(--ne-compare-b-color); }
+.ne-compare-vs { color: var(--ink-28); }
+
+.ne-channel-group { display: inline-flex; border: 1px solid var(--line-medium); border-radius: var(--radius-sm); overflow: hidden; flex: 0 0 auto; }
+.ne-channel-btn {
+  background: var(--surface-ghost); border: none; border-right: 1px solid var(--line-medium);
+  color: var(--ink-40); padding: var(--space-3xs) var(--space-2xs); font-family: inherit; font-size: var(--text-2xs);
+  font-weight: var(--weight-semi); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.ne-channel-btn:last-child { border-right: none; }
+.ne-channel-btn:hover { background: var(--surface-face-hover); color: var(--ink-72); }
+.ne-channel-btn.is-active { background: var(--tab-color); color: var(--text-on-accent); }
+
+/* ── Workspace tab strip (one .fmtgraph document per tab) ─────────────────── */
+.ne-tabstrip { display: flex; align-items: center; gap: var(--space-3xs); flex: 1 1 auto; min-width: 0; overflow-x: auto; }
+.ne-tab {
+  display: flex; align-items: center; gap: var(--space-2xs); flex: 0 0 auto; max-width: 160px;
+  padding: var(--space-2xs) var(--space-sm); border-radius: var(--radius-sm);
+  background: var(--surface-ghost); border: 1px solid transparent;
+  font-family: var(--font-display); font-size: var(--text-sm); color: var(--ink-55);
+  cursor: pointer; user-select: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.ne-tab:hover { background: var(--surface-face-hover); color: var(--ink-72); }
+.ne-tab.is-active { background: var(--surface-face-a); border-color: var(--tab-color); color: var(--ink-100); }
+.ne-tab-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ne-tab-rename {
+  width: 100px; background: var(--surface-sunk); border: 1px solid var(--tab-color);
+  border-radius: var(--radius-sm); color: var(--ink-100); padding: 1px var(--space-3xs);
+  font: inherit; outline: none;
+}
+.ne-tab-close {
+  background: none; border: none; color: var(--ink-28); line-height: 1; cursor: pointer;
+  padding: 0 0 0 var(--space-3xs); font-size: var(--text-md);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.ne-tab-close:hover { color: var(--status-err-bright); }
+.ne-tab-add {
+  flex: 0 0 auto; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  background: var(--surface-ghost); border: 1px dashed var(--line-medium); border-radius: var(--radius-sm);
+  color: var(--ink-40); cursor: pointer; font-size: var(--text-md); line-height: 1;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.ne-tab-add:hover { background: var(--surface-face-hover); color: var(--tab-color); }
+
+/* ── Node graph (bottom half) ────────────────────────────────────────────── */
+.ne-graph {
+  position: absolute; inset: 0; overflow: hidden;
+  border-top: 1px solid var(--line-faint);
+  background: var(--surface-canvas);   /* warm near-black stage — like the banner, no dot grid */
+  cursor: grab;
+  touch-action: none;
+}
+.ne-graph.is-connecting { cursor: crosshair; }
+.ne-graph-inner { position: absolute; inset: 0; transform-origin: 0 0; }
+.ne-edges { position: absolute; inset: 0; pointer-events: none; }
+.ne-edge {
+  fill: none; stroke: var(--ink-40); stroke-width: 2;
+  pointer-events: none; /* the fat sibling hit-path takes the clicks */
+  transition: stroke var(--dur-fast) var(--ease-out);
+}
+/* Invisible wide band that actually catches the pointer, so a thin 2px curve
+   is easy to click/select. */
+.ne-edge-hit { fill: none; stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+.ne-edge-group:hover .ne-edge { stroke: var(--ink-72); }
+.ne-edge.is-sel { stroke: var(--tab-color); stroke-width: 3; filter: drop-shadow(0 0 4px var(--tab-glow)); }
+.ne-edge-pending { stroke: var(--tab-color); stroke-dasharray: 5 4; pointer-events: none; }
+
+.ne-node {
+  position: absolute;
+  background: linear-gradient(180deg, var(--surface-face-a), var(--surface-face-b));
+  border: 1px solid var(--line-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  user-select: none;
+  cursor: default;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.ne-node.is-sel { border-color: var(--tab-color); box-shadow: 0 0 0 1px var(--tab-color), var(--shadow-md); }
+.ne-node.is-frozen { border-color: var(--ne-freeze-color); }
+/* Bypassed: the node's own effect is skipped (passthrough) — read as "dimmed
+   out" rather than restyling the whole card. */
+.ne-node.is-bypassed { opacity: 0.55; }
+/* Error wins over selection/freeze — it's the most urgent state a card can be
+   in, so its rule sits last and its border colour takes priority. */
+.ne-node.is-error { border-color: var(--status-err-bright); box-shadow: 0 0 0 1px var(--status-err-bright), var(--shadow-md); }
+.ne-node-freeze-dot {
+  position: absolute; right: 6px; bottom: 6px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--ne-freeze-color);
+  box-shadow: 0 0 6px var(--ne-freeze-color), 0 0 0 1px var(--shade-70);
+  cursor: pointer;
+}
+/* Bypass/compare dots share the freeze dot's bottom corner, mirrored to the
+   left so neither set ever overlaps regardless of how many are active. */
+.ne-node-badges-left { position: absolute; left: 6px; bottom: 6px; display: flex; gap: 4px; }
+.ne-node-bypass-dot {
+  width: 9px; height: 9px; border-radius: 50%; cursor: pointer;
+  background: var(--ne-bypass-color);
+  box-shadow: 0 0 6px var(--ne-bypass-color), 0 0 0 1px var(--shade-70);
+}
+.ne-node-compare-dot {
+  width: 9px; height: 9px; border-radius: 50%; cursor: pointer;
+  box-shadow: 0 0 0 1px var(--shade-70);
+}
+.ne-node-compare-dot.is-a { background: var(--ne-compare-a-color); box-shadow: 0 0 6px var(--ne-compare-a-color), 0 0 0 1px var(--shade-70); }
+.ne-node-compare-dot.is-b { background: var(--ne-compare-b-color); box-shadow: 0 0 6px var(--ne-compare-b-color), 0 0 0 1px var(--shade-70); }
+.ne-node-head {
+  display: flex; align-items: center; gap: var(--space-xs);
+  height: 30px; padding: 0 var(--space-xs);
+  border-bottom: 1px solid var(--line-faint);
+  border-left: 2px solid var(--node-accent);   /* node-type object colour (Role 2) */
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--sheen-040);
+  cursor: grab;
+}
+.ne-node-head:active { cursor: grabbing; }
+.ne-node-label {
+  flex: 1 1 auto; font-size: var(--text-sm); font-weight: var(--weight-semi); color: var(--ink-100);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ne-node-rename {
+  flex: 1 1 auto; min-width: 0;
+  background: var(--surface-sunk); border: 1px solid var(--tab-color);
+  border-radius: var(--radius-sm); color: var(--ink-100); padding: 1px var(--space-3xs);
+  font: inherit; font-size: var(--text-sm); font-weight: var(--weight-semi); outline: none;
+}
+.ne-node-del {
+  background: none; border: none; color: var(--ink-40);
+  font-size: var(--text-lg); line-height: 1; cursor: pointer; padding: 0 var(--space-3xs);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.ne-node-del:hover { color: var(--status-err-bright); }
+.ne-node-body { padding: var(--space-xs) 0; }
+.ne-socket-row { display: flex; align-items: center; gap: var(--space-xs); height: 24px; padding-left: var(--space-sm); position: relative; }
+.ne-socket-none { color: var(--ink-28); font-size: var(--text-xs); font-style: italic; padding-left: var(--space-md); }
+.ne-socket-label { font-size: var(--text-sm); color: var(--ink-40); }
+
+.ne-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; display: inline-block; }
+
+.ne-socket {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--surface-sunk); border: 2px solid var(--ink-40);
+  cursor: crosshair; position: absolute;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+/* Enlarge the pointer hit area well past the visible dot so a connection drag
+   never slips through to a background pan (fixes the "pans instead of connects"
+   bug). The ::before is part of the element for hit-testing. */
+.ne-socket::before { content: ''; position: absolute; inset: -9px; border-radius: 50%; }
+.ne-socket:hover { border-color: var(--tab-color); background: var(--tab-color); }
+.ne-socket-in { left: -6px; }
+/* Centre the output dot exactly on its edge anchor (CARD_W, HEADER_H/2). The
+   JSX sets left:CARD_W / top:HEADER_H/2; translate pulls the dot's centre onto
+   that point so the connection line starts dead-centre of the dot. */
+.ne-socket-out { transform: translate(-50%, -50%); }
+.ne-socket-out.is-armed { border-color: var(--tab-color); background: var(--tab-color); box-shadow: 0 0 8px var(--tab-glow); }
+
+.ne-zoom-badge {
+  position: absolute; bottom: var(--space-xs); right: var(--space-xs);
+  background: var(--surface-overlay); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-sm); padding: var(--space-3xs) var(--space-xs);
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-55);
+  pointer-events: none;
+}
+.ne-graph-hint {
+  position: absolute; bottom: var(--space-sm); left: 50%; transform: translateX(-50%);
+  background: var(--surface-overlay); border: 1px solid var(--tab-color);
+  border-radius: var(--radius-sm); padding: var(--space-3xs) var(--space-sm);
+  font-size: var(--text-sm); color: var(--tab-color);
+  pointer-events: none;
+}
+.ne-marquee {
+  position: absolute; border: 1px solid var(--tab-color);
+  background: color-mix(in srgb, var(--tab-color) 12%, transparent);
+  pointer-events: none; z-index: 5;
+}
+
+/* ── Toolbox dock (left, over the graph — Gaea style) ────────────────────── */
+.ne-panel-title {
+  font-size: var(--text-3xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase;
+  color: var(--ink-40); padding: var(--space-sm) var(--space-sm) var(--space-2xs);
+}
+.ne-palette-dock {
+  position: absolute; top: var(--space-xs); left: var(--space-xs); bottom: var(--space-xs); width: 244px;
+  display: flex; flex-direction: column;
+  background: var(--surface-overlay);
+  border: 1px solid var(--line-medium); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow-y: auto; backdrop-filter: blur(3px); z-index: var(--z-rail);
+}
+.ne-palette-cat { padding: 0 var(--space-xs) var(--space-2xs); }
+.ne-palette-cat-label { font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: var(--track-base); color: var(--ink-28); margin: var(--space-xs) var(--space-3xs) var(--space-2xs); }
+/* Two nodes per row. minmax(0,1fr) lets long labels wrap inside a cell
+   instead of forcing the grid wider. */
+.ne-palette-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3xs); }
+.ne-palette-item {
+  display: flex; align-items: center; gap: var(--space-xs); min-width: 0;
+  background: var(--surface-ghost); border: 1px solid transparent;
+  border-radius: var(--radius-sm); color: var(--ink-72);
+  padding: var(--space-2xs) var(--space-xs); font-family: inherit; font-size: var(--text-sm);
+  text-align: left; line-height: 1.15; overflow-wrap: anywhere; cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.ne-palette-item:hover { background: var(--surface-face-hover); }
+.ne-palette-hint {
+  margin-top: auto; padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-2xs); color: var(--ink-28); text-align: center;
+  border-top: 1px solid var(--line-faint);
+}
+
+/* ── Add-node search (Tab) ───────────────────────────────────────────────── */
+.ne-search {
+  position: absolute; top: var(--space-lg); left: 50%; transform: translateX(-50%);
+  width: min(420px, 80%); z-index: var(--z-overlay, 60);
+  background: var(--surface-overlay); border: 1px solid var(--tab-color);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+  overflow: hidden; backdrop-filter: blur(4px);
+}
+.ne-search-connect-hint {
+  padding: var(--space-2xs) var(--space-md); font-size: var(--text-2xs); color: var(--ink-40);
+  border-bottom: 1px solid var(--line-faint); background: var(--surface-sunk);
+}
+.ne-search-connect-hint strong { color: var(--tab-color); }
+.ne-search-input {
+  width: 100%; box-sizing: border-box;
+  background: var(--surface-sunk); border: none; border-bottom: 1px solid var(--line-faint);
+  color: var(--ink-100); padding: var(--space-sm) var(--space-md);
+  font-family: inherit; font-size: var(--text-md); outline: none;
+}
+.ne-search-list { max-height: 260px; overflow-y: auto; padding: var(--space-3xs); }
+.ne-search-empty { padding: var(--space-md); color: var(--ink-40); font-size: var(--text-sm); text-align: center; }
+.ne-search-item {
+  display: flex; align-items: center; gap: var(--space-xs); width: 100%;
+  background: none; border: none; border-radius: var(--radius-sm); cursor: pointer;
+  padding: var(--space-2xs) var(--space-sm); color: var(--ink-72);
+  font-family: inherit; font-size: var(--text-md); text-align: left;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.ne-search-item:hover { background: var(--surface-face-hover); }
+.ne-search-item-label { flex: 1 1 auto; }
+.ne-search-item-cat {
+  font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: var(--track-base);
+  color: var(--ink-28);
+}
+
+/* ── Inspector (Properties) ──────────────────────────────────────────────── */
+.ne-inspector { padding: 0 var(--space-md) var(--space-lg); }
+.ne-inspector-empty { color: var(--ink-40); font-size: var(--text-sm); padding: var(--space-lg) var(--space-md); }
+.ne-inspector-head { display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-sm) 0 var(--space-xs); }
+.ne-inspector-title { font-weight: var(--weight-bold); font-size: var(--text-lg); color: var(--ink-100); }
+.ne-inspector-id { margin-left: auto; font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-40); }
+
+.ne-field { margin-bottom: var(--space-sm); }
+.ne-field-label { display: flex; justify-content: space-between; font-size: var(--text-sm); color: var(--ink-55); margin-bottom: var(--space-2xs); }
+.ne-field-val { color: var(--tab-color); font-family: var(--font-mono); }
+.ne-field input[type="text"], .ne-field input[type="number"], .ne-field select { width: 100%; }
+.ne-field-check { display: flex; align-items: center; gap: var(--space-xs); font-size: var(--text-md); }
+.ne-slider-row { display: flex; align-items: center; gap: var(--space-xs); }
+.ne-slider-row input[type="range"] { flex: 1 1 auto; accent-color: var(--tab-color); }
+.ne-slider-row input[type="number"] { width: 62px; flex: 0 0 auto; }
+.ne-field-inline { display: inline-flex; align-items: center; gap: var(--space-2xs); font-size: var(--text-xs); color: var(--ink-40); }
+.ne-field-inline input { width: 54px; }
+
+/* ── Gradient sub-editor ─────────────────────────────────────────────────── */
+.ne-gradient-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+.ne-gradient-bar {
+  position: relative; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line-medium); cursor: copy;
+}
+.ne-gradient-stop {
+  position: absolute; top: -4px; width: 12px; height: 42px; transform: translateX(-50%);
+  border: 2px solid var(--ink-100); border-radius: var(--radius-sm); cursor: ew-resize;
+  box-shadow: 0 0 0 1px var(--shade-70);
+}
+.ne-gradient-stop.is-sel { border-color: var(--tab-color); box-shadow: 0 0 6px var(--tab-glow); z-index: 2; }
+.ne-gradient-controls { display: flex; align-items: center; gap: var(--space-xs); flex-wrap: wrap; margin-top: var(--space-xs); }
+.ne-hint { font-size: var(--text-2xs); color: var(--ink-40); margin: var(--space-3xs) 0 0; }
+
+/* ── Alpha Ramp sub-editor ───────────────────────────────────────────────── */
+.ne-alpharamp-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+.ne-alpharamp-pad {
+  position: relative; height: 96px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line-medium); cursor: copy; overflow: hidden;
+  background-image:
+    repeating-conic-gradient(var(--ink-15) 0% 25%, transparent 0% 50%);
+  background-size: 12px 12px;
+}
+.ne-alpharamp-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ne-alpharamp-fill { fill: var(--tab-color); opacity: 0.28; stroke: none; }
+.ne-alpharamp-line { fill: none; stroke: var(--tab-color); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.ne-alpharamp-stop {
+  position: absolute; width: 12px; height: 12px; transform: translate(-50%, -50%);
+  border: 2px solid var(--ink-100); border-radius: 50%; cursor: grab;
+  background: var(--surface-face); box-shadow: 0 0 0 1px var(--shade-70);
+}
+.ne-alpharamp-stop.is-sel { border-color: var(--tab-color); box-shadow: 0 0 6px var(--tab-glow); z-index: 2; }
+
+/* ── Curves sub-editor ───────────────────────────────────────────────────── */
+.ne-curve-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+.ne-curve-pad {
+  position: relative; height: 150px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line-medium); cursor: copy; overflow: hidden;
+  background: var(--surface-sunk);
+  background-image:
+    linear-gradient(var(--line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-faint) 1px, transparent 1px);
+  background-size: 25% 25%;
+}
+.ne-curve-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ne-curve-diag { stroke: var(--ink-15); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 3 3; }
+.ne-curve-line { fill: none; stroke: var(--tab-color); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.ne-curve-pt {
+  position: absolute; width: 12px; height: 12px; transform: translate(-50%, -50%);
+  border: 2px solid var(--ink-100); border-radius: 50%; cursor: grab;
+  background: var(--surface-face); box-shadow: 0 0 0 1px var(--shade-70);
+}
+.ne-curve-pt.is-sel { border-color: var(--tab-color); box-shadow: 0 0 6px var(--tab-glow); z-index: 2; }
+
+/* ── .scmap source sub-editors (Sky Gradient / Texture) ──────────────────── */
+.ne-scmap-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+.ne-scmap-row { display: flex; align-items: center; gap: var(--space-xs); }
+.ne-scmap-select {
+  flex: 1 1 auto; min-width: 0;
+  background: var(--surface-sunk); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-sm); color: var(--ink-100);
+  padding: var(--space-3xs) var(--space-xs); font-family: inherit; font-size: var(--text-md);
+  outline: none;
+}
+.ne-scmap-select:focus { border-color: var(--tab-color); }
+.ne-tex-path {
+  width: 100%; box-sizing: border-box;
+  background: var(--surface-sunk); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-sm); color: var(--ink-100);
+  padding: var(--space-2xs) var(--space-xs);
+  font-family: var(--font-mono); font-size: var(--text-sm); outline: none;
+}
+.ne-tex-path:focus { border-color: var(--tab-color); }
+
+.ne-scmap-found {
+  display: flex; flex-direction: column; gap: var(--space-3xs);
+  padding-top: var(--space-2xs); border-top: 1px solid var(--line-faint);
+}
+.ne-scmap-found-title {
+  font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: var(--track-base);
+  color: var(--ink-28);
+}
+.ne-scmap-tex, .ne-scmap-pick {
+  display: flex; flex-direction: column; gap: 1px; min-width: 0; text-align: left;
+}
+.ne-scmap-pick {
+  background: var(--surface-ghost); border: 1px solid transparent;
+  border-radius: var(--radius-sm); cursor: pointer; padding: var(--space-2xs) var(--space-xs);
+  font-family: inherit; transition: background var(--dur-fast) var(--ease-out);
+}
+.ne-scmap-pick:hover { background: var(--surface-face-hover); }
+.ne-scmap-tex-label { font-size: var(--text-2xs); color: var(--ink-40); }
+.ne-scmap-tex-path {
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-72);
+  overflow-wrap: anywhere;
+}
+.ne-asset-list { max-height: 200px; overflow-y: auto; }
+.ne-scmap-browse { align-self: flex-start; }
+.ne-scmap-heights { display: flex; gap: var(--space-sm); font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-72); }
+
+/* ── UV region sub-editor ────────────────────────────────────────────────── */
+.ne-uv-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+.ne-uv-map {
+  position: relative; aspect-ratio: 1; width: 120px; align-self: center;
+  border: 1px solid var(--line-medium); border-radius: var(--radius-sm);
+  background-image:
+    linear-gradient(var(--line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-faint) 1px, transparent 1px);
+  background-size: 50% 50%;
+  background-color: var(--surface-sunk);
+}
+.ne-uv-sel {
+  position: absolute; background: var(--tab-glow);
+  border: 1px solid var(--tab-color); box-shadow: 0 0 6px var(--tab-glow);
+}
+.ne-uv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2xs); }
+.ne-uv-presets { display: flex; flex-wrap: wrap; gap: var(--space-3xs); }
+
+.ne-fatal { padding: var(--space-3xl); text-align: center; color: var(--ink-40); line-height: 1.8; }

@@ -14,9 +14,10 @@
 const path  = require('path');
 const fs    = require('fs');
 const https = require('https');
-const { app, ipcMain, shell, BrowserWindow } = require('electron');
+const { app, ipcMain, shell, BrowserWindow, clipboard } = require('electron');
 const { log, bridgeRendererConsole } = require('./logger');
 const { safeStorage } = require('electron');
+const { GITHUB_REPO } = require('./settings');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONTRIBUTIONS — GitHub OAuth Device Flow + PR Submission
@@ -303,6 +304,51 @@ ipcMain.handle('github-auth-logout', async () => {
   _devicePoll = null;
   log.info('[contrib] GitHub auth disconnected');
   return { success: true };
+});
+
+// ── clipboard-write-text ──────────────────────────────────────────────────────
+// Used by the Troubleshoot report flow — the Discord template and the GitHub
+// browser-fallback text are copied here rather than sent anywhere automatically.
+ipcMain.handle('clipboard-write-text', async (event, text) => {
+  try {
+    clipboard.writeText(typeof text === 'string' ? text : String(text ?? ''));
+    return { success: true };
+  } catch (err) {
+    log.error('[clipboard] write failed:', err);
+    return { success: false, error: err.message };
+  }
+});
+
+// ── github-create-issue ───────────────────────────────────────────────────────
+// Creates an issue on the main tool repo (not the Assets repo) on behalf of the
+// signed-in user. Requires the OAuth user token — a maintainer PAT is
+// deliberately NOT used as a fallback here, because an issue should be
+// attributed to the actual reporter, not to a shared token. The renderer falls
+// back to a prefilled browser tab when this returns { success:false }.
+ipcMain.handle('github-create-issue', async (event, { title, body }) => {
+  try {
+    const auth = _readAuthToken();
+    if (!auth?.access_token) {
+      return { success: false, error: 'not-authenticated' };
+    }
+    const issue = await ghRequest({
+      method: 'POST', hostname: 'api.github.com',
+      path: `/repos/${GITHUB_REPO}/issues`,
+      headers: { Authorization: `Bearer ${auth.access_token}` },
+      body: { title, body },
+    });
+    if (!issue.number) throw new Error('Issue creation failed: ' + JSON.stringify(issue));
+
+    log.info(`[report] GitHub issue created: #${issue.number} ${issue.html_url}`);
+    return { success: true, issueNumber: issue.number, issueUrl: issue.html_url };
+  } catch (err) {
+    log.error('[report] github-create-issue failed:', err);
+    const msg = err.message || '';
+    const friendlyMsg = msg.includes('403') || msg.includes('404')
+      ? 'Keine Berechtigung, Issues in diesem Repo zu erstellen. Bitte GitHub in den Contributions neu verbinden.'
+      : msg;
+    return { success: false, error: friendlyMsg };
+  }
 });
 
 // ── submit-contribution-pr ────────────────────────────────────────────────────

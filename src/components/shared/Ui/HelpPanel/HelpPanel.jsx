@@ -28,7 +28,6 @@ const HelpConsole = ({
   activeSection,
   onSelect,
   onClose,
-  eyebrowPrefix = 'Help Register',
   children,
 }) => {
   useEffect(() => {
@@ -43,17 +42,19 @@ const HelpConsole = ({
   const active = sections.find((s) => s.id === activeSection) || sections[0];
   const bare = !!active?.bare;
 
-  // The register head — eyebrow + hero + traceline. In a normal section it
-  // is FIXED above the scroll area. A `bare` section folds it INTO the
-  // scroll content instead, so the content runs the full height up to the
-  // rail: scrolling carries the head (and the section) up to the tab bar
-  // and the top fade dissolves it there — no hard cut mid-stage.
+  // The register head — an index + big designation, mirroring the footer's
+  // panel headline (the title that names the active tab) so the help surface
+  // reads as the same register, just naming the help SECTION instead. In a
+  // normal section it is FIXED above the scroll area. A `bare` section folds
+  // it INTO the scroll content instead, so the content runs the full height
+  // up to the rail: scrolling carries the head (and the section) up to the
+  // tab bar and the top fade dissolves it there — no hard cut mid-stage.
   const head = (
     <>
-      <div className="hc-eyebrow" key={`eb-${active?.id}`}>
-        {eyebrowPrefix} — {active?.index} — {String(active?.label || '').toUpperCase()}
+      <div className="hc-headline" key={`hl-${active?.id}`}>
+        <span className="hc-index">{active?.index}</span>
+        <h2 className="hc-designation">{active?.label}</h2>
       </div>
-      <h2 className="hc-hero title-main" key={`hero-${active?.id}`}>{active?.label}</h2>
       <div className="hc-trace" key={`tr-${active?.id}`} aria-hidden="true">
         <div className="hc-trace-bloom" />
         <div className="hc-trace-core" />

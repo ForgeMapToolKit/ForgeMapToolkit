@@ -8,8 +8,8 @@
  * Configuration. Keine IPC-Aufrufe hier — Handler kommen als Props vom Parent.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
-import { hexToRgbArr, hexToHsv, hsvToHex, hueToHex } from './utils.js';
+import { hexToRgbArr, SKYBOX_PRESET_COLORS } from './utils.js';
+import { ColorPicker } from '../../../Shared/Ui/ColorPicker/ColorPicker.jsx';
 
 // ── DomePreview-Canvas ────────────────────────────────────────────
 export const DomePreview = ({
@@ -144,7 +144,7 @@ export const FullscreenDome = ({
           </div>
           <div className="ctrl-field">
             <div className="ctrl-label">Horizon Color</div>
-            <ColorPicker value={horizonColor} onChange={e=>setHorizonColor(e.target.value)} />
+            <ColorPicker value={horizonColor} onChange={e=>setHorizonColor(e.target.value)} presets={SKYBOX_PRESET_COLORS} />
           </div>
           <div className="ctrl-field">
             <div className="ctrl-label">Horizon Height</div>
@@ -152,7 +152,7 @@ export const FullscreenDome = ({
           </div>
           <div className="ctrl-field">
             <div className="ctrl-label">Zenith Color</div>
-            <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)} />
+            <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)} presets={SKYBOX_PRESET_COLORS} />
           </div>
           <div className="ctrl-field">
             <div className="ctrl-label">Zenith Height</div>
@@ -174,173 +174,8 @@ export const FullscreenDome = ({
   );
 };
 
-// ── ColorPicker (Glassmorphic) ────────────────────────────────────
-const SKYBOX_PRESET_COLORS = [
-  '#020814','#050f2a','#0a1840','#0d2252','#112d6b',
-  '#1a3a8c','#2255b0','#2b6cd4','#3b76ff','#60a5fa',
-  '#1a1a3a','#1e2850','#243264','#2a3c78','#1e4a70',
-  '#2a1828','#3c1e38','#501e3c','#6b2440','#8c2a3c',
-  '#5c1e0a','#7a2c14','#9e3820','#c44a2a','#e06030',
-  '#6b3c0a','#8a5018','#aa6824','#c8842e','#e8a040',
-  '#3c2c18','#5a4022','#7a5830','#9a7040','#b88c52',
-  '#b8c4d8','#ccd4e8','#dce4f2','#eaf0f8','#f4f8fc',
-];
-
-export const ColorPicker = ({ value, onChange }) => {
-  const isValidHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v);
-  const safeValue  = isValidHex(value) ? value : '#3b76ff';
-  const [open,       setOpen]       = useState(false);
-  const [hexEdit,    setHexEdit]    = useState('');
-  const [rgbEdit,    setRgbEdit]    = useState({ r:'', g:'', b:'' });
-  const [editingHex, setEditingHex] = useState(false);
-  const [editingRgb, setEditingRgb] = useState(false);
-  const [pos,        setPos]        = useState({ top:0, left:0, width:0 });
-  const swatchRef = useRef(null);
-  const popupRef  = useRef(null);
-  const svRef     = useRef(null);
-  const hueRef    = useRef(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => {
-      if (!swatchRef.current?.contains(e.target) && !popupRef.current?.contains(e.target))
-        setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open || !swatchRef.current) return;
-    const rect = swatchRef.current.getBoundingClientRect();
-    // The popup is portaled to document.body, outside the .skybox-tab subtree
-    // that defines --tab-color — forward the resolved values so the accent
-    // cascade still reaches it.
-    const cs = getComputedStyle(swatchRef.current);
-    setPos({
-      top: rect.bottom + 8, left: rect.left, width: rect.width,
-      tabColor:       cs.getPropertyValue('--tab-color').trim(),
-      tabGlow:        cs.getPropertyValue('--tab-glow').trim(),
-      tabGlowStrong:  cs.getPropertyValue('--tab-glow-strong').trim(),
-    });
-  }, [open]);
-
-  const { h, s, v } = hexToHsv(safeValue);
-  const [r, g, b] = [
-    parseInt(safeValue.slice(1,3),16),
-    parseInt(safeValue.slice(3,5),16),
-    parseInt(safeValue.slice(5,7),16),
-  ];
-
-  const onSVClick = (e) => {
-    const rect = svRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const ns = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const nv = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
-    onChange({ target: { value: hsvToHex(h, ns, nv) } });
-  };
-  const onHueClick = (e) => {
-    const rect = hueRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const nh = Math.max(0, Math.min(360, ((e.clientX - rect.left) / rect.width) * 360));
-    onChange({ target: { value: hsvToHex(nh, s, v) } });
-  };
-
-  return (
-    <div className="sb-cp-swatch-wrap" ref={swatchRef}>
-      <button
-        type="button"
-        className={`sb-cp-trigger${open ? ' open' : ''}`}
-        onClick={() => setOpen(o => !o)}
-        title={safeValue}
-      >
-        <span className="sb-cp-trigger-swatch" style={{ background: safeValue }}/>
-        <span className="sb-cp-trigger-hex">{safeValue.toUpperCase()}</span>
-      </button>
-      {open && ReactDOM.createPortal(
-        <div ref={popupRef} className="sb-cp-popup"
-          style={{
-            position:'fixed', top: pos.top, left: pos.left, zIndex: 99999,
-            '--tab-color': pos.tabColor, '--tab-glow': pos.tabGlow, '--tab-glow-strong': pos.tabGlowStrong,
-          }}>
-          {/* Landscape layout: SV+hue column on the left, fields stacked to
-              the right — wide, not tall. */}
-          <div className="sb-cp-popup-top">
-            <div className="sb-cp-sv-col">
-              {/* SV field — machined bezel, same recessed-slot language as .ctrl-toggle */}
-              <div className="sb-cp-sv-frame">
-                <div ref={svRef} className="sb-cp-sv"
-                  style={{ background: `hsl(${h},100%,50%)` }}
-                  onClick={onSVClick}>
-                  <div className="sb-cp-sv-white"/>
-                  <div className="sb-cp-sv-black"/>
-                  <div className="sb-cp-sv-cursor"
-                    style={{ left:`${s*100}%`, top:`${(1-v)*100}%`, background: safeValue }}/>
-                </div>
-              </div>
-              {/* Hue — recessed track, travelling pole (same mechanic as .ctrl-toggle-pole) */}
-              <div className="sb-cp-hue-frame">
-                <div ref={hueRef} className="sb-cp-hue" onClick={onHueClick}>
-                  <div className="sb-cp-hue-cursor" style={{ left:`${(h/360)*100}%` }}/>
-                </div>
-              </div>
-            </div>
-            {/* Fields — the same never-boxed baseline as every other ctrl-input in the app */}
-            <div className="sb-cp-fields-col">
-              <div className="ctrl-field">
-                <div className="ctrl-label">Hex</div>
-                <div className="sb-cp-input-hex-wrap">
-                  <span className="sb-cp-input-hash">#</span>
-                  <input className="ctrl-input sb-cp-input--hex"
-                    value={editingHex ? hexEdit : safeValue.slice(1).toUpperCase()}
-                    onFocus={() => { setEditingHex(true); setHexEdit(safeValue.slice(1).toUpperCase()); }}
-                    onChange={e => setHexEdit(e.target.value)}
-                    onBlur={() => { setEditingHex(false); const h2='#'+hexEdit; if(isValidHex(h2)) onChange({target:{value:h2}}); }}
-                    onKeyDown={e => { if(e.key==='Enter'){setEditingHex(false);const h2='#'+hexEdit;if(isValidHex(h2))onChange({target:{value:h2}});} }}
-                    maxLength={6} spellCheck={false}/>
-                </div>
-              </div>
-              <div className="sb-cp-rgb-row">
-                {[['R',r,0],['G',g,1],['B',b,2]].map(([ch,chVal]) => (
-                  <div key={ch} className="ctrl-field">
-                    <div className="ctrl-label">{ch}</div>
-                    <input className="ctrl-input sb-cp-input--num"
-                      value={editingRgb ? rgbEdit[ch.toLowerCase()] : chVal}
-                      onFocus={() => { setEditingRgb(true); setRgbEdit({r:String(r),g:String(g),b:String(b)}); }}
-                      onChange={e => setRgbEdit(prev => ({...prev,[ch.toLowerCase()]:e.target.value}))}
-                      onBlur={() => {
-                        setEditingRgb(false);
-                        const rv=Math.max(0,Math.min(255,parseInt(rgbEdit.r)||0));
-                        const gv=Math.max(0,Math.min(255,parseInt(rgbEdit.g)||0));
-                        const bv=Math.max(0,Math.min(255,parseInt(rgbEdit.b)||0));
-                        onChange({target:{value:'#'+[rv,gv,bv].map(x=>x.toString(16).padStart(2,'0')).join('')}});
-                      }}
-                      onKeyDown={e => { if(e.key==='Enter'){
-                        setEditingRgb(false);
-                        const rv=Math.max(0,Math.min(255,parseInt(rgbEdit.r)||0));
-                        const gv=Math.max(0,Math.min(255,parseInt(rgbEdit.g)||0));
-                        const bv=Math.max(0,Math.min(255,parseInt(rgbEdit.b)||0));
-                        onChange({target:{value:'#'+[rv,gv,bv].map(x=>x.toString(16).padStart(2,'0')).join('')}});
-                      }}}
-                      maxLength={3}/>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="ctrl-label sb-cp-presets-label">Presets</div>
-          <div className="sb-cp-presets">
-            {SKYBOX_PRESET_COLORS.map(c => (
-              <div key={c} className="sb-cp-preset" style={{background:c}}
-                onClick={() => onChange({target:{value:c}})}/>
-            ))}
-          </div>
-        </div>,
-        document.body,
-      )}
-    </div>
-  );
-};
+// ColorPicker now lives in Shared/Ui/ColorPicker — imported above. Kept as
+// ColorPicker + SKYBOX_PRESET_COLORS (this tab's sky/water swatch row).
 
 // ── EditorBridgeBadge ─────────────────────────────────────────────
 // Rein präsentational. Props vom Parent, kein IPC hier.
@@ -478,11 +313,11 @@ const Configuration = ({
           <div className="sb-cfg-row">
             <div className="ctrl-field">
               <div className="ctrl-label">Horizon Color</div>
-              <ColorPicker value={horizonColor} onChange={e=>setHorizonColor(e.target.value)}/>
+              <ColorPicker value={horizonColor} onChange={e=>setHorizonColor(e.target.value)} presets={SKYBOX_PRESET_COLORS}/>
             </div>
             <div className="ctrl-field">
               <div className="ctrl-label">Zenith Color</div>
-              <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)}/>
+              <ColorPicker value={zenithColor} onChange={e=>setZenithColor(e.target.value)} presets={SKYBOX_PRESET_COLORS}/>
             </div>
           </div>
           <div className="sb-cfg-row">

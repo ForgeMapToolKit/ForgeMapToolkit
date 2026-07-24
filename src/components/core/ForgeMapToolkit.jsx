@@ -180,7 +180,7 @@ window.electronAPI.invoke('check-update').then(res => {
   useEffect(() => {
     if (!settings?.mapName) return;
     setSharedState(prev => projectMapName(prev, settings.mapName));
-  }, [settings?.mapName]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings?.mapName]);  
 
   // Persist the persisted-prefix slice whenever the shared store changes.
   useEffect(() => { persistShared(sharedState); }, [sharedState]);

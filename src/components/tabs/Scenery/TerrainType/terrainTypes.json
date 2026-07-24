@@ -1,0 +1,769 @@
+[
+  {
+    "name": "Default",
+    "index": 1,
+    "color": [
+      0,
+      0,
+      0
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Default",
+    "styleName": "Default"
+  },
+  {
+    "name": "Dirt01",
+    "index": 2,
+    "color": [
+      255,
+      0,
+      0
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Default Dirt",
+    "styleName": "Default"
+  },
+  {
+    "name": "Dirt02",
+    "index": 3,
+    "color": [
+      68,
+      7,
+      7
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Red/brown/biege dirt, with slight vegetation",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Dirt03",
+    "index": 4,
+    "color": [
+      136,
+      187,
+      248
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Brown/gray earth",
+    "styleName": "Default"
+  },
+  {
+    "name": "Dirt05",
+    "index": 5,
+    "color": [
+      136,
+      0,
+      102
+    ],
+    "blocking": false,
+    "style": 2,
+    "description": "Red earth",
+    "styleName": "RedRock"
+  },
+  {
+    "name": "Dirt06",
+    "index": 6,
+    "color": [
+      136,
+      102,
+      17
+    ],
+    "blocking": false,
+    "style": 2,
+    "description": "darker red/brown earth",
+    "styleName": "RedRock"
+  },
+  {
+    "name": "Dirt07",
+    "index": 7,
+    "color": [
+      136,
+      45,
+      98
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "White/Beige Desert",
+    "styleName": "Default"
+  },
+  {
+    "name": "Dirt08",
+    "index": 8,
+    "color": [
+      88,
+      189,
+      86
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Beige/Brown Rocky Desert",
+    "styleName": "Default"
+  },
+  {
+    "name": "Dirt09",
+    "index": 9,
+    "color": [
+      255,
+      100,
+      39
+    ],
+    "blocking": true,
+    "style": 1,
+    "description": "Blocking variant of Red/brown/biege dirt, with slight vegetation (Dirt02)",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Sand01",
+    "index": 40,
+    "color": [
+      255,
+      255,
+      255
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "White sand",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Sand02",
+    "index": 41,
+    "color": [
+      222,
+      222,
+      185
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Sand Grassy",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Vegetation01",
+    "index": 80,
+    "color": [
+      0,
+      255,
+      0
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Default Vegetation",
+    "styleName": "Default"
+  },
+  {
+    "name": "Vegetation02",
+    "index": 81,
+    "color": [
+      0,
+      255,
+      255
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Rocky grass",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Vegetation03",
+    "index": 82,
+    "color": [
+      144,
+      0,
+      0
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Light green olive vegetation",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Vegetation04",
+    "index": 83,
+    "color": [
+      255,
+      34,
+      34
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Dark green olive vegetation",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Vegetation05",
+    "index": 84,
+    "color": [
+      51,
+      136,
+      34
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "Green olive vegetation",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Rocky01",
+    "index": 150,
+    "color": [
+      255,
+      102,
+      255
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Default Rocky",
+    "styleName": "Default"
+  },
+  {
+    "name": "Concrete01",
+    "index": 151,
+    "color": [
+      34,
+      0,
+      34
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Concrete",
+    "styleName": "Default"
+  },
+  {
+    "name": "Rocky02",
+    "index": 152,
+    "color": [
+      255,
+      51,
+      255
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Gray rock",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Rocky03",
+    "index": 153,
+    "color": [
+      153,
+      34,
+      153
+    ],
+    "blocking": false,
+    "style": 7,
+    "description": "Gray rock",
+    "styleName": "Tundra"
+  },
+  {
+    "name": "Rocky04",
+    "index": 154,
+    "color": [
+      136,
+      0,
+      0
+    ],
+    "blocking": false,
+    "style": 2,
+    "description": "Red rock",
+    "styleName": "RedRock"
+  },
+  {
+    "name": "Rocky05",
+    "index": 155,
+    "color": [
+      136,
+      0,
+      0
+    ],
+    "blocking": false,
+    "style": 3,
+    "description": "Beige dusty rock",
+    "styleName": "Desert"
+  },
+  {
+    "name": "Rocky06",
+    "index": 156,
+    "color": [
+      102,
+      96,
+      187
+    ],
+    "blocking": false,
+    "style": 5,
+    "description": "Light Lava Rock",
+    "styleName": "Lava"
+  },
+  {
+    "name": "Rocky07",
+    "index": 157,
+    "color": [
+      34,
+      136,
+      34
+    ],
+    "blocking": false,
+    "style": 5,
+    "description": "Dark Lava Rock",
+    "styleName": "Lava"
+  },
+  {
+    "name": "Rocky08",
+    "index": 158,
+    "color": [
+      17,
+      17,
+      255
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Green rock",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Rocky09",
+    "index": 159,
+    "color": [
+      17,
+      17,
+      85
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "Green/gray/black rock w/ vegetation",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Rocky10",
+    "index": 160,
+    "color": [
+      51,
+      51,
+      51
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "Green/brown rock, cliff sides",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Rocky11",
+    "index": 161,
+    "color": [
+      51,
+      51,
+      51
+    ],
+    "blocking": false,
+    "style": 6,
+    "description": "Geothermal dark green/gray rock",
+    "styleName": "Geothermal"
+  },
+  {
+    "name": "Rocky12",
+    "index": 162,
+    "color": [
+      51,
+      51,
+      136
+    ],
+    "blocking": false,
+    "style": 6,
+    "description": "Geothermal gray rock",
+    "styleName": "Geothermal"
+  },
+  {
+    "name": "Rocky13",
+    "index": 163,
+    "color": [
+      136,
+      51,
+      136
+    ],
+    "blocking": false,
+    "style": 6,
+    "description": "Geothermal light gray/green rock",
+    "styleName": "Geothermal"
+  },
+  {
+    "name": "Rocky14",
+    "index": 164,
+    "color": [
+      255,
+      0,
+      0
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Blue Crystal",
+    "styleName": "Default"
+  },
+  {
+    "name": "Rocky15",
+    "index": 165,
+    "color": [
+      255,
+      255,
+      18
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Cyber Strata",
+    "styleName": "Default"
+  },
+  {
+    "name": "TermacUEF",
+    "index": 190,
+    "color": [
+      255,
+      0,
+      255
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "UEF Termac",
+    "styleName": "Default"
+  },
+  {
+    "name": "TermacAeon",
+    "index": 191,
+    "color": [
+      255,
+      0,
+      255
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Aeon Termac",
+    "styleName": "Default"
+  },
+  {
+    "name": "TermacCybran",
+    "index": 192,
+    "color": [
+      255,
+      0,
+      255
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Cybran Termac",
+    "styleName": "Default"
+  },
+  {
+    "name": "Snowy01",
+    "index": 200,
+    "color": [
+      153,
+      153,
+      255
+    ],
+    "blocking": false,
+    "style": 7,
+    "description": "Snowy, dark blue, hard ice",
+    "styleName": "Tundra"
+  },
+  {
+    "name": "Snowy02",
+    "index": 201,
+    "color": [
+      187,
+      187,
+      187
+    ],
+    "blocking": false,
+    "style": 7,
+    "description": "Snowy, light blue snow pack",
+    "styleName": "Tundra"
+  },
+  {
+    "name": "Snowy03",
+    "index": 202,
+    "color": [
+      153,
+      85,
+      153
+    ],
+    "blocking": false,
+    "style": 7,
+    "description": "Snowy, hight albedo, bright white snow",
+    "styleName": "Tundra"
+  },
+  {
+    "name": "Water01",
+    "index": 220,
+    "color": [
+      255,
+      255,
+      0
+    ],
+    "blocking": false,
+    "style": 0,
+    "description": "Default water",
+    "styleName": "Default"
+  },
+  {
+    "name": "Water02",
+    "index": 221,
+    "color": [
+      128,
+      128,
+      0
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Shoreline water",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Water03",
+    "index": 222,
+    "color": [
+      32,
+      128,
+      68
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Deep Dark Blue Ocean Water",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Water04",
+    "index": 223,
+    "color": [
+      136,
+      200,
+      148
+    ],
+    "blocking": false,
+    "style": 1,
+    "description": "Shallow Light Blue Water",
+    "styleName": "Evergreen"
+  },
+  {
+    "name": "Water05",
+    "index": 224,
+    "color": [
+      136,
+      200,
+      148
+    ],
+    "blocking": false,
+    "style": 2,
+    "description": "Shoreline red rock water",
+    "styleName": "RedRock"
+  },
+  {
+    "name": "Water06",
+    "index": 225,
+    "color": [
+      153,
+      34,
+      84
+    ],
+    "blocking": false,
+    "style": 2,
+    "description": "Deep defaultred rock water",
+    "styleName": "RedRock"
+  },
+  {
+    "name": "Water07",
+    "index": 226,
+    "color": [
+      153,
+      34,
+      84
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "Tropical Shoreline",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Water08",
+    "index": 227,
+    "color": [
+      136,
+      200,
+      148
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "Tropical light blue water shallows",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Water09",
+    "index": 228,
+    "color": [
+      32,
+      128,
+      68
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "Tropical mid-depth blue",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Water10",
+    "index": 229,
+    "color": [
+      16,
+      64,
+      20
+    ],
+    "blocking": false,
+    "style": 4,
+    "description": "Tropical deep water, dark blue",
+    "styleName": "Tropical"
+  },
+  {
+    "name": "Lava01",
+    "index": 230,
+    "color": [
+      204,
+      34,
+      84
+    ],
+    "blocking": true,
+    "style": 5,
+    "description": "LAVA!!!!!!!!!!!!",
+    "styleName": "Lava"
+  },
+  {
+    "name": "Water11",
+    "index": 231,
+    "color": [
+      32,
+      128,
+      68
+    ],
+    "blocking": false,
+    "style": 3,
+    "description": "Desrt shoreline water",
+    "styleName": "Desert"
+  },
+  {
+    "name": "Water12",
+    "index": 232,
+    "color": [
+      16,
+      64,
+      20
+    ],
+    "blocking": false,
+    "style": 3,
+    "description": "Desert deep water",
+    "styleName": "Desert"
+  },
+  {
+    "name": "Water13",
+    "index": 233,
+    "color": [
+      32,
+      128,
+      132
+    ],
+    "blocking": false,
+    "style": 7,
+    "description": "Tundra shoreline water",
+    "styleName": "Tundra"
+  },
+  {
+    "name": "Water14",
+    "index": 234,
+    "color": [
+      16,
+      64,
+      20
+    ],
+    "blocking": false,
+    "style": 7,
+    "description": "Tundra deep water, blue",
+    "styleName": "Tundra"
+  },
+  {
+    "name": "Water15",
+    "index": 235,
+    "color": [
+      16,
+      192,
+      20
+    ],
+    "blocking": false,
+    "style": 7,
+    "description": "Tundra mid-level water, aquamarine",
+    "styleName": "Tundra"
+  },
+  {
+    "name": "Water16",
+    "index": 236,
+    "color": [
+      16,
+      192,
+      20
+    ],
+    "blocking": false,
+    "style": 5,
+    "description": "Lava water shoreline",
+    "styleName": "Lava"
+  },
+  {
+    "name": "Water17",
+    "index": 237,
+    "color": [
+      16,
+      64,
+      20
+    ],
+    "blocking": false,
+    "style": 5,
+    "description": "Lava water",
+    "styleName": "Lava"
+  },
+  {
+    "name": "Water18",
+    "index": 238,
+    "color": [
+      16,
+      64,
+      20
+    ],
+    "blocking": false,
+    "style": 6,
+    "description": "Geothermal shoreline water",
+    "styleName": "Geothermal"
+  },
+  {
+    "name": "Water19",
+    "index": 239,
+    "color": [
+      144,
+      64,
+      20
+    ],
+    "blocking": false,
+    "style": 6,
+    "description": "Geothermal olive water",
+    "styleName": "Geothermal"
+  },
+  {
+    "name": "Water20",
+    "index": 240,
+    "color": [
+      144,
+      64,
+      148
+    ],
+    "blocking": false,
+    "style": 6,
+    "description": "Geothermal mint water",
+    "styleName": "Geothermal"
+  }
+]

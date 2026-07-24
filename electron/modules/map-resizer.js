@@ -702,10 +702,11 @@ function register() {
     async (event, { mapFolder }) => findScmap(mapFolder)
   ));
 
-  _ipcMain.handle('mr-duplicate-map-version', withPathGuard(
-    ({ mapFolder }) => [mapFolder],
-    async (event, { mapFolder }) => duplicateMapVersion(mapFolder)
-  ));
+  // 'mr-duplicate-map-version' is NOT registered here — preview.js owns the
+  // live handler for this channel (it additionally patches version strings
+  // inside the duplicated map's .lua files, which this module's
+  // duplicateMapVersion() does not do). Registering it here too would throw
+  // "Attempted to register a second handler" once both modules are required.
 
   _ipcMain.handle('mr-scale-scmap', withPathGuard(
     ({ unpackFolder }) => [unpackFolder],
@@ -722,17 +723,8 @@ function register() {
     async (event, args) => updateScenarioLua(args)
   ));
 
-  if (_dialog) {
-    _ipcMain.handle('settings-pick-file', async (event, { title, filters }) => {
-      const result = await _dialog.showOpenDialog({
-        title:      title || 'Select File',
-        filters:    filters || [{ name: 'All Files', extensions: ['*'] }],
-        properties: ['openFile'],
-      });
-      if (result.canceled || !result.filePaths.length) return { success: false };
-      return { success: true, path: result.filePaths[0] };
-    });
-  }
+  // 'settings-pick-file' is NOT registered here — settings.js already owns
+  // this channel (it's a generic file-picker dialog, not map-resizer-specific).
 }
 
 module.exports = {

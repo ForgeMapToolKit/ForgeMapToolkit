@@ -5,8 +5,11 @@ import Emitter           from '../Tabs/Placement/Emitter/Emitter.jsx';
 import CustomProps       from '../Tabs/Scenery/CustomProps/CustomProps.jsx';
 import Trees             from '../Tabs/Scenery/Trees/Trees.jsx';
 import RockErosion       from '../Tabs/Scenery/RockErosion/RockErosion.jsx';
+import WaveNormals       from '../Tabs/Scenery/WaveNormals/WaveNormals.jsx';
+import TerrainType        from '../Tabs/Scenery/TerrainType/TerrainType.jsx';
 import Stars             from '../Tabs/Skybox/Stars/Stars.jsx';
 import SkyboxGenerator   from '../Tabs/Skybox/SkyboxGenerator/SkyboxGenerator.jsx';
+import NodeEditor        from '../Tabs/Skybox/NodeEditor/NodeEditor.jsx';
 import Contributions     from '../Tabs/Community/Contributions/Contributions.jsx';
 import Settings          from '../Tabs/Config/Settings/Settings.jsx';
 import ScmapTool         from '../Tabs/Tools/Scmap/Scmap.jsx';
@@ -59,9 +62,12 @@ export const TAB_ROUTES = {
   customprops:        (c) => <CustomProps     {...c.tabProps} />,
   treemap:            (c) => <Trees           {...c.tabProps} />,
   rockerosion:        (c) => <RockErosion     {...c.tabProps} />,
+  wavenormals:        (c) => <WaveNormals     {...c.tabProps} />,
+  terraintype:        (c) => <TerrainType     {...c.tabProps} />,
   emitter:            (c) => <Emitter         {...c.tabProps} />,
   stars:              (c) => <Stars           {...c.tabProps} />,
   'skybox-generator': (c) => <SkyboxGenerator {...c.tabProps} />,
+  'node-editor':      (c) => <NodeEditor      {...c.tabProps} />,
   scmaptool:          (c) => <ScmapTool       {...c.tabProps} />,
   adaptivemaphelper:  (c) => <AdaptiveMapHelper {...c.tabProps} />,
   history:            (c) => <HistoryTab settings={c.settings} shared={c.sharedState} />,

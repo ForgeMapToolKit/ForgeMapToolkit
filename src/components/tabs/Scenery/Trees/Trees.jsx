@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import '../../../Shared/shared.css';
 import '../../../Shared/trace.css';
 import './Trees.css';
@@ -12,6 +12,7 @@ import {
   ensureDir, writeFile,
   usePersistentState, useMapInfo, useScmapPreview,
   loadImageChannel, drawPlacementCanvas,
+  useTerrainData, createTerrainSampler,
 } from '../../../Shared/MapLogic';
 import TreesConfiguration from './Configuration.jsx';
 import TreesChannels from './Channels.jsx';
@@ -35,11 +36,24 @@ const DEFAULT_PROP_CARD = {
   customValuesOpen: false, customActiveTab: null,
   customDensityMultiplier: '1.0', customDiffusion: '0',
   customDecimalPlacesCoords: '2', customDecimalPlacesHeading: '2',
+  allowWaterSpawn: false, slopeMin: '0', slopeMax: '90',
 };
 
 const availableColors = [
-  '#FFAF00', '#FF7B00', '#FFFA00', '#A5E801', '#538A33', '#8A12BD',
-  '#00DDFF', '#3B76FF', '#FE1818', '#3EA387', '#18C748', '#00FF66', '#FFFFFF', '#000000'
+  { name: 'Trainer', color: '#FFAF00', glow: 'rgba(255, 175, 0, 0.35)' },
+  { name: 'Promotions', color: '#FF7B00', glow: 'rgba(255, 123, 0, 0.35)' },
+  { name: 'FAF Live', color: '#FFFA00', glow: 'rgba(255, 250, 0, 0.35)' },
+  { name: 'Tournament', color: '#A5E801', glow: 'rgba(165, 232, 1, 0.35)' },
+  { name: 'Matchmaking', color: '#538A33', glow: 'rgba(83, 138, 51, 0.35)' },
+  { name: 'Balance', color: '#8A12BD', glow: 'rgba(138, 18, 189, 0.35)' },
+  { name: 'Games', color: '#00DDFF', glow: 'rgba(0, 221, 255, 0.35)' },
+  { name: 'Creative', color: '#3B76FF', glow: 'rgba(59, 118, 255, 0.35)' },
+  { name: 'Moderation', color: '#FE1818', glow: 'rgba(254, 24, 24, 0.35)' },
+  { name: 'DevOps', color: '#3EA387', glow: 'rgba(62, 163, 135, 0.35)' },
+  { name: 'Campaign', color: '#18C748', glow: 'rgba(24, 199, 72, 0.35)' },
+  { name: 'Growth', color: '#00FF66', glow: 'rgba(0, 255, 102, 0.35)' },
+  { name: 'Association', color: '#FFFFFF', glow: 'rgba(255, 255, 255, 0.35)' },
+  { name: 'Black', color: '#000000', glow: 'rgba(0, 0, 0, 0.35)' }
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -90,6 +104,15 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
   });
   const { previewImage, previewImageData, setPreviewImageData, previewLoading } =
     useScmapPreview({ mapName, mapsFolderPath, settings });
+
+  // Real terrain elevation — read straight out of the .scmap binary so markers
+  // get placed at their actual in-game height instead of the y=0 placeholder
+  // the engine silently corrects for at load time.
+  const { terrain, terrainError } = useTerrainData({ mapName, mapsFolderPath, settings });
+  const terrainSampler = useMemo(() => createTerrainSampler(terrain), [terrain]);
+  useEffect(() => {
+    if (terrainError) console.warn('[TreeMap] Real terrain elevation unavailable, falling back to y=0:', terrainError);
+  }, [terrainError]);
 
   // ─── Settings sync ──────────────────────────────────────────────────────────
 
@@ -283,11 +306,19 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
             finalZ = exactZ * (1 - cardDiffusionAmount) + randomZ * cardDiffusionAmount;
           }
 
+          if (terrainSampler) {
+            if (!card.allowWaterSpawn && terrainSampler.isUnderwater(finalX, finalZ)) return;
+            const slopeDeg = terrainSampler.sampleSlopeDegrees(finalX, finalZ);
+            const slopeMinVal = parseFloat(card.slopeMin) || 0;
+            const slopeMaxVal = card.slopeMax === '' || card.slopeMax == null ? 90 : parseFloat(card.slopeMax);
+            if (slopeDeg < slopeMinVal || slopeDeg > slopeMaxVal) return;
+          }
+
           currentSeed++;
           markers.push({
             id: currentSeed,
             x: finalX,
-            y: 0,
+            y: terrainSampler ? terrainSampler.sampleHeight(finalX, finalZ) : 0,
             z: finalZ,
             heading: seededRandom(currentSeed) * Math.PI * 2,
             blueprint,
@@ -325,7 +356,8 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
         }
 
         mHeading = ((mHeading % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        markers.push({ ...m, id: m.id + 0.5, x: mx, z: mz, heading: mHeading, isMirrored: true });
+        const my = terrainSampler ? terrainSampler.sampleHeight(mx, mz) : m.y;
+        markers.push({ ...m, id: m.id + 0.5, x: mx, y: my, z: mz, heading: mHeading, isMirrored: true });
       });
     }
     setPropMarkers(markers);
@@ -336,7 +368,7 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       generatePropMarkers(densityMapData, densityMapData.width, densityMapData.height, exclusionZoneData, heightmapData, propCards);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [propCards, seed, densityMultiplier, gridResolution, mapSize, treeline, treelineGradient, treelineMin, treelineMinGradient, heightmapData]);
+  }, [propCards, seed, densityMultiplier, gridResolution, mapSize, treeline, treelineGradient, treelineMin, treelineMinGradient, heightmapData, terrainSampler]);
 
   const handleRandomize = () => {
     setSeed(Date.now());
@@ -496,7 +528,7 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       determineAreaData: null,
       propDensityMapImage: null,
       propDensityMapData: null,
-      color: availableColors[Math.floor(Math.random() * availableColors.length)],
+      color: availableColors[Math.floor(Math.random() * availableColors.length)].color,
       customValuesOpen: false,
       customActiveTab: null,
       customDensityMultiplier: '1.0',
@@ -507,6 +539,7 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       customDiffusion: '0',
       customDecimalPlacesCoords: '2',
       customDecimalPlacesHeading: '2',
+      allowWaterSpawn: false, slopeMin: '0', slopeMax: '90',
     }]);
     setSelectedProp(propCards.length);
   };
@@ -626,6 +659,7 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
       const cosH = Math.cos(h);
       const sinH = Math.sin(h);
       const x = marker.x.toFixed(coordDecimals);
+      const y = (marker.y || 0).toFixed(coordDecimals);
       const z = marker.z.toFixed(coordDecimals);
       const rx1 = cosH.toFixed(headingDecimals);
       const rx3 = (-sinH).toFixed(headingDecimals);
@@ -634,7 +668,7 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
 
       lua += `    {\n`;
       lua += `        path = "${marker.blueprint}",\n`;
-      lua += `        position = {\n            ${x},\n            0,\n            ${z},\n        },\n`;
+      lua += `        position = {\n            ${x},\n            ${y},\n            ${z},\n        },\n`;
       lua += `        rotationX = {\n            ${rx1},\n            0,\n            ${rx3},\n        },\n`;
       lua += `        rotationY = {\n            0,\n            1,\n            0,\n        },\n`;
       lua += `        rotationZ = {\n            ${rz1},\n            0,\n            ${rz3},\n        },\n`;
@@ -782,6 +816,8 @@ const TreemapTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecord
                 lines.push(`      Custom Treeline   : Yes (Cutoff ${card.customTreeline}, Min ${card.customTreelineMin})`);
               if (card.determineAreaImage)  lines.push(`      Determine Area    : Yes`);
               if (card.propDensityMapImage) lines.push(`      Prop Density Map  : Yes`);
+              if (card.allowWaterSpawn || (card.slopeMin ?? '0') !== '0' || (card.slopeMax ?? '90') !== '90')
+                lines.push(`      Terrain Rules     : Water ${card.allowWaterSpawn ? 'allowed' : 'blocked'}, Slope ${card.slopeMin ?? '0'}°–${card.slopeMax ?? '90'}°`);
               return lines.join('\n');
             }).join('\n\n');
           const readmeContent = buildReadme({

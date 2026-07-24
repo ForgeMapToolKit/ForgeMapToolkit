@@ -7,7 +7,7 @@ import { DropSlot, ToggleSwitch } from '../../../Shared/Ui/EntityPanel/EntityPan
    whatever Gaea's simulation actually computed. */
 
 const CHANNEL_DEFS = [
-  { key: 'slope',      label: 'Slope' },
+  { key: 'slope',      label: 'Slope', idleText: 'Optional — falls back to the real heightmap slope if a map is loaded' },
   { key: 'flow',       label: 'Flow Accumulation' },
   { key: 'curvature',  label: 'Curvature' },
   { key: 'deposition', label: 'Deposition / Sediment' },
@@ -20,7 +20,7 @@ function ChannelSlot({ def, channel, onUpload, onClear, onToggleInvert }) {
       <DropSlot
         acceptInput="image/*"
         status={channel ? 'done' : 'idle'}
-        idleText="Click or drop a greyscale mask"
+        idleText={def.idleText || 'Click or drop a greyscale mask'}
         doneText={channel ? `${channel.width} × ${channel.height} px` : undefined}
         onChange={onUpload}
         onClear={onClear}

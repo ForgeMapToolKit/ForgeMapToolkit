@@ -8,41 +8,41 @@
   quis nostrud exercitation ullamco laboris.
 </p>
 
-<div class="fcv-callout">
+<div class="cp-callout">
   <p>Callout-Box: Most bindings use <kbd>Ctrl</kbd> on Windows / Linux and <kbd>Cmd</kbd> on macOS.
   Inline <code>code</code> inside a callout also renders here.</p>
 </div>
 
 <h2>Section heading h2 — Global Bindings</h2>
 
-<div class="fcv-shortcuts">
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Open / close footer panel</span>
-    <span class="fcv-shortcuts__combo"><kbd>F</kbd></span>
+<div class="cp-shortcuts">
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Open / close footer panel</span>
+    <span class="cp-shortcuts__combo"><kbd>F</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Search within article</span>
-    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>F</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Search within article</span>
+    <span class="cp-shortcuts__combo"><kbd>Ctrl</kbd><kbd>F</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Close article / collapse panel</span>
-    <span class="fcv-shortcuts__combo"><kbd>Esc</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Close article / collapse panel</span>
+    <span class="cp-shortcuts__combo"><kbd>Esc</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Next search result</span>
-    <span class="fcv-shortcuts__combo"><kbd>Enter</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Next search result</span>
+    <span class="cp-shortcuts__combo"><kbd>Enter</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Previous search result</span>
-    <span class="fcv-shortcuts__combo"><kbd>Shift</kbd><kbd>Enter</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Previous search result</span>
+    <span class="cp-shortcuts__combo"><kbd>Shift</kbd><kbd>Enter</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Undo last action</span>
-    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>Z</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Undo last action</span>
+    <span class="cp-shortcuts__combo"><kbd>Ctrl</kbd><kbd>Z</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Generate output files</span>
-    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>G</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Generate output files</span>
+    <span class="cp-shortcuts__combo"><kbd>Ctrl</kbd><kbd>G</kbd></span>
   </div>
 </div>
 
@@ -122,55 +122,59 @@
 <p>Paragraph before a <code>pre</code> block. Lorem ipsum dolor sit amet,
 consectetur adipiscing elit, sed do eiusmod.</p>
 
-<div class="fcv-code">
-  <div class="fcv-code__header">
-    <span class="fcv-code__label">unit-placement.lua</span>
-    <span class="fcv-code__lang">Lua</span>
+<div class="cp-code">
+  <div class="cp-code__header">
+    <span class="cp-code__label">unit-placement.lua</span>
+    <span class="cp-code__lang">Lua</span>
   </div>
-  <pre class="fcv-code__pre"><code><span class="fcv-tok-comment">-- Lua example: unit placement configuration</span>
-<span class="fcv-tok-keyword">local</span> <span class="fcv-tok-ident">config</span> <span class="fcv-tok-operator">=</span> <span class="fcv-tok-operator">{</span>
-  <span class="fcv-tok-ident">density</span>    <span class="fcv-tok-operator">=</span> <span class="fcv-tok-number">0.5</span><span class="fcv-tok-operator">,</span>
-  <span class="fcv-tok-ident">spread</span>     <span class="fcv-tok-operator">=</span> <span class="fcv-tok-number">120</span><span class="fcv-tok-operator">,</span>
-  <span class="fcv-tok-ident">category</span>   <span class="fcv-tok-operator">=</span> <span class="fcv-tok-string">"LAND"</span><span class="fcv-tok-operator">,</span>
-  <span class="fcv-tok-ident">randomSeed</span> <span class="fcv-tok-operator">=</span> <span class="fcv-tok-number">42</span><span class="fcv-tok-operator">,</span>
-<span class="fcv-tok-operator">}</span>
+  <div class="cp-code__scroll">
+  <pre class="cp-code__pre"><code><span class="cp-tok-comment">-- Lua example: unit placement configuration</span>
+<span class="cp-tok-keyword">local</span> <span class="cp-tok-ident">config</span> <span class="cp-tok-operator">=</span> <span class="cp-tok-operator">{</span>
+  <span class="cp-tok-ident">density</span>    <span class="cp-tok-operator">=</span> <span class="cp-tok-number">0.5</span><span class="cp-tok-operator">,</span>
+  <span class="cp-tok-ident">spread</span>     <span class="cp-tok-operator">=</span> <span class="cp-tok-number">120</span><span class="cp-tok-operator">,</span>
+  <span class="cp-tok-ident">category</span>   <span class="cp-tok-operator">=</span> <span class="cp-tok-string">"LAND"</span><span class="cp-tok-operator">,</span>
+  <span class="cp-tok-ident">randomSeed</span> <span class="cp-tok-operator">=</span> <span class="cp-tok-number">42</span><span class="cp-tok-operator">,</span>
+<span class="cp-tok-operator">}</span>
 
-<span class="fcv-tok-keyword">for</span> <span class="fcv-tok-ident">i</span><span class="fcv-tok-operator">,</span> <span class="fcv-tok-ident">pos</span> <span class="fcv-tok-keyword">in</span> <span class="fcv-tok-ident">ipairs</span><span class="fcv-tok-operator">(</span><span class="fcv-tok-ident">coordinates</span><span class="fcv-tok-operator">)</span> <span class="fcv-tok-keyword">do</span>
-  <span class="fcv-tok-ident">PlaceUnit</span><span class="fcv-tok-operator">(</span><span class="fcv-tok-ident">config</span><span class="fcv-tok-operator">,</span> <span class="fcv-tok-ident">pos</span><span class="fcv-tok-operator">.</span><span class="fcv-tok-ident">x</span><span class="fcv-tok-operator">,</span> <span class="fcv-tok-ident">pos</span><span class="fcv-tok-operator">.</span><span class="fcv-tok-ident">z</span><span class="fcv-tok-operator">)</span>  <span class="fcv-tok-comment">-- z is vertical in FA</span>
-<span class="fcv-tok-keyword">end</span></code></pre>
+<span class="cp-tok-keyword">for</span> <span class="cp-tok-ident">i</span><span class="cp-tok-operator">,</span> <span class="cp-tok-ident">pos</span> <span class="cp-tok-keyword">in</span> <span class="cp-tok-ident">ipairs</span><span class="cp-tok-operator">(</span><span class="cp-tok-ident">coordinates</span><span class="cp-tok-operator">)</span> <span class="cp-tok-keyword">do</span>
+  <span class="cp-tok-ident">PlaceUnit</span><span class="cp-tok-operator">(</span><span class="cp-tok-ident">config</span><span class="cp-tok-operator">,</span> <span class="cp-tok-ident">pos</span><span class="cp-tok-operator">.</span><span class="cp-tok-ident">x</span><span class="cp-tok-operator">,</span> <span class="cp-tok-ident">pos</span><span class="cp-tok-operator">.</span><span class="cp-tok-ident">z</span><span class="cp-tok-operator">)</span>  <span class="cp-tok-comment">-- z is vertical in FA</span>
+<span class="cp-tok-keyword">end</span></code></pre>
+  </div>
 </div>
 
 <p>Paragraph after the code block. Lorem ipsum dolor sit amet.</p>
 
-<div class="fcv-code">
-  <div class="fcv-code__header">
-    <span class="fcv-code__label">Export example</span>
-    <span class="fcv-code__lang">Bash</span>
+<div class="cp-code">
+  <div class="cp-code__header">
+    <span class="cp-code__label">Export example</span>
+    <span class="cp-code__lang">Bash</span>
   </div>
-  <pre class="fcv-code__pre"><code><span class="fcv-tok-cmd">fmtk</span> <span class="fcv-tok-plain">export</span> <span class="fcv-tok-flag">--map</span> <span class="fcv-tok-plain">mymap</span> <span class="fcv-tok-flag">--output</span> <span class="fcv-tok-plain">./out</span> <span class="fcv-tok-flag">--format</span> <span class="fcv-tok-plain">lua</span></code></pre>
+  <div class="cp-code__scroll">
+  <pre class="cp-code__pre"><code><span class="cp-tok-cmd">fmtk</span> <span class="cp-tok-plain">export</span> <span class="cp-tok-flag">--map</span> <span class="cp-tok-plain">mymap</span> <span class="cp-tok-flag">--output</span> <span class="cp-tok-plain">./out</span> <span class="cp-tok-flag">--format</span> <span class="cp-tok-plain">lua</span></code></pre>
+  </div>
 </div>
 
 <hr>
 
 <h2>Section heading h2 — Second Shortcuts Block</h2>
 
-<div class="fcv-shortcuts">
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Rotate selected wreck</span>
-    <span class="fcv-shortcuts__combo"><kbd>R</kbd></span>
+<div class="cp-shortcuts">
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Rotate selected wreck</span>
+    <span class="cp-shortcuts__combo"><kbd>R</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Delete selected</span>
-    <span class="fcv-shortcuts__combo"><kbd>Del</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Delete selected</span>
+    <span class="cp-shortcuts__combo"><kbd>Del</kbd></span>
   </div>
-  <div class="fcv-shortcuts__row">
-    <span class="fcv-shortcuts__action">Select all in view</span>
-    <span class="fcv-shortcuts__combo"><kbd>Ctrl</kbd><kbd>A</kbd></span>
+  <div class="cp-shortcuts__row">
+    <span class="cp-shortcuts__action">Select all in view</span>
+    <span class="cp-shortcuts__combo"><kbd>Ctrl</kbd><kbd>A</kbd></span>
   </div>
 </div>
 
-<div class="fcv-notes">
-  <span class="fcv-notes__label">Notes</span>
+<div class="cp-notes">
+  <span class="cp-notes__label">Notes</span>
   <p>Second callout at the bottom. Lorem ipsum dolor sit amet, consectetur
   adipiscing elit. Sed do eiusmod tempor incididunt ut labore.</p>
 </div>

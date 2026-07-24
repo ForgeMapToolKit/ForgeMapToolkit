@@ -298,6 +298,7 @@ hidden until output exists.
 | PropsTab | all | X | fixed | MapPreview |
 | EmitterTab | all | X | fixed | MapPreview |
 | RockErosionTab | all | X | fixed | MapPreview |
+| WaveNormalsTab | all | X | half | Water preview (composite / per-layer canvas) — shipped, verified |
 | TreesTab | all | X | fixed | MapPreview |
 | StarsTab | Configuration | Y | — | Standby: star parameters |
 | StarsTab | UV Texture | X | half | UV atlas canvas |

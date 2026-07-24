@@ -118,6 +118,43 @@ export default function TreesCards({
                       )}
                     </div>
 
+                    <CardSubsection title="Terrain Rules" initialOpen={card.allowWaterSpawn || card.slopeMin !== '0' || card.slopeMax !== '90'}>
+                      <button
+                        type="button"
+                        className={`ctrl-toggle-row${card.allowWaterSpawn ? ' on' : ''}`}
+                        role="switch"
+                        aria-checked={!!card.allowWaterSpawn}
+                        onClick={() => updatePropCard(idx, 'allowWaterSpawn', !card.allowWaterSpawn)}
+                      >
+                        <span className="ctrl-toggle"><span className="ctrl-toggle-pole" /></span>
+                        <span className="ctrl-toggle-text">
+                          <span className="ctrl-toggle-label">Allow Spawn In Water</span>
+                        </span>
+                      </button>
+                      <div className="tm-density-grid" style={{ marginTop: 'var(--space-sm)' }}>
+                        <div className="ctrl-field">
+                          <div className="ctrl-label">Min Slope (°)</div>
+                          <input
+                            type="number" step="1" min="0" max="90"
+                            className="ctrl-input"
+                            value={card.slopeMin ?? '0'}
+                            onChange={(e) => updatePropCard(idx, 'slopeMin', e.target.value)}
+                            onBlur={(e) => { const v = parseFloat(e.target.value); if (isNaN(v) || v < 0) updatePropCard(idx, 'slopeMin', '0'); }}
+                          />
+                        </div>
+                        <div className="ctrl-field">
+                          <div className="ctrl-label">Max Slope (°)</div>
+                          <input
+                            type="number" step="1" min="0" max="90"
+                            className="ctrl-input"
+                            value={card.slopeMax ?? '90'}
+                            onChange={(e) => updatePropCard(idx, 'slopeMax', e.target.value)}
+                            onBlur={(e) => { const v = parseFloat(e.target.value); if (isNaN(v) || v > 90) updatePropCard(idx, 'slopeMax', '90'); }}
+                          />
+                        </div>
+                      </div>
+                    </CardSubsection>
+
                     <CardSubsection title="Custom Treeline" initialOpen={!!card.customTreelineImage}>
                       <DropSlot
                         acceptInput="image/*"

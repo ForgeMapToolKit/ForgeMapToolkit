@@ -147,17 +147,17 @@ function tokenise(line, lang) {
 }
 
 const TYPE_CLASS = {
-  keyword:  'hs-tok-keyword',
-  string:   'hs-tok-string',
-  number:   'hs-tok-number',
-  comment:  'hs-tok-comment',
-  operator: 'hs-tok-operator',
-  ident:    'hs-tok-ident',
-  key:      'hs-tok-key',
-  bool:     'hs-tok-bool',
-  plain:    'hs-tok-plain',
-  cmd:      'hs-tok-cmd',
-  flag:     'hs-tok-flag',
+  keyword:  'cp-tok-keyword',
+  string:   'cp-tok-string',
+  number:   'cp-tok-number',
+  comment:  'cp-tok-comment',
+  operator: 'cp-tok-operator',
+  ident:    'cp-tok-ident',
+  key:      'cp-tok-key',
+  bool:     'cp-tok-bool',
+  plain:    'cp-tok-plain',
+  cmd:      'cp-tok-cmd',
+  flag:     'cp-tok-flag',
 };
 
 /* ── CodeLine (memoised) ────────────────────────────────────────── */
@@ -165,11 +165,11 @@ const TYPE_CLASS = {
 const CodeLine = memo(({ line, lang, num, showNum }) => {
   const tokens = useMemo(() => tokenise(line, lang), [line, lang]);
   return (
-    <div className="hs-code__line">
-      {showNum && <span className="hs-code__line-num" aria-hidden="true">{num}</span>}
-      <span className="hs-code__line-body">
+    <div className="cp-code__line">
+      {showNum && <span className="cp-code__line-num" aria-hidden="true">{num}</span>}
+      <span className="cp-code__line-body">
         {tokens.map((t, i) => (
-          <span key={i} className={TYPE_CLASS[t.type] || 'hs-tok-plain'}>{t.text}</span>
+          <span key={i} className={TYPE_CLASS[t.type] || 'cp-tok-plain'}>{t.text}</span>
         ))}
       </span>
     </div>
@@ -186,27 +186,25 @@ export default function CodeSection({ label, lang = 'plain', code = '', lineNumb
   const LANG_LABEL = { lua: 'LUA', json: 'JSON', bash: 'BASH', plain: 'TEXT' };
 
   return (
-    <div className="hs-section hs-code">
+    <div className="hs-section cp-code">
       {(label || lang !== 'plain') && (
-        <div className="hs-code__header">
-          {label && <span className="hs-code__label">{label}</span>}
-          <span className="hs-code__lang-badge">{LANG_LABEL[lang] || lang.toUpperCase()}</span>
+        <div className="cp-code__header">
+          {label && <span className="cp-code__label">{label}</span>}
+          <span className="cp-code__lang">{LANG_LABEL[lang] || lang.toUpperCase()}</span>
         </div>
       )}
-      <div className="hs-code__block">
-        <div className="hs-code__scroll">
-          <pre className="hs-code__pre" aria-label={label || 'Code block'}>
-            {lines.map((line, i) => (
-              <CodeLine
-                key={i}
-                line={line}
-                lang={lang}
-                num={i + 1}
-                showNum={lineNumbers}
-              />
-            ))}
-          </pre>
-        </div>
+      <div className="cp-code__scroll">
+        <pre className="cp-code__pre" aria-label={label || 'Code block'}>
+          {lines.map((line, i) => (
+            <CodeLine
+              key={i}
+              line={line}
+              lang={lang}
+              num={i + 1}
+              showNum={lineNumbers}
+            />
+          ))}
+        </pre>
       </div>
     </div>
   );

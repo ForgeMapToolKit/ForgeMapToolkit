@@ -7,7 +7,7 @@
    Primitives:
      WorkflowSection   — journey map: self-drawing route + milestones
      ShortcutsSection  — keyboard / interaction cheat-sheet
-     TroubleshootSection — FAQ list with separator lines
+     TroubleshootSection — triage weiche: bug report vs. help lookup
      MediaSection      — image/slideshow layouts
      CodeSection       — syntax-highlighted code block
    ═══════════════════════════════════════════════════════════════════ */
@@ -221,154 +221,157 @@
 
 /* ══════════════════════════════════════════════════════════════════
    SHORTCUTS SECTION — keyboard cheat-sheet
+   Moved to Shared/DesignSystem/ContentPrimitives.css as .cp-shortcuts /
+   .cp-kbd — shared with the Footer article viewer's fcv-content articles.
    ══════════════════════════════════════════════════════════════════ */
-
-.hs-keys__grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: var(--space-2xl);
-}
-.hs-keys__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--tab-color) 12%, var(--line-soft));
-}
-.hs-keys__action {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  color: var(--ink-55);
-  line-height: 1.4;
-}
-.hs-keys__combo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2xs);
-  flex-shrink: 0;
-}
-.hs-keys__kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  padding: 3px 7px;
-  border-radius: 3px;
-  background: var(--surface-sunk);
-  border: 1px solid var(--ink-12);
-  border-bottom-color: rgba(0,0,0,0.6);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semi);
-  color: var(--ink-72);
-  line-height: 1.4;
-}
-@media (max-width: 640px) {
-  .hs-keys__grid { grid-template-columns: 1fr; column-gap: 0; }
-}
 
 
 /* ══════════════════════════════════════════════════════════════════
-   TROUBLESHOOT SECTION — fault register
-   A diagnostic list: each entry carries a mono code, a symptom (the
-   question) and a resolution (the answer). Boxless, tokens only, accent
-   is the inherited --tab-color. A normal-flow .hs-section block, so it
-   stacks freely with other sections (Code, Media…) in one tab.
+   TROUBLESHOOT SECTION — triage, not a fault register
+   Built from the same primitives every tab's controls column uses
+   (primitives.css) — .ctrl-block / .ctrl-subtitle / .ctrl-field /
+   .ctrl-label / .ctrl-input / .ctrl-option / .station / .commit-button
+   — so this reads as a tab controls column, not a one-off card design.
+   .ctrl-subtitle--flush cancels the staircase indent (§2) that normally
+   lines a Subtitle up under a local Title far to the column's left —
+   this section has no local Title of its own, the Help Console's own
+   fixed hero above already plays that role (HelpPanel.jsx's .hc-hero).
+   Its content uses .hs-tr-body, a plain flush column, rather than
+   .ctrl-content--flush: that primitive cancels its indent with a
+   negative margin-left sized for a wide rail-adjacent column, which
+   pushes content off-canvas in narrower contexts (confirmed live in the
+   History tab) — not safe to reuse here. Every clickable tile (weiche,
+   categories, help links) is .station — the one selection-tile
+   primitive used everywhere else in the app, not a boxless list found
+   nowhere else. The back-row mirrors FooterContentViewer's fcv-back-row.
    ══════════════════════════════════════════════════════════════════ */
 
-.hs-ts__item {
-  position: relative;
-  display: grid;
-  grid-template-columns: 104px 1fr;
-  gap: var(--space-lg);
-  padding: var(--space-lg) var(--space-sm) var(--space-lg) 0;
-  border-top: 1px solid var(--line-soft);   /* neutral structure */
-  transition: background 0.35s var(--ease-out);
-  opacity: 0;
-  animation: hs-ts-in 0.6s var(--ease-out) both;
-  animation-delay: calc(0.06s + var(--i, 0) * 0.07s);
+.hs-tr {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
 }
-@keyframes hs-ts-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-/* red accent appears only on the hovered entry — at rest the list is all
-   neutral hairlines, so a long fault list never becomes a wall of red. */
-.hs-ts__item::before {
-  content: '';
-  position: absolute;
-  left: 0; top: -1px;
-  height: 1px;
-  width: 0;
-  background: var(--tab-color);
-  box-shadow: 0 0 8px var(--tab-glow);
-  opacity: 0;
-  transition: width 0.45s var(--ease-out), opacity 0.3s linear;
-}
-.hs-ts__item:hover {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--tab-color) 6%, transparent), transparent 55%);
-}
-.hs-ts__item:hover::before { width: 64px; opacity: 1; }
 
-.hs-ts__gutter { padding-top: 0; }
-.hs-ts__code {
-  display: block;
-  margin-top: -4px;                 /* nudges the code up off the symptom line */
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--track-snug);
-  text-transform: uppercase;
-  line-height: 1;
-  color: var(--tab-color);
-  white-space: nowrap;
+.hs-tr-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
-.hs-ts__sym {
-  font-family: var(--font-display);
-  font-size: 1.02rem;
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--track-tight);
-  text-transform: uppercase;
-  line-height: 1.2;
-  color: var(--ink-100);
+
+.hs-tr-back-row {
+  padding-bottom: var(--space-md);
 }
-.hs-ts__res {
-  margin-top: var(--space-sm);
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-sm);
-  align-items: start;
-}
-.hs-ts__res-label {
+.hs-tr-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  padding: 0;
   font-family: var(--font-display);
-  font-size: var(--text-sm);
+  font-size: var(--text-body-sm);
   font-weight: var(--weight-semi);
   letter-spacing: var(--track-base);
   text-transform: uppercase;
-  color: var(--ink-38);
-  white-space: nowrap;
-  padding-top: 2px;
+  color: var(--ink-40);
+  cursor: pointer;
+  transition: color var(--dur-fast) ease;
 }
-.hs-ts__res-text {
-  font-family: var(--font-display);
-  font-size: 0.88rem;
-  font-weight: var(--weight-regular);
-  line-height: 1.6;
-  color: var(--ink-55);
-  border-left: 1px solid color-mix(in srgb, var(--tab-color) 35%, transparent);
-  padding-left: var(--space-md);
+.hs-tr-back-btn:hover { color: var(--tab-color); }
+.hs-tr-back-btn svg {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  flex-shrink: 0;
 }
-.hs-ts__res-text p { margin: 0 0 var(--space-2xs); }
-.hs-ts__res-text p:last-child { margin-bottom: 0; }
 
-@media (max-width: 640px) {
-  .hs-ts__item { grid-template-columns: 1fr; gap: var(--space-xs); }
-  .hs-ts__res { grid-template-columns: 1fr; gap: var(--space-2xs); }
-  .hs-ts__res-label { padding-top: 0; }
+.hs-tr-intro {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-light);
+  line-height: 1.6;
+  color: var(--ink-28);
 }
-@media (prefers-reduced-motion: reduce) {
-  .hs-ts__item { animation: none; opacity: 1; }
+
+/* ── The weiche — two .station tiles, side by side (same row layout
+   AddCustomProp.jsx uses for its Input Mode / Prop Type pickers) ── */
+.hs-tr-hero-row {
+  display: flex;
+  gap: var(--space-sm);
+}
+.hs-tr-hero {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-lg);
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .hs-tr-hero-row { flex-direction: column; }
+}
+
+/* ── Category / help-link tiles — same .station tile, stacked ─────── */
+.hs-tr-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.hs-tr-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-md) var(--space-lg);
+  text-align: left;
+}
+
+.hs-tr-bugpath {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── The report form ─────────────────────────────────────────────── */
+.hs-tr-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* The reused Dropdown (EntityPanel.jsx, same component as Mirror Mode) is
+   inline-flex and shrink-to-fit everywhere else it's used (a canvas-header
+   control), but .ctrl-field's column layout stretches flex children by
+   default — pin it back to content width so the panel opens directly
+   under the trigger instead of under a stretched invisible wrap. */
+.hs-tr-form .wr-mirror-wrap {
+  align-self: flex-start;
+}
+
+.hs-tr-textarea {
+  width: 100%;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.hs-tr-meta { margin-top: calc(-1 * var(--space-sm)); }
+
+/* result — one accent edge, never both a surface and a border (§5) */
+.hs-tr-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-left: 2px solid var(--status-ok);
+  background: rgba(255,255,255,0.02);
+}
+.hs-tr-result--error { border-left-color: var(--status-err); }
+.hs-tr-result p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-72);
 }
 
 
@@ -535,93 +538,8 @@
 
 /* ══════════════════════════════════════════════════════════════════
    CODE SECTION — syntax-highlighted code
+   Moved to Shared/DesignSystem/ContentPrimitives.css as .cp-code /
+   .cp-tok-* — shared with the Footer article viewer's fcv-content
+   articles, so a snippet looks identical whether it's hand-authored
+   static HTML or CodeSection.jsx's tokenizer output.
    ══════════════════════════════════════════════════════════════════ */
-
-.hs-code {
-  /* container */
-}
-.hs-code__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-xs);
-}
-.hs-code__label {
-  font-family: var(--font-mono);
-  font-size: var(--text-3xs);
-  font-weight: var(--weight-semi);
-  letter-spacing: var(--track-wide);
-  text-transform: uppercase;
-  color: var(--tab-color);
-  opacity: 0.75;
-}
-.hs-code__lang-badge {
-  font-family: var(--font-mono);
-  font-size: var(--text-3xs);
-  font-weight: var(--weight-semi);
-  letter-spacing: var(--track-base);
-  text-transform: uppercase;
-  color: var(--ink-22);
-  margin-left: auto;
-}
-.hs-code__block {
-  background: #0c0c10;
-  border: 1px solid var(--line-medium);
-  border-radius: 3px;
-  overflow: hidden;
-  position: relative;
-}
-.hs-code__block::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 1px;
-  background: color-mix(in srgb, var(--tab-color) 40%, transparent);
-}
-.hs-code__scroll {
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ink-12) transparent;
-}
-.hs-code__scroll::-webkit-scrollbar { height: 4px; }
-.hs-code__scroll::-webkit-scrollbar-track { background: transparent; }
-.hs-code__scroll::-webkit-scrollbar-thumb { background: var(--ink-12); }
-.hs-code__pre {
-  margin: 0;
-  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-xl);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 1.75;
-  color: #d4d4d4;
-  white-space: pre;
-  tab-size: 2;
-  -webkit-font-smoothing: antialiased;
-}
-.hs-code__line {
-  display: flex;
-}
-.hs-code__line-num {
-  display: inline-block;
-  min-width: 28px;
-  color: var(--ink-15);
-  text-align: right;
-  margin-right: var(--space-lg);
-  user-select: none;
-  flex-shrink: 0;
-}
-.hs-code__line-body {
-  flex: 1;
-  min-width: 0;
-}
-/* syntax token colors — VS Code dark palette */
-.hs-tok-keyword  { color: #569cd6; }
-.hs-tok-string   { color: #ce9178; }
-.hs-tok-number   { color: #b5cea8; }
-.hs-tok-comment  { color: #6a9955; font-style: italic; }
-.hs-tok-operator { color: #d4d4d4; }
-.hs-tok-ident    { color: #9cdcfe; }
-.hs-tok-key      { color: #9cdcfe; }   /* JSON keys */
-.hs-tok-bool     { color: #569cd6; }   /* JSON booleans */
-.hs-tok-plain    { color: #d4d4d4; }
-.hs-tok-cmd      { color: #4ec9b0; }   /* bash commands */
-.hs-tok-flag     { color: #b5cea8; }   /* bash flags */

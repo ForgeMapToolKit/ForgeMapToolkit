@@ -465,7 +465,9 @@ ipcMain.handle('resolve-prop-to-emit', async (event, { propGamePath }) => {
 // ── read-scenario-size ────────────────────────────────────────────────────────
 // Reads the scenario.lua from a map folder and extracts size = {W, H}.
 // Returns { success, width, height } where width/height are in scmap units.
-ipcMain.handle('read-scenario-size', async (event, { mapFolderPath }) => {
+ipcMain.handle('read-scenario-size', withPathGuard(
+  ({ mapFolderPath }) => [mapFolderPath],
+  async (event, { mapFolderPath }) => {
   try {
     // Find the scenario lua file (named *_scenario.lua)
     const entries = fs.readdirSync(mapFolderPath);
@@ -487,13 +489,15 @@ ipcMain.handle('read-scenario-size', async (event, { mapFolderPath }) => {
     log.error('[skybox] read-scenario-size failed:', err.message);
     return { success: false, error: err.message };
   }
-});
+}));
 
 // ── read-map-info ─────────────────────────────────────────────────────────────
 // Reads save.lua and extracts RECTANGLE(x1, y1, x2, y2) — the playable area.
 // x2-x1 == y2-y1 == map size in scmap units (1024 = 20km, 512 = 10km, etc.)
 // Returns { success, mapSize, km, x1, y1, x2, y2 }
-ipcMain.handle('read-map-info', async (event, { mapFolderPath }) => {
+ipcMain.handle('read-map-info', withPathGuard(
+  ({ mapFolderPath }) => [mapFolderPath],
+  async (event, { mapFolderPath }) => {
   try {
     let entries;
     try { entries = fs.readdirSync(mapFolderPath); }
@@ -529,7 +533,7 @@ ipcMain.handle('read-map-info', async (event, { mapFolderPath }) => {
     log.debug('[map-info] read-map-info failed:', err.message);
     return { success: false, error: err.message };
   }
-});
+}));
 
 
 

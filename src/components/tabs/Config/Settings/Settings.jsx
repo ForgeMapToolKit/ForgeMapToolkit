@@ -353,6 +353,12 @@ function FactoryResetButton() {
 
 const SectionContent = ({ id, settings, set, scanStatus, setScanStatus }) => {
   const canScan = !!(settings?.faInstallPath || settings?.fafPath);
+  // Hoisted out of the `id === 'autosave'` branch below — a hook can never be
+  // called conditionally (react-hooks/rules-of-hooks). The `key={section.id}`
+  // at this component's call site remounts it on every section switch today,
+  // which happened to mask the violation, but that's an incidental side effect
+  // of the caller, not something this component should rely on.
+  const [runBusy, setRunBusy] = useState(false);
 
   const handleScan = async () => {
     if (!canScan) return;
@@ -475,8 +481,6 @@ const SectionContent = ({ id, settings, set, scanStatus, setScanStatus }) => {
     const intervalIsPreset = AUTOSAVE_INTERVAL_OPTIONS.some(
       o => o.value === (settings.autosaveInterval ?? 15)
     );
-
-    const [runBusy, setRunBusy] = React.useState(false);
 
     return (
       <div className="st-content-stack">

@@ -104,7 +104,7 @@ const NavbarAtmosphereLayer = ({
     }
     engineRef.current = getOrCreateEngine(containerRef.current);
     engineRef.current?.setState({ color: null }); // initial neutral frame
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   // Recolor on each hovered-tab change. One frame, no lerp.
   useEffect(() => {

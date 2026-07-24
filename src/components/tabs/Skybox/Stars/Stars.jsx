@@ -208,15 +208,12 @@ const StarsTab = ({ settings, shared = {}, onSharedChange = () => {}, onRecordSn
 
   // ── Texture upload ────────────────────────────────────────────
   // DropSlot hands us the File directly (no change event to unwrap).
-  // NOTE: `webUtils` wird hier referenziert, ist aber in dieser Datei
-  // (auch schon im Original) nicht importiert — bestehender Bug, hier
-  // unverändert übernommen, nicht Teil dieser Migration.
   const onUploadImage = useCallback(async (file) => {
     if (!file) return;
     const isDds = file.name.toLowerCase().endsWith('.dds');
     if (isDds) {
       try {
-        const filePath = webUtils.getPathForFile(file);
+        const filePath = window.electronAPI.getPathForFile(file);
         const result = await window.electronAPI.invoke('dds-to-dataurl', { filePath });
         if (!result?.success) { await luxuryAlert('Failed to load DDS file: ' + (result?.error || 'Unknown error'), 'DDS Load Failed', 'error'); return; }
         setTextureDataUrl(result.dataUrl);

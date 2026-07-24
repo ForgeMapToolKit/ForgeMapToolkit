@@ -1,5 +1,5 @@
 // ─── IMPORTS ────────────────────────────────────────────────────────────────
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import '../../../Shared/shared.css';
 import '../../../Shared/trace.css';
 import './RockErosion.css';
@@ -13,6 +13,7 @@ import {
   ensureDir, writeFile, nextPropsLuaName, kmLabel,
   usePersistentState, useMapInfo, useScmapPreview,
   loadImageChannel, sampleChannel, drawPlacementCanvas,
+  useTerrainData, createTerrainSampler,
 } from '../../../Shared/MapLogic';
 import RockErosionConfiguration from './Configuration.jsx';
 import RockErosionChannels from './Channels.jsx';
@@ -75,6 +76,15 @@ const RockErosionTab = ({ settings, shared = {}, onSharedChange = () => {}, onRe
   });
   const { previewImage, previewImageData, setPreviewImageData, previewLoading } =
     useScmapPreview({ mapName, mapsFolderPath, settings });
+
+  // Real terrain elevation — same source as TreeMap. Markers get placed at
+  // their actual in-game height, and the slope channel falls back to the
+  // real heightmap gradient when no Gaea slope export has been uploaded.
+  const { terrain, terrainError } = useTerrainData({ mapName, mapsFolderPath, settings });
+  const terrainSampler = useMemo(() => createTerrainSampler(terrain), [terrain]);
+  useEffect(() => {
+    if (terrainError) console.warn('[RockErosion] Real terrain elevation unavailable, falling back to y=0:', terrainError);
+  }, [terrainError]);
 
   // ─── SETTINGS SYNC ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -184,7 +194,12 @@ const RockErosionTab = ({ settings, shared = {}, onSharedChange = () => {}, onRe
         const worldX = mapOffsetX + (gx + rng()) * cell;
         const worldZ = mapOffsetY + (gz + rng()) * cell;
 
-        const slopeVal      = sampleChannel(channels.slope,      worldX, worldZ, mapSizeNum, mapOffsetX, mapOffsetY, channels.slope?.invert);
+        // Prefer a manually-uploaded Gaea slope export when present; otherwise
+        // fall back to the real heightmap gradient straight out of the .scmap,
+        // so the slope preference works even without an external Gaea pass.
+        const slopeVal       = channels.slope
+          ? sampleChannel(channels.slope, worldX, worldZ, mapSizeNum, mapOffsetX, mapOffsetY, channels.slope?.invert)
+          : (terrainSampler ? Math.min(1, terrainSampler.sampleSlopeDegrees(worldX, worldZ) / 90) : null);
         const flowVal       = sampleChannel(channels.flow,       worldX, worldZ, mapSizeNum, mapOffsetX, mapOffsetY, channels.flow?.invert);
         const curvatureVal  = sampleChannel(channels.curvature,  worldX, worldZ, mapSizeNum, mapOffsetX, mapOffsetY, channels.curvature?.invert);
         const depositionVal = sampleChannel(channels.deposition, worldX, worldZ, mapSizeNum, mapOffsetX, mapOffsetY, channels.deposition?.invert);
@@ -222,7 +237,7 @@ const RockErosionTab = ({ settings, shared = {}, onSharedChange = () => {}, onRe
 
           rngSeed += 1;
           markers.push({
-            id: rngSeed, x: finalX, z: finalZ, heading, blueprint,
+            id: rngSeed, x: finalX, y: terrainSampler ? terrainSampler.sampleHeight(finalX, finalZ) : 0, z: finalZ, heading, blueprint,
             ruleId: rule.id, ruleName: rule.name, color: rule.color,
             size: combinedSize, mass, energy,
           });
@@ -256,7 +271,8 @@ const RockErosionTab = ({ settings, shared = {}, onSharedChange = () => {}, onRe
             return;
         }
         mHeading = ((mHeading % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        markers.push({ ...m, id: m.id + 0.5, x: mx, z: mz, heading: mHeading, isMirrored: true });
+        const my = terrainSampler ? terrainSampler.sampleHeight(mx, mz) : m.y;
+        markers.push({ ...m, id: m.id + 0.5, x: mx, y: my, z: mz, heading: mHeading, isMirrored: true });
       });
     }
 
@@ -266,7 +282,7 @@ const RockErosionTab = ({ settings, shared = {}, onSharedChange = () => {}, onRe
   useEffect(() => {
     generateMarkers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rules, channels, heightmap, seed, gridResolution, mapSize, mapOffsetX, mapOffsetY, mirrorMode]);
+  }, [rules, channels, heightmap, seed, gridResolution, mapSize, mapOffsetX, mapOffsetY, mirrorMode, terrainSampler]);
 
   const handleRandomize = () => setSeed(Date.now());
 
@@ -428,11 +444,12 @@ const RockErosionTab = ({ settings, shared = {}, onSharedChange = () => {}, onRe
       const sinH = Math.sin(h).toFixed(ROTATION_DECIMALS);
       const negSinH = (-Math.sin(h)).toFixed(ROTATION_DECIMALS);
       const x = marker.x.toFixed(COORD_DECIMALS);
+      const y = (marker.y || 0).toFixed(COORD_DECIMALS);
       const z = marker.z.toFixed(COORD_DECIMALS);
       const s = (marker.size != null ? marker.size : 1).toFixed(ROTATION_DECIMALS);
       lua += `    {\n`;
       lua += `        path = "${marker.blueprint}",\n`;
-      lua += `        position = {\n            ${x},\n            0,\n            ${z},\n        },\n`;
+      lua += `        position = {\n            ${x},\n            ${y},\n            ${z},\n        },\n`;
       lua += `        rotationX = {\n            ${cosH},\n            0,\n            ${negSinH},\n        },\n`;
       lua += `        rotationY = {\n            0,\n            1,\n            0,\n        },\n`;
       lua += `        rotationZ = {\n            ${sinH},\n            0,\n            ${cosH},\n        },\n`;

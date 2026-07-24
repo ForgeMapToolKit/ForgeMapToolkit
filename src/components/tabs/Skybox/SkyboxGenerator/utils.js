@@ -23,6 +23,17 @@ export const PLANET_UV_COLORS = [
   '#ff4444','#44ff44','#4444ff','#ffff44','#ff44ff','#44ffff','#ff8844','#88ff44',
 ];
 
+export const SKYBOX_PRESET_COLORS = [
+  '#020814','#050f2a','#0a1840','#0d2252','#112d6b',
+  '#1a3a8c','#2255b0','#2b6cd4','#3b76ff','#60a5fa',
+  '#1a1a3a','#1e2850','#243264','#2a3c78','#1e4a70',
+  '#2a1828','#3c1e38','#501e3c','#6b2440','#8c2a3c',
+  '#5c1e0a','#7a2c14','#9e3820','#c44a2a','#e06030',
+  '#6b3c0a','#8a5018','#aa6824','#c8842e','#e8a040',
+  '#3c2c18','#5a4022','#7a5830','#9a7040','#b88c52',
+  '#b8c4d8','#ccd4e8','#dce4f2','#eaf0f8','#f4f8fc',
+];
+
 export const Y_MODES = [
   { value: 'flat',      label: 'Flat'        },
   { value: 'gaussian',  label: 'Gaussian'    },
