@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import HelpConsole from '../../../Shared/Ui/HelpPanel/HelpPanel.jsx';
+import { CodeSection } from '../../../Shared/Ui/HelpPanel/Sections/index.js';
 
 // ─────────────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -17,13 +18,16 @@ const SECTIONS = [
   { id: 'output',     index: '06', label: 'Output & Inject' },
 ];
 
-// ── Kleine Layout-Helfer (inline, kein shared import nötig) ──────
+// ── Layout-Helfer über dem geteilten hc-*-Vokabular ──────────────
+// Die Klassen leben in Shared/Ui/HelpPanel/HelpPanel.css, nicht hier.
+// Wo eine Element-Regel der Section schon greift (p, ul, li, h3), steht
+// bewusst KEINE Klasse — .hc-section p / ul / li formatieren das bereits.
 const Step = ({ index, title, children, notes }) => (
   <div className="hc-step">
     <div className="hc-step-num">{index}</div>
     <div className="hc-step-body">
       {title && <h4 className="hc-step-title">{title}</h4>}
-      {children && <p className="hc-step-desc">{children}</p>}
+      {children && <p>{children}</p>}
       {notes?.length > 0 && (
         <ul className="hc-step-notes">
           {notes.map((n, i) => <li key={i}>{n}</li>)}
@@ -42,20 +46,22 @@ const Plain = ({ children }) => (
 
 const Block = ({ title, children }) => (
   <div className="hc-block">
-    {title && <h3 className="hc-block-title">{title}</h3>}
+    {title && <h3>{title}</h3>}
     {children}
   </div>
 );
 
 const TsItem = ({ problem, solution }) => (
   <div className="hc-ts-item">
-    <div className="hc-ts-q"><strong>{problem}</strong></div>
+    <div className="hc-ts-q">{problem}</div>
     <div className="hc-ts-a">{solution}</div>
   </div>
 );
 
-const CodeBox = ({ children }) => (
-  <pre className="hc-code-box">{children}</pre>
+// Formeln und Lua-Auszüge laufen über die geteilte CodeSection (Gen 2),
+// dieselbe, die Wreckage/Help.jsx benutzt.
+const CodeBox = ({ lang = 'plain', children }) => (
+  <CodeSection lang={lang} code={String(children)} lineNumbers={false} />
 );
 
 // ══════════════════════════════════════════════════════════════════
@@ -76,7 +82,7 @@ const Help = ({ onClose }) => {
       {activeSection === 'guide' && (
         <>
           <Block title="Full Workflow Overview">
-            <p className="hc-desc">
+            <p>
               The Skybox Generator configures four independent rendering techniques from FA's sky.fx
               shader — Atmosphere (dome gradient), Decal (planets), Cirrus (clouds), and Stars
               (billboard props). All four are serialised into a single <code>skyBox</code> Lua table
@@ -169,7 +175,7 @@ const Help = ({ onClose }) => {
       {activeSection === 'atmosphere' && (
         <>
           <Block title="How the Gradient Works">
-            <p className="hc-desc">
+            <p>
               AtmospherePS in sky.fx computes the gradient by mapping each dome vertex's world-Y
               elevation to a 0–1 blend value, then mixing between the two configured colours.
             </p>
@@ -241,7 +247,7 @@ output = lerp(horizonColor, skyColor, 1 − tv)`}</CodeBox>
       {activeSection === 'cirrus' && (
         <>
           <Block title="Multiplicative Layer Blending">
-            <p className="hc-desc">
+            <p>
               CirrusPS samples the cloud DDS four times — each layer reading a different colour
               channel (R, G, B, A) at its own independently scrolling UV position. All four values
               are multiplied together to produce the final cloud opacity.
@@ -313,7 +319,7 @@ alpha = cirrusMultiplier × c0 × c1 × c2 × c3`}</CodeBox>
       {activeSection === 'planets' && (
         <>
           <Block title="Billboard Construction (DecalVS)">
-            <p className="hc-desc">
+            <p>
               DecalVS builds each billboard from a two-triangle corner-pair quad. It rotates the
               corners by the planet's rotation, scales them by the size field, then offsets them from
               the anchor along the camera's viewRight and viewUp vectors.
@@ -353,7 +359,7 @@ alpha = cirrusMultiplier × c0 × c1 × c2 × c3`}</CodeBox>
       {activeSection === 'stars' && (
         <>
           <Block title="Placement Algorithm">
-            <p className="hc-desc">
+            <p>
               Stars are placed procedurally using a seeded Gaussian cluster model. Cluster anchor
               points are generated first; each star is then placed either near an anchor using a
               bell-curve offset, or uniformly across the full sky as a background star.
@@ -414,7 +420,7 @@ alpha = cirrusMultiplier × c0 × c1 × c2 × c3`}</CodeBox>
           </Block>
 
           <Block title="Seed & Reproducibility">
-            <p className="hc-desc">
+            <p>
               The seed generates one deterministic sequence of random numbers consumed left to right.
               Any change that affects an earlier draw shifts all subsequent star positions — even with
               the same seed value.
@@ -438,12 +444,12 @@ alpha = cirrusMultiplier × c0 × c1 × c2 × c3`}</CodeBox>
       {activeSection === 'output' && (
         <>
           <Block title="Lua Output Format">
-            <p className="hc-desc">
+            <p>
               The skyBox table maps directly to sky.fx shader variables. Colours are linear RGB 0–1.
               The Planets array contains both manual planets and generated stars interleaved in
               insertion order.
             </p>
-            <CodeBox>{`skyBox = {
+            <CodeBox lang="lua">{`skyBox = {
     HorizonColor = { R, G, B, 1 },  -- horizonColor (linear 0–1)
     ZenithColor  = { R, G, B, 1 },  -- skyColor
     HorizonHeight = N,               -- horizonBegin in sky.fx
@@ -468,7 +474,7 @@ alpha = cirrusMultiplier × c0 × c1 × c2 × c3`}</CodeBox>
           </Block>
 
           <Block title="IPC Injection Pipeline">
-            <p className="hc-desc">
+            <p>
               The inject operation runs entirely via IPC calls to the main Electron process. It
               decompresses the .scmap, patches data.lua with a regex replacement, and recompresses
               — all other map data is untouched.

@@ -506,3 +506,120 @@
   color: color-mix(in srgb, var(--tab-color) 55%, var(--ink-72));
   white-space: nowrap;
 }
+
+/* ── Numbered step ──────────────────────────────────────────────────
+   An ordered walkthrough inside a section: "01 → do this, and here is
+   what to watch for". Extracted from SkyboxGenerator/Help.jsx, which
+   had grown its own copy; the same shape exists in every legacy help
+   modal (help-adv-step), so it belongs here rather than per tab.
+
+   Boxless (§5): the ordinal carries the structure, not a card. It is
+   set as a small mono accent label in the same register as .hc-kv__key,
+   sitting across a gutter from the body — same reading rhythm as the
+   spec list, so a section mixing both stays visually calm.
+
+   The description <p> and notes <ul> are NOT given classes: .hc-section
+   p / ul / li already style them. Only the notes list is de-emphasised
+   below, because it is a third tier under the step's own text (§1). */
+.hc-step {
+  display: grid;
+  grid-template-columns: minmax(2rem, auto) 1fr;
+  column-gap: var(--space-lg);
+  align-items: baseline;
+}
+
+/* NOT uppercased, unlike .hc-kv__key: an ordinal is often an identifier
+   rather than a number — SkyboxGenerator labels steps with the sky.fx
+   variable they explain (tv, lerp, sA, sH, P0). Casing is meaningful
+   there, and uppercasing would collide `sH` with the separate `SH`. */
+.hc-step-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-eyebrow);
+  color: color-mix(in srgb, var(--tab-color) 72%, var(--ink-100));
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.hc-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+/* The step's own heading — a fourth level below .hc-section h3, so it
+   stays neutral: no accent, no tick, no uppercase. Size and weight do
+   the work (§3 — hierarchy through structure, not more color). */
+.hc-step-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-snug);
+  color: var(--ink-85);
+}
+
+/* Notes are the quiet tier: smaller, dimmer, tighter than the step text. */
+.hc-step-notes {
+  gap: var(--space-2xs);
+}
+.hc-step-notes li {
+  font-size: var(--text-body-sm);
+  color: var(--ink-45);
+  line-height: 1.6;
+}
+
+/* ── Aside ──────────────────────────────────────────────────────────
+   A plain-language restatement next to a technical passage — the "in
+   other words" voice. Marked only by a glyph and a dimmer ink, never a
+   callout box (§5): a bordered tinted panel would out-shout the prose
+   it is meant to support. */
+.hc-plain {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-50);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.hc-plain-icon {
+  flex-shrink: 0;
+  font-style: normal;
+  opacity: 0.5;
+  line-height: 1.7;
+}
+
+/* ── Troubleshoot entry ─────────────────────────────────────────────
+   A symptom/remedy pair. Stacked rather than two-column like .hc-kv,
+   because a symptom is a sentence ("Sky renders black in-game") and
+   would not survive the key column's width. The symptom takes the
+   accent-label role, the remedy reads as ordinary prose.
+
+   This is the flat Q&A list. TroubleshootSection (Sections/) is a
+   different thing — an interactive triage that produces a bug report —
+   and does not replace this. */
+.hc-ts-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.hc-ts-q {
+  font-family: var(--font-display);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-snug);
+  color: color-mix(in srgb, var(--tab-color) 65%, var(--ink-85));
+}
+
+.hc-ts-a {
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  color: var(--ink-55);
+  line-height: 1.65;
+}
