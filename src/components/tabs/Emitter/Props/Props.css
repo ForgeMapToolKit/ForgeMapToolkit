@@ -10,11 +10,6 @@
   --theme-glow-strong:  var(--props-glow-strong);
   --theme-glow-intense: var(--props-glow-strong);
 
-  --props-help-trouble-bg:     var(--line-soft);
-  --props-help-trouble-border: var(--props-color);
-  --props-help-trouble-icon:   var(--props-glow-strong);
-  --props-help-trouble-text:   var(--props-color);
-
   background-color: var(--surface-canvas);
   /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
 }
@@ -30,13 +25,6 @@
 .props-tab .section-content::-webkit-scrollbar,
 .props-tab .ec-legend-cards::-webkit-scrollbar,
 .props-tab .preview-panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
-
-
-
-.props-modal ::-webkit-scrollbar       { width: 6px; }
-.props-modal ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-.props-modal ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--tab-color) 40%, transparent); }
-.props-modal ::-webkit-scrollbar-thumb:hover { background: var(--tab-color); }
 
 
 /* ── 3. ACCESSIBILITY ────────────────────────────────────────────────────── */
@@ -61,17 +49,6 @@
 }
 
 
-/* ── 4. SECTION DESCRIPTION ─────────────────────────────────────────────── */
-
-.props-section-description {
-  color:         var(--text-secondary);
-  font-size:     0.92rem;
-  margin-bottom: 28px;
-  font-weight:   300;
-  line-height:   1.7;
-}
-
-
 /* ── 5. PREVIEW COLUMN ───────────────────────────────────────────────────── */
 
 .props-tab .tab-col-detail {
@@ -81,250 +58,13 @@
 }
 
 
-/* ── 6. PROP-NAME INLINE INPUT ───────────────────────────────────────────── */
-
-.props-prop-name-input {
-  background:    transparent !important;
-  border:        none !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--tab-color) 20%, transparent) !important;
-  box-shadow:    none !important;
-  padding:       4px 8px !important;
-  font-size:     0.95rem;
-}
-
-.props-prop-name-input:focus {
-  outline:             none !important;
-  border-bottom-color: var(--tab-color) !important;
-  box-shadow:          none !important;
-  background:          transparent !important;
-}
-
-
 /* ── 7. MIRROR DROPDOWN ──────────────────────────────────────────────────── */
 /* Uses shared .btn-toggle — no custom styles needed here */
-
-
-
-
-
-
-
-
-
-
-/* ── 12. UPLOAD AREA ─────────────────────────────────────────────────────── */
-
-.props-file-input { display: none; }
 
 
 /* ── 13. CANVAS ──────────────────────────────────────────────────────────── */
 
 .props-canvas-container  { position: relative; margin: 0 auto; background: rgba(0,0,0,0.6); overflow: hidden; border: 1px solid rgba(255,255,255,0.08); box-shadow: inset 0 0 60px rgba(0,0,0,0.8); }
-.props-preview-canvas    { display: block; width: 100%; height: 100%; cursor: crosshair; }
-.props-canvas-placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted); font-size: 1.15rem; pointer-events: none; font-weight: 300; letter-spacing: 0.08em; text-transform: uppercase; }
-
-
-
-/* ── 15. LIBRARY MODAL ───────────────────────────────────────────────────── */
-
-.props-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 9999; display: flex; align-items: center; justify-content: center; animation: propsOverlayIn 0.3s ease; }
-
-@keyframes propsOverlayIn { from { opacity: 0; } to { opacity: 1; } }
-
-.props-modal { background: #111111; border: 1px solid rgba(165,232,1,0.3); width: 90%; max-width: 1200px; height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 80px var(--props-glow); animation: propsModalIn 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
-
-@keyframes propsModalIn { from { transform: translateY(40px) scale(0.97); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-
-.props-modal-header { padding: 22px 30px; border-bottom: 1px solid rgba(165,232,1,0.2); display: flex; justify-content: space-between; align-items: center; background: var(--sheen-040); flex-shrink: 0; }
-.props-modal-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: 0.08em; margin: 0; color: var(--props-color); text-shadow: 0 0 20px var(--props-glow); }
-.props-modal-close { background: transparent; border: none; color: #666; font-size: 1.8rem; cursor: pointer; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; line-height: 1; }
-.props-modal-close:hover { color: var(--props-color); transform: scale(1.15); }
-.props-modal-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-
-.props-modal-sidebar { width: 220px; min-width: 220px; flex-shrink: 0; border-right: 1px solid rgba(165,232,1,0.2); overflow-y: auto; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; }
-.props-modal-category { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid var(--line-soft); transition: all 0.3s; display: flex; justify-content: space-between; align-items: center; }
-.props-modal-category:hover  { background: var(--line-ghost-border); }
-.props-modal-category.active { background: var(--ink-12); border-left: 3px solid var(--props-color); }
-.props-modal-cat-name  { font-weight: 600; font-size: 0.9rem; color: #fff; }
-.props-modal-cat-count { font-size: 0.8rem; color: #555; background: var(--line-soft); padding: 3px 9px; border-radius: 12px; }
-
-.props-modal-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
-.props-modal-actions { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--ink-12); flex-shrink: 0; }
-.props-modal-selected-count { margin-left: auto; color: var(--props-color); font-weight: 600; font-size: 0.9rem; }
-
-.props-modal-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important; gap: 14px !important; }
-.props-modal-item { padding: 14px !important; background: var(--surface-ghost) !important; border: 2px solid var(--ink-16) !important; cursor: pointer !important; transition: all 0.3s !important; box-sizing: border-box !important; }
-.props-modal-item:hover    { background: var(--line-faint) !important; border-color: rgba(165,232,1,0.35) !important; }
-.props-modal-item.selected { background: rgba(165,232,1,0.12) !important; border-color: var(--props-color) !important; box-shadow: 0 0 15px var(--props-glow) !important; }
-
-.props-modal-item-preview { width: 100%; height: 100px; background: rgba(0,0,0,0.3); overflow: hidden; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; opacity: 0.4; }
-.props-modal-item-preview img { max-width: 100%; max-height: 100%; object-fit: contain; opacity: 1; }
-.props-modal-item-name { font-weight: 600; font-size: 0.88rem; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
-.props-modal-item-path { font-size: 0.7rem; color: #444; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.props-modal-footer { flex-shrink: 0; background: var(--surface-face-a); border-top: 1px solid rgba(165,232,1,0.2); padding: 15px 25px; display: flex; gap: 12px; justify-content: flex-end; box-shadow: 0 -4px 12px rgba(0,0,0,0.3); }
-.props-modal-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: #555; font-size: 0.95rem; gap: 15px; padding: 40px; text-align: center; }
-
-.props-modal-load-label { display: inline-block; padding: 12px 24px; background: rgba(165,232,1,0.1); border: 1px dashed var(--props-color); color: var(--props-color); cursor: pointer; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; transition: all 0.3s; }
-.props-modal-load-label:hover { background: rgba(165,232,1,0.18); box-shadow: 0 0 20px var(--props-glow); }
-
-
-/* ── 16. EMITTER ITEMS (inside modal) ────────────────────────────────────── */
-
-.props-emitter-item { padding: 18px; background: var(--line-soft); border: 2px solid var(--ink-16); cursor: pointer; transition: all 0.3s ease; margin-bottom: 12px; }
-.props-emitter-item:hover { background: rgba(255,255,255,0.08); border-color: var(--props-color); box-shadow: 0 0 20px var(--props-glow); transform: translateX(5px); }
-.props-emitter-name { font-weight: 600; font-size: 1rem; margin-bottom: 5px; color: #fff; }
-.props-emitter-path { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
-
-
-/* ── 17. HELP BUTTON ─────────────────────────────────────────────────────── */
-
-.props-help-btn {
-  position: fixed; bottom: 30px; right: 30px;
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background:  linear-gradient(135deg, var(--props-color) 0%, rgba(165,232,1,0.85) 100%);
-  border:      none;
-  color:       #000;
-  font-size:   1.4rem;
-  font-weight: 700;
-  cursor:      pointer;
-  z-index:     999;
-  box-shadow:  0 4px 20px var(--props-glow-strong), 0 0 40px var(--props-glow);
-  display:     flex;
-  align-items: center;
-  justify-content: center;
-  transition:  all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.props-help-btn:hover { transform: scale(1.1); box-shadow: 0 6px 30px var(--props-glow-strong), 0 0 60px var(--props-glow); }
-
-
-/* ── 18. HELP MODAL ──────────────────────────────────────────────────────── */
-
-.props-help-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(10px); z-index: 9998; animation: propsHelpOverlayIn 0.3s ease; }
-@keyframes propsHelpOverlayIn { from { opacity: 0; } to { opacity: 1; } }
-
-.props-help-modal {
-  position: fixed; top: 50%; left: 50%;
-  transform:      translate(-50%, -50%);
-  width:          80%;
-  max-width:      2500px;
-  height:         92vh;
-  max-height:     1500px;
-  background:     linear-gradient(135deg, rgba(15,15,15,0.98) 0%, rgba(8,8,8,0.98) 100%);
-  border:         2px solid rgba(165,232,1,0.35);
-  border-radius:  16px;
-  box-shadow:     0 25px 80px rgba(0,0,0,0.95), 0 0 100px var(--props-glow), inset 0 1px 0 rgba(165,232,1,0.2);
-  z-index:        9999;
-  display:        flex;
-  flex-direction: column;
-  overflow:       hidden;
-  animation:      propsHelpModalIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes propsHelpModalIn {
-  from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1);    }
-}
-
-.props-help-modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent 0%, rgba(165,232,1,0.5) 20%, var(--props-color) 50%, rgba(165,232,1,0.5) 80%, transparent 100%); box-shadow: 0 0 30px var(--props-glow-strong); border-radius: 16px 16px 0 0; }
-
-.props-help-modal-header { padding: 30px 40px 20px; border-bottom: 1px solid rgba(165,232,1,0.15); display: flex; justify-content: space-between; align-items: center; background: rgba(165,232,1,0.02); flex-shrink: 0; }
-
-.props-help-modal-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700; letter-spacing: 0.12em; color: var(--props-color); text-transform: uppercase; text-shadow: 0 0 20px var(--props-glow-strong); margin: 0; }
-
-.props-help-close-btn { background: transparent; border: 2px solid rgba(165,232,1,0.35); color: var(--props-color); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
-.props-help-close-btn:hover { background: rgba(165,232,1,0.12); border-color: var(--props-color); transform: rotate(90deg); box-shadow: 0 0 20px var(--props-glow); }
-
-.props-help-tabs { display: flex; padding: 0 40px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(165,232,1,0.12); gap: 4px; flex-shrink: 0; }
-
-.props-help-tab { padding: 16px 22px; background: transparent; border: none; color: var(--ink-50); font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; border-bottom: 3px solid transparent; white-space: nowrap; }
-.props-help-tab:hover  { color: rgba(255,255,255,0.85); background: rgba(165,232,1,0.04); }
-.props-help-tab.active { color: var(--props-color); border-bottom-color: var(--props-color); background: rgba(165,232,1,0.07); text-shadow: 0 0 15px var(--props-glow); }
-
-.props-help-guide-body { flex: 1; overflow: hidden; display: flex; }
-.props-help-content    { flex: 1; overflow-y: auto; padding: 40px; }
-.props-help-content::-webkit-scrollbar       { width: 8px; }
-.props-help-content::-webkit-scrollbar-track { background: rgba(165,232,1,0.03); }
-.props-help-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--props-color), rgba(165,232,1,0.5)); border-radius: 4px; }
-.props-help-content::-webkit-scrollbar-thumb:hover { background: var(--props-color); }
-
-.props-help-step { margin-bottom: 28px; padding: 22px; background: rgba(165,232,1,0.02); border: 1px solid rgba(165,232,1,0.12); border-left: 4px solid var(--props-color); border-radius: 8px; transition: all 0.3s ease; }
-.props-help-step:hover { background: rgba(165,232,1,0.04); border-color: rgba(165,232,1,0.2); transform: translateX(4px); }
-.props-help-step-number { display: inline-block; width: 32px; height: 32px; background: linear-gradient(135deg, var(--props-color), rgba(165,232,1,0.8)); color: #000; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 700; margin-right: 16px; box-shadow: 0 0 20px var(--props-glow); flex-shrink: 0; }
-.props-help-step-title  { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 600; color: #fff; margin: 0 0 10px 0; display: flex; align-items: center; }
-.props-help-step-desc   { color: rgba(255,255,255,0.8); line-height: 1.7; margin: 10px 0 0 48px; font-size: 0.95rem; }
-.props-help-step-detail { margin: 14px 0 0 48px; padding: 14px 18px; background: rgba(165,232,1,0.04); border: 1px solid rgba(165,232,1,0.1); border-radius: 6px; font-size: 0.88rem; line-height: 1.8; color: var(--ink-65); }
-.props-help-step-detail code { background: rgba(165,232,1,0.12); color: var(--props-color); padding: 1px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.85em; }
-
-.props-help-guide-layout { display: flex; gap: 40px; height: 100%; padding: 40px; overflow: hidden; }
-.props-help-replica-col  { flex: 0 0 auto; overflow-y: auto; padding-right: 20px; border-right: 1px solid rgba(165,232,1,0.1); }
-.props-help-explain-col  { flex: 1; overflow-y: auto; max-height: 80vh; }
-.props-help-replica-col::-webkit-scrollbar, .props-help-explain-col::-webkit-scrollbar       { width: 6px; }
-.props-help-replica-col::-webkit-scrollbar-track, .props-help-explain-col::-webkit-scrollbar-track { background: transparent; }
-.props-help-replica-col::-webkit-scrollbar-thumb, .props-help-explain-col::-webkit-scrollbar-thumb { background: rgba(165,232,1,0.3); border-radius: 3px; }
-
-.props-help-explain-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 18px; opacity: 0.5; text-align: center; }
-
-.props-help-explain-card { background: rgba(165,232,1,0.04); border: 1px solid rgba(165,232,1,0.18); border-radius: 12px; padding: 28px 32px; animation: propsExplainFadeIn 0.25s ease; }
-@keyframes propsExplainFadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-
-.props-help-explain-title   { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--props-color); margin: 0 0 6px 0; text-shadow: 0 0 15px var(--props-glow); letter-spacing: 0.05em; }
-.props-help-explain-desc    { color: rgba(255,255,255,0.8); font-size: 0.95rem; line-height: 1.75; margin: 0 0 20px 0; }
-.props-help-explain-details { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
-.props-help-explain-row     { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 10px 14px; background: var(--surface-ghost); border-radius: 6px; border-left: 2px solid rgba(165,232,1,0.3); font-size: 0.88rem; }
-.props-help-explain-row strong { color: var(--props-color); font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase; }
-.props-help-explain-row span   { color: var(--ink-65); line-height: 1.6; }
-.props-help-explain-tip        { padding: 12px 16px; background: rgba(165,232,1,0.06); border: 1px solid rgba(165,232,1,0.2); border-radius: 8px; font-size: 0.85rem; color: var(--ink-60); line-height: 1.6; }
-.props-help-explain-tip strong { color: var(--props-color); }
-
-.props-help-section-header { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 22px 0; display: flex; align-items: center; gap: 14px; }
-.props-help-section-number { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(165,232,1,0.15); border: 2px solid rgba(165,232,1,0.4); color: var(--props-color); border-radius: 6px; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
-
-.props-help-note-box { background: rgba(165,232,1,0.05); border: 1px solid rgba(165,232,1,0.2); border-left: 4px solid var(--props-color); padding: 16px 20px; border-radius: 6px; font-size: 0.88rem; line-height: 1.8; color: var(--ink-65); margin: 16px 0; }
-.props-help-note-box code { background: rgba(165,232,1,0.12); color: var(--props-color); padding: 1px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.85em; }
-
-.props-help-troubleshooting-item     { background: var(--surface-ghost); border: 1px solid var(--line-ghost-border); overflow: hidden; margin-bottom: 2px; }
-.props-help-troubleshooting-question { display: flex; align-items: center; gap: 14px; padding: 18px 22px; background: rgba(165,232,1,0.05); border-left: 3px solid rgba(165,232,1,0.5); cursor: default; }
-.props-help-troubleshooting-question strong { color: rgba(220,255,150,0.95); font-size: 0.95rem; font-weight: 600; }
-.props-help-trouble-dot              { width: 18px; height: 18px; border-radius: 50%; background: rgba(165,232,1,0.6); flex-shrink: 0; }
-.props-help-troubleshooting-answer  { padding: 16px 22px 16px 55px; color: var(--ink-60); font-size: 0.9rem; line-height: 1.7; }
-.props-help-troubleshooting-answer code { background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 3px; font-family: 'Courier New', monospace; color: var(--ink-92); }
-
-.props-help-code-block { background: rgba(0,0,0,0.5); border: 1px solid rgba(165,232,1,0.15); border-radius: 6px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.85); margin-top: 10px; overflow-x: auto; white-space: pre; line-height: 1.7; }
-
-.props-help-technical-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
-.props-help-technical-card { background: var(--surface-ghost); border: 1px solid var(--line-ghost-border); padding: 20px; border-radius: 8px; transition: all 0.3s ease; }
-.props-help-technical-card:hover { border-color: rgba(165,232,1,0.25); background: rgba(165,232,1,0.04); }
-.props-help-technical-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.props-help-technical-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(165,232,1,0.12); border: 1px solid rgba(165,232,1,0.3); border-radius: 6px; color: var(--props-color); font-size: 1rem; font-weight: 700; flex-shrink: 0; }
-.props-help-technical-header h4 { color: #fff; font-size: 0.95rem; font-weight: 600; margin: 0; }
-.props-help-technical-desc { color: var(--ink-55); font-size: 0.85rem; line-height: 1.65; margin: 0 0 10px 0; }
-.props-help-technical-features { list-style: none; padding: 0; margin: 0; }
-.props-help-technical-features li { font-size: 0.8rem; color: rgba(255,255,255,0.4); padding: 3px 0; border-bottom: 1px solid var(--sheen-040); }
-.props-help-technical-features li::before { content: '·  '; color: var(--props-color); }
-
-.props-help-best-practices-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; }
-.props-help-practice-card { background: rgba(165,232,1,0.04); border: 1px solid rgba(165,232,1,0.14); padding: 22px; border-radius: 8px; transition: all 0.3s ease; }
-.props-help-practice-card:hover { border-color: rgba(165,232,1,0.28); background: rgba(165,232,1,0.07); transform: translateY(-2px); }
-.props-help-practice-icon { font-size: 1.6rem; margin-bottom: 10px; }
-.props-help-practice-card h4 { color: var(--props-color); font-size: 0.9rem; font-weight: 600; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.06em; }
-.props-help-practice-card p  { color: var(--ink-50); font-size: 0.82rem; line-height: 1.65; margin: 0; }
-
-.props-help-process-timeline { display: flex; gap: 0; align-items: flex-start; flex-wrap: wrap; margin-bottom: 30px; }
-.props-help-process-step { flex: 1; min-width: 180px; display: flex; gap: 14px; padding: 18px; background: var(--surface-ghost); border: 1px solid rgba(165,232,1,0.1); border-radius: 8px; }
-.props-help-process-step-number { width: 32px; height: 32px; flex-shrink: 0; background: rgba(165,232,1,0.15); border: 2px solid rgba(165,232,1,0.4); color: var(--props-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
-.props-help-process-step-content h4 { color: #fff; font-size: 0.9rem; font-weight: 600; margin: 0 0 6px 0; }
-.props-help-process-step-content p  { color: var(--ink-50); font-size: 0.82rem; line-height: 1.6; margin: 0; }
-.props-help-process-arrow { display: flex; align-items: center; padding: 0 10px; color: rgba(165,232,1,0.4); font-size: 1.2rem; align-self: center; }
-
-.props-tab .help-troubleshooting-item { background: var(--surface-ghost); border: 1px solid var(--line-ghost-border); overflow: hidden; margin-bottom: 2px; }
-.props-tab .help-troubleshooting-item:hover { background: linear-gradient(135deg, var(--sheen-040) 0%, var(--surface-ghost) 100%); border-color: var(--ink-15); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
-.props-tab .help-troubleshooting-question { display: flex; align-items: center; gap: 15px; padding: 20px 25px; background: var(--props-help-trouble-bg); border-left: 3px solid var(--props-help-trouble-border); cursor: pointer; }
-.props-tab .help-troubleshooting-icon { font-size: 1rem; width: 18px; height: 18px; border-radius: 50%; background: var(--props-help-trouble-icon); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.props-tab .help-troubleshooting-question strong { color: var(--props-help-trouble-text); font-size: 1rem; font-weight: 600; }
-.props-tab .help-troubleshooting-answer { padding: 20px 25px 20px 60px; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
 
 
 /* ── 19. RESPONSIVE ──────────────────────────────────────────────────────── */
@@ -333,12 +73,6 @@
   .props-tab .tab-col-detail { position: relative; top: 0; }
 }
 
-@media (max-width: 768px) {
-  .props-modal         { width: 100%; height: 100vh; }
-  .props-modal-sidebar { width: 160px; min-width: 160px; }
-  .props-help-modal    { width: 95%; height: 90vh; }
-  .props-help-guide-layout { flex-direction: column; }
-}
 
 /* ── 21. HELP ADVANCED + HELP INFO — PROPS-COLOR OVERRIDES ──────────────── */
 /* Mirror of Wreckage.css pattern: only override accent-colored text, not layout */
