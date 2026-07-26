@@ -94,7 +94,7 @@ export default function GradientEditor({ value = [], onChange }) {
                 onChange={v => update(sel, { pos: Math.max(0, Math.min(1, v)) })}
               />
             </label>
-            <button className="ne-btn ne-btn-mini" onClick={() => removeStop(sel)} disabled={stops.length <= 2}>Remove</button>
+            <button className="ctrl-btn-add" onClick={() => removeStop(sel)} disabled={stops.length <= 2}>Remove</button>
           </div>
         </>
       )}

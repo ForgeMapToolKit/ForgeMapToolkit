@@ -15,9 +15,10 @@ import { CATEGORIES, getToolsByCategory } from '../data/toolRegistry.js';
  *  - onToolBlur():    pointer left any slat
  */
 const ToolRail = ({ activeToolId, onSelect, onToolFocus, onToolBlur }) => {
-  const railCategories = CATEGORIES.filter(c =>
-    ['emitter', 'generator', 'skybox', 'tools', 'community', 'config'].includes(c.key)
-  );
+  // The rail shows every category in registry order. It used to repeat the key
+  // list here, which meant adding a category silently omitted it from the home
+  // screen — CATEGORIES is the single source of truth, so defer to it.
+  const railCategories = CATEGORIES;
 
   return (
     <nav className="hs-rail">

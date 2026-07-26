@@ -31,9 +31,9 @@ function KV({ rows }) {
   return (
     <div className="hc-kv">
       {rows.map(([k, v], i) => (
-        <div className="hc-kv-row" key={i}>
-          <span className="hc-kv-key">{k}</span>
-          <span className="hc-kv-val">{v}</span>
+        <div className="hc-kv__row" key={i}>
+          <span className="hc-kv__key">{k}</span>
+          <span className="hc-kv__val">{v}</span>
         </div>
       ))}
     </div>

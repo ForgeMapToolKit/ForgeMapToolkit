@@ -24,11 +24,19 @@
   /* phosphor decay — ignite fast, cool slow */
   --nb-decay: var(--ease-decay);
 
+  /* Per-item side padding, driven from here so the label and the active
+     underline can never drift apart, and so the responsive steps at the bottom
+     of this file only have one value to change. With nine items the padding is
+     the single largest consumer of bar width — 2 × 36px each — which is what
+     pushed the last item off-screen at 1280px once Textures / Map Tools /
+     System replaced the old single Tools entry. */
+  --nb-pad: var(--space-2xl);
+
   position: relative;
   z-index: var(--z-rail);           /* 10 — below overlays, above workspace */
   flex-shrink: 0;
   height: var(--space-4xl);         /* 72px — unchanged from previous navbar */
-  padding: 0 var(--space-3xl);      /* 64px horizontal padding */
+  padding: 0 var(--nb-edge, var(--space-3xl));
   display: flex;
   align-items: stretch;
 
@@ -108,8 +116,8 @@
 .nb-item--active::after {
   content: '';
   position: absolute;
-  left: var(--space-2xl);   /* 36px — inset matches label padding */
-  right: var(--space-2xl);
+  left: var(--nb-pad);      /* inset matches label padding at every breakpoint */
+  right: var(--nb-pad);
   bottom: 0;
   height: 2px;
   border-radius: 1px;
@@ -133,14 +141,14 @@
   align-items: center;
   gap: var(--space-xs);
   height: 100%;
-  padding: 0 var(--space-2xl);      /* 36px — generous, instrument-panel spacing */
+  padding: 0 var(--nb-pad);         /* 36px at full width — instrument spacing */
   background: transparent;
   border: none;
   cursor: pointer;
   font-family: inherit;
-  font-size: var(--text-lg);        /* 0.8rem — a touch larger, more present */
+  font-size: var(--nb-label-size, var(--text-lg));
   font-weight: var(--weight-semi);  /* 600 */
-  letter-spacing: var(--track-wide); /* 0.16em — eased so the larger type still fits */
+  letter-spacing: var(--nb-track, var(--track-wide));
   text-transform: uppercase;
   color: var(--ink-28);
   white-space: nowrap;
@@ -178,19 +186,39 @@
   color: var(--ink-40);
 }
 
-/* ── Responsive ─────────────────────────────────────────────────────────────*/
+/* ── Responsive ───────────────────────────────────────────────────────────────
+   Nine top-level entries do not fit at 1280px with 36px of padding a side, and a
+   nav bar that clips is the same defect as a panel that clips: the item you
+   cannot see is the one you were looking for. The bar therefore spends its own
+   spacing first — edge padding, then per-item padding, then tracking — and only
+   the last step touches type size.
 
-@media (max-width: 1200px) {
-  .nb-bar   { padding: 0 var(--space-xl); }
-  .nb-label { padding: 0 var(--space-lg); letter-spacing: var(--track-wide); }
+   Everything here drives the three custom properties declared on .nb-bar rather
+   than restating .nb-label's padding. The previous version set the label padding
+   directly and left .nb-item--active::after on a hard var(--space-2xl), so the
+   active underline silently drifted out of alignment with its own label below
+   1200px. It also reached for --track-base, which is not a token that exists. */
+
+@media (max-width: 1500px) {
+  .nb-bar { --nb-pad: var(--space-xl); --nb-edge: var(--space-2xl); }
 }
-
-@media (max-width: 960px) {
-  .nb-label { padding: 0 var(--space-md); font-size: var(--text-xs); letter-spacing: var(--track-base); }
+@media (max-width: 1340px) {
+  .nb-bar { --nb-pad: var(--space-lg); --nb-edge: var(--space-xl); }
 }
-
-@media (max-width: 760px) {
-  .nb-label { padding: 0 var(--space-sm); font-size: 0.62rem; letter-spacing: 0.1em; }
+@media (max-width: 1180px) {
+  .nb-bar {
+    --nb-pad:   var(--space-md);
+    --nb-edge:  var(--space-md);
+    --nb-track: var(--track-snug);
+  }
+}
+@media (max-width: 1040px) {
+  .nb-bar {
+    --nb-pad:   var(--space-sm);
+    --nb-edge:  var(--space-sm);
+    --nb-track: var(--track-snug);
+    --nb-label-size: var(--text-sm);
+  }
 }
 
 /* ── Light-mode overrides ───────────────────────────────────────────────────

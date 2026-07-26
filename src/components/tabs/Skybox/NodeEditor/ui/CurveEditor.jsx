@@ -93,7 +93,7 @@ export default function CurveEditor({ value = [], onChange }) {
               onChange={v => commit(points.map((p, idx) => (idx === sel ? { ...p, y: Math.max(0, Math.min(1, v)) } : p)))}
             />
           </label>
-          <button className="ne-btn ne-btn-mini" onClick={() => removePoint(sel)} disabled={points.length <= 2}>Remove</button>
+          <button className="ctrl-btn-add" onClick={() => removePoint(sel)} disabled={points.length <= 2}>Remove</button>
         </div>
       )}
       <p className="ne-hint">Drag points (X = in, Y = out) · middle-click pad to add</p>

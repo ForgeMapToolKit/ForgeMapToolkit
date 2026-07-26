@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Dropdown } from '../../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 
 /**
  * SkyGradientEditor — pulls the sky straight out of a map's data.lua.
@@ -100,19 +101,17 @@ export default function SkyGradientEditor({ params, setParams }) {
   return (
     <div className="ne-scmap-editor">
       <div className="ne-scmap-row">
-        <select
-          className="ne-scmap-select"
+        <Dropdown
           value={selected}
-          onChange={e => setParams({ scmapMap: e.target.value })}
-        >
-          <option value="">— unpacked map —</option>
-          {maps.map(m => <option key={m} value={m}>{m}</option>)}
-        </select>
-        <button className="ne-btn ne-btn-mini" onClick={() => readSky(selected)} disabled={busy || unpacking || !selected}>
+          onChange={v => setParams({ scmapMap: v })}
+          ariaLabel="Unpacked map"
+          options={[{ value: '', label: '— unpacked map —' }, ...maps.map(m => ({ value: m, label: m }))]}
+        />
+        <button className="ctrl-btn-add" onClick={() => readSky(selected)} disabled={busy || unpacking || !selected}>
           {busy ? 'Reading…' : 'Read sky'}
         </button>
       </div>
-      <button className="ne-btn ne-btn-mini ne-scmap-browse" onClick={browseAndUnpack} disabled={busy || unpacking}>
+      <button className="ctrl-btn-add ne-scmap-browse" onClick={browseAndUnpack} disabled={busy || unpacking}>
         {unpacking ? 'Unpacking…' : 'Browse .scmap…'}
       </button>
 

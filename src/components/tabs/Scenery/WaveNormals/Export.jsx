@@ -8,22 +8,28 @@ const FORMATS = [
 ];
 
 /**
- * Section 03 — write the set and wire it into the map.
+ * Section 05 — write the set and wire it into the map.
+ *
+ * The scroll motion belongs here rather than with the sea state: it never touches
+ * a baked pixel, it only decides the Speed/Angle pairs the engine scrolls the
+ * finished textures at. Because it is solved live from the repeat rates and the
+ * wind, it needs no bake and never makes one stale.
  *
  * With the "patch .scmap" toggle on, the export both writes the DDS files and
- * rewrites the map's water settings (texture paths, movement, repeat rates) so
- * nothing has to be assembled by hand. The editor-values block below is still
- * printed as a fallback and a record of what was written.
+ * rewrites the map's water settings so nothing has to be assembled by hand. The
+ * printed settings block is kept as a fallback and a record of what was written.
  */
 export default function WaveExport({
   mapName, setMapName, mapInfo, baseName, setBaseName, format, setFormat,
-  foamTarget, setFoamTarget, recommended, editorRows, layers,
+  flowSpeed, setFlowSpeed, angleSpread, setAngleSpread,
+  recommended, editorRows = [], layers,
   writeSlots = [], toggleWriteSlot = () => {},
   writeScmap = true, setWriteScmap = () => {}, liftSun = false, setLiftSun = () => {},
   onWrite, writing, written,
 }) {
   const isSelected = i => writeSlots[i] !== false;
   const [copied, setCopied] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const mapNameRef = useRef(null);
 
   const settingsBlock = () => {
@@ -116,7 +122,7 @@ export default function WaveExport({
             />
           </Field>
 
-          {!!layers?.length && (
+          {hasLayers && (
             <div className="ctrl-field">
               <label className="ctrl-label">Layers to write</label>
               <div className="wn-slot-table">
@@ -155,26 +161,26 @@ export default function WaveExport({
         </div>
       </div>
 
-      {/* ── Foam budget ── */}
+      {/* ── Motion ── */}
       <div className="ctrl-block">
-        <div className="ctrl-subtitle">Foam Budget</div>
+        <div className="ctrl-subtitle">Motion</div>
         <div className="ctrl-content">
           <Slider
-            label="Target foam coverage" value={foamTarget} onChange={setFoamTarget}
-            min={0.005} max={0.4} step={0.005}
-            format={v => `${(v * 100).toFixed(1)}%`}
-            hint="Share of the water surface that should end up white in-game. The threshold below is solved from the four baked alphas to hit it."
+            label="Flow speed" value={flowSpeed} onChange={setFlowSpeed}
+            min={0} max={0.04} step={0.001}
+            format={v => v.toFixed(3)}
+            hint="Scroll speed scales with each layer's tile: editor Speed ≈ this × √scale. At 0.015 that is about 0.15 for a scale-100 layer and 0.05 for scale-10 — the range the editor expects. This only affects the exported motion, not the baked normals."
+          />
+          <Slider
+            label="Angle variation" value={angleSpread} onChange={setAngleSpread}
+            min={0} max={45} step={1} unit="°"
+            hint="Fans each layer's scroll heading off the wind so the four scales cross instead of sliding as one rigid sheet — the base layer runs with the wind, finer layers scatter. 0 locks them all to the wind direction."
           />
 
-          {recommended ? (
-            <Readout rows={[
-              ['waveCrestThreshold', recommended.threshold.toFixed(3)],
-              ['mean Σα',            recommended.meanSum.toFixed(3)],
-              ['max Σα',             recommended.maxSum.toFixed(3)],
-            ]} />
-          ) : (
-            <div className="wn-hint">Bake the layers to get a threshold.</div>
-          )}
+          <Readout rows={editorRows.map(r => [
+            `layer ${r.index} · scale ${r.scale.toFixed(0)}`,
+            `speed ${r.speed.toFixed(3)} · ${r.angle.toFixed(0)}°`,
+          ])} />
         </div>
       </div>
 
@@ -194,13 +200,8 @@ export default function WaveExport({
             onChange={setLiftSun}
             hint="The stock water sun points ~74° below the horizon, which switches the specular highlight off — why FA water looks matte almost everywhere. This flips it above the horizon so your normals actually catch light. Off by default because it changes the whole water look; turn it on if the water still looks flat in-game."
           />
-        </div>
-      </div>
 
-      {/* ── Write ── */}
-      <div className="ctrl-block">
-        <div className="ctrl-content">
-          <button className="commit-button" onClick={handleWrite} disabled={!hasLayers || writing}>
+          <button className="commit-button" onClick={handleWrite} disabled={!hasLayers || writing} type="button">
             <span className="commit-button-label">
               {writing ? 'Writing…' : writeScmap ? 'Write set + patch map' : 'Write DDS set'}
             </span>
@@ -232,23 +233,24 @@ export default function WaveExport({
               )}
             </div>
           )}
-        </div>
-      </div>
 
-      {/* ── Editor values ── */}
-      {!!editorRows.length && (
-        <div className="ctrl-block">
-          <div className="ctrl-subtitle">Water Settings</div>
-          <div className="ctrl-content">
-            <pre className="wn-code">{settingsBlock()}</pre>
-            <div className="ctrl-action-row">
-              <button className="ftr-preview-readmore" onClick={copy} type="button">
+          {/* Leise, per §3 block order: the manual fallback for anyone patching
+              the map by hand, kept out of the way of the path that works. */}
+          <div className="ctrl-action-row">
+            <button
+              className="ctrl-btn-meta"
+              onClick={() => setShowSettings(v => !v)}
+              type="button"
+            >{showSettings ? 'Hide water settings' : 'Show water settings'}</button>
+            {showSettings && (
+              <button className="ctrl-btn-meta" onClick={copy} type="button">
                 {copied ? 'Copied' : 'Copy'}
               </button>
-            </div>
+            )}
           </div>
+          {showSettings && <pre className="wn-code">{settingsBlock()}</pre>}
         </div>
-      )}
+      </div>
 
     </div>
   );

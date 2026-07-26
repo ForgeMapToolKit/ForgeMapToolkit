@@ -119,7 +119,7 @@ Pro Tab nach Contract: **`TabLayout`**-Shell (vier Varianten X/Y/Z/W, siehe
 `ctrl-*`-Kontrollfamilie + `commit-button` + `station` — kein separates
 5-Klassen-Button-Set wie ursprünglich geplant, siehe `DESIGN_SYSTEM_MIGRATION.md §4`.
 
-- [x] **Placement — Wreckage, Props, Emitter**: fertig, Gold-Standard, verifiziert
+- [x] **Emitter — Wreckage, Props, Emitter**: fertig, Gold-Standard, verifiziert
   2026-07-08. `layoutMode="x"` (Controls + Aside/MapPreview).
 - [x] **Welle 1 (klein/formlastig)** — PreviewImage, Stars, History auf `TabLayout`
   verifiziert (2026-07-11, Grep + Preview-Mount-Check). **Settings** bewusst
@@ -171,7 +171,7 @@ gilt aber nur als Absichtserklärung, bis der jeweilige Tab tatsächlich migrier
 
 ### Phase 3 — Help-System (Feature #4)
 - [x] **Wreckage**: migriert auf `Shared/Ui/HelpPanel/HelpPanel.jsx` (`HelpConsole`
-  + `HelpButton`) + Section-Komponenten. Vorlage: `Tabs/Placement/Wreckage/Help.jsx`.
+  + `HelpButton`) + Section-Komponenten. Vorlage: `Tabs/Emitter/Wreckage/Help.jsx`.
 - [ ] **Props, Emitter**: noch **nicht** migriert — hängen weiterhin an
   `Tabs/HelpModals/{Props,Emitter}_help.jsx` (eigenständige Modals ohne
   `HelpPanel`-Anbindung). Kleine, risikoarme Aufgabe, siehe `TAB_CONTRACT.md §7`.

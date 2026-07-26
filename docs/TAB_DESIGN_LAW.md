@@ -5,7 +5,7 @@ refreshed 2026-07-08 after the `Shared/`/`Tabs/` PascalCase rename and the
 `WorkspaceConsole`→`TabLayout`, `EntityConsole`→`EntityPanel` component renames
 (see Changelog).*
 *This document is law. Deviations require justification — but the law follows the build, not the other way around: when the implementation is provably smarter than a rule here, the rule is corrected, not the build.*
-*Scope: verified against the three gold-standard tabs (`Tabs/Placement/{Wreckage,Props,Emitter}`). Other tabs may not yet comply — see `DESIGN_SYSTEM_MIGRATION.md`.*
+*Scope: verified against the three gold-standard tabs (`Tabs/Emitter/{Wreckage,Props,Emitter}`). Other tabs may not yet comply — see `DESIGN_SYSTEM_MIGRATION.md`.*
 
 ---
 
@@ -282,7 +282,89 @@ The solution is not "fewer lines" — it is **intentional lines with clear hiera
 
 ---
 
+## § 11 — THE GRAPH CANVAS
+
+A *graph canvas* is a free 2D surface on which the user places, drags and wires
+discrete objects (the Texture Editor's node graph; any future editor of the same
+shape). It is the one surface in the toolkit where §5's box rules need an
+explicit carve-out — and a narrow one.
+
+### The exception
+
+**On a graph canvas, an object's outline is mechanism, not decoration.** Without
+a card body there is no drag handle, no hit target, no anchor for the socket
+geometry the edge maths depends on. This is the same reasoning that grants a
+toggle its track in §5: a box that *is* the control is signal.
+
+**Scope — this licence covers the object card only.** It does not extend to
+anything that merely sits near the canvas: toolbars, toolboxes, inspectors,
+badges, overlays and search panels around a graph are ordinary tab surface and
+obey §4/§5 unchanged. The failure mode this clause exists to prevent is the
+exception leaking outward until the whole tab is boxed again.
+
+### The two-channel card
+
+A node card carries two questions at once, and they must ride on **separate,
+non-competing channels** — the same decoupling §2 applies to size vs. colour:
+
+| Channel | Carrier | Character | Colour role |
+|---|---|---|---|
+| **Identity** — "what am I" | the head | permanent, static | Role 2 (object colour) |
+| **State** — "what is true of me right now" | the ring | transient, rare | Role 3 + selection |
+
+**Identity — the head.** The head is washed in the object's category colour
+(~18%) with a single full-saturation hairline on its lower edge. This is §5's
+"one surface *or* one edge" turned inward: surface and edge are the *same* data
+colour, which is signal, not the forbidden neutral-surface-plus-neutral-border
+pair. A full-saturation head *fill* is not permitted — at a dozen cards it turns
+the canvas into a colour field and drowns `--tab-color`.
+
+**State — the ring.** **At rest the ring does not exist.** A card wears no
+border until a state is true; the ring *appearing* is the signal. This is what
+keeps the exception honest — the neutral resting border that §5 forbids is not
+excused here, it is structurally absent.
+
+Three rules govern the ring:
+
+1. **It is a shadow, not a border.** A state must never change an object's
+   geometry — the socket anchors the edge maths assumes have to stay put.
+2. **Exactly one ring at a time**, resolved by a declared priority ladder
+   (Texture Editor: `compare < bypass < freeze < selection < error`).
+3. **No information may live only in the ring.** Because the ring shows one
+   state and an object may hold several, every active state must also appear in
+   a per-object glyph strip — which doubles as the click target for clearing it.
+
+### Connections
+
+Wires are not plumbing — on a canvas they *are* the trace grammar the rest of
+the toolkit draws by hand (§4), generated from the data instead:
+
+- A wire inherits **its source object's** category colour (Role 2 — "the same
+  colour reappears wherever the object appears") and fades along its length
+  toward the target. Direction is read from the fade; a canvas needs no
+  arrowheads or markers.
+- Hairline weight, non-scaling stroke. A wire that fattens with zoom reads as
+  cabling, not as trace.
+- Selection recolours the wire to `--tab-color`. That is the only place the tab
+  identity colour touches a wire.
+
+---
+
 ## CHANGELOG
+
+**2026-07-25 — added §11 (the graph canvas), for the Texture Editor's node
+editor.** No existing rule changed; §11 is an additional, deliberately narrow
+role in the sense of Philosophy §7 ("a documented deviation is not a violation
+— it is an additional role that refines the rule"). The substance: on a free
+canvas the object's outline is mechanism, so a node card may be a box — but
+only the card, and only by splitting into an identity channel (washed head,
+Role 2) and a state channel (a ring that does not exist at rest, so the
+forbidden neutral resting border is absent rather than excused). Wires inherit
+their source object's colour and get trace treatment. Everything around the
+canvas keeps §4/§5 unchanged. Implemented in
+`Tabs/Skybox/NodeEditor/{NodeEditor.css, ui/NodeGraph.jsx}`; the tab's
+remaining 21 BOXED findings all sit *outside* the canvas and are not covered by
+this clause.
 
 **2026-07-08 — refreshed class/token names after the `Shared/`/`Tabs/` rename; scoped to Wreckage/Props/Emitter.**
 

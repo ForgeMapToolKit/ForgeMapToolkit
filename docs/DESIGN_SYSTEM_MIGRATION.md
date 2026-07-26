@@ -25,9 +25,9 @@ it too — that keeps one source of truth.
 
 Gold-standard reference implementations — the only three tabs currently held to
 this contract in full:
-- `Tabs/Placement/Wreckage/Wreckage.jsx` — the source the shared components were
+- `Tabs/Emitter/Wreckage/Wreckage.jsx` — the source the shared components were
   lifted from.
-- `Tabs/Placement/Props/Props.jsx` and `Tabs/Placement/Emitter/Emitter.jsx` — built
+- `Tabs/Emitter/Props/Props.jsx` and `Tabs/Emitter/Emitter/Emitter.jsx` — built
   on the same shared components; the proof that "build once, reuse everywhere" holds.
 
 > **Scope note:** most other tabs (Skybox, Stars, RockErosion, Trees, Settings,
@@ -70,7 +70,7 @@ for Z; `canvasToolbar`/`topBar`/`toolbar` for W), and shell props `toolbarSlot`,
 per-tab — `TabLayout` persists it to a single shared `localStorage` key
 (`RAIL_PINNED_KEY` in `TabLayout.jsx`), so it carries over across tabs and
 across sessions; there is no per-tab override for it. All three gold-standard
-tabs use `layoutMode="x"` (Placement tabs are canvas + controls).
+tabs use `layoutMode="x"` (Emitter tabs are canvas + controls).
 
 **`Shared/Ui/EntityPanel/EntityPanel.jsx`** — reusable feature components (the big
 lever). Exports today: `EntityCard`, `EntityCardGrid`, `AddTile`, `CoordinateList`,
@@ -143,7 +143,7 @@ consistent accent, dark or light. See `docs/UI_PHILOSOPHY.md` §2 for the reason
 
 ---
 
-## 3. Integrate a Placement-style tab (the decisive recipe)
+## 3. Integrate a Emitter-style tab (the decisive recipe)
 
 This is the full path for a register-of-entities tab (units, props, emitters —
 color-coded, with coordinates, a map preview, and an export step). PropsTab and

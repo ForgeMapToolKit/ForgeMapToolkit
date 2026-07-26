@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Dropdown } from '../../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 
 /**
  * TextureImportEditor — pick the texture a Texture node points at.
@@ -98,7 +99,7 @@ export default function TextureImportEditor({ value, onChange, params, setParams
   return (
     <div className="ne-scmap-editor">
       <input
-        className="ne-tex-path"
+        className="ctrl-input ne-tex-path"
         type="text"
         placeholder="/textures/environment/….dds"
         value={value || ''}
@@ -107,24 +108,22 @@ export default function TextureImportEditor({ value, onChange, params, setParams
       />
 
       <div className="ne-scmap-row">
-        <select
-          className="ne-scmap-select"
+        <Dropdown
           value={pickMap}
-          onChange={e => { setPickMap(e.target.value); loadSkyboxPaths(e.target.value); }}
-        >
-          <option value="">— browse a map's skybox —</option>
-          {maps.map(m => <option key={m} value={m}>{m}</option>)}
-        </select>
+          onChange={v => { setPickMap(v); loadSkyboxPaths(v); }}
+          ariaLabel="Map skybox"
+          options={[{ value: '', label: "— browse a map's skybox —" }, ...maps.map(m => ({ value: m, label: m }))]}
+        />
         {busy && <span className="ne-hint">Reading…</span>}
       </div>
-      <button className="ne-btn ne-btn-mini ne-scmap-browse" onClick={browseAndUnpack} disabled={busy || unpacking}>
+      <button className="ctrl-btn-add ne-scmap-browse" onClick={browseAndUnpack} disabled={busy || unpacking}>
         {unpacking ? 'Unpacking…' : 'Browse .scmap…'}
       </button>
 
       {/* Stock game assets — waterramps, cirrus sheets, envcubes … */}
       <div className="ne-scmap-row">
         <input
-          className="ne-scmap-select"
+          className="ctrl-input ctrl-input--text ne-scmap-search"
           type="text"
           placeholder="search stock assets (e.g. waterramp)"
           value={assetQuery}
@@ -135,13 +134,13 @@ export default function TextureImportEditor({ value, onChange, params, setParams
       </div>
       <div className="ne-uv-presets">
         {['waterramp', 'cirrus', 'envcube'].map(q => (
-          <button key={q} className="ne-btn ne-btn-mini" onClick={() => searchAssets(q)}>{q}</button>
+          <button key={q} className="ctrl-btn-add" onClick={() => searchAssets(q)}>{q}</button>
         ))}
       </div>
       {assets.length > 0 && (
         <div className="ne-scmap-found ne-asset-list">
           {assets.map(p => (
-            <button key={p} className="ne-scmap-pick" onClick={() => choose(p)} title={p}>
+            <button key={p} className="station ne-scmap-pick" onClick={() => choose(p)} title={p}>
               <code className="ne-scmap-tex-path">{p}</code>
             </button>
           ))}
@@ -153,7 +152,7 @@ export default function TextureImportEditor({ value, onChange, params, setParams
       {rows.length > 0 && (
         <div className="ne-scmap-found">
           {rows.map(([label, p]) => (
-            <button key={label} className="ne-scmap-pick" onClick={() => choose(p)} title={p}>
+            <button key={label} className="station ne-scmap-pick" onClick={() => choose(p)} title={p}>
               <span className="ne-scmap-tex-label">{label}</span>
               <code className="ne-scmap-tex-path">{p}</code>
             </button>

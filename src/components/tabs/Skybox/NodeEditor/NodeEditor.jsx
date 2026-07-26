@@ -14,6 +14,7 @@ import Viewport from './ui/Viewport.jsx';
 import NodeGraph from './ui/NodeGraph.jsx';
 import Inspector from './ui/Inspector.jsx';
 import NumberField from './ui/NumberField.jsx';
+import { Dropdown } from '../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 
 /**
  * NodeEditor — the tab parent (docs/NODE_EDITOR_PLAN.md).
@@ -626,8 +627,11 @@ const NodeEditor = ({ settings, shared = {}, onSharedChange = () => {} }) => {
   };
 
   // ── Export ────────────────────────────────────────────────────────────────
-  const onExport = async () => {
-    const outputId = findOutput(graph);
+  // Called with the id of the output node whose commit-button was pressed, so a
+  // graph with several outputs exports exactly the one you clicked. Falls back
+  // to findOutput() only for programmatic callers that pass nothing.
+  const onExport = async (nodeId) => {
+    const outputId = nodeId || findOutput(graph);
     if (!outputId) { setStatus('⚠ no output node in the graph'); return; }
     setStatus('Selecting folder…');
     // Prefer the active map's own folder (Settings' mapName) over the bare
@@ -656,7 +660,7 @@ const NodeEditor = ({ settings, shared = {}, onSharedChange = () => {} }) => {
   if (glError) {
     return (
       <div className="node-editor-tab">
-        <div className="ne-fatal">WebGL2 is required for the Node Editor and could not be initialised.<br />{glError}</div>
+        <div className="ne-fatal">WebGL2 is required for the Texture Editor and could not be initialised.<br />{glError}</div>
       </div>
     );
   }
@@ -666,56 +670,59 @@ const NodeEditor = ({ settings, shared = {}, onSharedChange = () => {} }) => {
 
   return (
     <div className="node-editor-tab">
-      {/* Toolbar */}
+      {/* Toolbar — design-system primitives only (§5): selects are fields with
+          a chevron, numbers ride a T2 baseline, and every action is a boxless
+          .ctrl-btn-*. There is deliberately NO primary CTA up here: exporting
+          belongs to the output node that defines the file (see NodeGraph). */}
       <div className="ne-toolbar">
-        <label className="ne-tool-group">
+        <div className="ne-tool-group">
           <span className="ne-tool-label">Asset</span>
-          <select value={graph.mode} onChange={e => onPickMode(e.target.value)}>
-            {MODE_LIST.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
-          </select>
-        </label>
+          <Dropdown
+            value={graph.mode} onChange={onPickMode} ariaLabel="Asset type"
+            options={MODE_LIST.map(m => ({ value: m.key, label: m.label }))}
+          />
+        </div>
         <div className="ne-tool-group">
           <span className="ne-tool-label">Canvas</span>
-          <NumberField min={1} max={4096} value={graph.canvas.w} onChange={v => setCanvasSize('w', v)} />
+          <NumberField className="ne-num" min={1} max={4096} value={graph.canvas.w} onChange={v => setCanvasSize('w', v)} />
           <span className="ne-tool-x">×</span>
-          <NumberField min={1} max={4096} value={graph.canvas.h} onChange={v => setCanvasSize('h', v)} />
+          <NumberField className="ne-num" min={1} max={4096} value={graph.canvas.h} onChange={v => setCanvasSize('h', v)} />
         </div>
-        <div className="ne-tool-group ne-tool-hist">
-          <button className="ne-btn ne-btn-icon" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">↶</button>
-          <button className="ne-btn ne-btn-icon" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)">↷</button>
+        <div className="ne-tool-group">
+          <button className="ctrl-btn-meta ne-glyph-btn" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">↶</button>
+          <button className="ctrl-btn-meta ne-glyph-btn" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)">↷</button>
         </div>
 
         <div className="ne-tool-group">
           <span className="ne-tool-label">Project</span>
-          <select value={projectName || ''} onChange={e => openProject(e.target.value)}>
-            <option value="">— none —</option>
-            {projectList.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-          <button className="ne-btn ne-btn-mini" onClick={() => setNewProjectOpen(o => !o)} title="Create a new project">+ Project</button>
+          <Dropdown
+            value={projectName || ''} onChange={openProject} ariaLabel="Project"
+            options={[{ value: '', label: '— none —' }, ...projectList.map(p => ({ value: p, label: p }))]}
+          />
+          <button className="ctrl-btn-add" onClick={() => setNewProjectOpen(o => !o)} title="Create a new project">New</button>
         </div>
         {newProjectOpen && (
           <div className="ne-tool-group ne-tool-newproject">
             <input
-              className="ne-inline-input" type="text" placeholder="project name" autoFocus
+              className="ctrl-input ctrl-input--text ne-name-input" type="text" placeholder="project name" autoFocus
               value={newProjectName}
               onChange={e => setNewProjectName(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') confirmNewProject(); else if (e.key === 'Escape') setNewProjectOpen(false); }}
             />
-            <button className="ne-btn ne-btn-mini ne-btn-primary" onClick={confirmNewProject}>Create</button>
+            <button className="ctrl-btn-add" onClick={confirmNewProject}>Create</button>
           </div>
         )}
 
         <div className="ne-tool-spacer" />
-        <div className="ne-tool-group ne-tool-hist">
-          <button className="ne-btn ne-btn-mini" onClick={onSave} title={projectName ? `Save "${activeTab.label}" into ${projectName}` : 'Download this tab as a .fmtgraph file'}>Save</button>
-          {projectName && <button className="ne-btn ne-btn-mini" onClick={onSaveAll} title="Save every open tab into this project">Save All</button>}
-          <button className="ne-btn ne-btn-mini" onClick={() => fileInputRef.current?.click()} title="Load a .fmtgraph file into the active tab">Load</button>
+        <div className="ne-tool-group">
+          <button className="ctrl-btn-add" onClick={onSave} title={projectName ? `Save "${activeTab.label}" into ${projectName}` : 'Download this tab as a .fmtgraph file'}>Save</button>
+          {projectName && <button className="ctrl-btn-add" onClick={onSaveAll} title="Save every open tab into this project">Save All</button>}
+          <button className="ctrl-btn-add" onClick={() => fileInputRef.current?.click()} title="Load a .fmtgraph file into the active tab">Load</button>
           <input
             ref={fileInputRef} type="file" accept=".fmtgraph,.json,application/json"
             style={{ display: 'none' }} onChange={onLoadGraphFile}
           />
         </div>
-        <button className="ne-btn ne-btn-primary" onClick={onExport}>Export DDS</button>
       </div>
 
       {/* Gaea-style body: viewport (top) + graph (bottom) span the full width;
@@ -770,17 +777,27 @@ const NodeEditor = ({ settings, shared = {}, onSharedChange = () => {} }) => {
               compareB={compare.b}
               onToggleCompare={toggleCompare}
               onToggleBypass={toggleBypass}
+              onExport={onExport}
             />
 
+            {/* Toolbox — .station tiles (primitives §7, the system's grid-style
+                picker) rather than bordered buttons. The dock is a surface with
+                no border of its own; it reads as docked by position. */}
             <div className="ne-palette-dock">
               <div className="ne-panel-title">Toolbox</div>
               {palette.map(({ cat, defs }) => (
                 <div key={cat} className="ne-palette-cat">
                   <div className="ne-palette-cat-label" style={{ color: categoryColor(cat) }}>{cat}</div>
+                  {/* The node's category is carried by the LABEL COLOUR, not by
+                      a swatch in front of it — one element instead of two, and
+                      the hue lands on the thing you actually read. */}
                   <div className="ne-palette-items">
                     {defs.map(d => (
-                      <button key={d.type} className="ne-palette-item" onClick={() => onAddNode(d.type)}>
-                        <span className="ne-dot" style={{ background: categoryColor(d.category) }} />
+                      <button
+                        key={d.type} className="station ne-palette-item"
+                        style={{ color: categoryColor(d.category) }}
+                        onClick={() => onAddNode(d.type)}
+                      >
                         {d.label}
                       </button>
                     ))}
@@ -803,7 +820,7 @@ const NodeEditor = ({ settings, shared = {}, onSharedChange = () => {} }) => {
                 )}
                 <input
                   ref={searchInputRef}
-                  className="ne-search-input"
+                  className="ctrl-input ctrl-input--text ne-search-input"
                   placeholder="Search nodes… (Enter to add, Esc to close)"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
@@ -815,9 +832,8 @@ const NodeEditor = ({ settings, shared = {}, onSharedChange = () => {} }) => {
                 <div className="ne-search-list">
                   {searchResults.length === 0 && <div className="ne-search-empty">No matching nodes</div>}
                   {searchResults.map(d => (
-                    <button key={d.type} className="ne-search-item" onClick={() => addFromSearch(d.type)}>
-                      <span className="ne-dot" style={{ background: categoryColor(d.category) }} />
-                      <span className="ne-search-item-label">{d.label}</span>
+                    <button key={d.type} className="station ne-search-item" onClick={() => addFromSearch(d.type)}>
+                      <span className="ne-search-item-label" style={{ color: categoryColor(d.category) }}>{d.label}</span>
                       <span className="ne-search-item-cat">{d.category}</span>
                     </button>
                   ))}

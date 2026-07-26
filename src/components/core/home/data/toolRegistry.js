@@ -20,13 +20,23 @@
  *  - status:                'active' | 'coming-soon'
  */
 
+/**
+ * Every category is defined by the *object it operates on*, never as "everything
+ * else". `tools` used to be the only negatively-defined entry in this list, which
+ * is why it collected anything without another home — a residual category always
+ * does. Splitting it by "does this touch the map or not" would only move that
+ * argument down a level (the SCMAP tool edits the map file more directly than
+ * anything else here, yet reads as a utility), so the split is by object: a whole
+ * map, a texture, or the suite itself.
+ */
 export const CATEGORIES = [
-  { key: 'emitter',   homeLabel: 'Emitter Tools', navLabel: 'Emitter',   navDefaultDesc: 'Place and configure particle emitters on the map with full control over type, frequency and output.' },
-  { key: 'generator', homeLabel: 'Scenery',        navLabel: 'Scenery',   navDefaultDesc: 'Generate and distribute props, trees and terrain features procedurally using masks and erosion maps.' },
+  { key: 'emitter',   homeLabel: 'Emitter Tools', navLabel: 'Emitter',   navDefaultDesc: 'Place and configure particle emitters — freestanding, attached to props and wreckages, and the terrain types that decide what units kick up as they drive.' },
+  { key: 'generator', homeLabel: 'Scenery',        navLabel: 'Scenery',   navDefaultDesc: 'Generate and distribute props, trees and rock formations procedurally using masks and erosion maps.' },
   { key: 'skybox',    homeLabel: 'Skybox',        navLabel: 'Skybox',    navDefaultDesc: 'Design realistic star distributions and full skyboxes for immersive map atmospheres.' },
-  { key: 'tools',     homeLabel: 'Tools',         navLabel: 'Tools',     navDefaultDesc: 'Unpack, edit and analyse map files — resize, adapt and preview your maps.' },
+  { key: 'textures',  homeLabel: 'Textures',      navLabel: 'Textures',  navDefaultDesc: 'Author the texture assets a map loads — compose them from a node graph, or simulate them physically.' },
+  { key: 'maptools',  homeLabel: 'Map Tools',     navLabel: 'Map Tools', navDefaultDesc: 'Work on a map as a whole — unpack and repack it, resize it, adapt it to another format, or render its preview.' },
+  { key: 'system',    homeLabel: 'System',        navLabel: 'System',    navDefaultDesc: 'The suite itself rather than any one map — generation history, the raw editor CLI, and your settings.' },
   { key: 'community', homeLabel: 'Community' },
-  { key: 'config',    homeLabel: 'Configuration' },
 ];
 
 export const TOOLS = [
@@ -111,7 +121,7 @@ export const TOOLS = [
   {
     id: 'wavenormals',
     label: 'Wave Normals',
-    category: 'generator',
+    category: 'textures',
     index: '07',
     color: 'var(--wavenormals-color)',
     glow: 'var(--wavenormals-glow)',
@@ -161,22 +171,25 @@ export const TOOLS = [
     status: 'active',
   },
   {
+    // The id stays `node-editor`: it is the route key and the saved start-tab
+    // value in Settings, so renaming it would silently break both. `label` is
+    // the user-facing name, which is exactly the split id/label exists for.
     id: 'node-editor',
-    label: 'Node Editor',
-    category: 'skybox',
+    label: 'Texture Editor',
+    category: 'textures',
     index: '20',
     color: 'var(--node-editor-color)',
     glow: 'var(--node-editor-glow)',
     glowStrong: 'var(--node-editor-glow-strong)',
     colorVar: '--node-editor-color',
-    description: 'Compose SupCom textures procedurally with a node graph.',
-    navDescription: 'A node-based texture composer: build EnvCube, WaterRamp, WaveNormal and other SupCom assets from one graph — sources, modifiers, compositors and output nodes, with a live WebGL preview.',
+    description: 'Compose SupCom textures procedurally from a node graph.',
+    navDescription: 'Author SupCom textures from a node graph: build EnvCube, WaterRamp, WaveNormal and other assets out of sources, modifiers, compositors and output nodes, with a live WebGL preview.',
     status: 'active',
   },
   {
     id: 'scmaptool',
     label: 'SCMAP Tool',
-    category: 'tools',
+    category: 'maptools',
     index: '10',
     color: '#FFFA00',
     glow: 'rgba(255,250,0,0.35)',
@@ -189,7 +202,7 @@ export const TOOLS = [
   {
     id: 'adaptivemaphelper',
     label: 'Adaptive Map Helper',
-    category: 'tools',
+    category: 'maptools',
     index: '11',
     color: '#ff8c00',
     glow: 'rgba(255,140,0,0.35)',
@@ -202,7 +215,7 @@ export const TOOLS = [
   {
     id: 'history',
     label: 'History',
-    category: 'tools',
+    category: 'system',
     index: '12',
     color: '#FF8AFF',
     glow: 'rgba(255, 138, 255, 0.35)',
@@ -215,7 +228,7 @@ export const TOOLS = [
   {
     id: 'mapresizer',
     label: 'Map Resizer',
-    category: 'tools',
+    category: 'maptools',
     index: '13',
     color: '#00E5CC',
     glow: 'rgba(0, 229, 204, 0.20)',
@@ -228,7 +241,7 @@ export const TOOLS = [
   {
     id: 'previewimage',
     label: 'Preview Image',
-    category: 'tools',
+    category: 'maptools',
     index: '14',
     color: 'var(--previewimage-color)',
     glow: 'var(--previewimage-glow)',
@@ -241,7 +254,7 @@ export const TOOLS = [
   {
     id: 'cliterminal',
     label: 'CLI Terminal',
-    category: 'tools',
+    category: 'system',
     index: '17',
     color: 'var(--cliterminal-color)',
     glow: 'var(--cliterminal-glow)',
@@ -267,7 +280,7 @@ export const TOOLS = [
   {
     id: 'settings',
     label: 'Settings',
-    category: 'config',
+    category: 'system',
     index: '16',
     color: 'var(--settings-color, #888)',
     glow: 'var(--settings-glow, rgba(136,136,136,0.15))',

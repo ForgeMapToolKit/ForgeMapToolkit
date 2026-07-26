@@ -180,7 +180,7 @@ Vite produces clean Rollup-bundled output in `dist/` that Electron loads via `lo
 ├──────────────────────────────────────────────────────────┤
 │  Electron Renderer Process  (Chromium + React 18)        │
 │                                                          │
-│  Placement tabs                  Visual generation       │
+│  Emitter tabs                    Visual generation       │
 │  ├── Wreckage                    ├── Skybox Generator    │
 │  ├── Props                       ├── Stars               │
 │  ├── Emitter                     └── SCMAP Tool          │

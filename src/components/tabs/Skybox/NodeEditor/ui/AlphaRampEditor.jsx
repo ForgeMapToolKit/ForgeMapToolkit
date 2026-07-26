@@ -104,7 +104,7 @@ export default function AlphaRampEditor({ value = [], onChange }) {
               onChange={v => update(sel, { alpha: Math.max(0, Math.min(1, v)) })}
             />
           </label>
-          <button className="ne-btn ne-btn-mini" onClick={() => removeStop(sel)} disabled={stops.length <= 2}>Remove</button>
+          <button className="ctrl-btn-add" onClick={() => removeStop(sel)} disabled={stops.length <= 2}>Remove</button>
         </div>
       )}
       <p className="ne-hint">Drag stops (X = position, Y = alpha) · middle-click pad to add</p>

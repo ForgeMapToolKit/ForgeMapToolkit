@@ -210,6 +210,15 @@
   --status-err:        rgba(255,80,80,0.85);
   --status-err-muted:  rgba(255,99,99,0.70);
   --status-err-bright: rgba(255,99,99,0.85);
+  /* Washes + edges for §5's "container carrying data color" case: a status
+     container gets one edge in the status hue and a wash of the same hue, which
+     is signal — unlike a neutral surface with a neutral border, which is noise.
+     These exist so tabs stop hand-rolling rgba() for the same three states. */
+  --status-warn-edge:  rgba(255,175,0,0.35);
+  --status-warn-text:  rgba(255,175,0,0.90);
+  --status-warn-wash:  rgba(255,175,0,0.07);
+  --status-err-wash:   rgba(255,80,80,0.07);
+  --status-ok-wash:    rgba(0,200,100,0.07);
   /* Near-black text for use on a fully-opaque tab-color fill (warm cast). */
   --text-on-accent: #050505;
 
@@ -301,10 +310,10 @@
   --rockerosion-glow:        rgba(255, 175, 0, 0.35);
   --rockerosion-glow-strong: rgba(255, 175, 0, 0.60);
 
-  /* Terrain Type — Teal */
-  --terraintype-color:       #3EC6A6;
-  --terraintype-glow:        rgba(62, 198, 166, 0.35);
-  --terraintype-glow-strong: rgba(62, 198, 166, 0.60);
+  /* Terrain Type — Rost/Sienna */
+  --terraintype-color:       #A8451B;
+  --terraintype-glow:        rgba(168, 69, 27, 0.35);
+  --terraintype-glow-strong: rgba(168, 69, 27, 0.60);
 
   /* Stars — Purple */
   --stars-color:       #8A12BD;
@@ -316,15 +325,15 @@
   --skybox-generator-glow:        rgba(59, 118, 255, 0.35);
   --skybox-generator-glow-strong: rgba(59, 118, 255, 0.60);
 
-  /* Wave Normals — Ocean azure */
-  --wavenormals-color:       #00A3E0;
-  --wavenormals-glow:        rgba(0, 163, 224, 0.35);
-  --wavenormals-glow-strong: rgba(0, 163, 224, 0.60);
+  /* Wave Normals — Dark Navy */
+  --wavenormals-color:       #1A365D;
+  --wavenormals-glow:        rgba(26, 54, 93, 0.35);
+  --wavenormals-glow-strong: rgba(26, 54, 93, 0.60);
 
-  /* Node Editor — Signal green */
-  --node-editor-color:       #2FE39B;
-  --node-editor-glow:        rgba(47, 227, 155, 0.35);
-  --node-editor-glow-strong: rgba(47, 227, 155, 0.60);
+  /* Node Editor — Cappuccino */
+  --node-editor-color:       #BE9B7B;
+  --node-editor-glow:        rgba(190, 155, 123, 0.35);
+  --node-editor-glow-strong: rgba(190, 155, 123, 0.60);
 
   /* SCMAP Tool — Yellow */
   --scmaptool-color:       #FFFA00;

@@ -37,6 +37,12 @@ export function edgeEq(a, b) {
  */
 
 const CARD_W = 176;
+// Output cards are wider because they carry their own export commit-button:
+// the export of a graph belongs to the node that defines what is exported
+// (filename, format, mipmaps), not to a single global toolbar button that
+// silently picks whichever output it finds first.
+const CARD_W_OUT = 236;
+const COMMIT_H = 44;
 const HEADER_H = 30;
 const SOCKET_ROW = 24;
 const BODY_PAD = 8;
@@ -46,11 +52,15 @@ const DRAG_THRESHOLD = 4; // px in screen space before a click becomes a box-sel
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
+function cardWidth(def) {
+  return def.isOutput ? CARD_W_OUT : CARD_W;
+}
 function cardHeight(def) {
-  return HEADER_H + BODY_PAD + Math.max(1, def.inputs.length) * SOCKET_ROW + BODY_PAD;
+  const rows = HEADER_H + BODY_PAD + Math.max(1, def.inputs.length) * SOCKET_ROW + BODY_PAD;
+  return def.isOutput ? rows + COMMIT_H : rows;
 }
 function outSocketPos(node) {
-  return { x: node.pos[0] + CARD_W, y: node.pos[1] + HEADER_H / 2 };
+  return { x: node.pos[0] + cardWidth(getNodeDef(node.type)), y: node.pos[1] + HEADER_H / 2 };
 }
 function inSocketPos(node, index) {
   return { x: node.pos[0], y: node.pos[1] + HEADER_H + BODY_PAD + SOCKET_ROW * (index + 0.5) };
@@ -65,6 +75,7 @@ export default function NodeGraph({
   onMoveNode, onMoveNodes, onRemoveNode, onRemoveNodes, onConnect, onDisconnect,
   onRenameNode, onCombineOutputs, onLinkDragEmpty,
   errorNodeId, errorMessage, compareA, compareB, onToggleCompare, onToggleBypass,
+  onExport,
 }) {
   const rootRef = useRef(null);
   const [view, setView] = useState({ x: 0, y: 0, zoom: 1 });
@@ -107,7 +118,7 @@ export default function NodeGraph({
   const nodeRect = (id) => {
     const node = graph.nodes[id];
     const def = getNodeDef(node.type);
-    return { x1: node.pos[0], y1: node.pos[1], x2: node.pos[0] + CARD_W, y2: node.pos[1] + cardHeight(def) };
+    return { x1: node.pos[0], y1: node.pos[1], x2: node.pos[0] + cardWidth(def), y2: node.pos[1] + cardHeight(def) };
   };
 
   // ── Left button on empty space: click-to-deselect, or drag-to-box-select ──
@@ -300,13 +311,26 @@ export default function NodeGraph({
             const toDef = getNodeDef(toNode.type);
             const idx = Math.max(0, toDef.inputs.findIndex(s => s.name === edge.to[1]));
             const sel = edgeEq(edge, selectedEdge);
-            const d = edgePath(outSocketPos(fromNode), inSocketPos(toNode, idx));
+            const a = outSocketPos(fromNode);
+            const b = inSocketPos(toNode, idx);
+            const d = edgePath(a, b);
+            const gradId = `ne-edge-grad-${i}`;
             return (
               // Two paths: a thin visible curve plus a fat transparent "hit"
               // path on top, so the whole ~16px band around the line catches
-              // the click instead of only the 2px stroke.
-              <g key={i} className="ne-edge-group">
-                <path className={`ne-edge${sel ? ' is-sel' : ''}`} d={d} />
+              // the click instead of only the hairline stroke.
+              <g key={i} className="ne-edge-group" style={{ '--edge-accent': nodeColor(getNodeDef(fromNode.type)) }}>
+                {/* Per-edge gradient: the wire leaves its source node in that
+                    node's category colour and fades toward the target, so flow
+                    direction reads without arrowheads. Declared inside the <g>
+                    rather than in a shared <defs> so the group's :hover rule
+                    can reach the stops. `stroke` is an ATTRIBUTE here on
+                    purpose — the .is-sel CSS rule must be able to outrank it. */}
+                <linearGradient id={gradId} gradientUnits="userSpaceOnUse" x1={a.x} y1={a.y} x2={b.x} y2={b.y}>
+                  <stop className="ne-edge-stop-a" offset="0" />
+                  <stop className="ne-edge-stop-b" offset="1" />
+                </linearGradient>
+                <path className={`ne-edge${sel ? ' is-sel' : ''}`} d={d} stroke={`url(#${gradId})`} />
                 <path
                   className="ne-edge-hit" d={d}
                   onPointerDown={(e) => { if (e.button !== 0) return; e.stopPropagation(); onSelectEdge(edge); }}
@@ -331,12 +355,16 @@ export default function NodeGraph({
           const isCompareB = compareB === id;
           const isError = id === errorNodeId;
           const label = node.label || def.label;
+          // Drives the output card's commit-button readiness readout.
+          const wired = def.isOutput && graph.edges.some(e => e.to[0] === id);
           return (
             <div
               key={id}
               data-node-card={id}
-              className={`ne-node${selected ? ' is-sel' : ''}${frozen ? ' is-frozen' : ''}${bypassed ? ' is-bypassed' : ''}${isError ? ' is-error' : ''}`}
-              style={{ left: node.pos[0], top: node.pos[1], width: CARD_W, minHeight: h, '--node-accent': accent }}
+              // Class order does not drive the ring — CSS source order is the
+              // priority ladder (compare < bypass < freeze < selection < error).
+              className={`ne-node${isCompareA ? ' is-compare-a' : ''}${isCompareB ? ' is-compare-b' : ''}${bypassed ? ' is-bypassed' : ''}${frozen ? ' is-frozen' : ''}${selected ? ' is-sel' : ''}${isError ? ' is-error' : ''}`}
+              style={{ left: node.pos[0], top: node.pos[1], width: cardWidth(def), minHeight: h, '--node-accent': accent }}
               onPointerDown={selectOnClick(id)}
               title={isError ? errorMessage : undefined}
             >
@@ -344,7 +372,6 @@ export default function NodeGraph({
                 className="ne-node-head" onPointerDown={startNodeDrag(id)}
                 onDoubleClick={(e) => { e.stopPropagation(); startNodeRename(id, label); }}
               >
-                <span className="ne-dot" style={{ background: accent }} />
                 {renamingId === id ? (
                   <input
                     className="ne-node-rename"
@@ -360,6 +387,34 @@ export default function NodeGraph({
                   />
                 ) : (
                   <span className="ne-node-label" title="Double-click to rename">{label}</span>
+                )}
+                {/* State glyph strip — the complete state list (the card's ring
+                    shows only the highest-priority one) and the click-to-clear
+                    target the old corner dots used to provide. */}
+                {(frozen || bypassed || isCompareA || isCompareB) && (
+                  <span className="ne-node-states">
+                    {bypassed && (
+                      <button
+                        className="ne-node-state is-bypass"
+                        title="Bypassed — passes input 0 straight through (B to toggle)"
+                        onPointerDown={(e) => { e.stopPropagation(); onToggleBypass(id); }}
+                      >⊘</button>
+                    )}
+                    {frozen && (
+                      <button
+                        className="ne-node-state is-freeze"
+                        title="Viewport pinned here (F to unfreeze)"
+                        onPointerDown={(e) => { e.stopPropagation(); onToggleFreeze(id); }}
+                      >❄</button>
+                    )}
+                    {(isCompareA || isCompareB) && (
+                      <button
+                        className={`ne-node-state ${isCompareA ? 'is-compare-a' : 'is-compare-b'}`}
+                        title={`Compare ${isCompareA ? 'A' : 'B'} (C to toggle)`}
+                        onPointerDown={(e) => { e.stopPropagation(); onToggleCompare(id); }}
+                      >{isCompareA ? 'A' : 'B'}</button>
+                    )}
+                  </span>
                 )}
                 <button
                   className="ne-node-del" title="Delete node"
@@ -382,39 +437,34 @@ export default function NodeGraph({
                 {def.inputs.length === 0 && <div className="ne-socket-row ne-socket-none">source</div>}
               </div>
 
+              {/* An output node owns its own export: it is the node that defines
+                  the filename, format and mipmap policy, so the commit action
+                  belongs on it rather than in a global toolbar button that has
+                  to guess which output it means. This is the tab's single T3
+                  accent line per §4 — there is no other one on the canvas. */}
+              {def.isOutput && (
+                <button
+                  className="commit-button ne-node-commit"
+                  disabled={!wired}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); onExport?.(id); }}
+                  title={wired ? 'Export this output to DDS' : 'Wire a node into this output first'}
+                >
+                  <span className="commit-button-label">Export</span>
+                  <span className="commit-button-status">{wired ? 'Ready' : 'No input'}</span>
+                  <span className="commit-button-bloom" aria-hidden="true" />
+                  <span className="commit-button-line" aria-hidden="true" />
+                </button>
+              )}
+
               {def.outputs.length > 0 && (
                 <span
                   className={`ne-socket ne-socket-out${conn?.from.id === id ? ' is-armed' : ''}`}
-                  style={{ left: CARD_W, top: HEADER_H / 2 }}
+                  style={{ left: cardWidth(def), top: HEADER_H / 2 }}
                   data-socket-dir="out" data-node-id={id} data-socket-name={def.outputs[0].name}
                   onPointerDown={startConnect(id, def.outputs[0].name, 'out')}
                   title="output — drag to an input"
                 />
-              )}
-              {frozen && (
-                <span
-                  className="ne-node-freeze-dot"
-                  title="Viewport pinned here (F to unfreeze)"
-                  onPointerDown={(e) => { e.stopPropagation(); onToggleFreeze(id); }}
-                />
-              )}
-              {(bypassed || isCompareA || isCompareB) && (
-                <div className="ne-node-badges-left">
-                  {bypassed && (
-                    <span
-                      className="ne-node-bypass-dot"
-                      title="Bypassed — passes input 0 straight through (B to toggle)"
-                      onPointerDown={(e) => { e.stopPropagation(); onToggleBypass(id); }}
-                    />
-                  )}
-                  {(isCompareA || isCompareB) && (
-                    <span
-                      className={`ne-node-compare-dot${isCompareA ? ' is-a' : ' is-b'}`}
-                      title={`Compare ${isCompareA ? 'A' : 'B'} (C to toggle)`}
-                      onPointerDown={(e) => { e.stopPropagation(); onToggleCompare(id); }}
-                    />
-                  )}
-                </div>
               )}
             </div>
           );

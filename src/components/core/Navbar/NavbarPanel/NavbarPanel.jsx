@@ -117,7 +117,7 @@ const NavbarPanel = ({
           stacking contexts, not within one. */}
       <div
         className={['nbp-panel-bg', instant ? 'nbp-panel-bg--instant' : ''].filter(Boolean).join(' ')}
-        style={{ top: panelTop, height: bgHeight ?? undefined }}
+        style={{ top: panelTop, height: bgHeight ?? undefined, '--nbp-top': `${panelTop}px` }}
         aria-hidden="true"
       />
 
@@ -127,7 +127,7 @@ const NavbarPanel = ({
       <div
         ref={el => { contentRef.current = el; if (measureRef) measureRef.current = el; }}
         className={['nbp-panel', instant ? 'nbp-panel--instant' : ''].filter(Boolean).join(' ')}
-        style={{ top: panelTop }}
+        style={{ top: panelTop, '--nbp-top': `${panelTop}px` }}
         role="dialog"
         aria-label={`${cfg.label} navigation panel`}
       >

@@ -31,6 +31,15 @@
 .forgemaptoolkit[data-active-theme="contributions"]     { --current-accent: var(--contributions-color);     --current-glow: var(--contributions-glow);     --current-glow-strong: var(--contributions-glow-strong); }
 .forgemaptoolkit[data-active-theme="settings"]          { --current-accent: var(--settings-color);          --current-glow: var(--settings-glow);          --current-glow-strong: var(--settings-glow-strong); }
 .forgemaptoolkit[data-active-theme="civilians"]         { --current-accent: var(--civilians-color);         --current-glow: var(--civilians-glow);         --current-glow-strong: var(--civilians-glow-strong); }
+/* Added 2026-07-25 — these four tabs shipped without a bridge line, so they
+   silently fell through to the orange default below: an orange scrollbar,
+   banner and footer trace inside a sand / green / blue / teal tab. The tool id
+   here must match toolRegistry.js's `id` exactly (hence the hyphens).
+   `guides` is deliberately absent: it has no accent token yet (nav "SOON"). */
+.forgemaptoolkit[data-active-theme="node-editor"]       { --current-accent: var(--node-editor-color);       --current-glow: var(--node-editor-glow);       --current-glow-strong: var(--node-editor-glow-strong); }
+.forgemaptoolkit[data-active-theme="terraintype"]       { --current-accent: var(--terraintype-color);       --current-glow: var(--terraintype-glow);       --current-glow-strong: var(--terraintype-glow-strong); }
+.forgemaptoolkit[data-active-theme="wavenormals"]       { --current-accent: var(--wavenormals-color);       --current-glow: var(--wavenormals-glow);       --current-glow-strong: var(--wavenormals-glow-strong); }
+.forgemaptoolkit[data-active-theme="cliterminal"]       { --current-accent: var(--cliterminal-color);       --current-glow: var(--cliterminal-glow);       --current-glow-strong: var(--cliterminal-glow-strong); }
 
 /* Default (no tool active) — the suite's resting orange. */
 .forgemaptoolkit {

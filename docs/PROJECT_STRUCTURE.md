@@ -121,7 +121,7 @@ ForgeMapToolkit
 │       │       └── TabLayout/              ← TabLayout.jsx — the X/Y/Z/W shell (see LAYOUTS.md)
 │       │
 │       └── Tabs
-│           ├── Placement                   ← gold standard, fully on the shared UI system
+│           ├── Emitter                      ← gold standard, fully on the shared UI system
 │           │   ├── Wreckage/
 │           │   ├── Props/
 │           │   └── Emitter/
@@ -178,7 +178,7 @@ ForgeMapToolkit
 
 - **"Migrated" here means "on the shared UI system"** (`TabLayout` + `EntityPanel` +
   the `Shared/DesignSystem` tokens/primitives), per `DESIGN_SYSTEM_MIGRATION.md`.
-  Only `Tabs/Placement/{Wreckage,Props,Emitter}` are verified fully compliant as of
+  Only `Tabs/Emitter/{Wreckage,Props,Emitter}` are verified fully compliant as of
   2026-07-08 — everything else may be partially migrated or still legacy. Don't
   treat unlisted tabs as reference implementations.
 - **Naming convention**: folders and `.jsx`/`.css` component files are PascalCase;

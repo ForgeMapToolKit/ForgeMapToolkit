@@ -197,7 +197,7 @@ All three reference the same token source (`Shared/DesignSystem/tokens.css`). If
 principle changes here, check whether TAB_DESIGN_LAW and TAB_CONTRACT.md §5 (styling
 contract) need to be updated as well — and vice versa.
 
-> Verified against the three gold-standard tabs (`Tabs/Placement/{Wreckage,Props,
+> Verified against the three gold-standard tabs (`Tabs/Emitter/{Wreckage,Props,
 > Emitter}`) as of 2026-07-08. Path shown above updated for the `shared/` → `Shared/`
 > rename; principles unchanged.
 

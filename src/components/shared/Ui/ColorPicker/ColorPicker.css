@@ -65,10 +65,13 @@
 
 /* Popup — solid surface + top accent, same vocabulary as .wr-mirror-panel.
    Wide, not tall: SV+hue and the fields sit side by side (.cp-popup-top). */
+/* Enlarged 2026-07-25: the SV pad was 150×108, small enough that picking a
+   precise value meant nudging pixel by pixel. Scaled up while keeping the
+   "wide, not tall" proportion (SV+hue beside the fields, never stacked). */
 .cp-popup {
   position: fixed;
   z-index: 99999;
-  width: 320px;
+  width: 420px;
   background: #08080b; /* same tone as --surface-overlay, fully opaque */
   border: 1px solid var(--line-medium);
   border-top: 1px solid color-mix(in srgb, var(--tab-color) 50%, var(--line-medium));
@@ -86,7 +89,7 @@
   gap: var(--space-md);
 }
 .cp-sv-col {
-  flex: 0 0 150px;
+  flex: 0 0 216px;
   display: flex;
   flex-direction: column;
 }
@@ -113,7 +116,7 @@
 .cp-sv {
   position: relative;
   width: 100%;
-  height: 108px;
+  height: 168px;
   cursor: crosshair;
   user-select: none;
 }
@@ -121,8 +124,8 @@
 .cp-sv-black { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, #000); pointer-events: none; }
 .cp-sv-cursor {
   position: absolute;
-  width: 11px;
-  height: 11px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -134,7 +137,7 @@
    thumb (same mechanic as .ctrl-toggle-pole). */
 .cp-hue-frame {
   position: relative;
-  height: 14px;
+  height: 18px;
   margin-top: var(--space-sm);
   padding: 2px;
   border: 1px solid var(--ink-14);

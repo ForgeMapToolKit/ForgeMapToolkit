@@ -37,15 +37,23 @@ const panelTab = (id, categoryKey) => {
   };
 };
 
+/**
+ * Settings no longer has its own top-level "Config" tab: it moved into the
+ * System panel next to History and the CLI, which is where it belongs once
+ * categories are defined by the object they act on. That keeps this bar at nine
+ * items despite gaining two categories — Config was the one entry whose only
+ * job was to reach a single tool.
+ */
 const NAV_CONFIG = [
   { id: 'ni-home',   label: 'Home',      type: 'direct', sectionId: null },
   panelTab('ni-em',  'emitter'),
   panelTab('ni-gen', 'generator'),
   panelTab('ni-sky', 'skybox'),
-  panelTab('ni-tl',  'tools'),
+  panelTab('ni-tex', 'textures'),
+  panelTab('ni-mt',  'maptools'),
+  panelTab('ni-sys', 'system'),
   { id: 'ni-com',    label: 'Community', type: 'direct', sectionId: 'contributions' },
   { id: 'ni-guides', label: 'Guides',    type: 'direct', sectionId: 'guides' },
-  { id: 'ni-cfg',    label: 'Config',    type: 'direct', sectionId: 'settings' },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

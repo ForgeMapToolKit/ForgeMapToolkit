@@ -46,43 +46,37 @@
   border: 1px solid var(--tab-glow-strong);
   color: var(--ink-72);
 }
+/* Status container (§5): wash + edge in the SAME feedback hue is signal, not a
+   generic box — but it must ride the shared --status-err-* tokens rather than
+   hand-rolled rgba, which is what these three literals were. */
 .tt-error {
-  background: rgba(254, 24, 24, 0.10);
-  border: 1px solid rgba(254, 24, 24, 0.30);
-  color: #ff9a9a;
+  background: var(--status-err-wash);
+  border-left: 2px solid var(--status-err);
+  color: var(--status-err-bright);
 }
 
 /* ── blend controls ── */
-.tt-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2xs);
-  font-size: var(--text-xs);
-  color: var(--ink-55);
-  cursor: pointer;
-  user-select: none;
-  margin-bottom: var(--space-xs);
-}
-.tt-toggle input,
-.tt-range { accent-color: var(--tab-color); }
-.tt-range { width: 100%; }
+/* Spacing only — .ctrl-toggle-row supplies the track/pole/label mechanic. */
+.tt-toggle { margin-bottom: var(--space-xs); }
+.tt-range { accent-color: var(--tab-color); width: 100%; }
 
 /* ── layer slots ── */
 .tt-slots { display: flex; flex-direction: column; gap: var(--space-sm); }
 
+/* §5 content container: a surface OR an edge, never a neutral pair. The slot
+   keeps its surface; the neutral frame is gone. */
 .tt-slot {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
   padding: var(--space-sm);
-  border-radius: var(--radius-md);
   background: var(--ink-09);
-  border: 1px solid var(--line-faint);
 }
+/* Ignored layers drop the surface entirely — absence reads as "excluded"
+   without needing a dashed frame to say it. */
 .tt-slot--ignored {
   opacity: 0.5;
   background: transparent;
-  border-style: dashed;
 }
 .tt-slot-head {
   display: flex;
@@ -100,18 +94,10 @@
   font-weight: 600;
   color: var(--ink-85);
 }
-.tt-exclude {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--text-3xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ink-45);
-  cursor: pointer;
-  user-select: none;
-}
-.tt-exclude input { accent-color: var(--tab-color); }
+/* Sizing only — .ctrl-btn-meta supplies the Leise text-button treatment.
+   `.is-on` is the state: the word itself lights up in --tab-color. */
+.tt-exclude { font-size: var(--text-3xs); letter-spacing: 0.04em; }
+.tt-exclude.is-on { color: var(--tab-color); }
 .tt-excluded-note {
   font-size: var(--text-2xs);
   font-style: italic;
@@ -147,11 +133,11 @@
   gap: 2px;
   flex: none;
 }
+/* The thumbnail image IS its own surface — the backing tone only shows while
+   it loads or when empty, so a frame around it is pure chrome (§5). */
 .tt-thumb {
   width: 72px;
   height: 72px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line-faint);
   background: var(--ink-11);
   image-rendering: pixelated;
   display: block;

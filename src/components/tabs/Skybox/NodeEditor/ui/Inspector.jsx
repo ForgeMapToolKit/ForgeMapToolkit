@@ -2,6 +2,7 @@ import React from 'react';
 import { getNodeDef, nodeColor } from '../engine/registry.js';
 import { ColorPicker } from '../../../../Shared/Ui/ColorPicker/ColorPicker.jsx';
 import NumberField from './NumberField.jsx';
+import { Dropdown } from '../../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
 
 /**
  * Inspector — the parameter panel for the selected node.
@@ -27,9 +28,9 @@ export default function Inspector({ graph, selectedId, selectedCount = 0, onPara
 
   return (
     <div className="ne-inspector">
+      {/* Category rides the title's colour, same as the toolbox — no swatch. */}
       <div className="ne-inspector-head">
-        <span className="ne-dot" style={{ background: nodeColor(def) }} />
-        <span className="ne-inspector-title">{node.label || def.label}</span>
+        <span className="ne-inspector-title" style={{ color: nodeColor(def) }}>{node.label || def.label}</span>
         <span className="ne-inspector-id">{selectedId}</span>
       </div>
 
@@ -42,8 +43,8 @@ export default function Inspector({ graph, selectedId, selectedCount = 0, onPara
         // .scmap) doesn't need one host param per value.
         if (CustomEditor && (spec.type === 'stops' || spec.type === 'points' || spec.editorParam === true)) {
           return (
-            <div key={key} className="ne-field">
-              <label className="ne-field-label">{spec.label || key}</label>
+            <div key={key} className="ctrl-field ne-field">
+              <label className="ctrl-label">{spec.label || key}</label>
               <CustomEditor
                 value={val}
                 onChange={v => set(key, v)}
@@ -57,8 +58,8 @@ export default function Inspector({ graph, selectedId, selectedCount = 0, onPara
         switch (spec.type) {
           case 'f':
             return (
-              <div key={key} className="ne-field">
-                <label className="ne-field-label">
+              <div key={key} className="ctrl-field ne-field">
+                <label className="ctrl-label ne-field-label">
                   {spec.label || key}
                   <span className="ne-field-val">{Number(val).toFixed(2)}</span>
                 </label>
@@ -68,6 +69,7 @@ export default function Inspector({ graph, selectedId, selectedCount = 0, onPara
                     value={val} onChange={e => set(key, Number(e.target.value))}
                   />
                   <NumberField
+                    className="ne-num"
                     min={spec.min} max={spec.max} step={spec.step ?? 0.01}
                     value={val} onChange={v => set(key, v)}
                   />
@@ -76,39 +78,52 @@ export default function Inspector({ graph, selectedId, selectedCount = 0, onPara
             );
           case 'i':
             return (
-              <div key={key} className="ne-field">
-                <label className="ne-field-label">{spec.label || key}</label>
+              <div key={key} className="ctrl-field ne-field">
+                <label className="ctrl-label">{spec.label || key}</label>
                 <NumberField step={1} value={val} onChange={v => set(key, Math.round(v))} />
               </div>
             );
           case 'b':
+            // .ctrl-toggle-row is the system's on/off control (primitives §5c) —
+            // a pole on a track, which §5 counts as a functional box, not a
+            // native checkbox square.
             return (
-              <label key={key} className="ne-field ne-field-check">
-                <input type="checkbox" checked={!!val} onChange={e => set(key, e.target.checked)} />
-                {spec.label || key}
-              </label>
+              <button
+                key={key} type="button"
+                className={`ctrl-toggle-row${val ? ' on' : ''}`}
+                onClick={() => set(key, !val)}
+              >
+                <span className="ctrl-toggle"><span className="ctrl-toggle-pole" /></span>
+                <span className="ctrl-toggle-text">
+                  <span className="ctrl-toggle-label">{spec.label || key}</span>
+                </span>
+              </button>
             );
           case 'color':
             return (
-              <div key={key} className="ne-field ne-field-color">
-                <label className="ne-field-label">{spec.label || key}</label>
+              <div key={key} className="ctrl-field ne-field">
+                <label className="ctrl-label">{spec.label || key}</label>
                 <ColorPicker value={val} onChange={e => set(key, e.target.value)} />
               </div>
             );
           case 'select':
             return (
-              <div key={key} className="ne-field">
-                <label className="ne-field-label">{spec.label || key}</label>
-                <select value={val} onChange={e => set(key, e.target.value)}>
-                  {spec.options.map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
+              <div key={key} className="ctrl-field ne-field">
+                <label className="ctrl-label">{spec.label || key}</label>
+                <Dropdown
+                  value={val} onChange={v => set(key, v)} ariaLabel={spec.label || key}
+                  options={spec.options.map(o => ({ value: o, label: o }))}
+                />
               </div>
             );
           case 'text':
             return (
-              <div key={key} className="ne-field">
-                <label className="ne-field-label">{spec.label || key}</label>
-                <input type="text" value={val} onChange={e => set(key, e.target.value)} />
+              <div key={key} className="ctrl-field ne-field">
+                <label className="ctrl-label">{spec.label || key}</label>
+                <input
+                  className="ctrl-input ctrl-input--text" type="text" placeholder={spec.label || key}
+                  value={val} onChange={e => set(key, e.target.value)}
+                />
               </div>
             );
           default:

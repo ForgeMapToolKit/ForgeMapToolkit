@@ -15,7 +15,8 @@
     "electron:build": "npm run build && electron-builder",
     "preview": "vite preview",
     "release:beta": "standard-version --prerelease beta",
-    "release": "standard-version"
+    "release": "standard-version",
+    "lint:design": "node scripts/design-lint.mjs"
   },
   "dependencies": {
     "@uiw/react-color": "^2.9.6",

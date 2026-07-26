@@ -15,7 +15,7 @@
 > **keine** Referenz. Siehe `ROADMAP.md` Phase 2 für den Rollout-Stand.
 >
 > Referenz-Implementierungen zum Abschauen:
-> `src/components/Tabs/Placement/{Wreckage,Props,Emitter}/`.
+> `src/components/Tabs/Emitter/{Wreckage,Props,Emitter}/`.
 
 ---
 
@@ -49,7 +49,7 @@ sinnvollen Alias, z. B. `import WreckageUnits from './Units.jsx';`. Sektions-Dat
 sind **rein präsentational**: sie destrukturieren Props und rendern JSX. Keine Hooks,
 kein IPC, kein State darin (außer trivialen lokalen UI-Toggles).
 
-Beispiel (echter Stand, `Tabs/Placement/Wreckage/`):
+Beispiel (echter Stand, `Tabs/Emitter/Wreckage/`):
 ```
 Wreckage.jsx   Wreckage.css   Configuration.jsx   Units.jsx   Export.jsx   Help.jsx
 ```
@@ -102,7 +102,7 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
   `docs/LAYOUTS.md`), `asideSlot`, `asideMirror`, `asideCaption`, `renderEyebrow`.
   Rail-Pin/Collapse-Status ist app-weit, nicht pro Tab — persistiert intern unter
   einem einzigen `localStorage`-Key (`RAIL_PINNED_KEY`), kein `railStorageKey`-Prop
-  mehr. Placement-Tabs nutzen ausschließlich `layoutMode="x"`.
+  mehr. Emitter-Tabs nutzen ausschließlich `layoutMode="x"`.
 - **`Shared/Libraries/{UnitLibrary,EmitterLibrary,PropsLibrary}`**: die
   Overlay-Bibliotheken (z. B. `UnitLibraryOverlay`, `EmitterLibraryOverlay`),
   eigenständig importiert, nicht Teil von `EntityPanel`.
@@ -183,7 +183,7 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
   (Default-Export `HelpConsole`, Named-Export `HelpButton`) + Section-Komponenten aus
   `Shared/Ui/HelpPanel/Sections/index.js` (`WorkflowSection`, `MediaSection`,
   `TroubleshootSection`, `ShortcutsSection`, `CodeSection`).
-  Vorlage: `Tabs/Placement/Wreckage/Help.jsx`.
+  Vorlage: `Tabs/Emitter/Wreckage/Help.jsx`.
 - **Ist-Stand**: Nur **Wreckage** folgt diesem Muster. **Props und Emitter binden
   weiterhin `Tabs/HelpModals/{Props,Emitter}_help.jsx`** ein — eigenständige
   Modal-Komponenten ohne `HelpPanel`-Anbindung, eigenes Markup, `--tab-color` inline

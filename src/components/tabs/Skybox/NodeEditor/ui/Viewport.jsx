@@ -145,7 +145,7 @@ const Viewport = React.forwardRef(function Viewport({
           {tabs.map((t, i) => (
             <div
               key={i}
-              className={`ne-tab${i === activeTabIdx ? ' is-active' : ''}`}
+              className={`station ne-tab${i === activeTabIdx ? ' active' : ''}`}
               onClick={() => onSwitchTab?.(i)}
               onDoubleClick={() => startRename(i, t.label)}
               title={t.label}
@@ -168,32 +168,33 @@ const Viewport = React.forwardRef(function Viewport({
               )}
               {tabs.length > 1 && (
                 <button
-                  className="ne-tab-close" title="Close tab"
+                  className="ctrl-btn-close ne-tab-close" title="Close tab"
                   onClick={e => { e.stopPropagation(); onCloseTab?.(i); }}
                 >×</button>
               )}
             </div>
           ))}
-          <button className="ne-tab-add" title="New tab" onClick={onAddTab}>+</button>
+          <button className="ctrl-btn-meta ne-glyph-btn" title="New tab" onClick={onAddTab}>+</button>
         </div>
         <div className="ne-viewport-info">
           {frozenLabel && (
-            <button className="ne-freeze-badge" onClick={onUnfreeze} title="Viewport pinned here — click (or press F on this node) to unfreeze">
+            <button className="ctrl-btn-meta ne-state-btn" onClick={onUnfreeze} title="Viewport pinned here — click (or press F on this node) to unfreeze">
               <span className="ne-freeze-dot" /> {frozenLabel}
             </button>
           )}
           {compareActive && (
-            <button className="ne-compare-badge" onClick={onExitCompare} title="A|B compare — click (or press C on either node) to exit">
+            <button className="ctrl-btn-meta ne-state-btn" onClick={onExitCompare} title="A|B compare — click (or press C on either node) to exit">
               <span className="ne-compare-swatch is-a" /> {compareALabel}
               <span className="ne-compare-vs">|</span>
               <span className="ne-compare-swatch is-b" /> {compareBLabel}
             </button>
           )}
+          {/* Channel isolation — .station tiles, not a segmented button box. */}
           <div className="ne-channel-group" title="Isolate a channel">
             {CHANNELS.map(c => (
               <button
                 key={c}
-                className={`ne-channel-btn${channel === c ? ' is-active' : ''}`}
+                className={`station ne-channel-btn${channel === c ? ' active' : ''}`}
                 onClick={() => onChannelChange?.(c)}
               >{c === 'rgba' ? 'RGB' : c.toUpperCase()}</button>
             ))}

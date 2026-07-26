@@ -11,9 +11,14 @@ import React, { useState, useRef, useEffect } from 'react';
  * if you left it unfinished. While unfocused it mirrors the external value, so
  * slider/drag updates flow in normally.
  *
+ * Always carries `.ctrl-input` (the design system's T2-baseline field). That is
+ * baked in rather than left to each caller because it was left to each caller:
+ * the inline pos/alpha/x/y fields in the sub-editors silently rendered as raw
+ * native number boxes for exactly that reason. `className` appends to it.
+ *
  *   props: { value:number, onChange:(n:number)=>void, min?, max?, step?, className?, ... }
  */
-export default function NumberField({ value, onChange, min, max, step, className, ...rest }) {
+export default function NumberField({ value, onChange, min, max, step, className = '', ...rest }) {
   const [draft, setDraft] = useState(() => String(value ?? ''));
   const focused = useRef(false);
 
@@ -26,7 +31,7 @@ export default function NumberField({ value, onChange, min, max, step, className
     <input
       {...rest}
       type="number"
-      className={className}
+      className={`ctrl-input ${className}`.trim()}
       min={min} max={max} step={step}
       value={draft}
       onFocus={() => { focused.current = true; }}

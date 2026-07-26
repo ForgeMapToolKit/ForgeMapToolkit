@@ -67,10 +67,18 @@ export default function TerrainTypeLayers({
       <div className="ctrl-block">
         <div className="ctrl-subtitle">Blend</div>
         <div className="ctrl-content">
-          <label className="tt-toggle">
-            <input type="checkbox" checked={halfRange} onChange={(e) => onHalfRange(e.target.checked)} />
-            Sharp mask remap (halfRange)
-          </label>
+          {/* .ctrl-toggle-row is the system's on/off control (primitives §5c) —
+              a pole on a track, not a native checkbox square. */}
+          <button
+            type="button"
+            className={`ctrl-toggle-row tt-toggle${halfRange ? ' on' : ''}`}
+            onClick={() => onHalfRange(!halfRange)}
+          >
+            <span className="ctrl-toggle"><span className="ctrl-toggle-pole" /></span>
+            <span className="ctrl-toggle-text">
+              <span className="ctrl-toggle-label">Sharp mask remap (halfRange)</span>
+            </span>
+          </button>
           <div className="ctrl-field">
             <div className="ctrl-label">Dominance threshold — {Math.round(threshold * 100)}%</div>
             <input
@@ -103,11 +111,18 @@ export default function TerrainTypeLayers({
                   <span className="tt-slot-title">{sl.label}</span>
                   <span className="tt-cov">{ignored ? 'excluded' : pct(cov)}</span>
                   {chosen?.blocking && !ignored && <span className="tt-badge-block" title="Blocks pathing">no-path</span>}
+                  {/* Leise inline toggle inside a slot head — too tight for a
+                      full .ctrl-toggle-row track, so it uses the Leise text
+                      button (§5 level 4); state reads from its own colour. */}
                   {stratumIdx != null && (
-                    <label className="tt-exclude" title="Exclude this layer from the blend (e.g. a map-wide normal, not a ground texture)">
-                      <input type="checkbox" checked={ignored} onChange={() => onToggleIgnore(stratumIdx)} />
+                    <button
+                      type="button"
+                      className={`ctrl-btn-meta tt-exclude${ignored ? ' is-on' : ''}`}
+                      onClick={() => onToggleIgnore(stratumIdx)}
+                      title="Exclude this layer from the blend (e.g. a map-wide normal, not a ground texture)"
+                    >
                       excl.
-                    </label>
+                    </button>
                   )}
                 </div>
 

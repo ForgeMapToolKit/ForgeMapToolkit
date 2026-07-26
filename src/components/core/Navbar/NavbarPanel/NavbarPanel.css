@@ -41,8 +41,12 @@
   right: 0;
   z-index: calc(var(--z-rail) + 1);
 
-  min-height: 32vh;
-  max-height: 46vh;
+  /* The panel takes the height its content needs and is capped only by the
+     viewport, not by a fixed 46vh. A fixed cap silently clipped whole tools out
+     of the longer categories on short windows — the list was unreachable, not
+     just cut off, because .nbp-left centred its overflow (see below). */
+  min-height: min(32vh, calc(100vh - var(--nbp-top, 72px)));
+  max-height: calc(100vh - var(--nbp-top, 72px));
 
   background-color: var(--surface-deep);
 
@@ -100,8 +104,16 @@
   right: 0;
   z-index: calc(var(--z-rail) + 3);
 
-  min-height: 32vh;
-  max-height: 46vh;
+  min-height: min(32vh, calc(100vh - var(--nbp-top, 72px)));
+  max-height: calc(100vh - var(--nbp-top, 72px));
+
+  /* Flex column, not a plain block: the panel's height is auto-with-a-max, which
+     is *indefinite* for percentage resolution, so `.nbp-inner { height: 100% }`
+     silently fell back to auto and sized to content — 405px of list inside a
+     308px panel, clipped with no scrollbar. A flex item is constrained by the
+     container's used height, which is exactly what is needed here. */
+  display: flex;
+  flex-direction: column;
 
   overflow: hidden;
 
@@ -155,22 +167,37 @@
      space that isn't there. column-gap is the actual, honest divider
      between the two zones. */
   grid-template-columns: minmax(0, 1.4fr) minmax(440px, 0.95fr);
+  /* The row must be minmax(0, 1fr), not content-sized: a grid row sized to its
+     content ignores the panel's max-height, so the slat list grew past the
+     viewport and got clipped by .nbp-panel's overflow:hidden — while
+     .nbp-left's own overflow-y:auto never engaged, because the column was
+     never actually constrained. That combination is what hid whole tools with
+     no scrollbar to reach them. */
+  grid-template-rows: minmax(0, 1fr);
   column-gap: var(--space-3xl);
-  height: 100%;
-  min-height: inherit;
-  max-height: inherit;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
   max-width: 1300px;
   margin: 0 auto;
 }
 
 /* ── Left zone — SlatRow column ──────────────────────────────────────────── */
 
+/* `justify-content: center` must not be used here: in a scrolling flex column,
+   centred overflow spills equally in both directions and the part above the
+   start edge cannot be scrolled to — scrollTop has no negative range. That is
+   what made the first tools of a long category genuinely unreachable rather
+   than merely cut off. `margin-block: auto` on the list below centres it while
+   there is slack and collapses to zero when there is not, which is the same
+   look with none of the trapped overflow. */
 .nbp-left {
   position: relative;
-  min-width: 0; /* allow grid track to shrink below content's intrinsic width */
+  min-width: 0;  /* allow grid track to shrink below content's intrinsic width */
+  min-height: 0; /* ditto vertically — without this overflow-y never engages */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding: var(--space-2xl) var(--space-3xl);
   overflow-y: auto;
   overflow-x: hidden;
@@ -188,11 +215,24 @@
 
 .nbp-slat-list {
   list-style: none;
-  margin: 0;
+  margin-block: auto;   /* centres while there is slack, collapses when not */
+  margin-inline: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+}
+
+/* Short windows: spend the negative space rather than the content. Growing the
+   panel comes first, tightening the rhythm second, scrolling only last. */
+@media (max-height: 900px) {
+  .nbp-left      { padding-block: var(--space-lg); }
+  .nbp-slat-list { gap: var(--space-lg); }
+}
+@media (max-height: 740px) {
+  .nbp-left      { padding-block: var(--space-md); }
+  .nbp-slat-list { gap: var(--space-sm); }
+  .sr-btn        { padding-block: var(--space-xs); }
 }
 
 /* ── Right zone — Register ───────────────────────────────────────────────── */

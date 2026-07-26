@@ -50,7 +50,7 @@ export default function UvRegionEditor({ value, onChange }) {
 
       <div className="ne-uv-presets">
         {QUADRANTS.map(([label, rect]) => (
-          <button key={label} className="ne-btn ne-btn-mini" onClick={() => onChange(rect)}>{label}</button>
+          <button key={label} className="ctrl-btn-add" onClick={() => onChange(rect)}>{label}</button>
         ))}
       </div>
       <p className="ne-hint">SupCom uv = {'{x, y, z, w}'}: x/y origin (bottom-left), z/w size.</p>
