@@ -1,0 +1,591 @@
+/**
+ * TextureEditor.css — bespoke layout for the Texture Editor tab.
+ *
+ * This tab owns its chrome (a split-viewport composer, not a section-rail tab),
+ * so it does not use TabLayout. Per UI_PHILOSOPHY §2/§5 and TAB_CONTRACT §5 it
+ * still speaks only the design system: every colour/space/radius/type value is
+ * a token (0 hardcoded hex, the Footer/Navbar gold-standard). The single
+ * identity accent is --tab-color; node-type accents are an object/data colour
+ * (Role 2); green/red are feedback (Role 3).
+ *
+ * The graph canvas follows TAB_UI_CONTRACT §11 — see the node-card block below.
+ * In one line: a node card splits into two independent channels, identity
+ * (the washed head) and state (a ring that does not exist at rest), and the
+ * wires inherit their source node's category colour. Everything OUTSIDE the
+ * canvas — toolbar, toolbox, inspector, badges — is ordinary tab surface and
+ * gets no §11 licence; it is still on the pre-migration boxed vocabulary and
+ * is the next thing to fix.
+ */
+
+/* Escape the default .tab-content padding + centered 1400px max-width
+   (ForgeMapToolkit.css) so the editor fills the whole tab edge-to-edge — the
+   same :has() escape hatch the Guides / CLI Terminal / Settings tabs use. */
+.tab-content:has(.node-editor-tab) {
+  padding: 0;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: none;
+}
+
+.node-editor-tab {
+  --tab-color: var(--node-editor-color);
+  --tab-glow: var(--node-editor-glow);
+  --tab-glow-strong: var(--node-editor-glow-strong);
+  /* Freeze/pin feedback (Role 3, like --status-ok/-err) — ice-blue so it never
+     reads as an object colour (Role 2, node accents) or the tab's own accent. */
+  --ne-freeze-color: #5ecdf0;
+  /* Bypass feedback (Role 3) — pink, distinct from freeze/error/compare. */
+  --ne-bypass-color: #ff54c8;
+  /* A|B compare feedback (Role 3) — lime/orange, distinct from every other dot
+     colour and from the blue/purple/amber/rose node-category accents. */
+  --ne-compare-a-color: #c8ff60;
+  --ne-compare-b-color: #ff9d5c;
+
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink-72);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.ne-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--line-faint);
+  background: var(--surface-deep);
+}
+.ne-tool-group { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.ne-tool-label {
+  font-size: var(--text-3xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase;
+  color: var(--ink-40);
+}
+.ne-tool-x { color: var(--ink-40); }
+.ne-tool-spacer { flex: 1 1 auto; }
+.ne-tool-newproject { animation: fmt-content-in var(--dur-base) var(--ease-out); }
+
+/* ── Sizing-only overrides on shared primitives ──────────────────────────────
+   Everything interactive in this tab now IS a design-system primitive
+   (.ctrl-input, .ctrl-select, .ctrl-btn-*, .station, .commit-button). The
+   rules below only constrain width/height where a bar or a card is tighter
+   than a controls column — they never restate colour, border or fill. */
+.ne-num { width: 64px; flex: 0 0 auto; }
+.ne-name-input { width: 160px; flex: 0 0 auto; }
+/* Toolbar controls sit in a bar, not a controls column — drop the primitives'
+   column-sized vertical padding so the bar keeps its height. */
+.ne-toolbar .wr-mirror-trigger { padding-top: var(--space-3xs); padding-bottom: var(--space-3xs); }
+.ne-toolbar .ctrl-input { padding-top: var(--space-3xs); padding-bottom: var(--space-3xs); }
+.ne-toolbar .ctrl-btn-add { padding: var(--space-3xs) 0; }
+/* Single-glyph .ctrl-btn-meta (undo / redo / new tab): square hit area, glyph
+   at its natural size instead of the primitive's tracked uppercase label. */
+.ne-glyph-btn {
+  min-width: 22px; justify-content: center;
+  font-size: var(--text-lg); line-height: 1; letter-spacing: 0; text-transform: none;
+}
+.ne-glyph-btn:disabled { opacity: 0.3; cursor: default; }
+.ne-state-btn { letter-spacing: var(--track-snug); text-transform: none; }
+
+/* ── Body layout (Gaea-style) ────────────────────────────────────────────── */
+.ne-body { flex: 1 1 auto; display: flex; min-height: 0; }
+/* Viewport + graph stacked, spanning the full width left of the Properties col. */
+.ne-stage-left { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+/* Graph zone: the graph fills it; the Toolbox docks over its left edge. */
+.ne-graph-zone { flex: 1 1 50%; min-height: 0; position: relative; }
+/* Properties — far-right full-height column (Gaea Transform Properties).
+   Wide enough for the sub-editors (gradient bar, alpha pad, colour picker)
+   to breathe; capped at a share of the viewport so it never swallows the
+   graph on a narrow window. */
+.ne-inspector-col {
+  flex: 0 0 auto; width: min(620px, 46vw);
+  display: flex; flex-direction: column; min-height: 0;
+  border-left: 1px solid var(--line-faint);
+  background: var(--surface-deep);
+  overflow-y: auto;
+}
+
+/* ── Viewport (top half) ─────────────────────────────────────────────────── */
+.ne-viewport { flex: 1 1 50%; min-height: 0; display: flex; flex-direction: column; }
+.ne-viewport-stage {
+  flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; padding: var(--space-md);
+  background-color: var(--surface-canvas);
+  background-image:
+    linear-gradient(45deg, var(--sheen-040) 25%, transparent 25%, transparent 75%, var(--sheen-040) 75%),
+    linear-gradient(45deg, var(--sheen-040) 25%, transparent 25%, transparent 75%, var(--sheen-040) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  cursor: grab;
+  touch-action: none;
+}
+.ne-viewport-stage:active { cursor: grabbing; }
+.ne-viewport-stage.is-compare { cursor: ew-resize; }
+.ne-viewport-stage.is-compare:active { cursor: ew-resize; }
+/* The canvas is the artwork — depth alone separates it from the checkerboard
+   stage, no frame (§5: a container gets a surface OR an edge, and the image
+   already supplies its own surface). */
+.ne-viewport-canvas {
+  max-width: 100%; max-height: 100%;
+  image-rendering: pixelated;
+  box-shadow: var(--shadow-md);
+}
+.ne-viewport-bar {
+  flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-md);
+  min-height: 40px; padding: var(--space-2xs) var(--space-md); border-top: 1px solid var(--line-faint);
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-40);
+  background: var(--surface-deep);
+}
+.ne-viewport-status { color: var(--tab-color); font-family: var(--font-display); }
+/* Leise readouts in the viewport bar — these had no rule at all and were
+   rendering as raw inherited text (design-lint ORPHAN). */
+.ne-viewport-dim, .ne-viewport-zoom { color: var(--ink-28); white-space: nowrap; }
+.ne-viewport-info { display: flex; align-items: center; gap: var(--space-md); flex: 0 0 auto; white-space: nowrap; }
+
+.ne-freeze-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--ne-freeze-color); box-shadow: 0 0 6px var(--ne-freeze-color); }
+.ne-compare-swatch { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+.ne-compare-swatch.is-a { background: var(--ne-compare-a-color); box-shadow: 0 0 6px var(--ne-compare-a-color); }
+.ne-compare-swatch.is-b { background: var(--ne-compare-b-color); box-shadow: 0 0 6px var(--ne-compare-b-color); }
+.ne-compare-vs { color: var(--ink-28); }
+
+/* Channel isolation — .station tiles (primitives §7). Only geometry here; the
+   rest/hover/active mechanic comes from the primitive. */
+.ne-channel-group { display: inline-flex; gap: 1px; flex: 0 0 auto; }
+.ne-channel-btn {
+  border: none; padding: var(--space-3xs) var(--space-xs);
+  color: var(--ink-40); font-family: inherit; font-size: var(--text-2xs);
+  font-weight: var(--weight-semi);
+}
+.ne-channel-btn.active { color: var(--tab-color); }
+
+/* ── Workspace tab strip (one .fmtgraph document per tab) ─────────────────── */
+.ne-tabstrip { display: flex; align-items: center; gap: var(--space-3xs); flex: 1 1 auto; min-width: 0; overflow-x: auto; }
+.ne-tab {
+  display: flex; align-items: center; gap: var(--space-2xs); flex: 0 0 auto; max-width: 160px;
+  padding: var(--space-2xs) var(--space-sm);
+  font-family: var(--font-display); font-size: var(--text-sm); color: var(--ink-55);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.ne-tab:hover { color: var(--ink-72); }
+.ne-tab.active { color: var(--ink-100); }
+.ne-tab-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ne-tab-rename {
+  width: 100px; background: none; border: none;
+  border-bottom: 1px solid var(--tab-color);
+  color: var(--ink-100); padding: 1px 0;
+  font: inherit; outline: none;
+}
+/* .ctrl-btn-close is sized for panel corners; a tab strip needs it small. */
+.ne-tab-close { width: var(--space-lg); height: var(--space-lg); font-size: var(--text-md); }
+
+/* ── Node graph (bottom half) ────────────────────────────────────────────── */
+.ne-graph {
+  position: absolute; inset: 0; overflow: hidden;
+  border-top: 1px solid var(--line-faint);
+  background: var(--surface-canvas);   /* warm near-black stage — like the banner, no dot grid */
+  cursor: grab;
+  touch-action: none;
+}
+.ne-graph.is-connecting { cursor: crosshair; }
+.ne-graph-inner { position: absolute; inset: 0; transform-origin: 0 0; }
+.ne-edges { position: absolute; inset: 0; pointer-events: none; }
+/* Wires are the trace grammar of this tab — here it is generated by the data
+   instead of drawn by hand, so it gets the trace treatment: hairline weight,
+   non-scaling so zoom never fattens it into cabling, and a directional fade
+   that reads flow without arrowheads or markers.
+   Deliberately NO `stroke` here: each edge sets `stroke="url(#…)"` as an SVG
+   attribute, which a CSS declaration would silently outrank. The .is-sel /
+   pending rules below do exactly that on purpose. */
+.ne-edge {
+  fill: none; stroke-width: 1.25; vector-effect: non-scaling-stroke;
+  pointer-events: none; /* the fat sibling hit-path takes the clicks */
+  transition: stroke var(--dur-fast) var(--ease-out), stroke-width var(--dur-fast) var(--ease-out);
+}
+/* The wire leaves its source node in that node's category colour (Role 2 — the
+   same hue as the head it comes out of) and fades toward its target. Stops are
+   styled rather than hardcoded so :hover on the group can reach them, which is
+   why each gradient is declared INSIDE its own <g> and not in a shared <defs>. */
+.ne-edge-stop-a { stop-color: var(--edge-accent); stop-opacity: 0.85; }
+.ne-edge-stop-b { stop-color: var(--edge-accent); stop-opacity: 0.16; }
+.ne-edge-group:hover .ne-edge-stop-a { stop-opacity: 1; }
+.ne-edge-group:hover .ne-edge-stop-b { stop-opacity: 0.5; }
+/* Invisible wide band that actually catches the pointer, so a hairline curve
+   is easy to click/select. Scales with the view (unlike the visible stroke) so
+   hit areas don't overlap into each other when zoomed out. */
+.ne-edge-hit { fill: none; stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+.ne-edge.is-sel { stroke: var(--tab-color); stroke-width: 2; filter: drop-shadow(0 0 4px var(--tab-glow)); }
+.ne-edge-pending { stroke: var(--tab-color); stroke-dasharray: 5 4; pointer-events: none; }
+
+/* The card carries TWO independent channels, and they never share a surface:
+     · identity ("what am I")            → the head, washed in --node-accent
+     · state    ("what is true of me")   → the ring, absent at rest
+   Because the ring does not exist until a state is true, the card never wears
+   a generic neutral border — the §5 violation is removed structurally rather
+   than excused. See TAB_UI_CONTRACT §11. */
+/* design-lint-allow: §11 — on the graph canvas the card body IS the object's
+   hit/drag surface, not decorative chrome. Surface only, no neutral border. */
+/* Square corners on purpose: a node is a machined plate on a canvas, and a
+   rounded card reads as a generic UI box — the exact impression §11's licence
+   is not meant to buy back. */
+.ne-node {
+  position: absolute;
+  background: var(--surface-face-b);
+  user-select: none;
+  cursor: default;
+  transition: box-shadow var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+/* The state ring. A box-shadow, not a border, so switching state can never
+   shift the card's geometry — a frozen node sits exactly where an idle one
+   does, and the socket anchors the edge maths assumes stay put.
+   Source order IS the priority ladder: compare < bypass < freeze < selection
+   < error. Only the top state colours the ring; every state the node holds
+   stays readable in the head's glyph strip, so nothing is lost. */
+.ne-node.is-compare-a { box-shadow: 0 0 0 1px var(--ne-compare-a-color); }
+.ne-node.is-compare-b { box-shadow: 0 0 0 1px var(--ne-compare-b-color); }
+/* Bypassed: the node's own effect is skipped (passthrough). The dim is set in
+   the same rule as the ring so it survives a higher-priority ring overriding
+   the box-shadow below. */
+.ne-node.is-bypassed { box-shadow: 0 0 0 1px var(--ne-bypass-color); opacity: 0.55; }
+.ne-node.is-frozen { box-shadow: 0 0 0 1px var(--ne-freeze-color); }
+.ne-node.is-sel { box-shadow: 0 0 0 1px var(--tab-color), 0 0 12px -2px var(--tab-glow); }
+/* Error wins over everything — the most urgent state a card can be in. */
+.ne-node.is-error { box-shadow: 0 0 0 1px var(--status-err-bright), 0 0 12px -2px var(--status-err); }
+
+.ne-node-head {
+  display: flex; align-items: center; gap: var(--space-xs);
+  height: 30px; padding: 0 var(--space-2xs) 0 var(--space-xs);
+  /* Identity channel (Role 2). A wash carries the surface, a full-saturation
+     hairline carries the exact hue — §5's "one surface OR one edge", turned
+     inward. Surface and edge are the SAME data colour here, which the law
+     counts as signal, not the forbidden neutral-surface+neutral-border pair. */
+  background: color-mix(in srgb, var(--node-accent) 18%, transparent);
+  border-bottom: 1px solid var(--node-accent);
+  cursor: grab;
+}
+
+/* State glyph strip — the complete, always-truthful state list (the ring shows
+   only the highest-priority one) and the click target for turning a state off,
+   which the old corner dots used to provide. */
+.ne-node-states { display: inline-flex; align-items: center; gap: var(--space-3xs); flex: 0 0 auto; }
+.ne-node-state {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; padding: 0;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: var(--text-3xs); font-weight: var(--weight-bold);
+  line-height: 1;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.ne-node-state:hover { opacity: 0.55; }
+.ne-node-state.is-freeze { color: var(--ne-freeze-color); }
+.ne-node-state.is-bypass { color: var(--ne-bypass-color); }
+.ne-node-state.is-compare-a { color: var(--ne-compare-a-color); }
+.ne-node-state.is-compare-b { color: var(--ne-compare-b-color); }
+.ne-node-head:active { cursor: grabbing; }
+.ne-node-label {
+  flex: 1 1 auto; font-size: var(--text-sm); font-weight: var(--weight-semi); color: var(--ink-100);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ne-node-rename {
+  flex: 1 1 auto; min-width: 0;
+  background: var(--surface-sunk); border: 1px solid var(--tab-color);
+  border-radius: var(--radius-sm); color: var(--ink-100); padding: 1px var(--space-3xs);
+  font: inherit; font-size: var(--text-sm); font-weight: var(--weight-semi); outline: none;
+}
+.ne-node-del {
+  background: none; border: none; color: var(--ink-40);
+  font-size: var(--text-lg); line-height: 1; cursor: pointer; padding: 0 var(--space-3xs);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.ne-node-del:hover { color: var(--status-err-bright); }
+.ne-node-body { padding: var(--space-xs) 0; }
+
+/* The output card's own export action — the shared .commit-button primitive,
+   scaled down for a 236px card. Only type metrics and padding are touched; the
+   dormant baseline, bloom, ignite and commit sweep all come from the primitive
+   untouched, so this reads as the same action as every other tab's CTA. */
+.ne-node-commit {
+  margin-top: 0;
+  padding: var(--space-2xs) var(--space-xs) 13px;
+  gap: var(--space-sm);
+}
+.ne-node-commit .commit-button-label {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+}
+.ne-node-commit:not(:disabled):hover .commit-button-label { letter-spacing: var(--track-wider); }
+.ne-node-commit .commit-button-status { font-size: var(--text-3xs); }
+.ne-socket-row { display: flex; align-items: center; gap: var(--space-xs); height: 24px; padding-left: var(--space-sm); position: relative; }
+.ne-socket-none { color: var(--ink-28); font-size: var(--text-xs); font-style: italic; padding-left: var(--space-md); }
+.ne-socket-label { font-size: var(--text-sm); color: var(--ink-40); }
+
+
+/* Sockets are filled dots, not rings — one less stroke per socket on a canvas
+   that already carries a wire per connection. */
+.ne-socket {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--ink-28);
+  cursor: crosshair; position: absolute;
+  transition: background var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+/* Enlarge the pointer hit area well past the visible dot so a connection drag
+   never slips through to a background pan (fixes the "pans instead of connects"
+   bug). The ::before is part of the element for hit-testing. */
+.ne-socket::before { content: ''; position: absolute; inset: -10px; border-radius: 50%; }
+.ne-socket-in { left: -4.5px; }
+/* Centre the output dot exactly on its edge anchor (CARD_W, HEADER_H/2). The
+   JSX sets left:CARD_W / top:HEADER_H/2; translate pulls the dot's centre onto
+   that point so the connection line starts dead-centre of the dot.
+   It wears the node's category colour: the output dot is where the accent
+   enters the wire, so a wire's hue is always traceable back to a visible dot. */
+.ne-socket-out {
+  transform: translate(-50%, -50%);
+  background: var(--node-accent);
+  box-shadow: 0 0 0 2px var(--surface-canvas);
+}
+.ne-socket:hover { background: var(--tab-color); box-shadow: 0 0 8px var(--tab-glow); }
+.ne-socket-out:hover { box-shadow: 0 0 0 2px var(--surface-canvas), 0 0 8px var(--tab-glow); }
+.ne-socket-out.is-armed { background: var(--tab-color); box-shadow: 0 0 0 2px var(--surface-canvas), 0 0 10px var(--tab-glow); }
+
+/* Leise meta readout — bare text on the canvas, no chip (§1 level 3). */
+.ne-zoom-badge {
+  position: absolute; bottom: var(--space-xs); right: var(--space-xs);
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-28);
+  pointer-events: none;
+}
+/* Transient instruction during a connection drag. Carried by a T3-style accent
+   underline rather than a bordered pill — it is a moment, not an object. */
+.ne-graph-hint {
+  position: absolute; bottom: var(--space-sm); left: 50%; transform: translateX(-50%);
+  padding: var(--space-3xs) var(--space-sm);
+  border-bottom: 1px solid var(--tab-color);
+  background: var(--surface-overlay);
+  font-size: var(--text-sm); color: var(--tab-color);
+  pointer-events: none;
+}
+.ne-marquee {
+  position: absolute; border: 1px solid var(--tab-color);
+  background: color-mix(in srgb, var(--tab-color) 12%, transparent);
+  pointer-events: none; z-index: 5;
+}
+
+/* ── Toolbox dock (left, over the graph — Gaea style) ────────────────────── */
+.ne-panel-title {
+  font-size: var(--text-3xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase;
+  color: var(--ink-40); padding: var(--space-sm) var(--space-sm) var(--space-2xs);
+}
+/* The dock floats over the canvas, so it needs an opaque surface — but a
+   surface is ALL it gets (§5: surface or edge, never a neutral pair). It reads
+   as docked from its position, not from a drawn frame. */
+.ne-palette-dock {
+  position: absolute; top: 0; left: 0; bottom: 0; width: 244px;
+  display: flex; flex-direction: column;
+  background: var(--surface-deep);
+  overflow-y: auto; z-index: var(--z-rail);
+}
+.ne-palette-cat { padding: 0 var(--space-xs) var(--space-2xs); }
+.ne-palette-cat-label { font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: var(--track-base); color: var(--ink-28); margin: var(--space-xs) var(--space-3xs) var(--space-2xs); }
+/* Two nodes per row. minmax(0,1fr) lets long labels wrap inside a cell
+   instead of forcing the grid wider. */
+.ne-palette-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; }
+/* Geometry only — .station supplies the rest/hover/ignite mechanic. */
+.ne-palette-item {
+  display: flex; align-items: center; gap: var(--space-xs); min-width: 0;
+  border: none; color: var(--ink-72);
+  padding: var(--space-2xs) var(--space-xs); font-family: inherit; font-size: var(--text-sm);
+  text-align: left; line-height: 1.15; overflow-wrap: anywhere;
+}
+
+/* The node pickers (toolbox grid + Tab-search list) flip .station's tick from
+   the top edge to the bottom. These tiles are stacked with a 1px gap, so a tick
+   sitting ABOVE the hovered item reads as belonging to the item above it. The
+   only property that changes is where the line sits — opacity, scale, glow and
+   timing all still come from the primitive, so it stays the same mechanic.
+   Deliberately scoped: .station's top tick is correct everywhere it has room. */
+.ne-palette-item::before,
+.ne-search-item::before { top: auto; bottom: -1px; }
+.ne-palette-hint {
+  margin-top: auto; padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-2xs); color: var(--ink-28); text-align: center;
+}
+
+/* ── Add-node search (Tab) ───────────────────────────────────────────────── */
+.ne-search {
+  position: absolute; top: var(--space-lg); left: 50%; transform: translateX(-50%);
+  width: min(420px, 80%); z-index: var(--z-overlay, 60);
+  background: var(--surface-overlay); border: 1px solid var(--tab-color);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+  overflow: hidden; backdrop-filter: blur(4px);
+}
+.ne-search-connect-hint {
+  padding: var(--space-2xs) var(--space-md); font-size: var(--text-2xs); color: var(--ink-40);
+  border-bottom: 1px solid var(--line-faint); background: var(--surface-sunk);
+}
+.ne-search-connect-hint strong { color: var(--tab-color); }
+.ne-search-input { padding-left: var(--space-md); padding-right: var(--space-md); }
+.ne-search-list { max-height: 260px; overflow-y: auto; }
+.ne-search-empty { padding: var(--space-md); color: var(--ink-40); font-size: var(--text-sm); text-align: center; }
+/* Geometry only — .station supplies the rest/hover/ignite mechanic. */
+.ne-search-item {
+  display: flex; align-items: center; gap: var(--space-xs); width: 100%;
+  border: none; padding: var(--space-2xs) var(--space-md); color: var(--ink-72);
+  font-family: inherit; font-size: var(--text-md); text-align: left;
+}
+.ne-search-item-label { flex: 1 1 auto; }
+.ne-search-item-cat {
+  font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: var(--track-base);
+  color: var(--ink-28);
+}
+
+/* ── Inspector (Properties) ──────────────────────────────────────────────── */
+.ne-inspector { padding: 0 var(--space-md) var(--space-lg); }
+.ne-inspector-empty { color: var(--ink-40); font-size: var(--text-sm); padding: var(--space-lg) var(--space-md); }
+.ne-inspector-head { display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-sm) 0 var(--space-xs); }
+.ne-inspector-title { font-weight: var(--weight-bold); font-size: var(--text-lg); color: var(--ink-100); }
+.ne-inspector-id { margin-left: auto; font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-40); }
+
+/* Spacing between .ctrl-field rows; the fields themselves are pure primitive. */
+.ne-field { margin-bottom: var(--space-sm); }
+/* The 'f' param label carries a live value readout on its right end, so this
+   one label variant is a row rather than the primitive's plain caption. */
+.ne-field-label { flex-direction: row; justify-content: space-between; }
+.ne-field-val { color: var(--tab-color); font-family: var(--font-mono); letter-spacing: 0; }
+.ne-slider-row { display: flex; align-items: center; gap: var(--space-xs); }
+.ne-slider-row input[type="range"] { flex: 1 1 auto; accent-color: var(--tab-color); }
+/* Inline "label + tiny field" pairs in the sub-editors (pos / α / in / out /
+   x y z w). The field is a full .ctrl-input — only its width and the column-
+   sized vertical padding are trimmed so several fit on one row. */
+.ne-field-inline {
+  display: inline-flex; align-items: center; gap: var(--space-2xs);
+  font-family: var(--font-display); font-size: var(--text-2xs);
+  letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-28);
+}
+.ne-field-inline .ctrl-input {
+  width: 58px; flex: 0 0 auto;
+  padding-top: var(--space-3xs); padding-bottom: var(--space-3xs);
+  font-size: var(--text-sm); text-transform: none; letter-spacing: 0.025em;
+}
+.ne-gradient-controls .ctrl-input { padding-top: var(--space-3xs); padding-bottom: var(--space-3xs); }
+
+/* ── Gradient sub-editor ─────────────────────────────────────────────────── */
+.ne-gradient-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+/* The bar IS the gradient — its own fill is the surface, so it needs no frame.
+   Handles are ring-on-shadow, which reads on any underlying colour without
+   adding a neutral rectangle. */
+.ne-gradient-bar {
+  position: relative; height: 34px; cursor: copy;
+}
+.ne-gradient-stop {
+  position: absolute; top: -4px; width: 12px; height: 42px; transform: translateX(-50%);
+  cursor: ew-resize;
+  box-shadow: 0 0 0 2px var(--ink-100), 0 0 0 3px var(--shade-70);
+}
+.ne-gradient-stop.is-sel { border-color: var(--tab-color); box-shadow: 0 0 6px var(--tab-glow); z-index: 2; }
+.ne-gradient-controls { display: flex; align-items: center; gap: var(--space-xs); flex-wrap: wrap; margin-top: var(--space-xs); }
+.ne-hint { font-size: var(--text-2xs); color: var(--ink-40); margin: var(--space-3xs) 0 0; }
+
+/* ── Alpha Ramp sub-editor ───────────────────────────────────────────────── */
+.ne-alpharamp-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+/* The checkerboard IS the pad's surface (it reads "alpha"), so no frame. */
+.ne-alpharamp-pad {
+  position: relative; height: 96px; cursor: copy; overflow: hidden;
+  background-image:
+    repeating-conic-gradient(var(--ink-15) 0% 25%, transparent 0% 50%);
+  background-size: 12px 12px;
+}
+.ne-alpharamp-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ne-alpharamp-fill { fill: var(--tab-color); opacity: 0.28; stroke: none; }
+.ne-alpharamp-line { fill: none; stroke: var(--tab-color); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+/* Drag handles are solid dots, not ringed rectangles — the same dot grammar as
+   the graph's sockets. §5 counts a control's own mechanism as signal, and a
+   filled knob needs no border to be one. */
+.ne-alpharamp-stop {
+  position: absolute; width: 11px; height: 11px; transform: translate(-50%, -50%);
+  border-radius: 50%; cursor: grab;
+  background: var(--ink-100); box-shadow: 0 0 0 1px var(--shade-70);
+}
+.ne-alpharamp-stop.is-sel { background: var(--tab-color); box-shadow: 0 0 0 1px var(--shade-70), 0 0 6px var(--tab-glow); z-index: 2; }
+
+/* ── Curves sub-editor ───────────────────────────────────────────────────── */
+.ne-curve-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+/* The quarter grid is the pad's structure; a frame around it would just be a
+   second, competing rectangle. */
+.ne-curve-pad {
+  position: relative; height: 150px; cursor: copy; overflow: hidden;
+  background: var(--surface-sunk);
+  background-image:
+    linear-gradient(var(--line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-faint) 1px, transparent 1px);
+  background-size: 25% 25%;
+}
+.ne-curve-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ne-curve-diag { stroke: var(--ink-15); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 3 3; }
+.ne-curve-line { fill: none; stroke: var(--tab-color); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.ne-curve-pt {
+  position: absolute; width: 11px; height: 11px; transform: translate(-50%, -50%);
+  border-radius: 50%; cursor: grab;
+  background: var(--ink-100); box-shadow: 0 0 0 1px var(--shade-70);
+}
+.ne-curve-pt.is-sel { background: var(--tab-color); box-shadow: 0 0 0 1px var(--shade-70), 0 0 6px var(--tab-glow); z-index: 2; }
+
+/* ── .scmap source sub-editors (Sky Gradient / Texture) ──────────────────── */
+.ne-scmap-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+.ne-scmap-row { display: flex; align-items: center; gap: var(--space-xs); }
+/* Geometry only — these ride .ctrl-select / .ctrl-input from primitives.css. */
+.ne-scmap-search { flex: 1 1 auto; min-width: 0; }
+/* The shared Dropdown's panel is right-anchored for a canvas header; in a
+   narrow inspector column it reads better anchored left, under its trigger. */
+.ne-inspector .wr-mirror-panel, .ne-scmap-editor .wr-mirror-panel { right: auto; left: 0; }
+.ne-tex-path { width: 100%; font-family: var(--font-mono); }
+
+.ne-scmap-found {
+  display: flex; flex-direction: column; gap: var(--space-3xs);
+  padding-top: var(--space-2xs); border-top: 1px solid var(--line-faint);
+}
+.ne-scmap-found-title {
+  font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: var(--track-base);
+  color: var(--ink-28);
+}
+.ne-scmap-tex, .ne-scmap-pick {
+  display: flex; flex-direction: column; gap: 1px; min-width: 0; text-align: left;
+}
+/* Geometry only — .station supplies the rest/hover/ignite mechanic. */
+.ne-scmap-pick {
+  border: none; cursor: pointer; padding: var(--space-2xs) var(--space-xs);
+  font-family: inherit;
+}
+.ne-scmap-tex-label { font-size: var(--text-2xs); color: var(--ink-40); }
+.ne-scmap-tex-path {
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-72);
+  overflow-wrap: anywhere;
+}
+.ne-asset-list { max-height: 200px; overflow-y: auto; }
+.ne-scmap-browse { align-self: flex-start; }
+.ne-scmap-heights { display: flex; gap: var(--space-sm); font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--ink-72); }
+
+/* ── UV region sub-editor ────────────────────────────────────────────────── */
+.ne-uv-editor { display: flex; flex-direction: column; gap: var(--space-xs); }
+/* Quadrant grid carries the structure — no frame (same call as .ne-curve-pad). */
+.ne-uv-map {
+  position: relative; aspect-ratio: 1; width: 120px; align-self: center;
+  background-image:
+    linear-gradient(var(--line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-faint) 1px, transparent 1px);
+  background-size: 50% 50%;
+  background-color: var(--surface-sunk);
+}
+.ne-uv-sel {
+  position: absolute; background: var(--tab-glow);
+  border: 1px solid var(--tab-color); box-shadow: 0 0 6px var(--tab-glow);
+}
+.ne-uv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2xs); }
+.ne-uv-presets { display: flex; flex-wrap: wrap; gap: var(--space-3xs); }
+
+.ne-fatal { padding: var(--space-3xl); text-align: center; color: var(--ink-40); line-height: 1.8; }

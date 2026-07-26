@@ -1,0 +1,244 @@
+/* Symmetry Checker — tab-specific exceptions only.
+   Layout/chrome come from TabLayout; the mode picker is the shared Dropdown and
+   the toggles are .ctrl-toggle-row. All values via design-system tokens; the
+   accent maps from the registry (tokens.css §11).
+
+   One deliberate colour decision: the verdict rows carry --status-ok/warn/err,
+   not --tab-color. That is §7 Role 3 (system feedback) — "is this map mirrored"
+   is the answer, not the tab's identity, so it must not change hue with the tab. */
+
+.symmetrychecker-tab {
+  --tab-color:       var(--symmetrychecker-color);
+  --tab-glow:        var(--symmetrychecker-glow);
+  --tab-glow-strong: var(--symmetrychecker-glow-strong);
+  background-color: var(--surface-canvas);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
+}
+
+/* ── Legend-rail escape hatch (same pattern as TerrainType/RockErosion) ── */
+.symmetrychecker-tab .workspace-main-inner--half { overflow: visible; }
+.symmetrychecker-tab .preview-panel              { overflow: visible; }
+
+.symmetrychecker-tab .section-content,
+.symmetrychecker-tab .ec-legend-cards,
+.symmetrychecker-tab .preview-panel-body { scrollbar-width: none; }
+.symmetrychecker-tab .section-content::-webkit-scrollbar,
+.symmetrychecker-tab .ec-legend-cards::-webkit-scrollbar,
+.symmetrychecker-tab .preview-panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── meta / notes ── */
+.sy-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  letter-spacing: 0.03em;
+}
+.sy-meta b { color: var(--tab-color); font-weight: 600; }
+
+.sy-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  letter-spacing: 0.03em;
+}
+
+.sy-empty {
+  font-size: var(--text-xs);
+  color: var(--ink-30);
+  line-height: 1.6;
+}
+
+/* Status container (§5): a wash plus one edge in the SAME feedback hue is
+   signal, not a generic box. */
+.sy-error {
+  margin-top: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  background: var(--status-err-wash);
+  border-left: 2px solid var(--status-err);
+  color: var(--status-err-bright);
+}
+
+/* ── controls ── */
+/* Spacing only — .ctrl-toggle-row supplies the track/pole/label mechanic. */
+.sy-toggle { margin-bottom: var(--space-xs); }
+.sy-range { accent-color: var(--tab-color); width: 100%; }
+
+/* ── detected-mode scores ────────────────────────────────────────────────
+   A ranking, not a form: the bar length IS the value, so no frame around it. */
+.sy-scores {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  margin-top: var(--space-xs);
+}
+.sy-score {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 3.5rem;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-3xs) 0;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.sy-score:hover      { opacity: 0.85; }
+.sy-score.is-active  { opacity: 1; }
+.sy-score-name {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-72);
+}
+.sy-score.is-active .sy-score-name { color: var(--tab-color); }
+/* The track is the control's own mechanism (§5 functional box), and the fill is
+   drawn with the tab accent — never a neutral surface + neutral border pair. */
+.sy-score-bar {
+  position: relative;
+  height: 3px;
+  background: var(--ink-09);
+  overflow: hidden;
+}
+.sy-score-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--sy-fill, 0%);
+  background: var(--tab-color);
+  box-shadow: 0 0 6px var(--tab-glow);
+}
+.sy-score-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  text-align: right;
+}
+.sy-score.is-active .sy-score-val { color: var(--tab-color); }
+
+/* ── verdict banner ──────────────────────────────────────────────────────
+   Carries feedback colour (§7 Role 3): one left edge in the state hue, wash of
+   the same hue. No neutral frame. */
+.sy-verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-xs) var(--space-sm);
+  border-left: 2px solid var(--sy-hue, var(--ink-25));
+  background: var(--sy-wash, transparent);
+}
+.sy-verdict--pass { --sy-hue: var(--status-ok);   --sy-wash: var(--status-ok-wash); }
+.sy-verdict--near { --sy-hue: var(--status-warn); --sy-wash: var(--status-warn-wash); }
+.sy-verdict--fail { --sy-hue: var(--status-err);  --sy-wash: var(--status-err-wash); }
+.sy-verdict--skip { --sy-hue: var(--ink-25); }
+.sy-verdict-word {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--sy-hue, var(--ink-72));
+}
+.sy-verdict-note {
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  line-height: 1.5;
+}
+
+/* ── layer rows ──────────────────────────────────────────────────────────
+   No border-bottom per row (§4 forbids repeated horizontal lines). Grouping
+   comes from the gap; state comes from the left tick, which is vertical. */
+.sy-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.sy-row { display: flex; flex-direction: column; gap: 2px; }
+.sy-row-head {
+  display: grid;
+  grid-template-columns: 3px 1fr auto 4.5rem;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+.sy-row-tick {
+  width: 3px;
+  height: 12px;
+  background: var(--sy-hue, var(--ink-25));
+  box-shadow: 0 0 5px var(--sy-hue, transparent);
+}
+.sy-row--pass { --sy-hue: var(--status-ok); }
+.sy-row--near { --sy-hue: var(--status-warn); }
+.sy-row--fail { --sy-hue: var(--status-err); }
+.sy-row--skip { --sy-hue: var(--ink-25); }
+.sy-row-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  color: var(--ink-85);
+}
+.sy-row.is-open .sy-row-label { color: var(--tab-color); }
+.sy-row-verdict {
+  font-size: var(--text-3xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sy-hue, var(--ink-30));
+}
+.sy-row-ratio {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  text-align: right;
+}
+.sy-row-headline {
+  padding-left: calc(3px + var(--space-xs));
+  font-size: var(--text-2xs);
+  color: var(--ink-38);
+  line-height: 1.5;
+}
+.sy-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-2xs);
+  padding: var(--space-xs) 0 var(--space-xs) calc(3px + var(--space-xs));
+}
+.sy-row-why {
+  font-size: var(--text-2xs);
+  color: var(--ink-50);
+  line-height: 1.55;
+}
+.sy-detail {
+  margin: 0;
+  padding-left: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-40);
+  line-height: 1.6;
+}
+.sy-detail b { color: var(--ink-72); font-weight: 600; }
+
+/* ── report text ──
+   A data surface, so it gets one surface and no border (§5). */
+.sy-report {
+  margin: 0;
+  max-height: 22rem;
+  overflow: auto;
+  padding: var(--space-sm);
+  background: var(--ink-09);
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  line-height: 1.65;
+  color: var(--ink-60);
+  white-space: pre;
+}

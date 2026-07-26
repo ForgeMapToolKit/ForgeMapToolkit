@@ -1,6 +1,6 @@
 'use strict';
 // ═══════════════════════════════════════════════════════════════════════════════
-// scripts/generate-csp-hashes.js
+// utils/generate-csp-hashes.js
 //
 // Scans ALL inline <script> blocks from two sources:
 //
@@ -12,7 +12,7 @@
 // Computes their SHA-256 hashes and writes them into main.js between the
 // __GUIDE_HASHES_START__ / __GUIDE_HASHES_END__ markers.
 //
-// Usage:  node scripts/generate-csp-hashes.js
+// Usage:  node utils/generate-csp-hashes.js
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const fs     = require('fs');

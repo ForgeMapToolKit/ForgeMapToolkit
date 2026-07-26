@@ -5,19 +5,23 @@ import Emitter           from '../Tabs/Emitter/Emitter/Emitter.jsx';
 import CustomProps       from '../Tabs/Scenery/CustomProps/CustomProps.jsx';
 import Trees             from '../Tabs/Scenery/Trees/Trees.jsx';
 import RockErosion       from '../Tabs/Scenery/RockErosion/RockErosion.jsx';
-import WaveNormals       from '../Tabs/Scenery/WaveNormals/WaveNormals.jsx';
-import TerrainType        from '../Tabs/Scenery/TerrainType/TerrainType.jsx';
+import WaveNormals       from '../Tabs/Textures/WaveNormals/WaveNormals.jsx';
+import TerrainType        from '../Tabs/Emitter/TerrainType/TerrainType.jsx';
 import Stars             from '../Tabs/Skybox/Stars/Stars.jsx';
 import SkyboxGenerator   from '../Tabs/Skybox/SkyboxGenerator/SkyboxGenerator.jsx';
-import NodeEditor        from '../Tabs/Skybox/NodeEditor/NodeEditor.jsx';
+import TextureEditor     from '../Tabs/Textures/TextureEditor/TextureEditor.jsx';
+import Viewer3D          from '../Tabs/Textures/Viewer3D/Viewer3D.jsx';
 import Contributions     from '../Tabs/Community/Contributions/Contributions.jsx';
-import Settings          from '../Tabs/Config/Settings/Settings.jsx';
-import ScmapTool         from '../Tabs/Tools/Scmap/Scmap.jsx';
-import AdaptiveMapHelper from '../Tabs/Tools/AdaptiveMapHelper/AdaptiveMapHelper.jsx';
-import HistoryTab        from '../Tabs/Tools/History/History.jsx';
-import MapResizerTab     from '../Tabs/Tools/MapResizer/MapResizer.jsx';
-import PreviewImageTab   from '../Tabs/Tools/PreviewImage/PreviewImage.jsx';
-import CliTerminalTab    from '../Tabs/Tools/CliTerminal/CliTerminal.jsx';
+import Settings          from '../Tabs/System/Settings/Settings.jsx';
+import ScmapTool         from '../Tabs/MapTools/Scmap/Scmap.jsx';
+import AdaptiveMapHelper from '../Tabs/MapTools/AdaptiveMapHelper/AdaptiveMapHelper.jsx';
+import HistoryTab        from '../Tabs/System/History/History.jsx';
+import MapResizerTab     from '../Tabs/MapTools/MapResizer/MapResizer.jsx';
+import PreviewImageTab   from '../Tabs/MapTools/PreviewImage/PreviewImage.jsx';
+import BiomeChangerTab   from '../Tabs/MapTools/BiomeChanger/BiomeChanger.jsx';
+import SymmetryChecker   from '../Tabs/MapTools/SymmetryChecker/SymmetryChecker.jsx';
+import FloatingTrees     from '../Tabs/MapTools/FloatingTrees/FloatingTrees.jsx';
+import CliTerminalTab    from '../Tabs/System/CliTerminal/CliTerminal.jsx';
 import FooterArticleTab  from './Footer/ArticleTab/FooterArticleTab.jsx';
 
 /**
@@ -67,12 +71,16 @@ export const TAB_ROUTES = {
   emitter:            (c) => <Emitter         {...c.tabProps} />,
   stars:              (c) => <Stars           {...c.tabProps} />,
   'skybox-generator': (c) => <SkyboxGenerator {...c.tabProps} />,
-  'node-editor':      (c) => <NodeEditor      {...c.tabProps} />,
+  'node-editor':      (c) => <TextureEditor   {...c.tabProps} />,
+  viewer3d:           (c) => <Viewer3D        {...c.tabProps} />,
   scmaptool:          (c) => <ScmapTool       {...c.tabProps} />,
   adaptivemaphelper:  (c) => <AdaptiveMapHelper {...c.tabProps} />,
   history:            (c) => <HistoryTab settings={c.settings} shared={c.sharedState} />,
   mapresizer:         (c) => <MapResizerTab   {...c.tabProps} />,
   previewimage:       (c) => <PreviewImageTab {...c.tabProps} />,
+  biomechanger:       (c) => <BiomeChangerTab  {...c.tabProps} />,
+  symmetrychecker:    (c) => <SymmetryChecker  {...c.tabProps} />,
+  floatingtrees:      (c) => <FloatingTrees    {...c.tabProps} />,
   cliterminal:        (c) => <CliTerminalTab  {...c.tabProps} />,
   contributions:      (c) => <Contributions   {...c.tabProps} />,
   guides:             () => <GuidesPlaceholder />,

@@ -1,14 +1,14 @@
 # FMT Layout System
 
-> Introduced as part of the UI Unification (see `ROADMAP.md` Phase 2 — the former
-> standalone `UI_UNIFICATION_ROADMAP.md` was merged into it 2026-07-08).
-> This document defines the universal layout system used by all tabs and
-> sections in FMT. It replaces the previous ad-hoc distinction between
-> `no-aside`, `aside-balanced`, and `aside-wide`.
+> The universal layout system every tab section uses. It replaced the earlier ad-hoc
+> distinction between `no-aside`, `aside-balanced` and `aside-wide`.
 >
-> Verified 2026-07-08: `Shared/Ui/TabLayout/TabLayout.jsx` implements this spec
-> as written (`layoutMode` prop, all four X/Y/Z/W renderers) — this document is
-> current, not aspirational, at least for the props/behavior described below.
+> **Verified against the code 2026-07-26.** Component name, prop defaults, widths and the
+> tab overview below were read out of `shared/Ui/TabLayout/TabLayout.jsx` and
+> `shared/DesignSystem/layout.css`, not carried over from an earlier revision.
+
+**Implementation:** `src/components/shared/Ui/TabLayout/TabLayout.jsx`
+**Styles:** `src/components/shared/DesignSystem/layout.css` (TabLayout has no CSS file of its own)
 
 ---
 
@@ -16,17 +16,69 @@
 
 Every section within a tab uses one of four layout types: **X, Y, Z, or W**.
 The choice belongs to the section, not the tab. A tab may mix layout types
-across its sections — the outer shell (Rail, WorkspaceConsole) remains unchanged.
+across its sections — the outer shell (rail, header) remains unchanged.
 
-Each type has **variants** controlled via props — not separate layout classes.
-Variants are documented with ASCII diagrams and prop notation in each section below.
-
-**The controls column has the same defined width across X and Y.**
-Width is a function of the layout type, not the window size.
-This creates consistent visual anchoring across all sections and tabs.
+Each type has **variants** controlled via props, not via separate layout classes.
 
 Switching between sections is an immediate state change — no transition animation.
 The TraceLine in the section header provides sufficient visual feedback.
+
+---
+
+## The full `TabLayout` API
+
+Read off the actual signature. Defaults shown are the real ones.
+
+```jsx
+<TabLayout
+  /* Core */
+  sections={[{ id, index, label, desc }, …]}
+  activeSection={id}
+  onSelect={fn}
+
+  /* Layout */
+  layoutMode="x"            // 'x' | 'y' | 'z' | 'w'      default: 'x'
+
+  /* Layout X */
+  controlsWidth="half"      // 'half' | 'fixed'           default: 'half'
+  asideSlot={node}
+  asideCaption="PREVIEW"    //                            default: 'PREVIEW'
+  asideMirror={node}
+
+  /* Layout Y */
+  ghostLabel=""
+  readout={[]}              // string[]
+
+  /* Layout Z */
+  groupMode="parallel"      // 'parallel' | 'exclusive'   default: 'parallel'
+  secondRail={[{ id, label }, …]}
+  activeGroup={id}
+  onGroupSelect={fn}
+  groupSlotB={node}
+  headerExtra={node}
+  footerExtra={node}
+
+  /* Layout W */
+  canvasToolbar={false}     //                            default: false
+  topBar={node}
+  toolbar={node}
+
+  /* Shell */
+  toolbarSlot={node}
+  renderEyebrow={null}
+  navLabel="Tab navigation"
+  bootMs={2200}
+>
+  {children}
+</TabLayout>
+```
+
+Notes on the shell props:
+
+- **Rail pin/collapse is app-wide, not per tab.** It persists internally under a single
+  `localStorage` key (`RAIL_PINNED_KEY`). There is no `railStorageKey` prop.
+- `bootMs` is the one-shot boot animation delay before the rail settles.
+- `toolbarSlot` renders stacked *above* the rail inside `.workspace`.
 
 ---
 
@@ -39,61 +91,54 @@ no standby state, no ghost label.
 that must be used simultaneously with the controls. Controls and visual
 content are operationally dependent.
 
-### X · fixed (default)
+### X · half (default)
 
-Controls fixed at ~360px, aside takes the rest. For canvases and maps
-that benefit from additional width.
+`controlsWidth="half"` — and since `'half'` is the default, **passing nothing gives you
+this.** The name is historical: the split is *not* 50/50.
 
-```
-┌──────────────────────────────────────────────────────┐
-│  RAIL  │  CONTROLS (~360px)  │  VISUAL CONTENT        │
-│        │                     │                        │
-│  01    │  field              │  Canvas / Preview /    │
-│  02 ●  │  field              │  Map / UV Atlas /      │
-│  03    │  field              │  Diff Viewer / ...     │
-│  04    │                     │                        │
-└──────────────────────────────────────────────────────┘
-```
-
-`<WorkspaceConsole layoutMode="x" controlsWidth="fixed" />`
-
-### X · half
-
-Controls 50%, aside 50%. For readouts composed of discrete units
-(diagrams, lists, live values) that work equally well at 50% as at 65% —
-an asymmetric split would be wasted space.
+- The controls column is `flex: 1 1 auto` — it absorbs all surplus width.
+- The aside is `flex: 0 0 clamp(560px, 44vw, 820px)` — it keeps a stable size.
+- The whole inner is capped at `max-width: 1560px` (wider than the 1300px base cap, so
+  the extra width feeds the controls column and the staircase gets more room).
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  RAIL  │  CONTROLS (50%)     │  VISUAL CONTENT (50%)  │
-│        │                     │                        │
-│  01    │  field   field      │  [Diagram / Readout]   │
-│  02 ●  │  field              │  [Diagram / Readout]   │
-│  03    │  field   field      │  [Diagram / Readout]   │
+│  RAIL  │  CONTROLS (flex)      │  ASIDE (560–820px)  │
+│        │                       │                      │
+│  01    │  field   field        │  [Preview / Canvas]  │
+│  02 ●  │  field                │  [Diagram / Readout] │
+│  03    │  field   field        │                      │
 └──────────────────────────────────────────────────────┘
 ```
 
-`<WorkspaceConsole layoutMode="x" controlsWidth="half" />`
+**Additional rule for `half`:** Single full-width fields (preset name, texture path)
+receive `max-width: ~360px` instead of `width: 100%`, so they don't stretch
+disproportionately. Multi-field `form-row` grids may use the full column.
 
-**Additional rule for `half`:** Single full-width fields (e.g. preset name,
-texture path) receive `max-width: ~360px` instead of `width: 100%` to prevent
-them from stretching disproportionately. Multi-field `form-row` grids may use
-the full 50% — they benefit from the extra spacing.
+### X · fixed
 
-**Examples:**
-- WreckageTab / PropsTab / EmitterTab / RockErosionTab / TreesTab → X · fixed (MapPreview)
-- StarsTab → UV Texture, Exclusion Zones → X · half (canvas)
-- SkyboxGeneratorTab → Cirrus → X · half (live readout)
-- CustomPropsTab → Props → X · half (visualisation / summary)
-- ScmapTab → X · half (pack + unpack equally weighted)
-- MapResizerTab → X · half (what to scale + scale parameters)
-- HistoryTab → X · half (snapshots + diff viewer)
+`controlsWidth="fixed"` — controls pinned at 360px, aside takes the remainder.
+For canvases and maps that benefit from additional width.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  RAIL  │  CONTROLS (360px)  │  ASIDE (remainder)      │
+│        │                    │                         │
+│  01    │  field             │  Canvas / Map /         │
+│  02 ●  │  field             │  UV Atlas / ...         │
+└──────────────────────────────────────────────────────┘
+```
+
+> **Currently used by zero tabs.** Every X-mode tab in the app runs on the `half`
+> default. `fixed` is implemented and correct — it is simply unused today. Treat it as
+> available, not as the norm, and don't assume a tab is `fixed` just because it shows a
+> map preview.
 
 ---
 
 ## Layout Y — Single Column + Standby Field
 
-Controls left, deliberate negative space right. Not empty space —
+Controls left (360px fixed), deliberate negative space right. Not empty space —
 a conscious machine presence with three elements.
 
 **When to use:** The section is purely form-based. There is no canvas
@@ -101,7 +146,7 @@ and no visual output that needs to be used simultaneously.
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  RAIL  │  CONTROLS (~360px)  │  STANDBY FIELD        │
+│  RAIL  │  CONTROLS (360px)   │  STANDBY FIELD         │
 │        │                     │                        │
 │  01 ●  │  field              │  GHOST LABEL           │
 │  02    │  field              │                        │
@@ -110,101 +155,94 @@ and no visual output that needs to be used simultaneously.
 └──────────────────────────────────────────────────────┘
 ```
 
-`<WorkspaceConsole layoutMode="y" ghostLabel="…" readout={[…]} />`
+`<TabLayout layoutMode="y" ghostLabel="…" readout={[…]} />`
 
 **The standby field contains:**
 
 1. **Ghost label** — section or tool name in large, heavily muted typography.
    Same visual language as the home tab background.
-
-2. **Parameter readout** — current core values of the section as a compact
-   monospace status line. Updates live as the user interacts with the controls.
-   Not a summary — a machine readout: *the system has registered the parameters.*
-
+2. **Parameter readout** — current core values as a compact monospace status line.
+   Updates live. Not a summary — a machine readout: *the system has registered
+   the parameters.*
 3. **Block cursor** — blinking. Signals: the machine is ready, waiting.
 
-The standby field is posture, not information. The machine is on, attentive, waiting.
+The standby field is posture, not information.
 
-**Component:** `<StandbyField ghostLabel={…} readout={[…]} cursorVisible />`
-lives in `shared/ui/StandbyField/`. Tab-independent — content is tab-specific,
-formatting is uniform.
+**`StandbyField` is not a standalone component.** It is defined inside
+`TabLayout.jsx` and rendered by the Y renderer. There is no `shared/Ui/StandbyField/`
+directory — an earlier revision of this document claimed there was.
 
-**Examples:**
-- StarsTab → Configuration: `50 STARS · 10 CLUSTERS · GAUSSIAN`
-- StarsTab → Export: `MAP_NAME.v0001 · JSON OFF · README ON`
-- CustomPropsTab → ADD-Props: summary of all current entries
-- RockErosionTab / TreesTab / MapResizerTab → all sections
+The markup is reusable directly, though, and one tab does exactly that: the Adaptive Map
+Helper's Export section stays on Layout W and hand-rolls a `.standby-field` /
+`.standby-ghost` / `.standby-readout` block to get the same treatment (with a code
+comment explaining why it doesn't switch `layoutMode`).
 
 ---
 
 ## Layout Z — Full Width with Internal Grid
 
-Full width after the rail, no aside, no standby field. Both columns
-are equal — neither is "controls", neither is "aside".
+Full width after the rail, no aside, no standby field. Both columns are equal
+(`grid-template-columns: 1fr 1fr`, `align-items: start`) — neither is "controls",
+neither is "aside". Group A carries a `border-right: 1px solid var(--line-subtle)`.
 
 **When to use:** The section has many parameters that divide naturally into
-two thematically equal groups. No interactive canvas — but possibly a
-non-interactive preview as a grid cell.
+two thematically equal groups.
 
 ### Z · parallel (default)
 
-Both groups are complementary — they belong to the same operation.
-The user fills in both.
+Both groups are complementary — they belong to the same operation. The user fills in both.
 
 ```
 ┌──────────────────────────────────────────────────────┐
 │  RAIL  │  GROUP A            │  GROUP B               │
-│        │                     │                        │
 │  01 ●  │  field              │  [Preview / field]     │
 │        │  field              │                        │
-│        ├─────────────────────┼────────────────────────┤
-│        │  field              │  field                 │
-│        │  field              │  field                 │
 └──────────────────────────────────────────────────────┘
 ```
 
-`<WorkspaceConsole layoutMode="z" groupMode="parallel" />`
+`<TabLayout layoutMode="z" groupMode="parallel" groupSlotB={…} />`
 
-**Preview as grid cell:** The preview is a grid cell like any other —
-not a structural special case. The right column receives `align-self: start`
-so it does not grow beyond the left column.
+**Preview as grid cell:** the preview is a grid cell like any other, not a structural
+special case. `align-items: start` keeps the right column from growing beyond the left.
 
 ### Z · exclusive
 
-Both groups are alternative paths to the same goal — the user fills in
-only one. No toggle or switcher — the active path emerges from the first
-input (reactive dimming).
+Both groups are alternative paths to the same goal — the user fills in only one.
 
 ```
 ┌────────┬─────────┬──────────────────────┬──────────────────────┐
 │ MAIN   │ 2ND     │  GROUP A             │  GROUP B             │
 │ RAIL   │ RAIL    │  (Path 1)            │  (Path 2)            │
-│        │         │                      │                      │
+│        │ (168px) │                      │                      │
 │        │ Prop    │  field               │  field               │
 │        │ Skybox  │  field               │  field               │
 │        │ Texture │  field               │  field               │
 └────────┴─────────┴──────────────────────┴──────────────────────┘
 ```
 
-`<WorkspaceConsole layoutMode="z" groupMode="exclusive" secondRail={[…]} />`
+`<TabLayout layoutMode="z" groupMode="exclusive" secondRail={[…]} activeGroup={…} />`
 
-**2nd Rail:** Optional. Determines which fields are shown per group
-(e.g. asset type: Prop / Skybox / Texture / Emitter). Rail count is
-orthogonal to `groupMode` — both are independently composable.
+**2nd Rail:** optional, `width: 168px`, a real full-height vertical sidepanel with its own
+scroll — same tick language as `.rail-item`, without the collapse/pin mechanic. It only
+renders when `groupMode === 'exclusive'` **and** `secondRail?.length > 0`.
 
-**Reactive dimming:** When the user begins interacting with Group A,
-Group B dims to ~40% opacity — and vice versa. The dimmed group remains
-interactive (not `disabled`), but is clearly marked as the inactive path.
-Resets to full opacity when the active group is cleared entirely.
+**Dimming:** `TabLayout` dims the inactive group to `opacity: 0.4` only when
+`groupMode === 'exclusive'` **and** `activeGroup` is literally `'a'` or `'b'`. That means
+`secondRail` can safely be reused for an unrelated N-way selector (asset type, say)
+without dimming both columns.
 
-**Why not a toggle instead:** No extra click required, no hidden state
-to remember, no form reset when switching paths. The active path is
-always the brighter one.
+> **`TabLayout` does not compute reactive dimming for you.** The "no toggle — the active
+> path emerges from the first input" behaviour is *not* built in. Each tab derives its own
+> active side from which fields have data and applies its own dim class. `TabLayout`'s
+> a/b dimming is the separate, narrower explicit-selection mechanism.
 
-**Examples:**
-- SkyboxGeneratorTab → Atmosphere: Sky Colors + Geometry + Decals + Preview → Z · parallel
-- PreviewImageTab → Mapconfig (left) + Preview (right, `align-self: start`) → Z · parallel
-- ContributionsTab → Upload: Single Prop vs. Merged Folder, 2nd Rail (Asset-Type) → Z · exclusive
+**Full-width slots:** `headerExtra` and `footerExtra` sit above/below the two-column grid
+for content belonging to neither group (an auth panel, a notes+submit row).
+
+**Scrolling:** `.layout-z` scrolls as one unit (`overflow-y: auto`) and `.layout-z-grid`
+sizes to its own content. This matters — a tall `headerExtra`/`footerExtra` used to be
+able to squeeze the grid to ~0px inside a hard-clipped column with no way to reach the
+rest.
 
 ---
 
@@ -217,176 +255,93 @@ No aside, no standby field.
 (clicking, dragging, zooming, many markers) or sheer reading size — that a
 side column would constrain the workspace in both dimensions.
 
-### W · canvas (default)
+### W · canvas
 
-Two horizontal bands above an interactive canvas.
+`canvasToolbar={true}` — two horizontal bands above an interactive canvas.
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  RAIL  │  TOP BAR (full width, fixed 1 line)         │
+│  RAIL  │  TOP BAR (52px, one line, nowrap)           │
 │        ├─────────────────────────────────────────────┤
-│  01    │  CANVAS TOOLBAR (docked to canvas)          │
+│  01    │  CANVAS TOOLBAR (44px, docked to canvas)    │
 │  02 ●  ├─────────────────────────────────────────────┤
-│        │                                             │
 │        │  CANVAS / MAP (full width + height)         │
-│        │                                             │
 └──────────────────────────────────────────────────────┘
 ```
 
-`<WorkspaceConsole layoutMode="w" canvasToolbar={true} />`
+**Band 1 — Top Bar (page chrome):** belongs to the page, not the canvas. Title, primary
+input, status info, stat pills. Hard height limit: `height: 52px`, `white-space: nowrap`,
+`overflow: hidden` — horizontal clipping over wrapping to a second line. The section
+title is force-shrunk to `--text-lg` here (`.layout-w-title`).
 
-**Band 1 — Top Bar (page chrome):** Belongs to the page, not the canvas.
-Title, primary input (map name), status info, stat pills. Hard height limit:
-exactly one line, no vertical growth. `flex-wrap: nowrap` — horizontal scroll
-over wrapping to a second line.
-
-**Band 2 — Canvas Toolbar (canvas chrome):** Belongs to the canvas, not the
-page. View mode tabs, tool toggles, quick-select, generate button. Appears
-and disappears with the canvas — hidden when canvas content is not yet loaded.
+**Band 2 — Canvas Toolbar (canvas chrome):** belongs to the canvas. `height: 44px`. View
+mode tabs, tool toggles, quick-select, generate. Appears and disappears with the canvas.
 
 ### W · output
 
-One band above the content — no canvas toolbar, because the content
-is not interactive (no clicking, dragging, zooming).
+`canvasToolbar={false}` (the default) — one band above non-interactive content.
 
 ```
 ┌──────────────────────────────────────────────────────┐
 │  RAIL  │  HEADER LINE (label · status · action)      │
 │        ├─────────────────────────────────────────────┤
-│  01    │                                             │
-│  02 ●  │  OUTPUT (full width + height)               │
-│        │  Code block / read-only content             │
-│        │                                             │
+│  01    │  OUTPUT (full width + height)               │
+│  02 ●  │  Code block / read-only content             │
 └──────────────────────────────────────────────────────┘
 ```
 
-`<WorkspaceConsole layoutMode="w" canvasToolbar={false} />`
+**Header line:** output label / filename, optional status note (`✓ saved`), at most one
+primary action (copy). No tool toggles — otherwise this is W · canvas.
 
-**Header line:** Output label / filename, optional status note (`✓ saved`),
-at most one primary action (copy button). No tool toggles — otherwise this
-becomes W · canvas.
-
-**Empty state:** No output yet → centred hint block (icon + explanation of
-what to do) replaces the content. Header line remains; action button is
-hidden until output exists.
-
-**Examples:**
-- AdaptiveMapHelperTab → CANVAS: Top Bar (map name, stat pills) + Canvas Toolbar
-  (view tabs, mirror, quick army, generate) + MapCanvas → W · canvas
-- AdaptiveMapHelperTab → TABLES: Header (`tables.lua · options.lua · script.lua`)
-  + code output → W · output
+**Empty state:** no output yet → centred hint block replaces the content; the header line
+remains, the action is hidden until output exists.
 
 ---
 
 ## Column Width Reference
 
-| Type | Variant | Structure | Width |
+| Type | Variant | Controls / Group A | Aside / Group B |
 |---|---|---|---|
-| X | fixed | Controls + Aside | Controls ~360px fixed, Aside: remainder |
-| X | half | Controls + Aside | Controls 50%, Aside 50% |
-| Y | — | Controls + Standby | Controls ~360px fixed, Standby: remainder |
-| Z | parallel / exclusive | Internal grid | Full width after rail, 50% / 50% |
-| W | canvas / output | Top bar + content | Full width after rail |
+| X | `half` (default) | `flex: 1 1 auto` (absorbs surplus) | `clamp(560px, 44vw, 820px)`; inner capped at 1560px |
+| X | `fixed` | `360px` fixed | remainder |
+| Y | — | `360px` fixed | standby field, remainder |
+| Z | `parallel` / `exclusive` | `1fr` | `1fr`; `+168px` second rail in exclusive |
+| W | `canvas` / `output` | full width after rail | — |
 
 ---
 
-## Tab Overview
+## Tab Overview — actual state
 
-| Tab | Section | Layout | Variant | Content |
-|---|---|---|---|---|
-| WreckageTab | all | X | fixed | MapPreview + Mirror |
-| PropsTab | all | X | fixed | MapPreview |
-| EmitterTab | all | X | fixed | MapPreview |
-| RockErosionTab | all | X | fixed | MapPreview |
-| WaveNormalsTab | all | X | half | Water preview (composite / per-layer canvas) — shipped, verified |
-| TreesTab | all | X | fixed | MapPreview |
-| StarsTab | Configuration | Y | — | Standby: star parameters |
-| StarsTab | UV Texture | X | half | UV atlas canvas |
-| StarsTab | Exclusion Zones | X | half | Exclusion canvas |
-| StarsTab | Export | Y | — | Standby: export status |
-| SkyboxGeneratorTab | Atmosphere | Z | parallel | Sky Colors · Geometry · Decals · Preview |
-| SkyboxGeneratorTab | Cirrus | X | half | Cirrus setup + live readout |
-| CustomPropsTab | Props | X | half | Config + visualisation / summary |
-| CustomPropsTab | ADD-Props | Y | — | Standby: summary of all entries |
-| ScmapTab | all | X | half | Pack + Unpack equally weighted |
-| MapResizerTab | all | X | half | What to scale + scale parameters |
-| AdaptiveMapHelperTab | CANVAS | W | canvas | Top Bar + MapCanvas |
-| AdaptiveMapHelperTab | TABLES | W | output | Header + code output |
-| PreviewImageTab | all | Z | parallel | Mapconfig + Preview (`align-self: start`) |
-| HistoryTab | all | X | half | Snapshots + Diff Viewer |
-| ContributionsTab | Upload | Z | exclusive | Single vs. Merged Folder (reactive dim, tab-computed — see below), 2nd Rail = Asset Type |
-| ContributionsTab | Download | W | canvas | Top bar (counts) + toolbar (type filter + search) + asset grid |
-| ContributionsTab | Leaderboard | W | output | Ranked contributor list / contributor profile drill-down |
-| SettingsTab | — | — | — | Exempt from this system — self-contained settings shell with its own internal layout. No `TabLayout`. |
+Read from the code on 2026-07-26. Where a tab passes no `layoutMode`/`controlsWidth`,
+it gets the defaults (`x` / `half`) — that is the majority case, marked *(default)*.
 
-> Note (2026-07-11): `WreckageTab`/`PropsTab`/`EmitterTab` (Layout X · fixed),
-> `ScmapTab`/`HistoryTab` (Layout X · half), and `ContributionsTab` (Layout Z ·
-> exclusive + Layout W · canvas/output, mixed per section on one `TabLayout`
-> instance by swapping `layoutMode` reactively) are verified against shipped
-> code. Building `ContributionsTab` surfaced four real gaps in
-> `TabLayout.jsx`/`layout.css` that are now fixed (all shared code, every
-> future Z/W tab benefits):
-> 1. Z·exclusive's dimming only engages when `activeGroup` is literally
->    `'a'`/`'b'` — `secondRail` can safely be reused for an unrelated N-way
->    selector (e.g. asset type) without dimming both columns.
-> 2. `secondRail` used to render as a horizontal nav row squeezed into the
->    section header — it's now a real second sidepanel: a full-height
->    vertical column next to the main console rail, matching the ASCII in
->    the Z·exclusive section above (`MAIN RAIL | 2ND RAIL | GROUP A | GROUP
->    B`). New wrapper markup: `LayoutZ` returns `.layout-z-outer` (flex row)
->    containing `.layout-z-second-rail` + the original `.layout-z` column.
-> 3. Layout Z gained `headerExtra`/`footerExtra` — full-width slots
->    above/below the two-column grid for content that belongs to neither
->    group (an auth panel, a notes+submit row).
-> 4. `.layout-z-grid` used to be `flex:1; min-height:0` inside a hard-clipped
->    (`overflow:hidden`) column — a tall `headerExtra`/`footerExtra` could
->    squeeze the grid to ~0px with **no way to scroll to the rest**: the
->    content wasn't gone, just unreachably clipped. `.layout-z` now scrolls
->    as one unit (`overflow-y:auto`) and the grid sizes to its own content
->    (CSS Grid's default row auto-sizing), same principle Layout X already
->    uses for `.section-content`.
-> Also: `.workspace` was `display:flex` with no `flex-direction` (default
-> `row`) — anything passed via `toolbarSlot` rendered *beside* the rail
-> instead of stacked above it. Added `flex-direction: column`. Latent since
-> `toolbarSlot` had never shipped with real content before Contributions.
->
-> Separately, note that *reactive* dimming ("no toggle — the active path
-> emerges from the first input") is NOT something `TabLayout` computes for
-> you — each tab derives its own `activeSide` from which fields have data
-> and applies its own dim class; `TabLayout`'s a/b dimming (point 1 above) is
-> the separate, narrower explicit-selection mechanism. The rest of this
-> table reflects the intended assignment for tabs not yet migrated —
-> treat as a plan, not a confirmed fact, until that tab is actually on
-> `TabLayout`. See
-> `docs/ROADMAP.md` Phase 2 for migration status.
+| Tab | Layout | Notes |
+|---|---|---|
+| `Emitter/Wreckage` | X · half *(default)* | `asideSlot` = MapPreview + mirror |
+| `Emitter/Props` | X · half *(default)* | `asideSlot` = MapPreview |
+| `Emitter/Emitter` | X · half *(default)* | `asideSlot` = MapPreview |
+| `Scenery/CustomProps` | X · half *(default)* | |
+| `Scenery/RockErosion` | X · half *(default)* | `asideSlot` = previewSlot |
+| `Scenery/Trees` | X · half *(default)* | `asideSlot` = previewSlot |
+| `Emitter/TerrainType` | X · half *(default)* | `asideSlot` = previewSlot |
+| `Textures/WaveNormals` | X · half *(explicit)* | water preview, composite / per-layer canvas |
+| `Skybox/Stars` | X · half *(default)* | `asideSlot` varies per section (`asideBySection`) |
+| `Skybox/SkyboxGenerator` | X · half *(default)* | `asideSlot` varies per section (`asideBySection`) |
+| `MapTools/Scmap` | X · half *(default)* | |
+| `MapTools/MapResizer` | X · half *(default)* | |
+| `MapTools/PreviewImage` | X · half *(default)* | |
+| `MapTools/BiomeChanger` | X · half *(default)* | `asideSlot` = MapPreview + collapsible legend of the queued layer changes |
+| `MapTools/SymmetryChecker` | X · half *(default)* | `asideSlot` = MapPreview (deviation heatmap) + collapsible legend of per-layer verdicts |
+| `System/History` | X · half *(explicit)* | `asideSlot` = diff viewer, only when an entry is selected |
+| `MapTools/AdaptiveMapHelper` | **W** (all 3 sections) | `canvasToolbar` only on `canvas`; `topBar` swaps per section. Export deliberately stays on W and hand-rolls a standby field. |
+| `Community/Contributions` | **Z / Y / W** (per section) | `upload` → `z` exclusive, or `y` once submitted; `download` + `leaderboard` → `w`. `secondRail` = asset type. Uses `headerExtra`/`footerExtra`/`toolbarSlot`. |
+| `System/Settings` | — | exempt: self-contained settings shell, no `TabLayout` |
+| `System/CliTerminal` | — | not on `TabLayout` (terminal surface, own shell) |
+| `Textures/TextureEditor` | — | not on `TabLayout` (full-bleed graph canvas, TAB_UI_CONTRACT §11) |
+| `Guides` | — | not wired into `tabRoutes.jsx`; the `guides` route renders a placeholder |
+| `CoOp` | — | dead code, not routed (see PROJECT_STRUCTURE.md) |
 
----
-
-## Relation to the Roadmap
-
-This document replaces what used to be Steps 2 and 3c of a standalone
-`UI_UNIFICATION_ROADMAP.md` (merged into `docs/ROADMAP.md` Phase 2 on 2026-07-08):
-
-- `aside-balanced` / `aside-wide` → **Layout X** (`controlsWidth: fixed | half`)
-- `no-aside` → **Layout Y** (standby field replaces empty space)
-- Internal grid → **Layout Z** (`groupMode: parallel | exclusive`)
-- Full-width canvas / output → **Layout W** (`canvasToolbar: true | false`)
-
-**`TabLayout` API** (component: `Shared/Ui/TabLayout/TabLayout.jsx`, renamed from
-the originally-planned `WorkspaceConsole`) — matches the shipped implementation:
-```jsx
-<TabLayout
-  layoutMode="x"           // 'x' | 'y' | 'z' | 'w'
-  controlsWidth="fixed"    // X only: 'fixed' | 'half'
-  groupMode="parallel"     // Z only: 'parallel' | 'exclusive'
-  secondRail={[…]}         // Z · exclusive only, optional
-  canvasToolbar={true}     // W only: true | false
-  ghostLabel="STARS"       // Y only
-  readout={['50 STARS']}   // Y only
-/>
-```
-
-**`StandbyField`:** not a standalone component/file — it's an internal
-sub-component defined inside `TabLayout.jsx` itself (rendered by Layout Y).
-Props: `ghostLabel`, `readout: string[]`, `cursorVisible`. The earlier plan to
-extract it to `shared/ui/StandbyField/` was not carried out; there was no need to.
+**What this table says about the system:** X·half carries 16 of the 18 `TabLayout` tabs.
+Y, Z and W each have exactly one consumer — Contributions for Y and Z, Adaptive Map Helper
+for W. They are real, implemented and correct, but they are not yet load-bearing; a change
+to any of them has a very small blast radius today.

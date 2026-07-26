@@ -280,15 +280,27 @@ async function resolveTexture(texturePath, settings, mapName) {
 }
 
 // ── node-editor-load-texture ────────────────────────────────────────────────
+// Despite the name this is the app's general "give me a game .dds as RGBA"
+// call, and the Viewer3D tab uses it too rather than growing a fourth near-copy
+// of the same resolver. `textureBytes` is that tab's drag-and-drop path: a file
+// dropped from outside every allowlisted root cannot be opened by path, so the
+// renderer reads it and sends the bytes, and `texturePath` carries only the
+// filename for the extension check.
 ipcMain.handle('node-editor-load-texture', withPathGuard(
-  ({ texturePath }) => (isAbsolute(String(texturePath || '').replace(/\\/g, '/')) ? [texturePath] : []),
-  async (event, { texturePath, mapName } = {}) => {
+  ({ texturePath, textureBytes }) =>
+    (!textureBytes && isAbsolute(String(texturePath || '').replace(/\\/g, '/')) ? [texturePath] : []),
+  async (event, { texturePath, textureBytes = null, mapName } = {}) => {
     try {
-      const settings = readSettings();
-      const buf = await resolveTexture(texturePath, settings, mapName);
-      if (!buf) return { success: false, error: `texture not found: ${texturePath}` };
       if (!/\.dds$/i.test(String(texturePath))) {
         return { success: false, error: 'only .dds textures are supported' };
+      }
+      let buf;
+      if (textureBytes) {
+        buf = Buffer.from(textureBytes, 'base64');
+      } else {
+        const settings = readSettings();
+        buf = await resolveTexture(texturePath, settings, mapName);
+        if (!buf) return { success: false, error: `texture not found: ${texturePath}` };
       }
       const img = decodeDDSToRGBA(buf);
       if (!img?.data) return { success: false, error: 'unsupported DDS format (decode returned null)' };

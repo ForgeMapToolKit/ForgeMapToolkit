@@ -9,7 +9,7 @@
  * renderer imports, so we never parse Unity YAML at runtime.
  *
  * Usage:  node utils/generate-terraintypes.js [path-to-asset]
- * Output: src/components/Tabs/Scenery/TerrainType/terrainTypes.json
+ * Output: src/components/tabs/Emitter/TerrainType/terrainTypes.json
  *
  * The style enum comes from TerrainTypeLayerSettings.cs (0..7).
  */
@@ -18,7 +18,7 @@ const fs   = require('fs');
 const path = require('path');
 
 const DEFAULT_ASSET = 'D:\\FAFEditor\\Assets\\Scripts\\UI\\Tools\\Terrain\\TerrainTypes\\Layers Settings.asset';
-const OUT_PATH = path.join(__dirname, '..', 'src', 'components', 'Tabs', 'Scenery', 'TerrainType', 'terrainTypes.json');
+const OUT_PATH = path.join(__dirname, '..', 'src', 'components', 'tabs', 'Emitter', 'TerrainType', 'terrainTypes.json');
 
 const STYLE_NAMES = ['Default','Evergreen','RedRock','Desert','Tropical','Lava','Geothermal','Tundra'];
 

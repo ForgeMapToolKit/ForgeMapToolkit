@@ -181,7 +181,7 @@
 .ct-dropzone-grid.cols-2 { grid-template-columns: 1fr 1fr; }
 .ct-dropzone-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
-/* Background surface only — no boxed border (TAB_DESIGN_LAW §5: never a
+/* Background surface only — no boxed border (TAB_UI_CONTRACT §5: never a
    neutral surface *and* a neutral border at once). Affordance + state come
    from a top-edge tick, the same lift/ignite mechanic as .station: dormant
    at rest, brightens on hover, and reads the drop state (dragging/done/

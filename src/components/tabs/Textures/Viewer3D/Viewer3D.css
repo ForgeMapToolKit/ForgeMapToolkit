@@ -1,0 +1,339 @@
+/**
+ * Viewer3D.css — 3D Viewer tab.
+ *
+ * Akzent aus der Registry (TAB_CONTRACT §5); niemals eine Tab-Farbe direkt.
+ *
+ * Der Viewport ist eine freie Fläche im Sinne von TAB_UI_CONTRACT §12: er trägt
+ * eine Kontur, weil das Volumen ohne Rahmen keine Kante hat, und alles, was
+ * darüber schwebt, ist Beschriftung dieser Fläche — kein Block. Die Seitenspalte
+ * daneben folgt §4/§5 unverändert.
+ */
+
+.viewer3d-tab {
+  --tab-color:       var(--viewer3d-color);
+  --tab-glow:        var(--viewer3d-glow);
+  --tab-glow-strong: var(--viewer3d-glow-strong);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────────── */
+
+.v3-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
+  border-bottom: var(--line-sm) solid var(--ink-11);
+}
+
+.v3-tool-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.v3-tool-spacer { flex: 1; }
+
+.v3-tool-label {
+  font-size: var(--text-3xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+}
+
+.v3-modes {
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+/* Mode switch: the active one is carried by the accent underline, so no
+   resting border is needed and none is drawn (§5). */
+.v3-mode {
+  padding: var(--space-2xs) var(--space-sm);
+  border: 0;
+  background: none;
+  border-bottom: var(--line-md) solid transparent;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-50);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.v3-mode:hover:not(:disabled) { color: var(--ink-85); }
+
+.v3-mode.is-active {
+  color: var(--tab-color);
+  border-bottom-color: var(--tab-color);
+}
+
+.v3-mode:disabled {
+  color: var(--ink-25);
+  cursor: not-allowed;
+}
+
+/* ── Body ─────────────────────────────────────────────────────────────── */
+
+.v3-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+}
+
+.v3-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 19rem;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.v3-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ── Viewport ─────────────────────────────────────────────────────────── */
+
+.v3-viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  border: var(--line-sm) solid var(--ink-12);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.v3-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.v3-readout {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  max-width: 22rem;
+  pointer-events: none;
+}
+
+.v3-readout-name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  letter-spacing: 0.04em;
+  color: var(--ink-95);
+  margin-bottom: var(--space-xs);
+}
+
+.v3-readout-empty {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-38);
+}
+
+.v3-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3xs) var(--space-sm);
+  margin: 0;
+  font-size: var(--text-xs);
+}
+
+.v3-facts dt {
+  font-size: var(--text-3xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-38);
+  padding-top: 0.15em;
+}
+
+.v3-facts dd {
+  margin: 0;
+  color: var(--ink-85);
+  font-variant-numeric: tabular-nums;
+}
+
+.v3-fact-aside {
+  display: block;
+  font-size: var(--text-3xs);
+  color: var(--ink-40);
+  font-variant-numeric: normal;
+}
+
+.v3-warn { color: var(--status-warn-text); }
+
+.v3-viewport-actions {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+.v3-viewport-actions .is-on {
+  color: var(--tab-color);
+}
+
+/* Standing caveat, not a status: it is true for every frame this tab draws. */
+.v3-disclaimer {
+  position: absolute;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  font-size: var(--text-3xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-30);
+  pointer-events: none;
+}
+
+.v3-error,
+.v3-loading {
+  position: absolute;
+  bottom: var(--space-md);
+  right: var(--space-md);
+  font-size: var(--text-xs);
+  color: var(--ink-70);
+}
+
+.v3-error { color: var(--status-err); max-width: 60%; text-align: right; }
+
+/* ── Source ───────────────────────────────────────────────────────────── */
+
+.v3-full { width: 100%; }
+
+/* A drop target is one of §5's functional boxes: the outline *is* the
+   affordance, and it has nowhere else to live. */
+.v3-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3xs);
+  padding: var(--space-lg) var(--space-sm);
+  border: var(--line-sm) dashed var(--ink-18);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.v3-drop:hover,
+.v3-drop.is-dragging {
+  border-color: var(--tab-color);
+  background: var(--tab-glow);
+}
+
+.v3-drop-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-70);
+}
+
+.v3-drop-hint {
+  font-size: var(--text-3xs);
+  color: var(--ink-38);
+}
+
+.v3-file-input { display: none; }
+
+.v3-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.v3-current-name {
+  font-size: var(--text-sm);
+  color: var(--ink-92);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v3-scale-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.v3-scale.is-on {
+  color: var(--tab-color);
+  border-color: var(--tab-color);
+}
+
+.v3-note {
+  font-size: var(--text-3xs);
+  line-height: 1.6;
+  color: var(--ink-40);
+}
+
+.v3-panel-error {
+  font-size: var(--text-3xs);
+  line-height: 1.6;
+  color: var(--status-err);
+}
+
+/* ── Reference ────────────────────────────────────────────────────────── */
+
+.v3-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--ink-80);
+  cursor: pointer;
+}
+
+.v3-ref-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.v3-ref {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-2xs) var(--space-xs);
+  border: 0;
+  border-left: var(--line-md) solid transparent;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--ink-65);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.v3-ref:hover:not(:disabled) { color: var(--ink-92); }
+
+.v3-ref.is-active {
+  color: var(--ink-95);
+  border-left-color: var(--tab-color);
+}
+
+.v3-ref:disabled {
+  color: var(--ink-25);
+  cursor: not-allowed;
+}
+
+.v3-ref-label { font-size: var(--text-sm); }
+
+.v3-ref-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-35);
+}

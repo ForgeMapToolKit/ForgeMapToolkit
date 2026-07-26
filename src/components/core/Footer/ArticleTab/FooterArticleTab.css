@@ -3,7 +3,7 @@
 
    ─── LAYOUT D — DOCUMENT ─────────────────────────────────────────────────
    One of five tab-layout patterns alongside TabLayout's X/Y/Z/W (see
-   shared/ui/TabLayout/TabLayout.jsx). X/Y/Z/W all assume a multi-section
+   shared/Ui/TabLayout/TabLayout.jsx). X/Y/Z/W all assume a multi-section
    tool: a rail to switch sections, a controls column, an aside/canvas.
    Layout D is for the opposite case — a single static document with no
    sections to switch between, no controls-vs-preview split. Just a header

@@ -1,5 +1,5 @@
 import React from 'react';
-import Settings from '../../Tabs/Config/Settings/Settings.jsx';
+import Settings from '../../Tabs/System/Settings/Settings.jsx';
 
 const FirstRunModal = ({ onDone, onSkip }) => (
   <div style={{

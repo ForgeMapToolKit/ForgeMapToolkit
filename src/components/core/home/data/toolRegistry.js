@@ -7,9 +7,14 @@
  *
  * Adding a new tool:
  *  1. Add its accent variables to the design-system SSOT
- *     shared/design-system/tokens.css (--<id>-color / -glow / -glow-strong)
+ *     shared/DesignSystem/tokens.css (--<id>-color / -glow / -glow-strong)
  *  2. Add one entry to TOOLS below — home screen and navbar pick it up automatically
- *  3. Register its component + route in ForgeMapToolkit.jsx
+ *  3. Register its component + route in tabRoutes.jsx
+ *
+ * The `category` field is not just navigation metadata: `src/components/tabs/`
+ * mirrors it on disk, one folder per category navLabel (Emitter, Scenery, Skybox,
+ * Textures, MapTools, System, Community). Changing a tool's category means moving
+ * its folder too, or the two drift apart again.
  *
  * Field reference:
  *  - color/glow/glowStrong: CSS color strings used for accent injection
@@ -187,6 +192,19 @@ export const TOOLS = [
     status: 'active',
   },
   {
+    id: 'viewer3d',
+    label: '3D Viewer',
+    category: 'textures',
+    index: '21',
+    color: 'var(--viewer3d-color)',
+    glow: 'var(--viewer3d-glow)',
+    glowStrong: 'var(--viewer3d-glow-strong)',
+    colorVar: '--viewer3d-color',
+    description: 'Inspect a prop in 3D against a unit for scale.',
+    navDescription: 'Load a .scm mesh with its albedo and stand it on an ogrid grid beside a unit from your installation — so scale, proportion and pivot are judged before the map is packed. Waves and sky views share this viewer later.',
+    status: 'active',
+  },
+  {
     id: 'scmaptool',
     label: 'SCMAP Tool',
     category: 'maptools',
@@ -236,6 +254,45 @@ export const TOOLS = [
     colorVar: '--mapresizer-color',
     description: 'Resize any FA map to a new grid — heightmap, textures, props, markers and areas scaled proportionally.',
     navDescription: 'Resize any FA map — heightmap, textures, props and markers all scaled proportionally.',
+    status: 'active',
+  },
+  {
+    id: 'biomechanger',
+    label: 'Biome Changer',
+    category: 'maptools',
+    index: '22',
+    color: 'var(--biomechanger-color)',
+    glow: 'var(--biomechanger-glow)',
+    glowStrong: 'var(--biomechanger-glow-strong)',
+    colorVar: '--biomechanger-color',
+    description: 'Rebuild a map\'s whole look from a biome preset.',
+    navDescription: 'Try a whole biome on a finished map in one move — layer textures, normals, water, lighting, skybox, minimap and props swapped as one coherent set, so you can judge whether the map wants to be autumn or desert instead of guessing.',
+    status: 'active',
+  },
+  {
+    id: 'symmetrychecker',
+    label: 'Symmetry Checker',
+    category: 'maptools',
+    index: '23',
+    color: 'var(--symmetrychecker-color)',
+    glow: 'var(--symmetrychecker-glow)',
+    glowStrong: 'var(--symmetrychecker-glow-strong)',
+    colorVar: '--symmetrychecker-color',
+    description: 'Verify that a map is exactly mirrored — terrain, props, markers, civilians.',
+    navDescription: 'Prove a map is fair instead of assuming it. Every layer is compared against its own reflection — heightmap, terrain types, texture and water masks, props, decals, markers and civilian units — with the deviation located on the map and written out as a report.',
+    status: 'active',
+  },
+  {
+    id: 'floatingtrees',
+    label: 'Floating Trees',
+    category: 'maptools',
+    index: '24',
+    color: 'var(--floatingtrees-color)',
+    glow: 'var(--floatingtrees-glow)',
+    glowStrong: 'var(--floatingtrees-glow-strong)',
+    colorVar: '--floatingtrees-color',
+    description: 'Find props that do not sit on the ground — floating tree groups, buried trunks, stale placements.',
+    navDescription: 'The editor snaps a prop to the terrain at one point: its origin. A tree group is a dozen trees on one flat plane, so along a cliff or a ramp the outer trees keep the centre\'s elevation and hang in the air while the uphill ones sink into the hill. This measures the terrain under every individual tree, clusters the offenders into places worth visiting, and names the asset that keeps failing. Works on any prop, not just trees.',
     status: 'active',
   },
   {

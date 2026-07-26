@@ -49,7 +49,7 @@
   composition at a maximum width and **center/contain** it, so excess pixels are
   distributed as balanced margin on *both* sides, not accumulated as one large empty
   block on the left.
-  (Technically regulated in TAB_DESIGN_LAW §8.)
+  (Technically regulated in TAB_UI_CONTRACT §8.)
 
 ## 2. Color — Three Roles
 
@@ -80,8 +80,9 @@ already, and correctly, uses more than one color at rest.
   legitimately carry an edge / swatch.
 
 **A fourth axis, not a fourth role — light/dark mode.** A light theme exists
-(`Shared/DesignSystem/tokens-light.css`, toggled via a `data-theme` attribute driven
-by a user setting) alongside dark. Under light mode, Role 1 deliberately
+(`shared/DesignSystem/tokens-light.css`, toggled via a `data-theme` attribute set on
+`documentElement` in `core/ForgeMapToolkit.jsx` from `settings.colorTheme`) alongside
+dark. Under light mode, Role 1 deliberately
 **collapses every tab's individual hue to one shared accent** instead of keeping
 per-tab identity colors distinct. This is not a violation of "one identity color
 per tab" — light mode is a different *rendering* of the same role, not a second
@@ -152,7 +153,7 @@ two channels into one and wastes the contrast.
   exceptions for opening moments (panel open), not for recurring interaction.
 - Glow effects are coupled exclusively to interaction states (hover / active), never
   permanent — otherwise the effect loses its signal value. (The decorative ghost index
-  was discarded for exactly this reason — see TAB_DESIGN_LAW §2.)
+  was discarded for exactly this reason — see TAB_UI_CONTRACT §2.)
 - Primary CTAs may carry the strongest motion / glow effect in their context — this
   unambiguously marks them as "next step."
 
@@ -169,7 +170,7 @@ two channels into one and wastes the contrast.
   A field is text on a line — and that (functional T2) line is **always visible, even in
   the empty state**. An empty field must never be bare placeholder text without a line;
   otherwise it is indistinguishable from a label. The line is the affordance; the
-  placeholder sits on top of it. (Technically regulated in TAB_DESIGN_LAW §4 / §5.)
+  placeholder sits on top of it. (Technically regulated in TAB_UI_CONTRACT §4 / §5.)
 - Placeholder text (phase-X hints, etc.) must remain clearly recognizable as such — it
   must not be treated stylistically as final content.
 
@@ -185,25 +186,47 @@ two channels into one and wastes the contrast.
 
 ---
 
-## Relationship to TAB_CONTRACT.md
+## Where this document sits
 
 | Document | Answers |
 |---|---|
-| `UI_PHILOSOPHY.md` (this) | *Why* does a tab look the way it does? Which hierarchy / color / motion decision is correct? |
+| `UI_PHILOSOPHY.md` (this) | *Why* does a tab look the way it does? Which hierarchy / color / motion decision is correct? Consult it when a new case has **no** rule yet. |
+| `TAB_UI_CONTRACT.md` | *Which* concrete rules (loudness, staircase, lines, trace, color roles) apply as law per tab surface? The normative text. |
 | `TAB_CONTRACT.md` | *How* is it built technically? File structure, state contracts, token obligations, IPC security. |
-| `TAB_DESIGN_LAW.md` | *Which* concrete rules (loudness, staircase, lines, trace, color roles) apply as law per tab surface? |
+| `LAYOUTS.md` | *Which* of the four layout shells (X/Y/Z/W) a section uses, and the `TabLayout` API. |
+| `PROJECT_STRUCTURE.md` | *Where* everything lives. |
+| `TECH_DECISIONS.md` | *Why* Electron + React + Vite. |
 
-All three reference the same token source (`Shared/DesignSystem/tokens.css`). If a
-principle changes here, check whether TAB_DESIGN_LAW and TAB_CONTRACT.md §5 (styling
-contract) need to be updated as well — and vice versa.
+All of them reference the same token source
+(`src/components/shared/DesignSystem/tokens.css`). If a principle changes here, check
+whether TAB_UI_CONTRACT and TAB_CONTRACT §5 (styling contract) need updating too — and
+vice versa.
 
-> Verified against the three gold-standard tabs (`Tabs/Emitter/{Wreckage,Props,
-> Emitter}`) as of 2026-07-08. Path shown above updated for the `shared/` → `Shared/`
-> rename; principles unchanged.
+**On the overlap with TAB_UI_CONTRACT.** §2 (color roles) and §3 ("size and color are
+decoupled") of this document are also written out in TAB_UI_CONTRACT §7 and §2. That is
+deliberate duplication of the *reasoning*, but only one of the two is normative: **when
+the two texts disagree, TAB_UI_CONTRACT wins and this document is the one that gets
+corrected.** Philosophy explains why the rule exists; the Law is what a reviewer and
+`scripts/design-lint.mjs` measure against.
+
+> Path note: on disk the folders are lowercase (`src/components/shared/…`) while imports
+> write them PascalCase. See PROJECT_STRUCTURE.md — it is a known, unresolved
+> inconsistency, not a typo here.
+
+> **Compliance is measured, not assumed.** `npm run lint:design` reports the current
+> state per tab; the numbers live in TAB_UI_CONTRACT's scope section. As of 2026-07-26,
+> seven tabs are fully clean and the largest remaining block is the legacy help modals.
 
 ---
 
 ## Changelog
+
+**2026-07-26 — no principle changed; references corrected.** Rewrote the closing section
+("Relationship to TAB_CONTRACT.md" → "Where this document sits") to list all six
+documents rather than three, named TAB_UI_CONTRACT explicitly as the normative text where
+the two overlap on color roles and size/color decoupling, replaced the stale
+"verified against the three gold-standard tabs" note with a pointer to the measured lint
+numbers, and corrected paths to the on-disk lowercase form.
 
 **2026-07-08 — added the light/dark mode note to §2 (Role 1 collapses to a shared
 accent in light mode; not a new role, just a second rendering). No principle

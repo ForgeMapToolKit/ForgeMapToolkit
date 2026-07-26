@@ -276,7 +276,7 @@ ipcMain.handle('read-guide', async (event, mdFile) => {
 });
 
 // ── read-footer-article ───────────────────────────────────────────────────────
-// Reads a pre-rendered HTML article from src/components/Core/Footer/content/.
+// Reads a pre-rendered HTML article from src/components/core/Footer/content/.
 // Mirrors the security model of 'read-guide': only bare filenames allowed,
 // no path separators, must end in .html.
 //
@@ -291,7 +291,7 @@ ipcMain.handle('read-footer-article', async (event, htmlFile) => {
 
   const contentDir = path.join(
     app.getAppPath(),
-    'src', 'components', 'Core', 'Footer', 'content'
+    'src', 'components', 'core', 'Footer', 'content'
   );
   const filePath = path.join(contentDir, htmlFile);
 

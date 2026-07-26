@@ -1,0 +1,35 @@
+/**
+ * Scene3D.css — the mount point for a WebGL canvas, and nothing else.
+ *
+ * The canvas is positioned absolutely by the engine, so all this element does
+ * is establish the containing block and fill whatever the host gives it. No
+ * surface, no border: the viewport's frame belongs to the tab around it
+ * (TAB_UI_CONTRACT §12), not to the shared layer.
+ */
+
+.scene3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.scene3d:active {
+  cursor: grabbing;
+}
+
+.scene3d--failed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.scene3d-fallback {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+}

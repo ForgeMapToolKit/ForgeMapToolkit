@@ -1,5 +1,5 @@
 import React from "react";
-import '../Tools/PreviewImage/PreviewImage.css';
+import '../MapTools/PreviewImage/PreviewImage.css';
 
 // ── PreviewImageHelpModal ──────────────────────────────────────────────────────
 

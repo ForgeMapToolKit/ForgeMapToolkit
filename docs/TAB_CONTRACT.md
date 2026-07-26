@@ -1,21 +1,30 @@
 # Tab-Contract — Authoring-Guide für ForgeMapToolkit-Tabs
 
-> Neu geschrieben 2026-07-08, um den tatsächlichen Code abzubilden. Die vorige
-> Fassung beschrieb den Stand vor dem PascalCase-Rename (`shared/`, `tabs/`,
-> `WorkspaceConsole`, `EntityConsole`) — der Rename ist gelandet, Pfade und
-> Komponentennamen haben sich geändert.
+> **Gegen den Code geprüft am 2026-07-26.**
 >
-> Verbindliche Bauanleitung für einen Tab im **neuen UI-System**. Wer einen Tab neu
-> baut oder migriert (du oder eine andere KI), folgt diesem Contract → das Ergebnis
-> ist konsistent zu Wreckage/Props/Emitter (Gold-Standard) ohne Repo-weites Vorwissen.
+> Verbindliche Bauanleitung für einen Tab im UI-System. Wer einen Tab neu baut oder
+> migriert (du oder eine andere KI), folgt diesem Contract → das Ergebnis ist
+> konsistent zum Rest der App ohne Repo-weites Vorwissen.
 >
-> **Scope-Hinweis:** Nur diese drei Tabs sind heute vollständig auf diesem Contract.
-> Die meisten anderen Tabs (Skybox, Stars, RockErosion, Trees, Settings, History,
-> Contributions, …) sind noch nicht oder nur teilweise migriert — ihr Code ist
-> **keine** Referenz. Siehe `ROADMAP.md` Phase 2 für den Rollout-Stand.
+> **Scope-Hinweis (Ist-Stand):** Der Rollout ist durch — 19 von 25 Tab-Komponenten
+> rendern `TabLayout`. Die sechs Ausnahmen sind bewusst oder tot, nicht "noch offen":
+> `System/Settings` und `System/CliTerminal` (eigene Shell, absichtlich),
+> `Textures/TextureEditor` (Graph-Canvas, TAB_UI_CONTRACT §11),
+> `Textures/Viewer3D` (3D-Viewport, TAB_UI_CONTRACT §12), `Guides` (noch nicht
+> geroutet), `CoOp` (toter Code). Details in `PROJECT_STRUCTURE.md`.
+>
+> *Auf `TabLayout` zu sein heißt nicht, `TAB_UI_CONTRACT` zu erfüllen.* Das misst
+> `npm run lint:design`; die aktuellen Zahlen stehen in `TAB_UI_CONTRACT.md`.
 >
 > Referenz-Implementierungen zum Abschauen:
-> `src/components/Tabs/Emitter/{Wreckage,Props,Emitter}/`.
+> `src/components/tabs/Emitter/{Wreckage,Props,Emitter}/` — die ältesten Tabs auf dem
+> System und weiterhin die saubersten (je 0–2 Lint-Findings).
+>
+> ⚠️ **Pfad-Schreibweise:** Auf der Platte heißen die Ordner **klein**
+> (`src/components/shared/`, `.../tabs/`), alle Imports schreiben sie **groß**
+> (`Shared/`, `Tabs/`). Das funktioniert nur auf case-insensitiven Dateisystemen.
+> Dieses Dokument nutzt die Import-Schreibweise, weil du sie beim Schreiben von Code
+> brauchst. Hintergrund: `PROJECT_STRUCTURE.md`.
 
 ---
 
@@ -27,7 +36,7 @@
 3. **Layout/Chrome kommt aus `Shared/`** — `TabLayout` + `EntityPanel`.
 4. **Styling nur über Design-System-Tokens** + `--tab-color`. Keine Hex/px im Tab.
 5. **Hilfe nur über `HelpPanel`.** Neue IPC-Channels nur mit Preload-Allowlist + Guard.
-   (Aktueller Ist-Stand: nur Wreckage folgt Regel 5 vollständig — siehe §7.)
+   (Ist-Stand: 6 von 19 Tabs mit Hilfe folgen Regel 5 — siehe §7.)
 
 ---
 
@@ -40,7 +49,7 @@ Tabs/<Bereich>/<Name>/
   Configuration.jsx      ← Sektion 01
   <Entities>.jsx          ← Sektion 02 (Units / PropList / Emitters …)
   Export.jsx              ← Sektion 03 (letzte Sektion)
-  Help.jsx                ← Hilfe via HelpPanel (nur Wreckage bisher, s. §7)
+  Help.jsx                ← Hilfe via HelpPanel (s. §7)
 ```
 
 Sektions-Dateien tragen **keinen Tab-Präfix** mehr im Dateinamen (`Configuration.jsx`,
@@ -85,10 +94,14 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
 `pt_` (Props), `em_` (Emitter). Neuer Tab → neues, eindeutiges Kürzel.
 
 ### Shared-Bausteine (Import aus `Shared/`)
-- **`Shared/MapLogic`** (`index.js`): `usePersistentState`, `useMapInfo`,
-  `useScmapPreview`, `getMirroredCoords`, `kmLabel`, `ensureDir`, `writeFile`,
-  `readFile`, `injectPropsLua`, `resolveToolkitEmitterPublicPaths`,
-  `drawPlacementCanvas`.
+- **`Shared/MapLogic`** (`index.js`) — die vollständige öffentliche Fläche:
+  - Hooks: `usePersistentState`, `useMapInfo`, `useScmapPreview`, `useTerrainData`
+  - Re-Exports (`export *`): `mapGeometry` (`getMirroredCoords`, `kmLabel`, …),
+    `scmapIO` (`ensureDir`, `writeFile`, `readFile`, `injectPropsLua`,
+    `resolveToolkitEmitterPublicPaths`, …), `mapCanvas` (`drawPlacementCanvas`, …)
+  - Terrain: `createTerrainSampler`, `loadImageChannel`, `sampleChannel`,
+    `STRATUM_SLOTS`, `shaderUsesHalfRange`, `computeDominantStratum`,
+    `buildTerrainTypeBytes`
   > Ein Hook namens `useEmitterCategories` existiert **nicht** (mehr) — die
   > alte "Matching-Mode"-Sektion mit eigener Tab-Stufe wurde ersetzt durch
   > `EmitterToggleBlock` innerhalb der Entity-Karte (Declare-Source /
@@ -98,11 +111,17 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
   `MirrorDropdown`, `EmitterToggleBlock`, `ToggleSwitch`, `DropSlot`, `useFileDrop`.
 - **`Shared/Ui/TabLayout/TabLayout.jsx`**: die Konsolen-Shell (Sektions-Rail,
   Aside-/Standby-/Grid-/Toolbar-Slot je nach `layoutMode`). Nimmt `sections`,
-  `activeSection`, `onSelect`, `layoutMode` (`'x'|'y'|'z'|'w'`, s.
-  `docs/LAYOUTS.md`), `asideSlot`, `asideMirror`, `asideCaption`, `renderEyebrow`.
+  `activeSection`, `onSelect`, `layoutMode` (`'x'|'y'|'z'|'w'`, Default `'x'`),
+  `asideSlot`, `asideMirror`, `asideCaption`, `renderEyebrow` u. a. —
+  **die vollständige Prop-Liste mit echten Defaults steht in `docs/LAYOUTS.md`.**
+  Eigene CSS-Datei hat `TabLayout` nicht; die Klassen liegen in
+  `Shared/DesignSystem/layout.css`.
   Rail-Pin/Collapse-Status ist app-weit, nicht pro Tab — persistiert intern unter
   einem einzigen `localStorage`-Key (`RAIL_PINNED_KEY`), kein `railStorageKey`-Prop
-  mehr. Emitter-Tabs nutzen ausschließlich `layoutMode="x"`.
+  mehr.
+  > Faustregel: **nichts übergeben = `layoutMode="x"` + `controlsWidth="half"`**,
+  > und genau das nutzen 15 der 17 Tabs auf `TabLayout`. `controlsWidth="fixed"`
+  > nutzt derzeit kein einziger Tab.
 - **`Shared/Libraries/{UnitLibrary,EmitterLibrary,PropsLibrary}`**: die
   Overlay-Bibliotheken (z. B. `UnitLibraryOverlay`, `EmitterLibraryOverlay`),
   eigenständig importiert, nicht Teil von `EntityPanel`.
@@ -153,8 +172,12 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
   Der Token-Id entspricht dem Tab-Id aus der Registry (z. B. `wreckages`, Plural —
   nicht `wreckage`).
 - Neue Tab-Farbe? **Einen Block** in `tokens.css` (§11) + je einen Eintrag in
-  `Core/Home/Data/toolRegistry.js` (Nav-Metadaten) und `Core/tabRoutes.jsx`
-  (Render-Wiring). Sonst nichts.
+  `core/home/data/toolRegistry.js` (Nav-Metadaten) und `core/tabRoutes.jsx`
+  (Render-Wiring). Sonst nichts. Die `id` muss in allen drei identisch sein.
+  > Warnung zur Schreibweise: `toolRegistry.js` wird im Bestand mit **zwei**
+  > verschiedenen Casings importiert (`../home/data/…` und `../Home/Data/…`) —
+  > beide zeigen auf dieselbe Datei und funktionieren nur wegen des
+  > case-insensitiven Dateisystems. Neue Imports bitte klein schreiben.
 - Werte (Spacing/Typo/Ink/Lines/Radius/Shadow) **nur** über Tokens (`--space-*`,
   `--text-*`, `--ink-*`, `--line-*`, `--radius-*`, `--shadow-*`). Keine
   Magic-Numbers/Hex im Tab-CSS.
@@ -162,7 +185,7 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
   ins CSS mit Tokens.
 - **Lichtmodus existiert.** `tokens-light.css` kollabiert die Pro-Tab-Akzente auf
   einen gemeinsamen Steel-Akzent, getoggelt über `document.documentElement.dataset.theme`
-  (aus `settings.colorTheme`, gesetzt in `Core/ForgeMapToolkit.jsx`). Referenziere
+  (aus `settings.colorTheme`, gesetzt in `core/ForgeMapToolkit.jsx`). Referenziere
   immer `var(--tab-color)` — nie die Registry-Variable direkt — damit der Tab in
   beiden Modi korrekt einfärbt.
 
@@ -184,16 +207,32 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
   `Shared/Ui/HelpPanel/Sections/index.js` (`WorkflowSection`, `MediaSection`,
   `TroubleshootSection`, `ShortcutsSection`, `CodeSection`).
   Vorlage: `Tabs/Emitter/Wreckage/Help.jsx`.
-- **Ist-Stand**: Nur **Wreckage** folgt diesem Muster. **Props und Emitter binden
-  weiterhin `Tabs/HelpModals/{Props,Emitter}_help.jsx`** ein — eigenständige
-  Modal-Komponenten ohne `HelpPanel`-Anbindung, eigenes Markup, `--tab-color` inline
-  gesetzt. Das ist kein Dokufehler, sondern eine offene, kleine Migrationsaufgabe:
-  beim nächsten Berühren von Props/Emitter auf das `Help.jsx`+`HelpPanel`-Muster
-  umstellen.
-- `Tabs/HelpModals/` bleibt für die noch nicht migrierten Tabs bestehen; für
-  Wreckage/Props/Emitter ist nur `Props_help.jsx`/`Emitter_help.jsx` noch aktiv
-  referenziert (`Wreckage_help.jsx` dort ist tot — die lebende Wreckage-Hilfe ist
-  `Wreckage/Help.jsx`).
+
+- **Ist-Stand (2026-07-26)** — sechs Tabs sind auf `HelpPanel`:
+
+  | Auf `HelpPanel` (`Help.jsx`) | Noch auf `Tabs/HelpModals/*_help.jsx` |
+  |---|---|
+  | `Emitter/Wreckage` | `Emitter/Props` · `Emitter/Emitter` |
+  | `Emitter/TerrainType` | `Scenery/CustomProps` · `Scenery/RockErosion` · `Scenery/Trees` |
+  | `Textures/WaveNormals` | `Skybox/Stars` |
+  | `Skybox/SkyboxGenerator` | `MapTools/{AdaptiveMapHelper,MapResizer,PreviewImage,Scmap}` · `System/History` |
+  | `MapTools/BiomeChanger` | `Community/Contributions` |
+  | `MapTools/FloatingTrees` | |
+
+  Die Modal-Variante ist eigenständiges Markup ohne `HelpPanel`-Anbindung, mit inline
+  gesetztem `--tab-color`. Das ist kein Dokufehler, sondern eine offene
+  Migrationsaufgabe: beim nächsten Berühren eines dieser Tabs auf
+  `Help.jsx` + `HelpPanel` umstellen.
+
+- **Toter Code in `Tabs/HelpModals/`:** `Wreckage_help.jsx` wird von niemandem mehr
+  importiert (die lebende Wreckage-Hilfe ist `Wreckage/Help.jsx`) — kann weg.
+  Umgekehrt importiert `CoOp.jsx` ein `CoopVersioner_help.jsx`, **das es nicht gibt**;
+  der CoOp-Tab ist deshalb ohnehin nicht baubar und nicht geroutet
+  (s. `PROJECT_STRUCTURE.md`).
+
+- `design-lint` sieht die Modals: die 13 `*_help.jsx` stellen mit ~180 ORPHAN-Findings
+  den mit Abstand größten Block der Lint-Ausgabe. Wer einen Tab auf `HelpPanel`
+  umstellt, räumt damit automatisch einen zweistelligen Findings-Block ab.
 
 ---
 
@@ -201,6 +240,8 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
 
 - Jeder neue Channel muss in der **Preload-Allowlist** stehen (`electron/preload.js`,
   `INVOKE_CHANNELS`-Set), sonst wird `invoke()` mit einem Fehler abgewiesen.
+  Größenordnung: derzeit **123 `ipcMain.handle`-Kanäle über 25 Module** in
+  `electron/modules/`.
 - Datei-schreibende/-lesende Handler **müssen** durch `withPathGuard`
   (`electron/modules/file-ipc.js`, basierend auf `electron/modules/security.js`)
   laufen. `isPathAllowed()` prüft den aufgelösten Zielpfad gegen statische Roots
@@ -221,7 +262,11 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
 - [ ] Tab-Farbe via `var(--<id>-…)` aus `tokens.css` §11; keine Hex/px im Tab;
       funktioniert in Light- und Dark-Mode.
 - [ ] Emitter-Zuordnung (falls zutreffend) über `EmitterToggleBlock`, nicht neu gebaut.
-- [ ] Hilfe über `HelpPanel` (`Help.jsx`) — bei Props/Emitter derzeit noch offen (§7).
+- [ ] Hilfe über `HelpPanel` (`Help.jsx`) — bei 13 Tabs noch offen (§7).
 - [ ] `npm run build` grün.
+- [ ] `npm run lint:design <TabName>` ohne ORPHAN/FOREIGN (die beiden lassen den Lauf
+      mit Exit-Code 1 fehlschlagen). BOXED/LITERAL werden gemeldet, brechen aber nicht —
+      dort ist eine menschliche Entscheidung nötig (§5 funktionale Boxen, §7 Datenfarbe).
+- [ ] `npm run lint` (ESLint) grün.
 - [ ] App-Smoke-Test: Map laden → mapInfo-Badge + Preview → Sektionen durchklicken →
       Generate (SCMAP-Repack **und** Raw-Lua) → Tab wechseln/zurück (State bleibt).

@@ -47,7 +47,7 @@
   --space-3xl: 64px;
   --space-4xl: 72px;
 
-  /* ═══ §2b STAIRCASE — TAB_DESIGN_LAW §2 ══════════════════════════
+  /* ═══ §2b STAIRCASE — TAB_UI_CONTRACT §2 ══════════════════════════
      One responsive step unit for the three-level positional hierarchy:
        Title    = flush left  (step 0)
        Subtitle = 1 × step    (step 1)
@@ -335,6 +335,11 @@
   --node-editor-glow:        rgba(190, 155, 123, 0.35);
   --node-editor-glow-strong: rgba(190, 155, 123, 0.60);
 
+  /* 3D Viewer — Indigo */
+  --viewer3d-color:       #6C63FF;
+  --viewer3d-glow:        rgba(108, 99, 255, 0.35);
+  --viewer3d-glow-strong: rgba(108, 99, 255, 0.60);
+
   /* SCMAP Tool — Yellow */
   --scmaptool-color:       #FFFA00;
   --scmaptool-glow:        rgba(255, 250, 0, 0.35);
@@ -354,6 +359,21 @@
   --mapresizer-color:       #00E5CC;
   --mapresizer-glow:        rgba(0, 229, 204, 0.20);
   --mapresizer-glow-strong: rgba(0, 229, 204, 0.45);
+
+  /* Biome Changer — Moss green */
+  --biomechanger-color:       #7FB069;
+  --biomechanger-glow:        rgba(127, 176, 105, 0.30);
+  --biomechanger-glow-strong: rgba(127, 176, 105, 0.55);
+
+  /* Symmetry Checker — Warm stone grey */
+  --symmetrychecker-color:       #6e675d;
+  --symmetrychecker-glow:        rgba(110, 103, 93, 0.30);
+  --symmetrychecker-glow-strong: rgba(110, 103, 93, 0.55);
+
+  /* Floating Trees — Pale birch */
+  --floatingtrees-color:       #9db38c;
+  --floatingtrees-glow:        rgba(157, 179, 140, 0.30);
+  --floatingtrees-glow-strong: rgba(157, 179, 140, 0.55);
 
   /* Preview Image — Pink */
   --previewimage-color:       #FF007A;

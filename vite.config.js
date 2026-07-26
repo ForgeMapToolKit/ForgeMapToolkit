@@ -13,7 +13,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main:        path.resolve(__dirname, 'index.html'),
-        'scmap-popout': path.resolve(__dirname, 'src/components/Tabs/Tools/Scmap/PopOut/scmapPopout.html'),
+        'scmap-popout': path.resolve(__dirname, 'src/components/tabs/MapTools/Scmap/PopOut/scmapPopout.html'),
       },
       output: {
         manualChunks(id) {

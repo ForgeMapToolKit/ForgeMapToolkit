@@ -270,7 +270,7 @@ async function groupPropFiles(bpFiles, scmFiles, texFiles) {
 // ── FolderDropZone — shared drag-a-whole-folder tile ──────────────────────────
 // variant: 'neutral' | 'ok' | 'warn' | 'error' — colours the folder name +
 // detail line once a folder has been dropped (a finite, data-driven enum —
-// expressed as a class modifier, not inline hex, per TAB_DESIGN_LAW §5).
+// expressed as a class modifier, not inline hex, per TAB_UI_CONTRACT §5).
 function FolderDropZone({ folderName, fileList, onFolder, detail, variant = 'neutral', title = 'Drop Folder Here', sub = 'or click to select a folder' }) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef(null);

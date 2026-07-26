@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * design-lint — mechanical enforcement of docs/TAB_DESIGN_LAW.md.
+ * design-lint — mechanical enforcement of docs/TAB_UI_CONTRACT.md.
  *
  * Reskinning an existing UI onto the design system fails in a way that reviewing
  * class *names* does not catch: the names look current while the shapes are still

@@ -1,0 +1,217 @@
+/* Floating Trees — tab-specific exceptions only.
+   Layout/chrome come from TabLayout; the overlay picker is the shared Dropdown
+   and the toggles are .ctrl-toggle-row. All values via design-system tokens; the
+   accent maps from the registry (tokens.css §11).
+
+   One deliberate colour decision, the same one SymmetryChecker makes: the
+   verdict and the per-row severity ticks carry --status-ok/warn/err, not
+   --tab-color. That is §7 Role 3 (system feedback) — "does this tree touch the
+   ground" is the answer, not the tab's identity, so it must not change hue with
+   the tab. The canvas overlay draws the same two hues as raw rgba because it
+   paints into a bitmap rather than applying CSS. */
+
+.floatingtrees-tab {
+  --tab-color:       var(--floatingtrees-color);
+  --tab-glow:        var(--floatingtrees-glow);
+  --tab-glow-strong: var(--floatingtrees-glow-strong);
+  background-color: var(--surface-canvas);
+  /* flex / overflow:hidden / dot-grid inherited from .trace-tab */
+}
+
+/* ── Legend-rail escape hatch (same pattern as SymmetryChecker/RockErosion) ── */
+.floatingtrees-tab .workspace-main-inner--half { overflow: visible; }
+.floatingtrees-tab .preview-panel              { overflow: visible; }
+
+.floatingtrees-tab .section-content,
+.floatingtrees-tab .ec-legend-cards,
+.floatingtrees-tab .preview-panel-body { scrollbar-width: none; }
+.floatingtrees-tab .section-content::-webkit-scrollbar,
+.floatingtrees-tab .ec-legend-cards::-webkit-scrollbar,
+.floatingtrees-tab .preview-panel-body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── meta / notes ── */
+.ft-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  letter-spacing: 0.03em;
+}
+.ft-meta b { color: var(--tab-color); font-weight: 600; }
+
+.ft-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  letter-spacing: 0.03em;
+}
+
+.ft-hint {
+  font-size: var(--text-2xs);
+  color: var(--ink-28);
+  line-height: 1.55;
+}
+
+.ft-empty {
+  font-size: var(--text-xs);
+  color: var(--ink-30);
+  line-height: 1.6;
+}
+
+/* Status containers (§5): a wash plus one edge in the SAME feedback hue is
+   signal, not a generic box. */
+.ft-error,
+.ft-warn {
+  margin-top: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+.ft-error {
+  background: var(--status-err-wash);
+  border-left: 2px solid var(--status-err);
+  color: var(--status-err-bright);
+}
+.ft-warn {
+  background: var(--status-warn-wash);
+  border-left: 2px solid var(--status-warn-edge);
+  color: var(--status-warn-text);
+}
+
+/* ── controls ── */
+/* Spacing only — .ctrl-toggle-row supplies the track/pole/label mechanic. */
+.ft-toggle { margin-bottom: var(--space-xs); }
+.ft-range { accent-color: var(--tab-color); width: 100%; }
+
+/* ── verdict banner ──────────────────────────────────────────────────────
+   Carries feedback colour (§7 Role 3): one left edge in the state hue, wash of
+   the same hue. No neutral frame. */
+.ft-verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-xs) var(--space-sm);
+  border-left: 2px solid var(--ft-hue, var(--ink-25));
+  background: var(--ft-wash, transparent);
+}
+.ft-verdict--pass { --ft-hue: var(--status-ok);   --ft-wash: var(--status-ok-wash); }
+.ft-verdict--near { --ft-hue: var(--status-warn); --ft-wash: var(--status-warn-wash); }
+.ft-verdict--fail { --ft-hue: var(--status-err);  --ft-wash: var(--status-err-wash); }
+.ft-verdict--skip { --ft-hue: var(--ink-25); }
+.ft-verdict-word {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semi);
+  letter-spacing: var(--track-base);
+  text-transform: uppercase;
+  color: var(--ft-hue, var(--ink-72));
+}
+.ft-verdict-note {
+  font-size: var(--text-2xs);
+  color: var(--ink-45);
+  line-height: 1.5;
+}
+
+/* ── result rows ─────────────────────────────────────────────────────────
+   No border-bottom per row (§4 forbids repeated horizontal lines). Grouping
+   comes from the gap; severity comes from the left tick, which is vertical. */
+.ft-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.ft-row {
+  display: grid;
+  grid-template-columns: 3px 7rem 1fr 4rem;
+  align-items: baseline;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  opacity: 0.78;
+}
+.ft-row:hover      { opacity: 1; }
+.ft-row--static    { cursor: default; opacity: 0.9; }
+.ft-row--head      { opacity: 0.85; }
+.ft-row--bad  { --ft-hue: var(--status-err); }
+.ft-row--warn { --ft-hue: var(--status-warn); }
+
+.ft-row-tick {
+  align-self: stretch;
+  min-height: 12px;
+  background: var(--ft-hue, var(--ink-25));
+  box-shadow: 0 0 5px var(--ft-hue, transparent);
+}
+.ft-row-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  color: var(--ink-85);
+  overflow-wrap: anywhere;
+}
+.ft-row-sub {
+  font-size: var(--text-3xs);
+  color: var(--ink-40);
+  line-height: 1.5;
+}
+.ft-row-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ft-hue, var(--ink-45));
+  text-align: right;
+}
+.ft-row-why {
+  font-size: var(--text-2xs);
+  color: var(--ink-50);
+  line-height: 1.55;
+}
+
+/* ── expandable placement ── */
+.ft-item { display: flex; flex-direction: column; gap: 2px; }
+.ft-item.is-open .ft-row-label { color: var(--tab-color); }
+.ft-item.is-open .ft-row       { opacity: 1; }
+.ft-row.is-open                { opacity: 1; }
+.ft-row.is-open .ft-row-label  { color: var(--tab-color); }
+
+.ft-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-2xs);
+  padding: var(--space-xs) 0 var(--space-xs) calc(3px + var(--space-xs));
+}
+.ft-detail {
+  margin: 0;
+  padding-left: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-40);
+  line-height: 1.6;
+}
+.ft-detail b { color: var(--ink-72); font-weight: 600; }
+
+/* ── report text ──
+   A data surface, so it gets one surface and no border (§5). */
+.ft-report {
+  margin: 0;
+  max-height: 22rem;
+  overflow: auto;
+  padding: var(--space-sm);
+  background: var(--ink-09);
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  line-height: 1.65;
+  color: var(--ink-60);
+  white-space: pre;
+}

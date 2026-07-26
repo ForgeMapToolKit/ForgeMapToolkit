@@ -1,0 +1,187 @@
+4) symmetry-checker
+8) generate rockfiel/forest/cliff debris Presets 
+6)heatmaps? - schonmal versucht aber gescheitert an Umsetzung eco/reclaim Density (split in rocks/trees etc)
+7) civilian bases - als Presets oder sogar als 3d Editor?
+3) biome changer
+8) cinematic creator 
+5) Floating tree detector
+
+2) map validator (pros outsideplayble area, wrong Format, unused dds in layers Folder, pathing issues)
+
+
+
+
+
+1) 3D Preview Viewer (Props / Waves / Sky)
+Ziel
+
+Eine integrierte 3D-Vorschau in FMT, um erzeugte Assets und Environment-Elemente direkt in einer räumlichen Umgebung beurteilen zu können.
+
+Nicht als Ersatz für Blender, sondern als SupCom-spezifische Preview- und Validierungsansicht.
+
+Prop 3D Viewer
+Idee
+
+Custom Props können direkt in FMT geladen und mit dem tatsächlichen SupCom-Shader angezeigt werden.
+
+Workflow:
+
+Mesh + Texturen
+        ↓
+FMT Asset Viewer
+        ↓
+SupCom Shader Preview
+
+Anzeige:
+
+Mesh
+Albedo Texture
+Normal Map
+Shader
+Scale
+Rotation
+Pivot
+
+Zusätzlich:
+
+Referenzobjekte
+
+Um die Größenverhältnisse besser einzuschätzen:
+
+T1 Tank
+T2 Tank
+Engineer
+Commander
+Factory
+
+Beispiel:
+
+Rock Asset
+
+        █
+      █████
+
+      Tank
+       ▄▄
+
+Damit erkennt man sofort:
+
+Asset zu groß/klein
+falsche Skalierung
+unpassende Proportionen
+Texture Editor Integration
+
+Aus der 3D Ansicht:
+
+Prop Texture
+      ↓
+"Open in Texture Node Editor"
+      ↓
+Tint / Adjust / Modify
+      ↓
+DDS Export
+      ↓
+Asset Update
+
+Der Texture Node Editor wird direkt mit dem verwendeten Material verbunden.
+
+Ziel:
+
+Kein manueller Workflow:
+
+PNG exportieren
+DDS konvertieren
+Dateien kopieren
+Blueprint ändern
+
+sondern:
+
+Edit → Preview → Export → FAF Asset
+Wave 3D Preview
+Idee
+
+WaveNormal-Generator bekommt eine optionale 3D-Ansicht.
+
+Nicht nur die Normalmap betrachten, sondern die tatsächliche Wellenform visualisieren.
+
+Workflow:
+
+Wave Parameters
+        ↓
+Wave Generator
+        ↓
+3D Ocean Plane Preview
+        ↓
+Normal Texture Export
+
+Darstellung:
+
+animierte Wasseroberfläche
+Wellenrichtung
+Wellenhöhe
+Frequenz
+Windrichtung
+
+Optionen:
+
+Height exaggeration
+Wireframe view
+Normal visualization
+
+Ziel:
+
+Schneller erkennen:
+
+Wellen zu groß
+Wellenrichtung falsch
+zu scharfe/unnatürliche Oberfläche
+Sky / Environment 3D Preview
+Idee
+
+Skybox- und Environment-Assets in einer passenden 3D-Umgebung anzeigen.
+
+Statt nur einzelne Farben/Texturen zu sehen:
+
+HorizonColor
+ZenithColor
+Cirrus
+Stars
+Planets
+Clouds
+        ↓
+     Sky Dome Preview
+
+Darstellung:
+
+Dome/Sphere Mesh
+Kamera innerhalb der Skybox
+Horizon View
+Zenith View
+
+Anzeige von:
+
+Sky gradient
+Cirrus layers
+Billboard sprites
+Stars
+Planeten
+
+Ziel:
+
+Environment direkt so beurteilen, wie es im Spiel wahrgenommen wird.
+
+Gemeinsame Architektur
+
+Alle drei Systeme verwenden denselben Viewer:
+
+             FMT 3D Preview Engine
+
+                    |
+        ----------------------------
+        |            |             |
+      Props       Waves          Sky
+        |            |             |
+    Shader      Water Mesh     Sky Dome
+    Preview     Preview        Preview
+
+Der Viewer ist kein Editor, sondern eine Visualisierungsschicht für FMT-Module.

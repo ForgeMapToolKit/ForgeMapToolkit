@@ -1,0 +1,930 @@
+/* ── Variables ─────────────────────────────────────────────────────── */
+/* Layout (flex/overflow/full-bleed sizing) inherited from .trace-tab —
+   this tab no longer owns its own page shell (that's TabLayout's job now). */
+.amh-tab {
+  --amh-accent:             #ff8c00;
+  --amh-accent-glow:        rgba(255, 140, 0, 0.35);
+  --amh-accent-glow-strong: rgba(255, 140, 0, 0.6);
+  --amh-border:             var(--line-ghost-border);
+  --amh-border-light:       var(--ink-13);
+  --amh-text:               #ffffff;
+  --amh-text-sec:           #b0b0b0;
+  --amh-text-muted:         #666666;
+  --tab-color:              var(--adaptivemaphelper-color);
+  --tab-glow:               var(--adaptivemaphelper-glow);
+  --tab-glow-strong:        var(--adaptivemaphelper-glow-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GOLD-STANDARD MIGRATION — live-tab-only classes for the Canvas/Tables
+   TabLayout bands + MapCanvas popup/zoom controls. Distinct names from the
+   amh-* originals below (those stay untouched — AdaptiveMapHelper_help.jsx's
+   embedded walkthrough replica still renders with the pre-migration markup).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Canvas topBar: compact map-name field for the 52px single-line band ── */
+.amh-topbar-input {
+  width:   auto;
+  flex:    0 1 320px;
+  min-width: 160px;
+}
+
+/* Pushes trailing content to the band's right edge. */
+.amh-topbar-spacer { flex: 1; }
+
+/* .layout-w-toolbar's default rgba(255,255,255,0.012) tint reads as a flat
+   grey bar against the dark canvas below, and both bands' default
+   border-bottom read as unwanted horizontal rules once Replace Preview /
+   Metadata / Mirror / Quick-assign are left-clustered with lots of open
+   space around them — AMH is the only layoutMode="w" consumer right now,
+   so this is scoped locally rather than touched in the shared layout.css
+   until more tabs adopt Layout W and a consensus forms. */
+.amh-tab .layout-w-toolbar { background: none; }
+.amh-tab .layout-w-top-bar,
+.amh-tab .layout-w-toolbar { border-bottom: none; }
+
+/* Map-name toolbar "+ Metadata" disclosure — a small floating card (needs an
+   opaque backing + one accent edge, same "content container" allowance as
+   the assignment popup) since the 44px toolbar band has no room to expand
+   the row itself without breaking the "one line" rule. */
+.amh-meta-wrap { position: relative; }
+.amh-meta-pop {
+  position:   absolute;
+  top:        calc(100% + var(--space-sm));
+  left:       0;
+  z-index:    50;
+  background: rgba(10,10,10,0.97);
+  border:     1px solid color-mix(in srgb, var(--tab-color) 25%, transparent);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+  padding:    var(--space-sm) var(--space-md);
+  white-space: nowrap;
+}
+
+/* Canvas topBar map-info/stat readouts reuse .ctrl-mapinfo / .ctrl-badge
+   (primitives.css §6 — plain Leise text, no boxed pills: TAB_UI_CONTRACT §5
+   forbids a neutral surface + neutral border together, which the earlier
+   pill treatment violated). */
+.amh-stat-icon {
+  width:  14px;
+  height: 14px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.amh-stat-assigned { color: var(--tab-color); }
+
+/* ── Canvas toolbar ────────────────────────────────────────────────────── */
+.amh-toolbar-note {
+  font-size:  var(--text-xs);
+  color:      var(--ink-38);
+  font-style: italic;
+}
+
+/* Mirror toggle — the real §5c toggle mechanism (pole-on-a-track IS the
+   control, not decoration), just sized to sit inline in the 44px toolbar
+   band instead of a full-width block-list row. */
+.amh-inline-toggle {
+  width:   auto;
+  padding: 0;
+}
+
+/* Quick-assign army row — the ACU icon already carries the army's colour
+   (Role 2 data colour lives in the artwork itself), so the button needs no
+   box at all: no background, no border, at rest OR on hover/active. The
+   only signal is a bottom baseline (T2-style) that ignites in the army's
+   colour when active — the same "line, not box" language as .ctrl-input. */
+.amh-qa-wrap {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-sm);
+  flex-wrap:   wrap;
+}
+.amh-qa-label {
+  font-size:   var(--text-xs);
+  color:       var(--ink-38);
+  padding:     0 var(--space-2xs) 0 0;
+  white-space: nowrap;
+}
+.amh-qa-btn {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2xs);
+  height:         26px;
+  padding:        0 0 2px;
+  background:     none;
+  border:         none;
+  border-bottom:  1px solid transparent;
+  color:          var(--ink-40);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-2xs);
+  font-weight:    var(--weight-bold);
+  letter-spacing: var(--track-wide);
+  cursor:         pointer;
+  transition:     color var(--dur-base) linear, border-color var(--dur-base) linear;
+  white-space:    nowrap;
+}
+.amh-qa-btn:hover {
+  color:        color-mix(in srgb, var(--qcol) 80%, #fff);
+  border-bottom-color: color-mix(in srgb, var(--qcol) 50%, transparent);
+}
+.amh-qa-btn.active {
+  color:        color-mix(in srgb, var(--qcol) 85%, #fff);
+  border-bottom-color: var(--qcol);
+}
+.amh-qa-icon {
+  width:  15px;
+  height: 15px;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+/* ── Zoom control buttons (canvas) — .amh-zoom-controls wrapper is
+   unused-by-mock and stays as-is further down. ── */
+/* No border at rest (rgba(255,255,255,0.022)-class subtle surface only, per
+   TAB_UI_CONTRACT §5 "content containers"); the tab-color edge + glow is an
+   interaction-only signal (Philosophy §5 "glow coupled exclusively to
+   hover/active"), not permanent chrome on a Leise utility control. */
+.amh-zoom-item {
+  width:       30px;
+  height:      30px;
+  background:  rgba(255,255,255,0.022);
+  border:      1px solid transparent;
+  color:       var(--ink-55);
+  cursor:      pointer;
+  font-size:   14px;
+  transition:  all var(--dur-base) linear;
+  font-family: var(--font-display);
+}
+.amh-zoom-item:hover {
+  border-color: var(--tab-color);
+  color:        var(--tab-color);
+  box-shadow:   0 0 10px var(--tab-glow);
+}
+
+/* ── Assignment popup — new names, floating over the canvas ── */
+.amh-assign-pop {
+  position:   absolute;
+  z-index:    100;
+  background: rgba(10,10,10,0.97);
+  border:     1px solid color-mix(in srgb, var(--tab-color) 30%, transparent);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 30px var(--tab-glow);
+  display:    flex;
+  flex-direction: column;
+  overflow:   hidden;
+  animation:  amhPopupIn 0.18s cubic-bezier(0.23,1,0.32,1);
+}
+.amh-assign-pop::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--tab-color), transparent);
+}
+.amh-assign-pop-header {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-xs);
+  padding:     var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--line-faint);
+  background:  color-mix(in srgb, var(--tab-color) 4%, transparent);
+}
+.amh-assign-pop-title {
+  flex:        1;
+  font-size:   var(--text-sm);
+  font-weight: var(--weight-semi);
+  color:       var(--tab-color);
+  letter-spacing: 0.04em;
+  font-family: var(--font-mono);
+}
+.amh-assign-pop-mirror {
+  font-size:     var(--text-xs);
+  color:         #64b5f6;
+  background:    rgba(100,181,246,0.15);
+  border:        1px solid rgba(100,181,246,0.3);
+  padding:       1px 5px;
+  margin-left:   auto;
+  margin-right:  var(--space-2xs);
+}
+.amh-assign-pop-body { overflow-y: auto; max-height: 220px; }
+.amh-assign-pop-body::-webkit-scrollbar       { width: 4px; }
+.amh-assign-pop-body::-webkit-scrollbar-thumb { background: var(--tab-glow); border-radius: 2px; }
+.amh-assign-pop-list { display: flex; flex-direction: column; gap: 1px; padding: var(--space-xs); }
+.amh-assign-pop-btn {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-xs);
+  padding:     var(--space-xs) var(--space-sm);
+  background:  transparent;
+  border:      1px solid transparent;
+  color:       var(--ink-55);
+  font-family: var(--font-display);
+  font-size:   var(--text-xs);
+  cursor:      pointer;
+  transition:  all var(--dur-base) linear;
+  text-align:  left;
+  width:       100%;
+}
+.amh-assign-pop-btn:hover {
+  background:  var(--sheen-040);
+  color:       #fff;
+}
+.amh-assign-pop-btn.active {
+  background:  color-mix(in srgb, var(--army-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--army-color) 50%, transparent);
+  color:       var(--army-color);
+}
+
+
+/* ── Header card ────────────────────────────────────────────────────── */
+.amh-header-card {
+  display:     flex;
+  align-items: center;
+  gap:         28px;
+  background:  linear-gradient(135deg, var(--sheen-040) 0%, rgba(0,0,0,0.15) 100%);
+  border:      1px solid var(--amh-border);
+  padding:     24px 32px;
+  position:    relative;
+  flex-wrap:   wrap;
+}
+
+.amh-header-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #ff8c00, transparent);
+  opacity: 0.8;
+}
+
+.amh-header-left {
+  display:     flex;
+  align-items: center;
+  gap:         14px;
+  flex-shrink: 0;
+}
+
+.amh-header-icon {
+  font-size:  1.8rem;
+  color:      #ff8c00;
+  filter:     drop-shadow(0 0 14px rgba(255,140,0,0.5));
+  line-height: 1;
+}
+
+.amh-header-title {
+  font-family:    'Space Grotesk', sans-serif;
+  font-size:      1.1rem;
+  font-weight:    700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color:          var(--amh-text);
+  margin:         0;
+}
+
+.amh-header-sub {
+  font-size:   0.7rem;
+  color:       var(--amh-text-muted);
+  letter-spacing: 0.06em;
+  margin-top:  2px;
+}
+
+/* ── Map name input ─────────────────────────────────────────────────── */
+.amh-mapname-wrap { flex: 1; min-width: 260px; }
+
+.amh-form-label {
+  display:     block;
+  margin-bottom: 8px;
+  font-size:   0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:       var(--amh-text-sec);
+}
+
+.amh-form-input {
+  width:       100%;
+  padding:     12px 18px;
+  background:  var(--sheen-040);
+  border:      1px solid var(--ink-16);
+  color:       var(--amh-text);
+  font-size:   0.9rem;
+  font-family: 'Poppins', sans-serif;
+  transition:  all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  outline:     none;
+  box-sizing:  border-box;
+}
+
+.amh-form-input:focus {
+  border-color: #ff8c00;
+  background:   var(--surface-code);
+  box-shadow:   0 0 0 1px #ff8c00, 0 0 20px rgba(255,140,0,0.2);
+  transform:    translateY(-1px);
+}
+
+.amh-form-input::placeholder { color: var(--amh-text-muted); }
+
+/* Compact override for the Canvas topBar's single-line band — the base
+   .amh-form-input is width:100% for the (mock-only, now unused-by-the-live-
+   tab) card layout; here it's one flex item among several in a 52px row. */
+.amh-topbar-input {
+  width:   auto;
+  flex:    0 1 320px;
+  min-width: 160px;
+  padding: 8px 14px;
+}
+
+/* Pushes trailing content (stat pills / generate button) to the band's
+   right edge — used in both the Canvas topBar/toolbar and Tables topBar. */
+.amh-topbar-spacer { flex: 1; }
+
+.amh-map-info {
+  margin-top: 8px;
+  padding:    7px 14px;
+  background: rgba(255,140,0,0.06);
+  border:     1px solid rgba(255,140,0,0.2);
+  font-size:  0.75rem;
+  font-family: monospace;
+  color:      #ff8c00;
+}
+.amh-map-info.error {
+  background: rgba(248,81,73,0.06);
+  border-color: rgba(248,81,73,0.2);
+  color:      #f85149;
+}
+
+/* ── Header stats ───────────────────────────────────────────────────── */
+.amh-header-stats {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  flex-shrink: 0;
+}
+
+.amh-stat-pill {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  padding:     6px 12px;
+  background:  var(--sheen-040);
+  border:      1px solid var(--line-ghost-border);
+  font-size:   0.82rem;
+  color:       var(--amh-text-sec);
+  white-space: nowrap;
+}
+
+.amh-stat-pill--assigned {
+  border-color: rgba(255,140,0,0.2);
+  color:        #ff8c00;
+  background:   rgba(255,140,0,0.06);
+}
+
+.amh-stat-icon {
+  width:  16px;
+  height: 16px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+
+/* ── Empty state — fills .layout-w-content ────────────────────────────── */
+.amh-empty-state {
+  height:         100%;
+  box-sizing:     border-box;
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  padding:        80px 40px;
+  background:     linear-gradient(135deg, var(--surface-ghost) 0%, rgba(0,0,0,0.1) 100%);
+  gap:            12px;
+  text-align:     center;
+}
+
+.amh-empty-icon {
+  font-size:  3rem;
+  opacity:    0.12;
+  color:      #ff8c00;
+  filter:     drop-shadow(0 0 20px rgba(255,140,0,0.3));
+}
+
+.amh-empty-title {
+  font-size:   1rem;
+  font-weight: 600;
+  color:       var(--amh-text-sec);
+  letter-spacing: 0.04em;
+}
+
+.amh-empty-sub {
+  font-size:   0.8rem;
+  color:       var(--amh-text-muted);
+  font-style:  italic;
+}
+
+/* ── Editor layout ──────────────────────────────────────────────────── */
+/* ── Canvas panel — FULL WIDTH ──────────────────────────────────────── */
+.amh-canvas-panel {
+  flex:           1;
+  display:        flex;
+  flex-direction: column;
+  min-width:      0;
+  min-height:     600px;
+  background:     linear-gradient(135deg, var(--surface-ghost) 0%, rgba(0,0,0,0.08) 100%);
+  border:         1px solid var(--amh-border);
+  position:       relative;
+  overflow:       hidden;
+}
+
+.amh-canvas-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #ff8c00, transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+  z-index: 5;
+}
+.amh-canvas-panel:hover::before { opacity: 0.5; }
+
+/* ── Panel tab bar ──────────────────────────────────────────────────── */
+.amh-panel-tabs {
+  display:     flex;
+  align-items: center;
+  border-bottom: 1px solid var(--amh-border);
+  background:  rgba(0,0,0,0.3);
+  padding:     0 16px;
+  gap:         2px;
+  flex-shrink: 0;
+}
+
+.amh-panel-tab {
+  padding:        12px 20px;
+  background:     transparent;
+  border:         none;
+  color:          var(--ink-35);
+  font-family:    'Poppins', sans-serif;
+  font-size:      0.75rem;
+  font-weight:    600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor:         pointer;
+  border-bottom:  3px solid transparent;
+  transition:     all 0.25s ease;
+  white-space:    nowrap;
+}
+
+.amh-panel-tab:hover { color: var(--ink-70); }
+
+.amh-panel-tab.active {
+  color:              #ff8c00;
+  border-bottom-color: #ff8c00;
+  background:         rgba(255,140,0,0.04);
+}
+
+.amh-generate-btn-inline {
+  padding:        9px 18px;
+  background:     rgba(255,140,0,0.1);
+  border:         1px solid rgba(255,140,0,0.35);
+  color:          #ff8c00;
+  font-family:    'Space Grotesk', sans-serif;
+  font-size:      0.75rem;
+  font-weight:    700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor:         pointer;
+  transition:     all 0.3s ease;
+  white-space:    nowrap;
+}
+
+.amh-generate-btn-inline:hover {
+  background:  rgba(255,140,0,0.2);
+  border-color: #ff8c00;
+  box-shadow:  0 0 20px rgba(255,140,0,0.3);
+  color:       #fff;
+}
+
+/* ── Map canvas inner ───────────────────────────────────────────────── */
+.amh-canvas-inner {
+  flex:     1;
+  position: relative;
+  overflow: hidden;
+  width:    100%;
+  min-height: 0;
+  height:   100%;
+  cursor:   default;
+}
+
+/* ── Zoom controls ──────────────────────────────────────────────────── */
+.amh-zoom-controls {
+  position:       absolute;
+  bottom:         16px;
+  right:          16px;
+  display:        flex;
+  flex-direction: column;
+  gap:            4px;
+  z-index:        20;
+}
+
+.amh-zoom-btn {
+  width:       30px;
+  height:      30px;
+  background:  rgba(10,10,10,0.9);
+  border:      1px solid rgba(255,140,0,0.2);
+  color:       #ff8c00;
+  cursor:      pointer;
+  font-size:   14px;
+  transition:  all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.amh-zoom-btn:hover {
+  border-color: #ff8c00;
+  box-shadow:   0 0 10px rgba(255,140,0,0.3);
+  background:   rgba(255,140,0,0.1);
+}
+
+/* ── Controls hint ──────────────────────────────────────────────────── */
+.amh-controls-hint {
+  position:    absolute;
+  bottom:      12px;
+  left:        50%;
+  transform:   translateX(-50%);
+  font-size:   0.68rem;
+  color:       var(--ink-20);
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index:     10;
+}
+
+/* ── Assignment Popup ───────────────────────────────────────────────── */
+.amh-popup {
+  position:   absolute;
+  z-index:    100;
+  background: rgba(10,10,10,0.97);
+  border:     1px solid rgba(255,140,0,0.3);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 30px rgba(255,140,0,0.1);
+  display:    flex;
+  flex-direction: column;
+  overflow:   hidden;
+  animation:  amhPopupIn 0.18s cubic-bezier(0.23,1,0.32,1);
+}
+
+@keyframes amhPopupIn {
+  from { opacity: 0; transform: scale(0.93) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.amh-popup::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #ff8c00, transparent);
+}
+
+.amh-popup-header {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+  padding:     10px 12px;
+  border-bottom: 1px solid var(--line-faint);
+  background:  rgba(255,140,0,0.04);
+}
+
+.amh-popup-hicon {
+  width:  16px;
+  height: 16px;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.amh-popup-htitle {
+  flex:        1;
+  font-size:   0.82rem;
+  font-weight: 600;
+  color:       #ff8c00;
+  letter-spacing: 0.04em;
+  font-family: monospace;
+}
+
+.amh-popup-close {
+  background:  transparent;
+  border:      none;
+  color:       var(--ink-30);
+  cursor:      pointer;
+  font-size:   1rem;
+  line-height: 1;
+  padding:     0 2px;
+  transition:  color 0.2s;
+}
+.amh-popup-close:hover { color: #fff; }
+
+
+
+
+.amh-popup-body { overflow-y: auto; max-height: 220px; }
+.amh-popup-body::-webkit-scrollbar       { width: 4px; }
+.amh-popup-body::-webkit-scrollbar-thumb { background: rgba(255,140,0,0.3); border-radius: 2px; }
+
+.amh-popup-army-list { display: flex; flex-direction: column; gap: 1px; padding: 6px; }
+
+.amh-popup-army-btn {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+  padding:     7px 10px;
+  background:  transparent;
+  border:      1px solid transparent;
+  color:       var(--ink-55);
+  font-family: 'Poppins', sans-serif;
+  font-size:   0.78rem;
+  cursor:      pointer;
+  transition:  all 0.18s ease;
+  text-align:  left;
+  width:       100%;
+}
+
+.amh-popup-army-btn:hover {
+  background:  var(--sheen-040);
+  color:       #fff;
+  border-color: var(--line-ghost-border);
+}
+
+.amh-popup-army-btn.active {
+  background:  color-mix(in srgb, var(--army-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--army-color) 50%, transparent);
+  color:       var(--army-color);
+}
+
+.amh-popup-remove {
+  display:        block;
+  width:          100%;
+  padding:        8px;
+  background:     rgba(248,81,73,0.06);
+  border:         none;
+  border-top:     1px solid rgba(248,81,73,0.15);
+  color:          #f85149;
+  font-family:    'Poppins', sans-serif;
+  font-size:      0.72rem;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  cursor:         pointer;
+  transition:     background 0.2s;
+}
+.amh-popup-remove:hover { background: rgba(248,81,73,0.12); }
+
+
+
+
+
+
+
+
+
+
+
+
+/* Small "✓ saved" pill riding next to the Tables topBar label */
+/* ── Code output — fills .layout-w-content (which is itself overflow:hidden,
+   so this wrapper owns the scroll region) ──────────────────────────────── */
+.amh-tables-content {
+  height:  100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: var(--space-xl) var(--space-3xl);
+  box-sizing: border-box;
+}
+
+/* Export section content — controls column + standby-field, same pairing
+   Layout Y uses. Genuine Layout Y's .standby-field is flex:1 (fills
+   whatever's left of the already-capped 1300px workspace-main-inner) —
+   fine at the window sizes it's normally seen at, but on a very wide
+   window that "whatever's left" balloons to 900px+ of near-empty ghost
+   field, which read as "too wide" rather than deliberate. Fix: cap the
+   whole (column + standby) composition at a fixed total width and centre
+   *that pair* in the available space — the standby-field keeps its real
+   content (ghost word, readout, cursor) but stops stretching to fill
+   arbitrary leftover width; any width beyond the pair's cap is genuine
+   page background, not a field trying to look busy. */
+.amh-export-content {
+  height:   100%;
+  overflow: hidden;
+  display:  flex;
+  justify-content: center;
+}
+.amh-export-column {
+  /* Base .workspace-column is flex:1 (assumes a Layout X/Y ancestor rule
+     narrows it) — this lives directly in .layout-w-content instead, so the
+     fixed ~360px basis has to be set explicitly here. */
+  flex:     0 0 360px;
+  width:    360px;
+  overflow-y: auto;
+  padding-top: var(--space-md);
+}
+.amh-export-content .standby-field {
+  flex: 0 1 480px;
+}
+
+.amh-code-label {
+  font-size:      0.72rem;
+  color:          var(--amh-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+
+.amh-code-pre {
+  background:  rgba(0,0,0,0.5);
+  border:      1px solid var(--amh-border);
+  padding:     24px;
+  font-size:   0.78rem;
+  line-height: 1.8;
+  color:       #c9d1d9;
+  overflow:    auto;
+  font-family: var(--font-mono);
+}
+
+.amh-code-empty {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex:            1;
+  min-height:      240px;
+  color:           var(--amh-text-muted);
+  font-size:       0.85rem;
+  flex-direction:  column;
+  gap:             12px;
+}
+
+.amh-code-empty-icon {
+  font-size: 2rem;
+  opacity:   0.15;
+}
+/* ── Preview button & loading indicator ──────────────────────────────────── */
+.amh-preview-upload-btn {
+  padding:       3px 10px;
+  background:    var(--surface-code);
+  border:        1px solid var(--ink-12);
+  border-radius: 4px;
+  color:         var(--amh-text-muted);
+  font-size:     0.78rem;
+  cursor:        pointer;
+  transition:    background 0.15s, color 0.15s;
+  white-space:   nowrap;
+}
+.amh-preview-upload-btn:hover {
+  background: var(--ink-12);
+  color:      var(--amh-text);
+}
+
+/* ── Mirror toggle & Quick-assign toolbar ────────────────────────────────── */
+.amh-toolbar-toggle {
+  padding:       3px 10px;
+  background:    var(--surface-code);
+  border:        1px solid var(--ink-12);
+  border-radius: 4px;
+  color:         var(--amh-text-muted);
+  font-size:     0.78rem;
+  cursor:        pointer;
+  transition:    background 0.15s, color 0.15s, border-color 0.15s;
+  white-space:   nowrap;
+}
+.amh-toolbar-toggle:hover  { background: var(--ink-11); color: var(--amh-text); }
+.amh-toolbar-toggle.active { background: rgba(100,180,255,0.18); border-color: #64b5f6; color: #64b5f6; }
+
+.amh-quick-army-wrap {
+  display:     flex;
+  align-items: center;
+  gap:         3px;
+  flex-wrap:   wrap;
+}
+.amh-quick-label {
+  font-size:   0.72rem;
+  color:       var(--amh-text-muted);
+  padding:     0 4px 0 2px;
+  white-space: nowrap;
+}
+.amh-quick-army-btn {
+  display:        flex;
+  align-items:    center;
+  gap:            5px;
+  height:         26px;
+  padding:        0 8px;
+  border-radius:  0;
+  border:         1px solid color-mix(in srgb, var(--qcol) 35%, transparent);
+  background:     color-mix(in srgb, var(--qcol) 8%, transparent);
+  color:          color-mix(in srgb, var(--qcol) 80%, #fff);
+  font-size:      0.68rem;
+  font-weight:    700;
+  font-family:    'Space Grotesk', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor:         pointer;
+  transition:     background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  white-space:    nowrap;
+}
+.amh-quick-army-btn:hover {
+  background:   color-mix(in srgb, var(--qcol) 20%, transparent);
+  border-color: var(--qcol);
+  color:        #fff;
+}
+.amh-quick-army-btn.active {
+  background:   color-mix(in srgb, var(--qcol) 28%, transparent);
+  border-color: var(--qcol);
+  color:        #fff;
+  box-shadow:   0 0 10px color-mix(in srgb, var(--qcol) 40%, transparent);
+}
+.amh-quick-army-label {
+  font-size:   0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Mirror badge in popup header */
+.amh-popup-mirror-badge {
+  font-size:     0.7rem;
+  color:         #64b5f6;
+  background:    rgba(100,181,246,0.15);
+  border:        1px solid rgba(100,181,246,0.3);
+  border-radius: 3px;
+  padding:       1px 5px;
+  margin-left:   auto;
+  margin-right:  4px;
+}
+
+
+/* ── Result feedback ── */
+.amh-adaptive-result {
+  margin-top: 5px;
+  padding: 5px 12px;
+  font-size: 0.77rem;
+  border-radius: 3px;
+}
+ 
+.amh-adaptive-result.ok {
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #34d399;
+}
+ 
+.amh-adaptive-result.error {
+  background: rgba(255, 77, 77, 0.08);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  color: #ff6b6b;
+}
+/* ══════════════════════════════════════════════════════════════════════════
+   HELP MODAL — AMH-specific only.
+   All modal chrome uses shared.css:
+     .help-btn  .help-modal-overlay  .help-modal  .help-modal-header
+     .help-modal-title  .help-modal-close  .help-modal-tabs  .help-modal-tab
+     .help-modal-content  .help-adv-layout  .help-adv-hero  .help-adv-section-header
+     .help-adv-section-num  .help-adv-subtabs  .help-adv-subtab  .help-adv-card
+     .help-adv-card-grid  .help-adv-ts-item  .help-adv-ts-q  .help-adv-ts-icon
+     .help-adv-ts-a  .help-adv-timeline  .help-adv-step  .help-adv-step-num
+     .help-adv-step-content  .help-adv-practice-grid  .help-adv-practice-card
+     .help-adv-practice-icon  .help-adv-note  .help-adv-code-block  .help-adv-structure
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Guide tab: two-column split layout ── */
+.amh-guide-split {
+  display:   flex;
+  gap:       0;
+  height:    100%;
+  margin:    -40px;   /* cancel .help-modal-content padding so columns fill edge-to-edge */
+  overflow:  hidden;
+}
+
+.amh-guide-replica {
+  flex:          0 0 58%;
+  overflow-y:    auto;
+  padding:       32px 28px;
+  border-right:  1px solid var(--line-medium);
+}
+.amh-guide-replica::-webkit-scrollbar { width: 6px; }
+.amh-guide-replica::-webkit-scrollbar-thumb { background: rgba(255,140,0,0.35); border-radius: 3px; }
+
+.amh-guide-replica-hint {
+  padding:        6px 0 18px;
+  font-size:      0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:          var(--ink-25);
+}
+
+.amh-guide-info {
+  flex:       1;
+  overflow-y: auto;
+  padding:    36px 38px;
+}
+.amh-guide-info::-webkit-scrollbar { width: 6px; }
+.amh-guide-info::-webkit-scrollbar-thumb { background: rgba(255,140,0,0.35); border-radius: 3px; }
+
+.amh-guide-empty {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  height:          70%;
+  gap:             16px;
+}
+
+/* Note: --tab-color/--tab-glow/--tab-glow-strong for .amh-tab (needed by
+   shared.css .help-adv-layout and everything else) are already set once,
+   at the top of this file — --amh-accent and tokens.css's global
+   --amh-glow/--amh-glow-strong aliases resolve to the same values anyway. */

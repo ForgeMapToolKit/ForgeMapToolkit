@@ -1,0 +1,157 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CLI TERMINAL — tabs/System/CliTerminal/CliTerminal.css
+   A real terminal, full-bleed — no section rail, no form controls.
+   Claude-Code-style: scrolling log on top, fixed input footer below a
+   hairline divider. The mountain glyph is just the first log entry, not an
+   overlay — it scrolls away with everything else and reappears on scroll-up.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Escape the standard .tab-content padding/max-width so the terminal fills
+   the whole tab edge-to-edge (same pattern the Guides tab uses). */
+.tab-content:has(.cli-term-root) {
+  padding: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cli-term-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-sunk);
+  font-family: var(--font-mono);
+  cursor: text;
+}
+
+.cli-term-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-scrollbar) transparent;
+}
+
+.cli-line {
+  display: block;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.cli-line--stdout { color: var(--ink-72); }
+.cli-line--error  { color: var(--status-err); }
+.cli-line--echo   { color: var(--ink-92); font-weight: var(--weight-semi); }
+
+/* Recent-activity lines — deliberately muted, no detail, just a nudge */
+.cli-line--muted  { color: var(--ink-38); }
+
+.cli-line--banner {
+  white-space: pre;
+  word-break: normal;
+  overflow-x: visible;
+  align-self: flex-start;
+  line-height: 1.05;
+  color: var(--tab-color);
+}
+
+/* Echte Zustände (⚠ / ✔ / ✖) bleiben an den Status-Tokens — unabhängig
+   von der Deko-Akzentfarbe, damit eine echte Warnung nicht optisch mit
+   einem hervorgehobenen Command-Namen verschmilzt. */
+.cli-line--ok      { color: var(--status-ok, #4ADE80); }
+.cli-line--warn    { color: var(--status-warn, #FBBF24); }
+
+/* Deko-Akzente — bewusst von --status-* entkoppelt, sonst kollabieren
+   Heading/Flag/Accent auf denselben Ton, sobald --status-accent /
+   --status-warn irgendwo global auf die Tab-Farbe gemappt sind.
+   Zwei Stufen: Tab-Farbe (Struktur) + Orange (Command-/Flag-Highlight). */
+.cli-line--heading { color: var(--tab-color); font-weight: var(--weight-semi); text-shadow: 0 0 8px var(--tab-glow); }
+.cli-line--accent  { color: var(--tab-color); }
+.cli-line--flag    { color: var(--tab-accent-2, #ff8c00); }
+
+.cli-term-picker {
+  flex-shrink: 0;
+  margin: 0 var(--space-lg);
+  padding: var(--space-2xs) 0;
+  border-top: 1px solid var(--line-ghost-border);
+  font-family: var(--font-mono);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.cli-term-picker-row {
+  padding: 3px var(--space-sm);
+  font-size: 12px;
+  color: var(--ink-38);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 4px;
+}
+
+.cli-term-picker-row--active {
+  color: var(--tab-color);
+  background: var(--tab-glow);
+  text-shadow: 0 0 8px var(--tab-glow);
+}
+
+/* ── Fixed footer — divider + input, always visible, never scrolls ─────── */
+
+.cli-term-footer {
+  flex-shrink: 0;
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+
+.cli-term-divider {
+  height: 1px;
+  background: var(--line-ghost-border);
+  margin-bottom: var(--space-sm);
+}
+
+.cli-term-prompt-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xs) 0;
+}
+
+.cli-term-prompt {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: var(--weight-semi);
+  color: var(--tab-color);
+  text-shadow: 0 0 8px var(--tab-glow);
+}
+
+.cli-term-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-92);
+  caret-color: var(--tab-color);
+}
+.cli-term-input::placeholder {
+  color: var(--ink-28);
+}
+.cli-term-input:disabled {
+  color: var(--ink-38);
+}
+
+.cli-term-busy {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--ink-28);
+  font-style: italic;
+}

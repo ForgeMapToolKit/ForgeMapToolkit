@@ -1033,7 +1033,7 @@ ipcMain.handle('open-tool-window', async (event, { tool }) => {
       // Load from dist/ in production, src/ in dev
       const isDev = !app.isPackaged;
       const htmlPath = isDev
-        ? path.join(app.getAppPath(), 'src', 'components', 'Tabs', 'Tools', 'Scmap', 'PopOut', 'scmapPopout.html')
+        ? path.join(app.getAppPath(), 'src', 'components', 'tabs', 'MapTools', 'Scmap', 'PopOut', 'scmapPopout.html')
         : path.join(app.getAppPath(), 'dist', 'scmap-popout.html');
       win.loadFile(htmlPath);
       bridgeRendererConsole(win);

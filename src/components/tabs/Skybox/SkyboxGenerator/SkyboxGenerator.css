@@ -249,7 +249,7 @@
 }
 
 /* ── 8. ColorPicker — moved to Shared/Ui/ColorPicker/ColorPicker.css so
-   NodeEditor (and any future tab) gets the same instrument instead of a
+   The Texture Editor (and any future tab) gets the same instrument instead of a
    bare native <input type="color">. This tab still supplies its own
    presets={SKYBOX_PRESET_COLORS} (utils.js) — the component itself is
    preset-agnostic. ──────────────────────────────────────────────────── */
