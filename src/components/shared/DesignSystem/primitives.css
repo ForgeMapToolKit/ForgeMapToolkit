@@ -39,9 +39,6 @@
   margin-top: var(--space-3xl);
 }
 
-.ctrl-block--tight {
-  gap: var(--space-xs);
-}
 
 
 /* ═══ §2  STAIRCASE ══════════════════════════════════════════════════
@@ -164,84 +161,9 @@
    by a custom SVG glyph. Wrap with .ctrl-select-wrap to get the chevron.
    §5 law: "a select is not a dropdown box — it is a field with a chevron." */
 
-.ctrl-select-wrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
 
-.ctrl-select {
-  appearance: none;
-  -webkit-appearance: none;
-  /* No width: 100% by default — wrap sets width when needed. */
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--line-ghost-border);
-  /* Generous horizontal breathing room; right side clears chevron + its margin. */
-  padding: var(--space-sm) var(--space-2xl) var(--space-sm) var(--space-sm);
-  /* Negative left margin pulls the select flush with its surroundings while
-     the internal padding still gives the text room to breathe. */
-  margin-left: calc(-1 * var(--space-sm));
-  color: var(--ink-40);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  letter-spacing: var(--track-base);
-  text-transform: uppercase;
-  outline: none;
-  cursor: pointer;
-  transition:
-    border-bottom-color var(--dur-fast) linear,
-    color              var(--dur-fast) linear;
-}
-.ctrl-select:hover {
-  color: var(--ink-55);
-  border-bottom-color: var(--line-strong);
-}
-.ctrl-select:focus {
-  border-bottom-color: color-mix(in srgb, var(--tab-color) 70%, rgba(255,255,255,0.35));
-  color: var(--ink-72);
-}
 
-/* Native option list — dark surface, generous line height for readability. */
-.ctrl-select option {
-  background: var(--surface-face-a);
-  color: var(--ink-72);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 10px 16px;
-  line-height: 2;
-}
-/* Selected option — tab-color text + underline only. No background fill:
-   the colour signal alone is enough; a full row fill is too loud here. */
-.ctrl-select option:checked {
-  background: var(--surface-face-a);
-  color: var(--tab-color);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: color-mix(in srgb, var(--tab-color) 50%, transparent);
-}
 
-/* Custom chevron — sits right of the select, pointer-events:none so clicks
-   pass through to the <select>. Inherits color from the wrap so a single
-   CSS selector drives both idle and focused states. */
-.ctrl-chevron {
-  position: absolute;
-  right: var(--space-sm);
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: var(--ink-16);
-  display: flex;
-  align-items: center;
-  transition: color var(--dur-fast) linear;
-}
-/* Brighten chevron when the select is hovered or focused — :has() targets the
-   wrap, which contains both the select and the chevron span. */
-.ctrl-select-wrap:has(.ctrl-select:hover) .ctrl-chevron { color: var(--ink-28); }
-.ctrl-select-wrap:has(.ctrl-select:focus) .ctrl-chevron { color: var(--tab-color); }
 
 
 /* ═══ §4  ROWS ══════════════════════════════════════════════════════
@@ -778,13 +700,6 @@
   text-transform: uppercase;
   color: var(--ink-72);
 }
-.ctrl-card-section-opt {
-  color: var(--ink-22);
-  font-weight: var(--weight-regular);
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: var(--text-2xs);
-}
 
 /* ═══ §6  META / PROGRESSIVE DISCLOSURE ═════════════════════════════
 
@@ -902,36 +817,8 @@
    .subsection-head-title — primary label (left-aligned)
    .field-hint           — dim guidance text below empty states / inputs  */
 
-/* Subsection head — a faint horizontal rule with an eyebrow label.
-   Used to separate named groups within an overlay or panel column.     */
-.subsection-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding-bottom: var(--space-xs);
-  margin-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--line-faint, rgba(255,255,255,0.06));
-}
 
-/* Left phosphor tick — same two-pixel vertical accent as ctrl-subtitle */
-.subsection-head::before {
-  content: '';
-  flex-shrink: 0;
-  width: 2px;
-  height: 10px;
-  background: var(--tab-color);
-  box-shadow: 0 0 6px var(--tab-glow);
-  opacity: 0.7;
-}
 
-.subsection-head-title {
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semi);
-  letter-spacing: var(--track-eyebrow);
-  text-transform: uppercase;
-  color: var(--ink-55);
-}
 
 /* Field hint — small guidance text, one step above invisible */
 .field-hint {

@@ -54,110 +54,19 @@
   box-shadow: 0 0 10px rgba(0, 255, 156, 0.3);
 }
 
-/* ── Help Modal content ──────────────────────────────────────────────────── */
-.cv-help-section {
-  margin-bottom: 28px;
-}
 
-.cv-help-section:last-child { margin-bottom: 0; }
 
-.cv-help-heading {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--coop-versioner-color, #00FF9C);
-  margin: 0 0 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
 
-.cv-help-text {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.65;
-  margin: 0 0 10px;
-}
 
-.cv-help-text:last-child { margin-bottom: 0; }
 
-.cv-help-text code {
-  font-family: 'Consolas', 'Fira Mono', monospace;
-  color: var(--coop-versioner-color, #00FF9C);
-  background: rgba(0, 255, 156, 0.08);
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-size: 0.85em;
-}
 
-.cv-help-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
-.cv-help-step {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-}
 
-.cv-help-step-num {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(0, 255, 156, 0.12);
-  border: 1px solid rgba(0, 255, 156, 0.3);
-  color: var(--coop-versioner-color, #00FF9C);
-  font-size: 0.78rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1px;
-}
 
-.cv-help-step code,
-.cv-help-step strong {
-  color: var(--text-primary);
-}
 
-.cv-help-step code {
-  font-family: 'Consolas', 'Fira Mono', monospace;
-  background: var(--surface-code);
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-size: 0.85em;
-}
 
-.cv-help-filelist {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 
-.cv-help-filerow {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  font-size: 0.86rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-}
 
-.cv-help-filerow code {
-  font-family: 'Consolas', 'Fira Mono', monospace;
-  color: var(--coop-versioner-color, #00FF9C);
-  background: rgba(0, 255, 156, 0.08);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.85em;
-  flex-shrink: 0;
-  min-width: 56px;
-  text-align: center;
-}
 
 /* ── Form ────────────────────────────────────────────────────────────────── */
 .cv-form {

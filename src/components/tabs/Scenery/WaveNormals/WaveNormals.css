@@ -264,7 +264,6 @@
   letter-spacing: 0.08em;
   color: var(--ink-28);
 }
-.wn-preview-select { width: auto; min-width: 0; padding-right: var(--space-lg); }
 
 /* §5: one surface, no border — the plate the canvas sits on. */
 .wn-preview-stage {

@@ -33,18 +33,12 @@
 }
 .tt-meta b { color: var(--tab-color); font-weight: 600; }
 
-.tt-note,
 .tt-error {
   margin-top: var(--space-xs);
   padding: var(--space-2xs) var(--space-xs);
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
   line-height: 1.45;
-}
-.tt-note {
-  background: var(--tab-glow);
-  border: 1px solid var(--tab-glow-strong);
-  color: var(--ink-72);
 }
 /* Status container (§5): wash + edge in the SAME feedback hue is signal, not a
    generic box — but it must ride the shared --status-err-* tokens rather than
@@ -98,11 +92,6 @@
    `.is-on` is the state: the word itself lights up in --tab-color. */
 .tt-exclude { font-size: var(--text-3xs); letter-spacing: 0.04em; }
 .tt-exclude.is-on { color: var(--tab-color); }
-.tt-excluded-note {
-  font-size: var(--text-2xs);
-  font-style: italic;
-  color: var(--ink-38);
-}
 .tt-cov {
   margin-left: auto;
   font-family: var(--font-mono);
@@ -168,5 +157,3 @@
   text-transform: uppercase;
 }
 
-/* ── apply ── */
-.tt-apply { min-width: 160px; }

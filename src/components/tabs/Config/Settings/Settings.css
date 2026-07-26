@@ -1259,15 +1259,6 @@
   box-shadow:   0 0 14px rgba(255, 60, 60, 0.15);
 }
 
-.st-settings-btn-ghost--danger {
-  color: rgba(200, 80, 80, 0.85) !important;
-  border-color: rgba(200, 80, 80, 0.25) !important;
-}
-.st-settings-btn-ghost--danger:hover {
-  color: #cc5555 !important;
-  border-color: rgba(200, 80, 80, 0.5) !important;
-  background: rgba(200, 80, 80, 0.06) !important;
-}
 
 
 /* ══════════════════════════════════════════════════════════════════

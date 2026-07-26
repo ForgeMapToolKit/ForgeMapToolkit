@@ -49,11 +49,6 @@
   display: flex; align-items: center; gap: 18px;
 }
 
-.pte-header-mark {
-  font-size: 1.5rem;
-  color: rgba(62, 163, 135, 0.7);
-  line-height: 1;
-}
 
 .pte-header-title {
   font-family: 'Space Grotesk', sans-serif;
@@ -74,19 +69,6 @@
   font-size: 0.67rem; font-weight: 600;
 }
 
-/* ── Close button — uses shared .lib-close-btn ───────────────────────────── */
-/* .pte-close-btn is kept as an alias for any remaining references */
-.pte-close-btn {
-  background: rgba(255,255,255,0.05); border: 1px solid var(--ink-16);
-  color: var(--ink-45); width: 32px; height: 32px;
-  border-radius: 0; cursor: pointer; font-size: 1rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-.pte-close-btn:hover {
-  background: var(--ink-16); color: #fff;
-  border-color: var(--ink-20);
-}
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
 .pte-body {
@@ -188,50 +170,11 @@
   color: var(--ink-22); margin-bottom: 16px;
 }
 
-.pte-preview-frame {
-  position: relative;
-  width: 100%; aspect-ratio: 1;
-  border-radius: 10px; overflow: hidden;
-  border: 1px solid var(--line-ghost-border);
-  background: var(--bg-card);
-  flex-shrink: 0;
-}
 
-.pte-preview-original,
-.pte-preview-adjusted {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; object-fit: contain;
-}
 
-.pte-preview-original {
-  opacity: 1;
-  /* Show left half */
-  clip-path: inset(0 50% 0 0);
-}
 
-.pte-preview-adjusted {
-  /* Show right half */
-  clip-path: inset(0 0 0 50%);
-}
 
-.pte-split-line {
-  position: absolute; top: 0; bottom: 0; left: 50%;
-  width: 2px; background: var(--ink-40);
-  box-shadow: 0 0 8px rgba(255,255,255,0.3);
-  pointer-events: none;
-  transform: translateX(-50%);
-}
 
-.pte-split-label {
-  position: absolute; bottom: 8px;
-  font-size: 0.6rem; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  background: rgba(0,0,0,0.65);
-  padding: 2px 7px; border-radius: 4px;
-  color: var(--ink-50);
-}
-.pte-split-label-left  { left: 8px; }
-.pte-split-label-right { right: 8px; }
 
 .pte-preview-empty {
   width: 100%; height: 100%;
@@ -293,24 +236,6 @@
   display: flex; align-items: center; gap: 12px;
 }
 
-.pte-apply-all-label {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 0.73rem; color: var(--ink-45);
-  cursor: pointer; user-select: none;
-}
-.pte-checkbox {
-  width: 16px; height: 16px;
-  border: 1px solid var(--ink-20);
-  border-radius: 4px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.6rem; color: var(--customprops-color);
-  background: rgba(62,163,135,0.08);
-  transition: all 0.2s;
-}
-.pte-checkbox.checked {
-  border-color: rgba(180,120,255,0.6);
-  background: rgba(180,120,255,0.18);
-}
 
 .pte-reset-btn {
   background: var(--sheen-040); border: 1px solid var(--ink-16);

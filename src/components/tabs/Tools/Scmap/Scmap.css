@@ -3,9 +3,8 @@
    The tab is a TabLayout console (rail → main column → aside), so
    layout/typography/controls all come from design-system primitives
    (ctrl-*, mp-*). This file only adds the few SCMAP-specific bits: the
-   map register rows, the status line, the global drag overlay and the
-   credits line. Accent = the yellow --scmaptool-* tokens, surfaced as
-   --tab-color.
+   map register rows, the status line and the credits line. Accent = the
+   yellow --scmaptool-* tokens, surfaced as --tab-color.
    ═══════════════════════════════════════════════════════════════════ */
 
 .scmap-tab {
@@ -43,14 +42,6 @@
   color: color-mix(in srgb, var(--tab-color) 80%, #fff);
 }
 
-/* ── Count badge on a subsection head — quiet mono ────────────────── */
-.scmap-count {
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  letter-spacing: var(--track-wide);
-  color: var(--ink-22);
-  font-variant-numeric: tabular-nums;
-}
 
 /* ── Map register — boxless rows, hairline separated ──────────────── */
 .scmap-list { display: flex; flex-direction: column; margin-top: var(--space-xs); }
@@ -130,54 +121,3 @@
 }
 .scmap-status--ok  { color: var(--status-ok);  border-color: var(--status-ok);  background: rgba(0, 220, 130, 0.04); }
 .scmap-status--err { color: var(--status-err); border-color: var(--status-err); background: rgba(255, 70, 70, 0.04); }
-
-/* ── Global drag overlay — a hue-led shutter on the plate ─────────── */
-.scmap-drag-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-overlay, 1000);
-  background: rgba(5,5,7,0.82);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  animation: trace-fade-in 0.18s linear;
-}
-.scmap-drag-frame {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-3xl) var(--space-4xl);
-  border: 1px solid color-mix(in srgb, var(--tab-color) 40%, transparent);
-  box-shadow: 0 0 60px -10px var(--tab-glow), inset 0 0 40px -22px var(--tab-glow);
-}
-.scmap-drag-frame::before {
-  content: '';
-  position: absolute;
-  top: -1px; left: 0; right: 0;
-  height: 2px;
-  background: var(--tab-color);
-  box-shadow: 0 0 12px var(--tab-glow-strong), 0 0 3px var(--tab-color);
-}
-.scmap-drag-label {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--track-wider);
-  text-transform: uppercase;
-  color: var(--ink-100);
-}
-.scmap-drag-sub {
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-light);
-  letter-spacing: var(--track-base);
-  text-transform: uppercase;
-  color: var(--ink-38);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scmap-drag-overlay { animation: none !important; }
-}

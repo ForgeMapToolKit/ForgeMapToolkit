@@ -326,7 +326,6 @@
 .ne-socket-none { color: var(--ink-28); font-size: var(--text-xs); font-style: italic; padding-left: var(--space-md); }
 .ne-socket-label { font-size: var(--text-sm); color: var(--ink-40); }
 
-.ne-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; display: inline-block; }
 
 /* Sockets are filled dots, not rings — one less stroke per socket on a canvas
    that already carries a wire per connection. */

@@ -285,40 +285,6 @@
   overflow: hidden;
 }
 
-/* Background ghost numerals */
-.workspace-ghost {
-  position: absolute;
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  line-height: 1;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-  z-index: 0;
-}
-.workspace-ghost--body {
-  top: 0; bottom: 0; left: 0;
-  width: 40%;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: var(--space-md);
-  gap: 0.35em;
-  padding-left: var(--space-2xs);
-  animation: ds-print 0.36s var(--ease-out) 0.07s both;
-}
-.workspace-ghost--body .workspace-ghost-index {
-  flex-shrink: 0;
-  font-size: clamp(5rem, 16vw, 11rem);
-  letter-spacing: var(--track-base);
-  color: var(--sheen-028);
-}
-.workspace-ghost--body .workspace-ghost-label {
-  flex-shrink: 0;
-  font-size: clamp(3rem, 8vw, 6rem);
-  letter-spacing: var(--track-eyebrow);
-  color: var(--sheen-022);
-}
 
 .section-eyebrow {
   position: relative;
@@ -437,11 +403,6 @@
   position: relative;
   z-index: var(--z-base);
 }
-.preview-panel-head-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 .preview-panel-caption {
   font-size: var(--text-2xs);
   font-weight: var(--weight-semi);
@@ -506,14 +467,6 @@ html[data-theme="light"] .preview-panel {
   box-shadow: inset 2px 0 18px -4px var(--tab-glow);
 }
 
-/* Ghost numerals — sheen values are now boosted but still very faint.
-   Raise slightly so they read as deliberate texture, not accidents.  */
-html[data-theme="light"] .workspace-ghost--body .workspace-ghost-index {
-  color: var(--sheen-040);
-}
-html[data-theme="light"] .workspace-ghost--body .workspace-ghost-label {
-  color: var(--sheen-028);
-}
 
 /* Section desc — --ink-28 (#969CA5) on Canvas (#F3F6F9) is ~2.5:1.
    Step up to --ink-40 (#69707A) for comfortable reading.            */
@@ -566,38 +519,14 @@ html[data-theme="light"] .section-desc {
   flex-shrink: 0;
 }
 
-/* ── Aside-Breiten-Varianten ──────────────────────────────────────
-   Default-Verhalten von .preview-panel bleibt unangetastet (Legacy-
-   Pfad nutzt keine dieser Klassen). Die drei Breiten sind die einzige
-   Stelle mit fixen px-Werten — bewusst, da Layout-Constraint und
-   nicht stilistischer Wert. */
-.preview-panel--compact {
-  width: 280px;
-  flex: 0 0 280px;
-}
 
 .preview-panel--balanced {
   width: 360px;
   flex: 0 0 360px;
 }
 
-.preview-panel--wide {
-  width: 460px;
-  flex: 0 0 460px;
-}
 
-/* ── Full-width Column (kein Aside aktiv) ────────────────────────
-   Greift, wenn die aktive Sektion aside: null trägt (z.B. Output).
-   Column nimmt die volle Breite von workspace-main-inner ein,
-   ohne dass workspace-column selbst angefasst werden muss. */
-.workspace-main-inner--full .workspace-column {
-  flex: 1 1 auto;
-  max-width: none;
-}
 
-.workspace-main-inner--full .preview-panel {
-  display: none;
-}
 
 /* ══════════════════════════════════════════════════════════════════
    LAYOUT SYSTEM — x / y / z / w

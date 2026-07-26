@@ -68,7 +68,6 @@
   font-style: italic;
   line-height: 1.4;
 }
-.sb-field-help--dim { color: var(--ink-22); }
 
 .sb-cfg-row {
   display: grid;
@@ -171,47 +170,7 @@
 
 /* ── 5. Output summary + Lua preview ─────────────────────────────── */
 
-.sb-out-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: var(--space-sm);
-}
-.sb-out-badge {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-sm);
-  border: 1px solid var(--line-ghost-border);
-  background: var(--surface-ghost);
-}
-.sb-out-badge--ok   { border-color: rgba(0,200,100,0.3); }
-.sb-out-badge--warn { border-color: rgba(255,140,0,0.3); }
-.sb-out-badge-label {
-  font-size: var(--text-3xs);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-30);
-}
-.sb-out-badge-value {
-  font-family: var(--font-mono);
-  font-size: var(--text-lg);
-  color: var(--ink-72);
-}
-.sb-out-badge--ok   .sb-out-badge-value { color: var(--status-ok); }
-.sb-out-badge--warn .sb-out-badge-value { color: var(--status-warn); }
 
-.sb-out-lua-preview {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--line-ghost-border);
-  padding: var(--space-md);
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  color: var(--ink-55);
-  line-height: 1.7;
-  max-height: 320px;
-  overflow-y: auto;
-  white-space: pre;
-}
 
 /* ── 6. Dome Preview (inline canvas + fullscreen overlay) ────────── */
 
@@ -340,56 +299,6 @@
 
 /* ── 10. Stars sub-widgets ────────────────────────────────────────── */
 
-.sb-st-styled-select { position: relative; width: 100%; }
-.sb-st-styled-select-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  background: var(--sheen-040);
-  border: 1px solid var(--ink-12);
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  font-family: var(--font-display);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.3s ease;
-  border-radius: 0;
-}
-.sb-st-styled-select-trigger:hover,
-.sb-st-styled-select-trigger.open {
-  border-color: var(--skybox-generator-color);
-  background: var(--surface-code);
-  box-shadow: 0 0 0 1px var(--skybox-generator-color), 0 0 18px var(--skybox-generator-glow);
-}
-.sb-st-styled-select-trigger:focus { outline: none; }
-.sb-st-styled-select-arrow { color: rgba(59, 118, 255, 0.7); flex-shrink: 0; transition: transform 0.22s ease, color 0.2s ease; }
-.sb-st-styled-select-trigger.open .sb-st-styled-select-arrow { transform: rotate(180deg); color: var(--skybox-generator-color); }
-.sb-st-styled-select-dropdown {
-  position: absolute;
-  top: calc(100% + 3px);
-  left: 0; right: 0;
-  z-index: 999;
-  background: var(--surface-deep);
-  border: 1px solid rgba(59, 118, 255, 0.35);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 118, 255, 0.12);
-  overflow: hidden;
-}
-.sb-st-styled-select-option {
-  position: relative;
-  padding: 10px 20px 10px 36px;
-  font-size: 0.88rem;
-  font-family: var(--font-display);
-  color: var(--ink-60);
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-  white-space: nowrap;
-}
-.sb-st-styled-select-option:hover { background: rgba(59, 118, 255, 0.12); color: rgba(255, 255, 255, 0.88); }
-.sb-st-styled-select-option.selected { background: rgba(59, 118, 255, 0.18); color: var(--skybox-generator-color); }
-.sb-st-styled-select-option.selected:hover { background: rgba(59, 118, 255, 0.25); }
-.sb-st-styled-select-tick { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; color: var(--skybox-generator-color); }
 
 .sb-st-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 12px; }
 

@@ -456,12 +456,6 @@
   margin-top: 4px;
 }
 
-/* ── Parsed BP values grid ───────────────────────────────────────────────── */
-.acpo-bp-parsed-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
-}
 .acpo-bp-val {
   display: flex;
   flex-direction: column;
@@ -565,21 +559,4 @@ details[open] .acpo-bp-raw-summary::before { content: '▼ '; }
   margin-left: 4px;
   vertical-align: super;
 }
-
-/* ── Reset edits button ──────────────────────────────────────────────────────── */
-.acpo-reset-edits-btn {
-  background: none;
-  border: 1px solid rgba(62,163,135,0.25);
-  color: rgba(62,163,135,0.6);
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.62rem;
-  padding: 2px 8px;
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  transition: all 0.15s;
-}
-.acpo-reset-edits-btn:hover {
-  border-color: rgba(62,163,135,0.6);
-  color: var(--customprops-color);
-  background: rgba(62,163,135,0.06);
-}
+

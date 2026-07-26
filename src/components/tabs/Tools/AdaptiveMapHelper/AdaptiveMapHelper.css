@@ -381,9 +381,6 @@
   image-rendering: pixelated;
 }
 
-.amh-stat-icon--acu {
-  filter: saturate(0) brightness(0.85);
-}
 
 /* ── Empty state — fills .layout-w-content ────────────────────────────── */
 .amh-empty-state {
@@ -617,29 +614,8 @@
 }
 .amh-popup-close:hover { color: #fff; }
 
-.amh-popup-tabs {
-  display:     flex;
-  border-bottom: 1px solid var(--line-faint);
-}
 
-.amh-popup-tab {
-  flex:           1;
-  padding:        8px;
-  background:     transparent;
-  border:         none;
-  color:          var(--ink-35);
-  font-family:    'Poppins', sans-serif;
-  font-size:      0.7rem;
-  font-weight:    600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor:         pointer;
-  border-bottom:  2px solid transparent;
-  transition:     all 0.2s;
-}
 
-.amh-popup-tab:hover   { color: var(--ink-70); }
-.amh-popup-tab.active  { color: #ff8c00; border-bottom-color: #ff8c00; background: rgba(255,140,0,0.04); }
 
 .amh-popup-body { overflow-y: auto; max-height: 220px; }
 .amh-popup-body::-webkit-scrollbar       { width: 4px; }
@@ -692,88 +668,16 @@
 }
 .amh-popup-remove:hover { background: rgba(248,81,73,0.12); }
 
-/* ── Group Picker ───────────────────────────────────────────────────── */
-.amh-group-picker { display: flex; flex-direction: column; padding: 8px; gap: 8px; }
 
-.amh-group-type-list { display: flex; flex-direction: column; gap: 1px; max-height: 160px; overflow-y: auto; }
 
-.amh-group-type-btn {
-  display:     flex;
-  align-items: center;
-  gap:         7px;
-  padding:     5px 8px;
-  background:  transparent;
-  border:      1px solid transparent;
-  color:       var(--ink-45);
-  font-family: 'Poppins', sans-serif;
-  font-size:   0.75rem;
-  cursor:      pointer;
-  transition:  all 0.18s;
-  text-align:  left;
-  width:       100%;
-}
 
-.amh-group-type-btn:hover   { background: var(--surface-ghost); color: #fff; }
-.amh-group-type-btn.active  {
-  background:  color-mix(in srgb, var(--gt-color) 12%, transparent);
-  border-color: color-mix(in srgb, var(--gt-color) 40%, transparent);
-  color:       var(--gt-color);
-}
 
-.amh-group-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
-.amh-group-row {
-  display:     flex;
-  align-items: center;
-  gap:         5px;
-  flex-wrap:   wrap;
-}
 
-.amh-group-row-label {
-  font-size:   0.7rem;
-  color:       var(--amh-text-muted);
-  font-family: 'Poppins', sans-serif;
-  flex-shrink: 0;
-}
 
-.amh-group-num-btn {
-  width:       24px;
-  height:      24px;
-  background:  transparent;
-  border:      1px solid var(--ink-16);
-  color:       var(--ink-40);
-  cursor:      pointer;
-  font-size:   0.72rem;
-  font-family: 'Poppins', sans-serif;
-  transition:  all 0.18s;
-}
 
-.amh-group-num-btn:hover   { border-color: rgba(255,140,0,0.4); color: #ff8c00; }
-.amh-group-num-btn.active  { background: rgba(255,140,0,0.15); border-color: #ff8c00; color: #ff8c00; }
 
-.amh-group-confirm {
-  padding:        7px;
-  background:     rgba(255,140,0,0.12);
-  border:         1px solid rgba(255,140,0,0.35);
-  color:          #ff8c00;
-  font-family:    'Space Grotesk', sans-serif;
-  font-size:      0.72rem;
-  font-weight:    700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor:         pointer;
-  transition:     all 0.2s;
-}
 
-.amh-group-confirm:hover {
-  background:  rgba(255,140,0,0.22);
-  border-color: #ff8c00;
-  box-shadow:  0 0 12px rgba(255,140,0,0.2);
-}
 
 /* Small "✓ saved" pill riding next to the Tables topBar label */
 /* ── Code output — fills .layout-w-content (which is itself overflow:hidden,
@@ -824,18 +728,6 @@
   text-transform: uppercase;
 }
 
-.amh-copy-btn {
-  padding:        6px 14px;
-  background:     rgba(255,140,0,0.08);
-  border:         1px solid rgba(255,140,0,0.3);
-  color:          #ff8c00;
-  font-family:    'Poppins', sans-serif;
-  font-size:      0.72rem;
-  font-weight:    600;
-  cursor:         pointer;
-  transition:     all 0.2s;
-}
-.amh-copy-btn:hover { background: rgba(255,140,0,0.16); border-color: #ff8c00; }
 
 .amh-code-pre {
   background:  rgba(0,0,0,0.5);
@@ -879,13 +771,6 @@
 .amh-preview-upload-btn:hover {
   background: var(--ink-12);
   color:      var(--amh-text);
-}
-.amh-preview-loading {
-  font-size:  0.75rem;
-  color:      var(--amh-text-muted);
-  padding:    0 8px;
-  opacity:    0.7;
-  font-style: italic;
 }
 
 /* ── Mirror toggle & Quick-assign toolbar ────────────────────────────────── */

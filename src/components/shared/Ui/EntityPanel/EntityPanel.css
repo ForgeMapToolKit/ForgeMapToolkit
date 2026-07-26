@@ -14,22 +14,9 @@
 
 /* ── Input rows ──────────────────────────────────────────────────── */
 
-.ec-input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.ec-input-row .field-input { flex: 1; margin-bottom: 0; }
 
 /* ── Path hint ────────────────────────────────────────────────────── */
 
-.ec-path-hint {
-  font-size: 0.72rem;
-  color: var(--ink-22);
-  margin-top: 5px;
-  font-family: 'JetBrains Mono', monospace;
-}
 
 /* ── Card grid ───────────────────────────────────────────────────── */
 
@@ -174,13 +161,6 @@
 
 /* ── Category path hint ──────────────────────────────────────────── */
 
-.ec-cat-path {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.66rem;
-  color: var(--ink-22);
-  margin-top: 8px;
-  font-style: italic;
-}
 
 /* ── Coordinate register — each point is its own recessed block ──── */
 
@@ -289,54 +269,11 @@
 
 /* ── Empty state (overlay sidebars / modal bodies) ───────────────── */
 
-.ec-empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.82rem;
-  color: var(--ink-22);
-  letter-spacing: 0.06em;
-}
 
 /* ═══════════════════════════════════════════════════════════════════
    MAP PREVIEW — upload, canvas well, markers stage, legend, hint
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Upload area — boxless secondary action with a growing filament stub */
-.ec-upload {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 2px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-40);
-  margin-bottom: 14px;
-  transition: color 0.2s linear, letter-spacing 0.26s var(--trace-out);
-}
-.ec-upload::after {
-  content: '';
-  position: absolute;
-  left: 0; bottom: 2px;
-  height: 1px;
-  width: 16px;
-  background: var(--tab-color);
-  opacity: 0.45;
-  box-shadow: 0 0 6px var(--tab-glow);
-  transition: width 0.34s var(--trace-out), opacity 0.2s linear;
-}
-.ec-upload:hover {
-  color: var(--ink-92);
-  letter-spacing: 0.19em;
-}
-.ec-upload:hover::after { width: 100%; opacity: 1; }
 .ec-file-input { display: none; }
 
 /* Canvas — a recessed instrument well, sunk into the plate */
@@ -490,33 +427,6 @@
 
 /* Legend */
 .ec-legend { margin-top: 20px; }
-.ec-legend-title {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.56rem;
-  font-weight: 600;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--ink-30);
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line-faint);
-}
-.ec-legend-title::before {
-  content: '';
-  width: 2px; height: 11px;
-  flex-shrink: 0;
-  background: var(--tab-color);
-  box-shadow: 0 0 8px var(--tab-glow-strong), 0 0 2px var(--tab-color);
-}
-.ec-legend-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--line-ghost-border), transparent 85%);
-}
 .ec-legend-list { display: flex; flex-direction: column; gap: 5px; }
 .ec-legend-row {
   display: flex;
@@ -533,22 +443,6 @@
 .ec-legend-row:hover {
   color: var(--ink-92);
   transition-duration: 0.08s;
-}
-.ec-legend-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: box-shadow 0.7s var(--trace-decay);
-}
-.ec-legend-row:hover .ec-legend-dot {
-  box-shadow: 0 0 10px var(--dot-c, currentColor), 0 0 3px var(--dot-c, currentColor);
-  transition-duration: 0.06s;
-}
-.ec-legend-pts {
-  margin-left: auto;
-  font-size: 0.64rem;
-  color: var(--ink-22);
-  font-variant-numeric: tabular-nums;
 }
 
 /* ── Legend rail — collapsible appendage (opt-in via legendCollapsible)
@@ -723,17 +617,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Hint row */
-.ec-hint {
-  margin-top: 12px;
-  padding: 8px 14px;
-  background: var(--tc-rail, #0d0d10);
-  border-left: 2px solid color-mix(in srgb, var(--tab-color) 40%, var(--line-medium));
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.68rem;
-  color: var(--ink-30);
-  letter-spacing: 0.04em;
-}
 
 /* ── File drag overlay — full-tab shutter, used via useFileDrop ────── */
 

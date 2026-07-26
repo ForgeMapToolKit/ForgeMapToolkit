@@ -47,8 +47,6 @@
 }
 
 .cli-line--stdout { color: var(--ink-72); }
-.cli-line--stderr { color: var(--status-err-muted); }
-.cli-line--info   { color: var(--tab-color); }
 .cli-line--error  { color: var(--status-err); }
 .cli-line--echo   { color: var(--ink-92); font-weight: var(--weight-semi); }
 

@@ -179,14 +179,6 @@
 }
 .cpt-form-input::placeholder { color: var(--text-muted); }
 
-.cpt-form-help {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-top: 10px;
-  font-style: italic;
-  line-height: 1.5;
-  font-family: monospace;
-}
 
 /* ── Props grid ───────────────────────────────────────────────────── */
 .cpt-props-grid {
@@ -260,14 +252,6 @@
 .cpt-prop-card-info {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; gap: 3px;
-}
-
-.cpt-prop-card-name {
-  font-size: 0.88rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: var(--cpt-text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .cpt-prop-card-meta {
@@ -428,12 +412,6 @@
   gap: 18px;
   padding: 60px 40px;
   text-align: center;
-}
-.cpt-empty-icon {
-  font-size: 3.5rem;
-  color: var(--customprops-color);
-  opacity: 0.18;
-  filter: drop-shadow(0 0 18px var(--customprops-glow));
 }
 .cpt-empty-title {
   font-family: 'Space Grotesk', sans-serif;
@@ -658,8 +636,6 @@
 .cpt-pass-file:hover { border-color: var(--ink-16); }
 .cpt-pass-file.custom:hover { border-color: rgba(62, 163, 135, 0.22); }
 
-.cpt-pass-file-icon { font-size: 0.95rem; flex-shrink: 0; }
-
 .cpt-pass-file-info {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; gap: 1px;
@@ -694,12 +670,6 @@
   display: flex;
   gap: 12px;
   align-items: flex-start;
-}
-.cpt-info-icon {
-  font-size: 0.9rem;
-  color: var(--ink-20);
-  flex-shrink: 0;
-  margin-top: 1px;
 }
 .cpt-info-text {
   font-size: 0.78rem;
@@ -737,51 +707,6 @@
   border-bottom-color: rgba(62, 163, 135, 0.4);
 }
 
-/* ── Link / assign / unlink buttons ─────────────────────────────────────── */
-.cpt-btn-link-small,
-.cpt-btn-unlink-small,
-.cpt-btn-assign-small {
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  border: 1px solid var(--ink-16);
-  background: var(--surface-ghost);
-  color: #aaa;
-  font-size: 11px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
-  line-height: 1;
-}
-.cpt-btn-link-small:hover {
-  background: rgba(62, 163, 135, 0.08);
-  border-color: rgba(62, 163, 135, 0.35);
-  color: var(--customprops-color);
-  box-shadow: 0 0 8px rgba(62, 163, 135, 0.15);
-}
-.cpt-btn-assign-small {
-  background: rgba(62, 163, 135, 0.08);
-  border-color: rgba(62, 163, 135, 0.3);
-  color: var(--customprops-color);
-  animation: pulse-link 1.2s ease-in-out infinite;
-}
-.cpt-btn-assign-small:hover {
-  background: rgba(62, 163, 135, 0.14);
-  box-shadow: 0 0 12px rgba(62, 163, 135, 0.25);
-}
-.cpt-btn-unlink-small:hover {
-  background: rgba(255,80,80,0.1);
-  border-color: rgba(255,80,80,0.4);
-  color: var(--wreckages-color);
-}
-@keyframes pulse-link {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(62, 163, 135, 0.35); }
-  50%       { box-shadow: 0 0 0 4px rgba(62, 163, 135, 0); }
-}
-
 /* ── Link dot on thumbnail ───────────────────────────────────────────────── */
 .cpt-prop-link-dot {
   position: absolute;
@@ -816,14 +741,6 @@
   border-left-color: rgba(62, 163, 135, 0.55);
 }
 
-/* 🔗 icon label */
-.cpt-link-label {
-  font-size: 10px;
-  color: rgba(62, 163, 135, 0.4);
-  white-space: nowrap;
-  flex-shrink: 0;
-  letter-spacing: 0.02em;
-}
 
 /* "Join group…" dropdown */
 .cpt-link-select {
@@ -1005,349 +922,18 @@
   font-size: 1.1rem;
   filter: drop-shadow(0 0 8px rgba(62, 163, 135, 0.5));
 }
-/* ═══════════════════════════════════════════════════════════════════════════
-   HELP BUTTON
-   ═══════════════════════════════════════════════════════════════════════════ */
-.cpt-help-button {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--customprops-color) 0%, rgba(62, 163, 135, 0.85) 100%);
-  border: 3px solid rgba(62, 163, 135, 0.4);
-  color: #000000;
-  font-size: 1.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  z-index: 10000;
-  box-shadow: 0 8px 30px var(--customprops-glow-strong),
-              0 0 60px var(--customprops-glow);
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-.cpt-help-button:hover {
-  transform: scale(1.15) rotate(10deg);
-  box-shadow: 0 12px 40px var(--customprops-glow-strong),
-              0 0 80px var(--customprops-glow);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   HELP MODAL
-   ═══════════════════════════════════════════════════════════════════════════ */
-.cpt-help-modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 9998;
-  animation: cptOverlayFadeIn 0.3s ease;
-}
-
-@keyframes cptOverlayFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.cpt-help-modal {
-  position: fixed;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  max-width: 2500px;
-  height: 92vh;
-  max-height: 1500px;
-  background: linear-gradient(
-    135deg,
-    rgba(15, 15, 15, 0.98) 0%,
-    rgba(8, 8, 8, 0.98) 100%
-  );
-  border: 2px solid rgba(62, 163, 135, 0.25);
-  border-radius: 0;
-  box-shadow:
-    0 25px 80px rgba(0, 0, 0, 0.95),
-    0 0 100px var(--customprops-glow),
-    inset 0 1px 0 rgba(62, 163, 135, 0.2);
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: cptModalSlideIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes cptModalSlideIn {
-  from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-
-/* Top accent line — teal */
-.cpt-help-modal::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 4px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--customprops-color) 30%,
-    var(--customprops-color) 70%,
-    transparent 100%
-  );
-  box-shadow: 0 0 30px var(--customprops-glow-strong);
-  border-radius: 0;
-  z-index: 1;
-}
-
-/* ── Modal header ── */
-.cpt-help-modal-header {
-  padding: 30px 40px 20px;
-  border-bottom: 1px solid var(--line-medium);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(62, 163, 135, 0.02);
-}
-
-.cpt-help-modal-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #ffffff;
-  text-transform: uppercase;
-  text-shadow: 0 0 20px var(--customprops-glow);
-  margin: 0;
-}
-
-/* ── Tabs ── */
-.cpt-help-tabs {
-  display: flex;
-  padding: 0 40px;
-  background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid var(--line-medium);
-  gap: 4px;
-}
-
-.cpt-help-tab {
-  padding: 16px 24px;
-  background: transparent;
-  border: none;
-  color: var(--ink-50);
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-bottom: 3px solid transparent;
-  white-space: nowrap;
-}
-
-.cpt-help-tab:hover {
-  color: var(--ink-85);
-  background: var(--sheen-040);
-}
-
-.cpt-help-tab.active {
-  color: var(--customprops-color);
-  border-bottom-color: var(--customprops-color);
-  background: rgba(62, 163, 135, 0.05);
-  text-shadow: 0 0 15px var(--customprops-glow);
-}
-
-/* ── Content area ── */
-.cpt-help-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 40px;
-}
-
-.cpt-help-content::-webkit-scrollbar { width: 6px; }
-.cpt-help-content::-webkit-scrollbar-track { background: var(--surface-ghost); }
-.cpt-help-content::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--customprops-color), rgba(62, 163, 135, 0.5));
-  border-radius: 3px;
-}
-.cpt-help-content::-webkit-scrollbar-thumb:hover { background: var(--customprops-color); }
-
-/* ── Reuse Wreckage advanced guide classes, themed to customprops ── */
-.cpt-help-modal {
-  --theme-accent: var(--customprops-color);
-  --theme-glow: var(--customprops-glow);
-  --theme-glow-strong: var(--customprops-glow-strong);
-  --theme-glow-intense: rgba(62, 163, 135, 0.9);
-}
-
-.cpt-help-modal .help-generate-hero::before {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--customprops-color) 30%,
-    var(--customprops-color) 70%,
-    transparent 100%
-  );
-  box-shadow: 0 0 25px var(--customprops-glow-strong);
-}
-
-.cpt-help-modal .help-generate-icon {
-  filter: drop-shadow(0 0 15px var(--customprops-glow))
-          drop-shadow(0 0 30px var(--customprops-glow));
-}
-
-.cpt-help-modal .help-section-number {
-  background: linear-gradient(135deg, var(--customprops-color), rgba(62, 163, 135, 0.7));
-  box-shadow: 0 0 30px var(--customprops-glow);
-}
-
-.cpt-help-modal .help-process-step:hover {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
-              0 0 40px var(--customprops-glow);
-}
-
-.cpt-help-modal .help-process-step-number {
-  background: var(--customprops-color);
-  box-shadow: 0 0 20px var(--customprops-glow);
-}
-
-.cpt-help-modal .help-process-arrow {
-  color: var(--customprops-color);
-  filter: drop-shadow(0 0 15px var(--customprops-glow));
-}
-
-.cpt-help-modal .help-fake-button,
-.cpt-help-modal .help-generate-fake-button {
-  background: var(--customprops-color);
-  color: #000;
-  box-shadow: 0 0 50px var(--customprops-glow-strong),
-              0 8px 30px rgba(0, 0, 0, 0.6);
-}
-
-.cpt-help-modal .help-note-box {
-  border-left-color: var(--customprops-color);
-}
-
-.cpt-help-modal .help-note-box strong {
-  color: var(--customprops-color);
-}
-
-.cpt-help-modal .help-section-header {
-  border-bottom-color: rgba(62, 163, 135, 0.2);
-}
-
-/* Troubleshooting items */
-.help-troubleshooting-item {
-  margin-bottom: 20px;
-  background: var(--surface-ghost);
-  border: 1px solid var(--line-ghost-border);
-  border-radius: 0;
-  overflow: hidden;
-}
-
-.help-troubleshooting-question {
-  padding: 14px 20px;
-  background: rgba(62, 163, 135, 0.04);
-  border-bottom: 1px solid var(--line-faint);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.88rem;
-  color: var(--ink-85);
-}
-
-.help-troubleshooting-icon {
-  color: var(--customprops-color);
-  font-size: 0.7rem;
-  flex-shrink: 0;
-}
-
-.help-troubleshooting-answer {
-  padding: 14px 20px;
-}
-
-.help-troubleshooting-answer p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--ink-50);
-  line-height: 1.65;
-}
-
-/* Technical grid */
-.help-technical-grid {
-  margin-top: 24px;
-}
-
-.help-technical-card {
-  padding: 20px 24px;
-  background: var(--surface-ghost);
-  border: 1px solid var(--line-medium);
-}
-
-.help-technical-features {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.help-technical-features li {
-  font-size: 0.88rem;
-  line-height: 1.6;
-  color: var(--ink-55);
-}
-
-.help-technical-features li strong {
-  color: var(--customprops-color);
-  font-weight: 600;
-}
-
-/* buttonPulse for help modal */
-.cpt-help-modal .help-generate-fake-button {
-  animation: cptButtonPulse 3s ease-in-out infinite;
-}
-
-@keyframes cptButtonPulse {
-  0%, 100% { box-shadow: 0 0 40px var(--customprops-glow), 0 8px 30px rgba(0,0,0,0.6); }
-  50%       { box-shadow: 0 0 70px var(--customprops-glow-strong), 0 12px 40px rgba(0,0,0,0.7); }
-}
-
-/* ── Slider CSS — interactive (for PropTextureEditor) ── */
-.cpt-slider-input-interactive {
-  position: relative;
-  width: 100%; height: 20px;
-  -webkit-appearance: none; appearance: none;
-  background: transparent;
-  cursor: pointer;
-  z-index: 1;
-}
-.cpt-slider-input-interactive::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: var(--customprops-color);
-  border: 2px solid rgba(0, 0, 0, 0.5);
-  box-shadow: 0 0 12px var(--customprops-glow);
-  transition: transform 0.15s, box-shadow 0.15s;
-  cursor: pointer;
-}
-.cpt-slider-input-interactive:hover::-webkit-slider-thumb {
-  transform: scale(1.25);
-  box-shadow: 0 0 20px var(--customprops-glow-strong);
-}
-.cpt-slider-input-interactive::-webkit-slider-runnable-track { background: transparent; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GOLD-STANDARD MIGRATION — rules below are consumed ONLY by the live tab
-   (PropList.jsx / PropDetail.jsx / CustomProps.jsx). Everything above this
-   line is shared with — or exclusively used by — CustomProps_help.jsx's
-   embedded mock UI and must not be renamed/removed here.
+   (PropList.jsx / PropDetail.jsx / CustomProps.jsx).
+
+   The previous version of this note claimed everything above the line was
+   "exclusively used by CustomProps_help.jsx's embedded mock UI and must not
+   be removed". That was no longer true: CustomProps_help.jsx renders the
+   shared `help-adv-*` / `help-modal-*` vocabulary, not the `cpt-help-*` and
+   generic `help-*` rules that used to sit here. The tab's own help modal was
+   superseded by the shared HelpPanel; its stylesheet was removed once nothing
+   referenced it.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Card body — sits inside EntityCard's children, replaces the old
