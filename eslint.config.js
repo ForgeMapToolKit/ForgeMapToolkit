@@ -17,12 +17,16 @@
 
 const js           = require('@eslint/js');
 const globals      = require('globals');
+const react        = require('eslint-plugin-react');
 const reactHooks   = require('eslint-plugin-react-hooks');
 const reactRefresh = require('eslint-plugin-react-refresh');
 
 module.exports = [
   {
-    ignores: ['dist/**', 'build/**', 'data/**', 'public/**', 'node_modules/**'],
+    // _backup/** holds inert reference copies of code removed from src/ (see
+    // _backup/README.md). Nothing imports it and no config block below claims
+    // it, so linting it would only produce parse errors on unclaimed JSX.
+    ignores: ['dist/**', 'build/**', 'data/**', 'public/**', 'node_modules/**', '_backup/**'],
   },
 
   js.configs.recommended,
@@ -41,12 +45,22 @@ module.exports = [
       globals: { ...globals.browser, process: 'readonly' },
     },
     plugins: {
+      react: react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // Core `no-unused-vars` does not understand JSX: `<TabLayout />` does not
+      // count as a use, so every imported component is reported as dead. That
+      // turns the warning list into a trap during cleanup — it invites deleting
+      // imports that are load-bearing. This rule marks JSX-referenced bindings
+      // as used and is the only reason the plugin is here.
+      'react/jsx-uses-vars': 'error',
+      // `react/jsx-uses-react` is deliberately NOT enabled. The build uses the
+      // automatic JSX runtime (@vitejs/plugin-react default), so a bare
+      // `import React from 'react'` genuinely is dead and should be reported.
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-empty': ['warn', { allowEmptyCatch: true }],
     },
@@ -59,6 +73,7 @@ module.exports = [
       'utils/scmap.js',
       'utils/autosave-runner.js',
       'utils/generate-csp-hashes.js',
+      'utils/generate-terraintypes.js',
       'eslint.config.js',
     ],
     languageOptions: {
@@ -86,6 +101,23 @@ module.exports = [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: { ...globals.browser },
+    },
+    rules: {
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
+  },
+
+  // ── Build/analysis scripts — Node ESM ─────────────────────────────────────
+  // scripts/*.mjs run under plain node with `import`, outside both the renderer
+  // bundle and the Electron main process. Without their own block they fall
+  // through to js.configs.recommended with no globals declared, which reports
+  // `console` and `process` as undefined.
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.node },
     },
     rules: {
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
