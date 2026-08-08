@@ -3,21 +3,37 @@
  *
  * Akzent aus der Registry (TAB_CONTRACT §5); niemals eine Tab-Farbe direkt.
  *
- * Der Viewport ist eine freie Fläche im Sinne von TAB_UI_CONTRACT §12: er trägt
- * eine Kontur, weil das Volumen ohne Rahmen keine Kante hat, und alles, was
- * darüber schwebt, ist Beschriftung dieser Fläche — kein Block. Die Seitenspalte
- * daneben folgt §4/§5 unverändert.
+ * Escape the default .tab-content padding + centered 1400px max-width and the
+ * vertical banner register — same :has() pattern the Texture Editor uses
+ * (TextureEditor.css, ForgeMapToolkit.css): a 3D viewport wants the full
+ * width and the full height above the fold, not a banner's worth of it lost.
  */
+.tab-content:has(.viewer3d-tab) {
+  padding: 0;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: none;
+}
 
 .viewer3d-tab {
   --tab-color:       var(--viewer3d-color);
   --tab-glow:        var(--viewer3d-glow);
   --tab-glow-strong: var(--viewer3d-glow-strong);
+  /* Shading embeds the Texture Editor's node graph — same state-ring feedback
+     colours (Role 3), scoped here since this tab never wears .node-editor-tab. */
+  --ne-freeze-color: #5ecdf0;
+  --ne-bypass-color: #ff54c8;
+  --ne-compare-a-color: #c8ff60;
+  --ne-compare-b-color: #ff9d5c;
 
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  position: relative;
 }
 
 /* ── Toolbar ──────────────────────────────────────────────────────────── */
@@ -50,7 +66,7 @@
   gap: var(--space-2xs);
 }
 
-/* Mode switch: the active one is carried by the accent underline, so no
+/* Workspace switch: the active one is carried by the accent underline, so no
    resting border is needed and none is drawn (§5). */
 .v3-mode {
   padding: var(--space-2xs) var(--space-sm);
@@ -66,16 +82,11 @@
   transition: color 140ms ease, border-color 140ms ease;
 }
 
-.v3-mode:hover:not(:disabled) { color: var(--ink-85); }
+.v3-mode:hover { color: var(--ink-85); }
 
 .v3-mode.is-active {
   color: var(--tab-color);
   border-bottom-color: var(--tab-color);
-}
-
-.v3-mode:disabled {
-  color: var(--ink-25);
-  cursor: not-allowed;
 }
 
 /* ── Body ─────────────────────────────────────────────────────────────── */
@@ -88,6 +99,14 @@
   padding: var(--space-lg);
 }
 
+/* Layout: viewport + object list side by side. Shading: viewport on top,
+   the embedded node editor filling the rest below — the split the user asked
+   for, "like the Texture Editor in the lower half". */
+.v3-body--layout { flex-direction: row; }
+.v3-body--shading { flex-direction: column; }
+
+.v3-body--shading .v3-viewport { flex: 1 1 42%; min-height: 0; }
+
 .v3-side {
   display: flex;
   flex-direction: column;
@@ -96,6 +115,7 @@
   flex-shrink: 0;
   overflow-y: auto;
 }
+.v3-side[hidden] { display: none; }
 
 .v3-panel {
   display: flex;
@@ -133,7 +153,6 @@
   font-size: var(--text-md);
   letter-spacing: 0.04em;
   color: var(--ink-95);
-  margin-bottom: var(--space-xs);
 }
 
 .v3-readout-empty {
@@ -143,36 +162,12 @@
   color: var(--ink-38);
 }
 
-.v3-facts {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-3xs) var(--space-sm);
-  margin: 0;
-  font-size: var(--text-xs);
-}
-
-.v3-facts dt {
-  font-size: var(--text-3xs);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-38);
-  padding-top: 0.15em;
-}
-
-.v3-facts dd {
-  margin: 0;
-  color: var(--ink-85);
-  font-variant-numeric: tabular-nums;
-}
-
 .v3-fact-aside {
   display: block;
   font-size: var(--text-3xs);
   color: var(--ink-40);
   font-variant-numeric: normal;
 }
-
-.v3-warn { color: var(--status-warn-text); }
 
 .v3-viewport-actions {
   position: absolute;
@@ -198,18 +193,41 @@
   pointer-events: none;
 }
 
-.v3-error,
-.v3-loading {
+/* ── Boot / load overlay ──────────────────────────────────────────────────
+   A frozen-looking tab on first load is a bug people report as a crash. This
+   makes the wait visible and un-clickable instead of silent. */
+.v3-boot-overlay {
   position: absolute;
-  bottom: var(--space-md);
-  right: var(--space-md);
-  font-size: var(--text-xs);
-  color: var(--ink-70);
+  inset: 0;
+  z-index: var(--z-overlay, 60);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  background: color-mix(in srgb, var(--surface-canvas) 78%, transparent);
+  backdrop-filter: blur(2px);
 }
 
-.v3-error { color: var(--status-err); max-width: 60%; text-align: right; }
+.v3-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-15);
+  border-top-color: var(--tab-color);
+  animation: v3-spin 0.8s linear infinite;
+}
 
-/* ── Source ───────────────────────────────────────────────────────────── */
+.v3-boot-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+@keyframes v3-spin { to { transform: rotate(360deg); } }
+
+/* ── Objects panel (Layout workspace) ────────────────────────────────────── */
 
 .v3-full { width: 100%; }
 
@@ -247,25 +265,11 @@
 
 .v3-file-input { display: none; }
 
-.v3-current {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-}
-
-.v3-current-name {
-  font-size: var(--text-sm);
-  color: var(--ink-92);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .v3-scale-row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2xs);
+  margin-top: var(--space-2xs);
 }
 
 .v3-scale.is-on {
@@ -285,14 +289,10 @@
   color: var(--status-err);
 }
 
-/* ── Reference ────────────────────────────────────────────────────────── */
-
 .v3-check {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  font-size: var(--text-xs);
-  color: var(--ink-80);
   cursor: pointer;
 }
 
@@ -318,17 +318,7 @@
   transition: color 140ms ease, border-color 140ms ease;
 }
 
-.v3-ref:hover:not(:disabled) { color: var(--ink-92); }
-
-.v3-ref.is-active {
-  color: var(--ink-95);
-  border-left-color: var(--tab-color);
-}
-
-.v3-ref:disabled {
-  color: var(--ink-25);
-  cursor: not-allowed;
-}
+.v3-ref:hover { color: var(--ink-92); border-left-color: var(--tab-color); }
 
 .v3-ref-label { font-size: var(--text-sm); }
 
@@ -336,4 +326,141 @@
   font-family: var(--font-mono);
   font-size: var(--text-3xs);
   color: var(--ink-35);
+}
+
+/* Object list — one row per slot standing on the floor, in the same order
+   the engine lines them up (Scene3D/engine.js layout()). */
+.v3-obj-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.v3-obj-empty { padding: var(--space-sm) 0; }
+
+.v3-obj {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border-left: var(--line-md) solid transparent;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.v3-obj:hover { background: var(--tab-glow); }
+
+.v3-obj.is-active { border-left-color: var(--tab-color); background: var(--tab-glow); }
+
+.v3-obj-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.v3-obj-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-92);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v3-obj-size {
+  font-size: var(--text-3xs);
+  color: var(--ink-55);
+  font-variant-numeric: tabular-nums;
+  padding-left: calc(var(--space-lg) + var(--space-xs));
+}
+
+/* ── Shading workspace ────────────────────────────────────────────────────
+   Reuses the Texture Editor's own node-graph vocabulary (.ne-* — imported
+   from TextureEditor.css by Shading.jsx) so a node here looks and behaves
+   exactly like it does in the full editor; only the surrounding chrome below
+   is new, scaled to a pane instead of the whole tab. */
+
+.v3-shading-pane {
+  flex: 1 1 58%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: var(--line-sm) solid var(--ink-11);
+}
+.v3-shading-pane[hidden] { display: none; }
+
+.v3-shading-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.v3-shading-pick-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  justify-content: center;
+  max-width: 40rem;
+}
+
+.v3-shading-pick {
+  border: none;
+  padding: var(--space-2xs) var(--space-sm);
+  color: var(--ink-72);
+  font-family: inherit;
+  font-size: var(--text-sm);
+}
+
+.v3-shading-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.v3-shading-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xs) var(--space-md);
+  border-bottom: var(--line-sm) solid var(--ink-11);
+  background: var(--surface-deep);
+}
+
+.v3-shading-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--tab-color);
+}
+
+/* Row: graph (with its docked toolbox) + inspector, filling the rest of the
+   pane — same split as .ne-body/.ne-stage-left/.ne-inspector-col, just under
+   a shorter roof. */
+.v3-shading-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.v3-shading-graph-zone {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+  background: var(--surface-canvas);
+}
+
+.v3-shading-inspector {
+  flex: 0 0 auto;
+  width: min(420px, 40vw);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: var(--line-sm) solid var(--ink-11);
+  background: var(--surface-deep);
+  overflow-y: auto;
 }

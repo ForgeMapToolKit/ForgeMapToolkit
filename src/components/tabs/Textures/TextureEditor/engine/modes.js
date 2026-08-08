@@ -119,7 +119,54 @@ export const MODES = {
       };
     },
   },
+
+  /**
+   * The 3D Viewer's Shading workspace (Tabs/Textures/Viewer3D/Shading.jsx).
+   *
+   * Unlike the other templates this one has a *host*: the viewer owns which
+   * asset is being shaded and keeps the `src` node's path in step with the
+   * selected object, while the output feeds straight back onto the mesh in the
+   * viewport above. The fixed node ids are the contract for that — `src` is the
+   * one the host writes, everything downstream is the user's to rearrange.
+   *
+   * freshId() only ever reuses ids matching /^[a-z]+\d+$/, so these unnumbered
+   * ids can never collide with a node added later.
+   */
+  propalbedo: {
+    key: 'propalbedo',
+    label: 'Asset Shading',
+    canvas: { w: 512, h: 512 },
+    palette: null,
+    makeGraph() {
+      return {
+        version: 1,
+        mode: 'propalbedo',
+        canvas: { w: 512, h: 512 },
+        nodes: {
+          // Path stays empty: the viewer fills it from the selected object's
+          // blueprint. A hard-coded default here would render a wrong texture
+          // confidently for the second between mount and the first sync.
+          //
+          // x-positions start past 244px (the toolbox dock's width, TextureEditor.css
+          // `.ne-palette-dock`) — spawning `src` under x=60 put it permanently behind
+          // the always-open toolbox, unreachable and invisible.
+          src: { type: 'texture-import', params: { path: '', mapName: '', alphaOnly: false }, pos: [340, 70] },
+          hue: { type: 'hsv', params: { hue: 0, sat: 1, val: 1 }, pos: [580, 70] },
+          lum: { type: 'brightness-contrast', params: { brightness: 0, contrast: 1 }, pos: [810, 70] },
+          out: { type: 'output-texture', params: { filename: 'albedo', format: 'DXT5', mipmaps: true }, pos: [1040, 70] },
+        },
+        edges: [
+          { from: ['src', 'out'], to: ['hue', 'in'] },
+          { from: ['hue', 'out'], to: ['lum', 'in'] },
+          { from: ['lum', 'out'], to: ['out', 'in'] },
+        ],
+      };
+    },
+  },
 };
 
 export const MODE_LIST = Object.values(MODES);
 export const DEFAULT_MODE = 'waterramp';
+
+/** The node id the Shading workspace writes its source texture path into. */
+export const SOURCE_NODE_ID = 'src';

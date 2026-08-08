@@ -4,15 +4,20 @@
  * three ships OrbitControls under `three/examples/jsm/`, but pulling an addon
  * in adds a second module path to the Vite bundle and therefore a second set of
  * CSP hashes to keep in step with `utils/generate-csp-hashes.js`. What we need
- * is eighty lines of spherical arithmetic, so it lives here instead.
+ * is a hundred lines of spherical arithmetic, so it lives here instead.
  *
  * The camera is described in spherical coordinates around a target point:
  * azimuth (around Y), elevation (from the horizon), distance. Y is up, matching
  * both three and the .scm coordinate system.
  *
  *   const orbit = createOrbit(canvas, camera, () => engine.requestRender());
- *   orbit.frame(center, radius);   // fit an object
+ *   orbit.frame(center, radius);   // fit an object, keeping the current angles
  *   orbit.dispose();
+ *
+ * Bindings follow Blender, because that is the tool this viewer is modelled on:
+ * middle-drag orbits, shift+middle (or shift+left) pans, the wheel dollies. Plain
+ * left-drag also orbits — the tab has no other use for it, and a viewer whose
+ * primary button does nothing feels broken.
  */
 
 import * as THREE from 'three';
@@ -27,10 +32,14 @@ const ORBIT_SPEED = 0.008;   // radians per pixel
 const PAN_SPEED   = 0.0016;  // fraction of distance per pixel
 const ZOOM_STEP   = 0.0011;  // per wheel unit
 
+/** Where the camera sits before anything is loaded — Blender's user-persp angle. */
+const HOME_AZIMUTH   = Math.PI * 0.25;
+const HOME_ELEVATION = Math.PI * 0.18;
+
 export function createOrbit(element, camera, onChange) {
   const target = new THREE.Vector3(0, 0, 0);
-  let azimuth   = Math.PI * 0.25;
-  let elevation = Math.PI * 0.18;
+  let azimuth   = HOME_AZIMUTH;
+  let elevation = HOME_ELEVATION;
   let distance  = 10;
   let minDistance = 0.05;
   let maxDistance = 500;
@@ -38,7 +47,13 @@ export function createOrbit(element, camera, onChange) {
   let dragging = null;      // 'orbit' | 'pan' | null
   let lastX = 0, lastY = 0;
 
-  function apply() {
+  // `notify` is false only for the constructor's own initial placement below:
+  // the caller's `const orbit = createOrbit(...)` hasn't finished assigning
+  // yet at that point, and its onChange (engine.js's onCameraChange) reads
+  // `orbit` from that same binding — calling it any earlier is a temporal
+  // dead zone crash, not a stale-value bug. `frame()`, called right after
+  // construction, fires the real first notify once `orbit` exists.
+  function apply(notify = true) {
     const cosE = Math.cos(elevation);
     camera.position.set(
       target.x + distance * cosE * Math.sin(azimuth),
@@ -47,7 +62,7 @@ export function createOrbit(element, camera, onChange) {
     );
     camera.lookAt(target);
     camera.updateMatrixWorld();
-    onChange();
+    if (notify) onChange();
   }
 
   // Pan moves the target across the camera's own screen plane, so dragging
@@ -63,7 +78,7 @@ export function createOrbit(element, camera, onChange) {
 
   function onPointerDown(e) {
     if (e.button === 2) return;                       // right-click stays free
-    dragging = (e.button === 1 || e.shiftKey) ? 'pan' : 'orbit';
+    dragging = e.shiftKey ? 'pan' : 'orbit';
     lastX = e.clientX; lastY = e.clientY;
     element.setPointerCapture(e.pointerId);
     e.preventDefault();
@@ -103,21 +118,33 @@ export function createOrbit(element, camera, onChange) {
   element.addEventListener('pointercancel', onPointerUp);
   element.addEventListener('wheel', onWheel, { passive: false });
 
-  apply();
+  apply(false);
 
   return {
-    /** Fit a sphere in view and re-derive sensible zoom limits from its size. */
-    frame(center, radius) {
+    /**
+     * Fit a sphere in view and re-derive sensible zoom limits from its size.
+     *
+     * The viewing angles are deliberately **kept**, the way Blender's View
+     * Selected does: framing answers "where is it", not "which side of it am I
+     * looking at". Snapping back to the home angle on every load meant every
+     * added object silently threw away the orientation you had just found.
+     * `reset: true` asks for the home angle explicitly.
+     */
+    frame(center, radius, { reset = false } = {}) {
       const r = Math.max(radius, 0.01);
       target.copy(center);
       distance    = r * 3.2;
-      minDistance = r * 0.15;
-      maxDistance = r * 60;
-      azimuth     = Math.PI * 0.25;
-      elevation   = Math.PI * 0.18;
+      // Floored at a multiple of the near plane: a small object's `r * 0.05`
+      // can fall below `camera.near`, which puts the orbit target — and every
+      // bit of floor grid around it — inside the near-clip volume, so both the
+      // object and the grid vanish once you zoom in that far.
+      minDistance = Math.max(r * 0.05, camera.near * 4);
+      maxDistance = r * 200;
+      if (reset) { azimuth = HOME_AZIMUTH; elevation = HOME_ELEVATION; }
       apply();
     },
     get distance() { return distance; },
+    get target() { return target; },
     dispose() {
       element.removeEventListener('pointerdown', onPointerDown);
       element.removeEventListener('pointermove', onPointerMove);

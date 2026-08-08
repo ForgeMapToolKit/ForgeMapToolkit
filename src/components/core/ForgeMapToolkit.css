@@ -87,7 +87,10 @@ body {
 /* Node Editor's split viewport/graph canvas wants the vertical banner
    register out of the way — only the navbar stays, keyed off
    .node-editor-tab the same :has() way as the overlay retract above. */
-.forgemaptoolkit:has(.node-editor-tab) .bnr-root {
+.forgemaptoolkit:has(.node-editor-tab) .bnr-root,
+/* Same reason for the 3D Viewer: a viewport wants the full vertical register,
+   not a banner's worth of it lost above the fold. */
+.forgemaptoolkit:has(.viewer3d-tab) .bnr-root {
   display: none;
 }
 

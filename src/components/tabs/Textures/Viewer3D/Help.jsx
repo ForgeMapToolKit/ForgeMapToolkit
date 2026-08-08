@@ -26,11 +26,15 @@ const SectionOverview = () => (
   <div className="hc-section">
     <div className="hc-block">
       <p>
-        A prop is judged in space, not on a swatch. This tab loads a
-        Supreme Commander mesh with its albedo, stands it on a grid ruled in
-        ogrids, and puts a unit from your own installation beside it — so
-        &ldquo;is this rock the right size&rdquo; is answered before the map is
-        packed, not after.
+        A prop is judged in space, not on a swatch. The <strong>Layout</strong>{' '}
+        workspace loads any number of Supreme Commander meshes with their
+        albedo and stands them side by side on one shared floor ruled in
+        ogrids, like Blender&rsquo;s viewport — so &ldquo;is this rock the
+        right size next to that tank&rdquo; is answered by eye before the map
+        is packed, not after. The <strong>Shading</strong> workspace picks one
+        of those loaded objects and opens the Texture Editor&rsquo;s node
+        graph on its albedo, painting the mesh live as you adjust hue,
+        brightness or anything else in the graph.
       </p>
     </div>
 
@@ -47,23 +51,27 @@ const SectionOverview = () => (
 
 const SectionWorkflow = () => (
   <WorkflowSection
-    label="Checking a prop"
+    label="Comparing and shading props"
     steps={[
       {
-        title: 'Pick a source',
-        body: 'Browse the Props Library for anything in the installation, or drop a loose .scm together with its _albedo.dds. Library props bring their blueprint, and therefore their scale, with them.',
+        title: 'Add objects in Layout',
+        body: 'Browse the Props Library (pick several at once) or add a reference unit — tank, ACU, factory — from your own installation. Drop a loose .scm with its _albedo.dds for anything not in the library. Every object you add stands on the same floor, in the order you added it.',
       },
       {
-        title: 'Set the scale, if it is loose',
-        body: 'A dropped mesh has no blueprint and so no UniformScale. The presets cover the range vanilla uses (0.025 to 0.25). Skip this and the mesh stands about twenty times too tall.',
+        title: 'Set the scale, if one is loose',
+        body: 'A dropped mesh has no blueprint and so no UniformScale. The presets under it cover the range vanilla uses (0.025 to 0.25). Skip this and the mesh stands about twenty times too tall.',
       },
       {
-        title: 'Put something beside it',
-        body: 'A tank for small scenery, the ACU for anything a unit walks past, a factory for large structures. The reference is read from your install at load time, so a modded install shows its own numbers.',
+        title: 'Toggle and remove',
+        body: 'Each object in the list has a visibility checkbox and a remove button — hide the reference to judge two props against each other instead, without losing either.',
+      },
+      {
+        title: 'Switch to Shading to adjust one',
+        body: 'Pick the object from the dropdown; the viewport isolates it while its node graph opens below, seeded from its own albedo. Every edit paints the mesh above live — no export needed to see it, though the output node can still write a DDS.',
       },
       {
         title: 'Read the numbers, then orbit',
-        body: 'The size line is the measured mesh extent after scaling. Drag to orbit, wheel to zoom, shift-drag or middle-drag to pan, Frame to refit.',
+        body: 'The size line under each object is its measured mesh extent after scaling. Drag to orbit, wheel to zoom, shift-drag or middle-drag to pan, Frame to refit.',
       },
     ]}
   />
@@ -98,15 +106,17 @@ const SectionProblems = () => (
     <div className="hc-block">
       <KV rows={[
         ['The prop dwarfs the tank',
-          'A loose .scm carries no UniformScale. Set it under Source — vanilla props sit between 0.025 and 0.25, median 0.05.'],
+          'A loose .scm carries no UniformScale. Set it under the object’s scale presets in the Objects list — vanilla props sit between 0.025 and 0.25, median 0.05.'],
         ['The mesh loads but is grey',
           'No albedo resolved. A library prop names its texture relative to its blueprint; if that .dds is not in the installation there is nothing to load. For a dropped mesh, drop the .dds alongside it.'],
         ['Foliage renders as solid cards',
           'The alpha cutout only switches on when the albedo actually carries alpha. An albedo whose alpha channel is fully opaque has no cutout to apply — that is the texture, not the viewer.'],
-        ['Scale Reference is greyed out',
+        ['Reference units are unavailable',
           'No Supreme Commander install path is configured. Set it in Settings; the reference meshes are read from your installation and are never shipped with the toolkit.'],
         ['A library prop will not load',
           'Four of the 334 stock prop blueprints (LavaSteam, some editor markers) are effect-only and point at a mesh that is not there. Nothing to fix on this side.'],
+        ['Shading says to load an object first',
+          'The Shading workspace adjusts an object that is already in Layout — it needs an albedo to seed its graph from. Add one in Layout, then switch workspaces.'],
       ]} />
     </div>
   </div>
