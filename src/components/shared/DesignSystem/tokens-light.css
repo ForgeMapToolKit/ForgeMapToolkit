@@ -257,6 +257,10 @@ html[data-theme="light"] {
   --mapresizer-glow:            rgba(38,128,192,0.22);
   --mapresizer-glow-strong:     rgba(38,128,192,0.44);
 
+  --maprotator-color:           #4FA9DA;
+  --maprotator-glow:            rgba(38,128,192,0.22);
+  --maprotator-glow-strong:     rgba(38,128,192,0.44);
+
   --biomechanger-color:         #4FA9DA;
   --biomechanger-glow:          rgba(38,128,192,0.22);
   --biomechanger-glow-strong:   rgba(38,128,192,0.44);

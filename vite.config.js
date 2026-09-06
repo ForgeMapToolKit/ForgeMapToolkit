@@ -1,6 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { createRequire } from 'node:module';
+
+// One source of truth for the dev port — Electron and the dev CSP read the
+// same constant. See electron/dev-server.js.
+const { DEV_PORT } = createRequire(import.meta.url)('./electron/dev-server.js');
 
 export default defineConfig({
   plugins: [react()],
@@ -36,17 +41,17 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5173,
-    // Fail loudly if 5173 is occupied instead of silently moving to 5174.
-    // Electron hard-loads http://localhost:5173 and the dev CSP only allows
-    // ws://localhost:5173, so a drifted port silently breaks HMR (the renderer
-    // loads a stale/zombie server and live updates never arrive). strictPort
-    // surfaces a lingering process immediately so it can be killed.
+    port: DEV_PORT,
+    // Fail loudly if the port is occupied instead of silently moving to the
+    // next one. Electron hard-loads this exact origin and the dev CSP allows
+    // only this origin and its HMR websocket, so a drifted port silently breaks
+    // HMR (the renderer loads a stale/zombie server and live updates never
+    // arrive). strictPort surfaces a lingering process immediately.
     strictPort: true,
     fs: { strict: false },
     hmr: {
       host: 'localhost',
-      port: 5173,
+      port: DEV_PORT,
     },
   },
   optimizeDeps: {

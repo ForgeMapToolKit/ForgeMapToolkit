@@ -21,7 +21,7 @@
 
 const path  = require('path');
 const fs    = require('fs');
-const { ipcMain } = require('electron');
+const { ipcMain, dialog } = require('electron');
 const JSZip = require('jszip');
 const { log } = require('./logger');
 const { readSettings, SCMAP_DIR, USER_DATA, getGamedataPaths } = require('./settings');
@@ -279,8 +279,27 @@ async function resolveTexture(texturePath, settings, mapName) {
   return null;
 }
 
+// Non-DDS formats a texture picked off the web arrives in — decoded via sharp
+// rather than the DDS decoder. TGA is absent: sharp doesn't read it.
+const PLAIN_IMAGE_EXT_RE = /\.(png|jpe?g|webp|bmp|gif|tiff?)$/i;
+
+async function decodeTextureBuffer(buf, texturePath) {
+  if (/\.dds$/i.test(String(texturePath))) {
+    const img = decodeDDSToRGBA(buf);
+    if (!img?.data) throw new Error('unsupported DDS format (decode returned null)');
+    return { width: img.width, height: img.height, data: img.data };
+  }
+  if (PLAIN_IMAGE_EXT_RE.test(String(texturePath))) {
+    let sharp;
+    try { sharp = require('sharp'); } catch (_) { throw new Error('sharp is not available — run: npm install sharp'); }
+    const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    return { width: info.width, height: info.height, data };
+  }
+  throw new Error(`unsupported texture format: ${texturePath}`);
+}
+
 // ── node-editor-load-texture ────────────────────────────────────────────────
-// Despite the name this is the app's general "give me a game .dds as RGBA"
+// Despite the name this is the app's general "give me a game texture as RGBA"
 // call, and the Viewer3D tab uses it too rather than growing a fourth near-copy
 // of the same resolver. `textureBytes` is that tab's drag-and-drop path: a file
 // dropped from outside every allowlisted root cannot be opened by path, so the
@@ -291,9 +310,6 @@ ipcMain.handle('node-editor-load-texture', withPathGuard(
     (!textureBytes && isAbsolute(String(texturePath || '').replace(/\\/g, '/')) ? [texturePath] : []),
   async (event, { texturePath, textureBytes = null, mapName } = {}) => {
     try {
-      if (!/\.dds$/i.test(String(texturePath))) {
-        return { success: false, error: 'only .dds textures are supported' };
-      }
       let buf;
       if (textureBytes) {
         buf = Buffer.from(textureBytes, 'base64');
@@ -302,8 +318,7 @@ ipcMain.handle('node-editor-load-texture', withPathGuard(
         buf = await resolveTexture(texturePath, settings, mapName);
         if (!buf) return { success: false, error: `texture not found: ${texturePath}` };
       }
-      const img = decodeDDSToRGBA(buf);
-      if (!img?.data) return { success: false, error: 'unsupported DDS format (decode returned null)' };
+      const img = await decodeTextureBuffer(buf, texturePath);
       return {
         success: true,
         width: img.width,
@@ -317,6 +332,39 @@ ipcMain.handle('node-editor-load-texture', withPathGuard(
     }
   },
 ));
+
+// ── node-editor-browse-texture-file ──────────────────────────────────────────
+// The Import node's "Browse…" button: pick any texture file on disk (e.g. one
+// downloaded from the internet), regardless of whether it sits under an
+// allowlisted root. Copied into userData/imported-textures so the returned
+// path passes withPathGuard on every later load — same trick scmap-unpack uses
+// to bring an arbitrary .scmap under SCMAP_DIR.
+const IMPORTED_TEXTURES_DIR = path.join(USER_DATA, 'imported-textures');
+
+ipcMain.handle('node-editor-browse-texture-file', async () => {
+  const result = await dialog.showOpenDialog({
+    title: 'Select texture file',
+    filters: [
+      { name: 'Textures', extensions: ['dds', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'gif', 'tif', 'tiff'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+    properties: ['openFile'],
+  });
+  if (result.canceled || !result.filePaths.length) return { canceled: true };
+  const src = result.filePaths[0];
+  try {
+    fs.mkdirSync(IMPORTED_TEXTURES_DIR, { recursive: true });
+    const ext = path.extname(src);
+    const base = path.basename(src, ext);
+    let dest = path.join(IMPORTED_TEXTURES_DIR, `${base}${ext}`);
+    for (let n = 1; fs.existsSync(dest); n++) dest = path.join(IMPORTED_TEXTURES_DIR, `${base}_${n}${ext}`);
+    fs.copyFileSync(src, dest);
+    return { success: true, path: dest };
+  } catch (err) {
+    log.warn('[node-editor] browse-texture-file failed:', err.message);
+    return { success: false, error: err.message };
+  }
+});
 
 // ── node-editor-list-assets ─────────────────────────────────────────────────
 // Browse the stock game textures (waterramps, cirrus, envcubes …) so the Import

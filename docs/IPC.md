@@ -8,11 +8,17 @@ is the map of that boundary.
 > every `invoke(…)` call in `src/`. Counts and the anomaly list below are extraction
 > results, not estimates.
 >
-> **123 handlers across 25 modules · 100-channel preload allowlist · 88 channels actually
-> invoked by the renderer.**
+> **124 handlers across 27 modules · 103-channel preload allowlist · 102 handlers
+> allowlisted · 22 handlers not allowlisted.**
+>
+> Regenerated with `npm run docs:ipc` on 2026-08-12. Do not edit by hand.
 >
 > (A raw grep reports 124 / 26 — one hit is a JSDoc usage example in `security.js`, not a
 > registration.)
+>
+> *Updated 2026-09-06 for the Map Rotator: `map-rotator.js` is a new module adding
+> `mrot-rotate-scmap` and `mrot-rotate-save-lua`, both guarded and both invoked. The
+> baseline before it was 122 / 26 / 100 / 101.*
 >
 > *Updated 2026-07-26 for Floating Trees: `floating-props.js` adds `floatprops-scan`,
 > guarded and invoked. The baseline before it was 122 / 24 / 99 / 87.*
@@ -61,13 +67,13 @@ what the main process registers. Two sibling sets govern the other directions:
 
 **② The handler.** Registered at module load — `electron/main.js` requires each module,
 some directly (`require('./modules/file-ipc')`), some via an explicit
-`.register()` call (`map-resizer`, `biome`, `editor-bridge`, `dds`).
+`.register()` call (`map-resizer`, `map-rotator`, `biome`, `editor-bridge`, `dds`).
 
 **③ The path guard.** `withPathGuard(pathExtractor, handler)` from
 `electron/modules/security.js`. `isPathAllowed()` resolves the target with
 `path.resolve()` and requires it to sit under a static root (`userData`, `temp`,
 `appPath`) or a dynamic root read live from settings (`mapsFolder`, `faInstallPath`,
-`backupFolder`, `emitterBpFolder`, …). **35 of 123 handlers are guarded.** The rest do
+`backupFolder`, `emitterBpFolder`, …). **35 of 122 handlers are guarded.** The rest do
 not take a caller-supplied path.
 
 ---
@@ -210,6 +216,25 @@ G  mr-update-scenario-lua
 G  mr-duplicate-map-version   make-map-adaptive   preview-render
    preview-image-step        !preview-replace-dds
 ```
+
+`mr-find-scmap` resolves *and validates*: it reads the first 64 bytes and fails with the
+reason when the file is not a map. FAF ships 18-byte placeholder `.scmap` files for the
+co-op missions whose map data lives in the game archives (five of them in a stock
+install), and every caller treats a successful lookup as licence to start writing —
+`mr-duplicate-map-version` copies a whole map version before the file is ever opened.
+
+### Map rotator — `map-rotator.js` (2, all guarded)
+```
+G  mrot-rotate-scmap    G  mrot-rotate-save-lua
+```
+Turns an unpacked map about its centre. It owns no map lookup or versioning of its own —
+the Map Rotator tab reuses `mr-find-scmap` and `mr-duplicate-map-version` — so this
+module registers only the two channels that do the rotating. `mrot-rotate-scmap` guards
+on `unpackFolder` and runs between `scmap-unpack` and `scmap-pack`, the same cycle
+`biome-apply` and `scmap-patch-water` use; `mrot-rotate-save-lua` guards on `mapFolder`
+and patches `<Map>_save.lua` after the pack. It also rewrites `props*.lua`,
+`decals*.lua` and `waveGenerators*.lua`, because `exportScmapData` splits those out of
+`data.lua` on unpack.
 
 ### Biome changer — `biome.js` (2, all guarded)
 ```

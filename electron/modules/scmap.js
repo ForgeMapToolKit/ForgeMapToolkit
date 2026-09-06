@@ -555,7 +555,7 @@ ipcMain.handle('read-data-file', async (_event, { name }) => {
 
 // ─── IPC handler: get-asset-base-url ─────────────────────────────────────────
 // Returns the file:// base URL for dist/assets so renderer can build icon paths.
-// In dev, the renderer runs against the Vite dev server (http://localhost:5173),
+// In dev, the renderer runs against the Vite dev server (electron/dev-server.js),
 // which already serves /public at root — dist/ doesn't exist yet at that point,
 // so a dist-based file:// URL would 404. Empty baseUrl makes callers fall back
 // to root-relative paths ('/assets/...'), which resolve correctly against the

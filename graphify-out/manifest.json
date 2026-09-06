@@ -1,0 +1,1677 @@
+{
+  "_backup/Libraries/EmitterLibrary/EmitterLibrary.jsx": {
+    "mtime": 1785167554.490808,
+    "ast_hash": "c95ed6df0b205367a91739db6ba98a37",
+    "semantic_hash": "c95ed6df0b205367a91739db6ba98a37"
+  },
+  "_backup/Libraries/PropsLibrary/PropsLibrary.jsx": {
+    "mtime": 1785167554.5064325,
+    "ast_hash": "e1b338e8cc0248185545a2835c766303",
+    "semantic_hash": "e1b338e8cc0248185545a2835c766303"
+  },
+  "_backup/Libraries/SkyboxLibrary/SkyboxLibrary.jsx": {
+    "mtime": 1785167554.5220585,
+    "ast_hash": "a8e6b3e00b0efc6b7124a20fea8a5fbd",
+    "semantic_hash": "a8e6b3e00b0efc6b7124a20fea8a5fbd"
+  },
+  "_backup/Libraries/UnitLibrary/UnitLibrary.jsx": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "65d11e9c503345a0ccd54866cf5e51bf",
+    "semantic_hash": "65d11e9c503345a0ccd54866cf5e51bf"
+  },
+  "electron/cli.js": {
+    "mtime": 1783427524.8509197,
+    "ast_hash": "364b1bb3248ac16415670e60031b91b1",
+    "semantic_hash": "364b1bb3248ac16415670e60031b91b1"
+  },
+  "electron/log-preload.js": {
+    "mtime": 1775429568.0,
+    "ast_hash": "2c9640dec5762962249c20a29e34e08f",
+    "semantic_hash": "2c9640dec5762962249c20a29e34e08f"
+  },
+  "electron/main.js": {
+    "mtime": 1785197004.3957944,
+    "ast_hash": "02bf98995658a7a2c4db8de5d7efa5cb",
+    "semantic_hash": "02bf98995658a7a2c4db8de5d7efa5cb"
+  },
+  "electron/modules/biome.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "8f766274091c4805bb4380072f672a23",
+    "semantic_hash": "8f766274091c4805bb4380072f672a23"
+  },
+  "electron/modules/cli-runner.js": {
+    "mtime": 1783439360.4284725,
+    "ast_hash": "549533b2d9ac0931bfa9f9298fce2594",
+    "semantic_hash": "549533b2d9ac0931bfa9f9298fce2594"
+  },
+  "electron/modules/cli-session-store.js": {
+    "mtime": 1783434083.85483,
+    "ast_hash": "e5f01899036bfb96fa953147db0d1501",
+    "semantic_hash": "e5f01899036bfb96fa953147db0d1501"
+  },
+  "electron/modules/community.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "9784647f937dea002cceba575792c9a8",
+    "semantic_hash": "9784647f937dea002cceba575792c9a8"
+  },
+  "electron/modules/coop-versioner.js": {
+    "mtime": 1775407610.0,
+    "ast_hash": "ba52b7f84b76d580f58c551089c41e05",
+    "semantic_hash": "ba52b7f84b76d580f58c551089c41e05"
+  },
+  "electron/modules/dds-decode.js": {
+    "mtime": 1784772305.21623,
+    "ast_hash": "75ac9e8fc97b1be584e623e596527613",
+    "semantic_hash": "75ac9e8fc97b1be584e623e596527613"
+  },
+  "electron/modules/dds.js": {
+    "mtime": 1784754201.2151558,
+    "ast_hash": "7286f4a4cdbe4ed5435a4d2b2acd652c",
+    "semantic_hash": "7286f4a4cdbe4ed5435a4d2b2acd652c"
+  },
+  "electron/modules/editor-bridge.js": {
+    "mtime": 1781878733.4253445,
+    "ast_hash": "a43392c0b86299d437cd2de9ee7bd710",
+    "semantic_hash": "a43392c0b86299d437cd2de9ee7bd710"
+  },
+  "electron/modules/file-ipc.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "4796a114ea6459c6f572e4be51a49047",
+    "semantic_hash": "4796a114ea6459c6f572e4be51a49047"
+  },
+  "electron/modules/floating-props.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "3f91a5e07beeff0a79ace57f16d7ccc4",
+    "semantic_hash": "3f91a5e07beeff0a79ace57f16d7ccc4"
+  },
+  "electron/modules/footer-content.js": {
+    "mtime": 1781989798.0,
+    "ast_hash": "f6530fed0951fde0a11f903ff6fd6679",
+    "semantic_hash": "f6530fed0951fde0a11f903ff6fd6679"
+  },
+  "electron/modules/gamefiles.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "e2c688ee88e4d68f0647035c38320201",
+    "semantic_hash": "e2c688ee88e4d68f0647035c38320201"
+  },
+  "electron/modules/guides-downloads.js": {
+    "mtime": 1783883630.3869474,
+    "ast_hash": "dc7b939d73c278566fc48e095628c485",
+    "semantic_hash": "dc7b939d73c278566fc48e095628c485"
+  },
+  "electron/modules/guides.js": {
+    "mtime": 1783883630.3879218,
+    "ast_hash": "395bdcf1c1eda3aa74b00f58f3f2c9a0",
+    "semantic_hash": "395bdcf1c1eda3aa74b00f58f3f2c9a0"
+  },
+  "electron/modules/logger.js": {
+    "mtime": 1783962345.3743443,
+    "ast_hash": "b679101bf64fe59d78d61e4fc7bb153a",
+    "semantic_hash": "b679101bf64fe59d78d61e4fc7bb153a"
+  },
+  "electron/modules/map-resizer.js": {
+    "mtime": 1783945692.4085212,
+    "ast_hash": "f989744eb48e7f967c115d2aab55ab9a",
+    "semantic_hash": "f989744eb48e7f967c115d2aab55ab9a"
+  },
+  "electron/modules/mesh.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "20d2bf4e4bfb14655c80a9e92607b612",
+    "semantic_hash": "20d2bf4e4bfb14655c80a9e92607b612"
+  },
+  "electron/modules/node-editor.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "b85b26032a6f586cde2f9de25c6d246a",
+    "semantic_hash": "b85b26032a6f586cde2f9de25c6d246a"
+  },
+  "electron/modules/preview.js": {
+    "mtime": 1783962401.2772915,
+    "ast_hash": "8d85ead3f603c90eceb8be1446b80c5e",
+    "semantic_hash": "8d85ead3f603c90eceb8be1446b80c5e"
+  },
+  "electron/modules/props.js": {
+    "mtime": 1783962416.2525227,
+    "ast_hash": "ca37d0505d15675d03944d6f9e9c32a1",
+    "semantic_hash": "ca37d0505d15675d03944d6f9e9c32a1"
+  },
+  "electron/modules/scanner.js": {
+    "mtime": 1783883630.402936,
+    "ast_hash": "c702de6fc24e6b06eb67ae670eefd0c4",
+    "semantic_hash": "c702de6fc24e6b06eb67ae670eefd0c4"
+  },
+  "electron/modules/scmap.js": {
+    "mtime": 1784767242.123002,
+    "ast_hash": "4d0673df2968f2162e8260d1a1e835f3",
+    "semantic_hash": "4d0673df2968f2162e8260d1a1e835f3"
+  },
+  "electron/modules/security.js": {
+    "mtime": 1783372262.0297036,
+    "ast_hash": "883d8109efaaee927bbeaedc6bf62e8b",
+    "semantic_hash": "883d8109efaaee927bbeaedc6bf62e8b"
+  },
+  "electron/modules/settings.js": {
+    "mtime": 1783883630.4149666,
+    "ast_hash": "78729ce6c6c99e71c172f107d29d95c7",
+    "semantic_hash": "78729ce6c6c99e71c172f107d29d95c7"
+  },
+  "electron/modules/skybox.js": {
+    "mtime": 1783883630.4159746,
+    "ast_hash": "50122bc14dc12b524fba8108c5659b9b",
+    "semantic_hash": "50122bc14dc12b524fba8108c5659b9b"
+  },
+  "electron/modules/symmetry.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "2cc4ae3176298e683f45cafe04fccd05",
+    "semantic_hash": "2cc4ae3176298e683f45cafe04fccd05"
+  },
+  "electron/modules/terraintype.js": {
+    "mtime": 1784774766.4827077,
+    "ast_hash": "7466f39b89fc8c6f1b5ac83264c07d74",
+    "semantic_hash": "7466f39b89fc8c6f1b5ac83264c07d74"
+  },
+  "electron/modules/texture-scanner.js": {
+    "mtime": 1784830329.8710406,
+    "ast_hash": "7fcc98f3e8776947a1f99c178a0b4ea8",
+    "semantic_hash": "7fcc98f3e8776947a1f99c178a0b4ea8"
+  },
+  "electron/preload.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "6f25a665cf7aa75057d6e97617bd961b",
+    "semantic_hash": "6f25a665cf7aa75057d6e97617bd961b"
+  },
+  "eslint.config.js": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "056302b4e073be8db026215b3b7bc952",
+    "semantic_hash": "056302b4e073be8db026215b3b7bc952"
+  },
+  "package.json": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "1ba8625b3cbf665d50ff99d2dcf657af",
+    "semantic_hash": "1ba8625b3cbf665d50ff99d2dcf657af"
+  },
+  "postcss.config.js": {
+    "mtime": 1770938582.0,
+    "ast_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0",
+    "semantic_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0"
+  },
+  "scripts/design-lint.mjs": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "4a463ae450ed860e3db4b9253536c78f",
+    "semantic_hash": "4a463ae450ed860e3db4b9253536c78f"
+  },
+  "src/App.js": {
+    "mtime": 1772775758.0,
+    "ast_hash": "44bf3dee283dc36d723d193e52502600",
+    "semantic_hash": "44bf3dee283dc36d723d193e52502600"
+  },
+  "src/components/Core/Banner/Banner.jsx": {
+    "mtime": 1783372262.0397,
+    "ast_hash": "32f129f960f8bba9977ef22a6256cec2",
+    "semantic_hash": "32f129f960f8bba9977ef22a6256cec2"
+  },
+  "src/components/Core/Chrome/FirstRunModal.jsx": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "3a08d8a407373419c6a69db7d1b62e4c",
+    "semantic_hash": "3a08d8a407373419c6a69db7d1b62e4c"
+  },
+  "src/components/Core/Chrome/ScanProgressBanner.jsx": {
+    "mtime": 1783372240.140863,
+    "ast_hash": "5d31368989afd903ba6e6f07b74bb265",
+    "semantic_hash": "5d31368989afd903ba6e6f07b74bb265"
+  },
+  "src/components/Core/Chrome/UpdateModal.jsx": {
+    "mtime": 1783372240.140863,
+    "ast_hash": "3ef4a6189080f2fe25620aa6ac1ece3e",
+    "semantic_hash": "3ef4a6189080f2fe25620aa6ac1ece3e"
+  },
+  "src/components/Core/Footer/ArticlePreview/FooterArticlePreview.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "86bcb287e161499c457e54b460228dff",
+    "semantic_hash": "86bcb287e161499c457e54b460228dff"
+  },
+  "src/components/Core/Footer/ArticleTab/FooterArticleTab.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "d379135b7bb892dc4de3e632512a0713",
+    "semantic_hash": "d379135b7bb892dc4de3e632512a0713"
+  },
+  "src/components/Core/Footer/ContentViewer/FooterContentViewer.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "de39efd2db78a3c6837860cb162bd983",
+    "semantic_hash": "de39efd2db78a3c6837860cb162bd983"
+  },
+  "src/components/Core/Footer/FafLogo/FafLogo.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "352ca3f083ae6c391ea596d89de7733f",
+    "semantic_hash": "352ca3f083ae6c391ea596d89de7733f"
+  },
+  "src/components/Core/Footer/Footer.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "4e8728760c5fec9a70fe86621e8254fe",
+    "semantic_hash": "4e8728760c5fec9a70fe86621e8254fe"
+  },
+  "src/components/Core/Footer/Nav/FooterNav.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "4d7eda02ff9130c9d0beafd3167a41d1",
+    "semantic_hash": "4d7eda02ff9130c9d0beafd3167a41d1"
+  },
+  "src/components/Core/Footer/Nav/navColumns.js": {
+    "mtime": 1783549339.9128542,
+    "ast_hash": "1db4d4d09f75562320de0bd3802f1db9",
+    "semantic_hash": "1db4d4d09f75562320de0bd3802f1db9"
+  },
+  "src/components/Core/Footer/footerContentRegistry.js": {
+    "mtime": 1783549339.1416433,
+    "ast_hash": "6bd546cf116e48a3ef673f42bf478896",
+    "semantic_hash": "6bd546cf116e48a3ef673f42bf478896"
+  },
+  "src/components/Core/Footer/hooks/useFooterPanelState.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "fc3bb404e553858c1eda1d576729f122",
+    "semantic_hash": "fc3bb404e553858c1eda1d576729f122"
+  },
+  "src/components/Core/Footer/hooks/useFooterProximity.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "3b4c70818c82345cf224e3e94320d4ef",
+    "semantic_hash": "3b4c70818c82345cf224e3e94320d4ef"
+  },
+  "src/components/Core/ForgeMapToolkit.jsx": {
+    "mtime": 1783962558.181725,
+    "ast_hash": "48dc4684e832ef3e4d3537bf6587d40b",
+    "semantic_hash": "48dc4684e832ef3e4d3537bf6587d40b"
+  },
+  "src/components/Core/Home/Atmosphere/AtmosphereLayer.jsx": {
+    "mtime": 1783372262.0437026,
+    "ast_hash": "bfc6ab812e00c1dfa7f4ae4a68d590de",
+    "semantic_hash": "bfc6ab812e00c1dfa7f4ae4a68d590de"
+  },
+  "src/components/Core/Home/Atmosphere/engine.js": {
+    "mtime": 1783372262.0447004,
+    "ast_hash": "ab499ab9e501692900b771f8106c37b4",
+    "semantic_hash": "ab499ab9e501692900b771f8106c37b4"
+  },
+  "src/components/Core/Home/Atmosphere/haze.glsl.js": {
+    "mtime": 1783372262.0447004,
+    "ast_hash": "c1385d0558bfe90756d9279129177893",
+    "semantic_hash": "c1385d0558bfe90756d9279129177893"
+  },
+  "src/components/Core/Home/Components/HeaderRegister.jsx": {
+    "mtime": 1783372240.1858628,
+    "ast_hash": "528dabc92d77ee1410a87966cefa4c16",
+    "semantic_hash": "528dabc92d77ee1410a87966cefa4c16"
+  },
+  "src/components/Core/Home/Components/ProjectionStage.jsx": {
+    "mtime": 1783372240.1858628,
+    "ast_hash": "eed65c69b79daf8db282b9b6e280427d",
+    "semantic_hash": "eed65c69b79daf8db282b9b6e280427d"
+  },
+  "src/components/Core/Home/Components/ToolRail.jsx": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "ad7f36d722a109924f258e610d478877",
+    "semantic_hash": "ad7f36d722a109924f258e610d478877"
+  },
+  "src/components/Core/Home/Components/ToolSlat.jsx": {
+    "mtime": 1783372240.1898642,
+    "ast_hash": "bf29639708411b69bfff06ec8e158206",
+    "semantic_hash": "bf29639708411b69bfff06ec8e158206"
+  },
+  "src/components/Core/Home/Components/TraceLine.jsx": {
+    "mtime": 1783372240.194863,
+    "ast_hash": "aa9a05559328bef1e7fc67e4270f8cf8",
+    "semantic_hash": "aa9a05559328bef1e7fc67e4270f8cf8"
+  },
+  "src/components/Core/Home/Data/toolRegistry.js": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "d1f08abd5dd04feb3133d519d680377a",
+    "semantic_hash": "d1f08abd5dd04feb3133d519d680377a"
+  },
+  "src/components/Core/Home/HomeScreen.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "c4719561f7367995bef27839c5ee8f18",
+    "semantic_hash": "c4719561f7367995bef27839c5ee8f18"
+  },
+  "src/components/Core/Navbar/Atmosphere/NavbarAtmosphereLayer.jsx": {
+    "mtime": 1783962558.181725,
+    "ast_hash": "4e7b37a32048bf62804c9d8fba919dc0",
+    "semantic_hash": "4e7b37a32048bf62804c9d8fba919dc0"
+  },
+  "src/components/Core/Navbar/Atmosphere/engine.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "c92182ed645d68c82907b794bd06789e",
+    "semantic_hash": "c92182ed645d68c82907b794bd06789e"
+  },
+  "src/components/Core/Navbar/Atmosphere/haze.glsl.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "01856ebb40fca24609c9d950bca9cd1a",
+    "semantic_hash": "01856ebb40fca24609c9d950bca9cd1a"
+  },
+  "src/components/Core/Navbar/Navbar.jsx": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "db7eb8ee8f5d9b2600331d9eea1e1faa",
+    "semantic_hash": "db7eb8ee8f5d9b2600331d9eea1e1faa"
+  },
+  "src/components/Core/Navbar/NavbarPanel/NavbarPanel.jsx": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "c670f9f0a339cd08566c52a06ba05498",
+    "semantic_hash": "c670f9f0a339cd08566c52a06ba05498"
+  },
+  "src/components/Core/Navbar/Register/Register.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "d415bd9fb2ec5db7739729787dbf0b5f",
+    "semantic_hash": "d415bd9fb2ec5db7739729787dbf0b5f"
+  },
+  "src/components/Core/Navbar/SlatRow/SlatRow.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "4d8ed8656e1f22c37fa2ce200741a92c",
+    "semantic_hash": "4d8ed8656e1f22c37fa2ce200741a92c"
+  },
+  "src/components/Core/sharedState.js": {
+    "mtime": 1784851023.3221684,
+    "ast_hash": "293887640b5239e948d98aca50046222",
+    "semantic_hash": "293887640b5239e948d98aca50046222"
+  },
+  "src/components/Core/tabRoutes.jsx": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "084dfd6c89d0941789950193aa13e840",
+    "semantic_hash": "084dfd6c89d0941789950193aa13e840"
+  },
+  "src/components/Shared/Libraries/EmitterLibrary/EmitterLibrary.jsx": {
+    "mtime": 1783883630.4452972,
+    "ast_hash": "c95ed6df0b205367a91739db6ba98a37",
+    "semantic_hash": "c95ed6df0b205367a91739db6ba98a37"
+  },
+  "src/components/Shared/Libraries/PropsLibrary/PropsLibrary.jsx": {
+    "mtime": 1783883630.447302,
+    "ast_hash": "e1b338e8cc0248185545a2835c766303",
+    "semantic_hash": "e1b338e8cc0248185545a2835c766303"
+  },
+  "src/components/Shared/Libraries/SkyboxLibrary/SkyboxLibrary.jsx": {
+    "mtime": 1783883630.4492927,
+    "ast_hash": "a8e6b3e00b0efc6b7124a20fea8a5fbd",
+    "semantic_hash": "a8e6b3e00b0efc6b7124a20fea8a5fbd"
+  },
+  "src/components/Shared/Libraries/UnitLibrary/UnitLibrary.jsx": {
+    "mtime": 1783883630.4502933,
+    "ast_hash": "65d11e9c503345a0ccd54866cf5e51bf",
+    "semantic_hash": "65d11e9c503345a0ccd54866cf5e51bf"
+  },
+  "src/components/Shared/MapLogic/biomeLogic.js": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "bd199e58f6e0bc138792b13dc1a0a31a",
+    "semantic_hash": "bd199e58f6e0bc138792b13dc1a0a31a"
+  },
+  "src/components/Shared/MapLogic/floatingPropsLogic.js": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "d1e0a0bc4e80f5fa114e79b0006692dd",
+    "semantic_hash": "d1e0a0bc4e80f5fa114e79b0006692dd"
+  },
+  "src/components/Shared/MapLogic/imageChannels.js": {
+    "mtime": 1783381505.7193859,
+    "ast_hash": "0a15e16e5dbcca52ebdad37fde3dcbb6",
+    "semantic_hash": "0a15e16e5dbcca52ebdad37fde3dcbb6"
+  },
+  "src/components/Shared/MapLogic/index.js": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "17d932ee5f3c0dd75f92751451c219b6",
+    "semantic_hash": "17d932ee5f3c0dd75f92751451c219b6"
+  },
+  "src/components/Shared/MapLogic/mapCanvas.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "528d69157afe99254850f0ade313b65d",
+    "semantic_hash": "528d69157afe99254850f0ade313b65d"
+  },
+  "src/components/Shared/MapLogic/mapGeometry.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "f8da9aaf7925cdd5d04ae45ed5254f1d",
+    "semantic_hash": "f8da9aaf7925cdd5d04ae45ed5254f1d"
+  },
+  "src/components/Shared/MapLogic/scmapIO.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "8d60f2c5f4e4328428cbf29f7bdab235",
+    "semantic_hash": "8d60f2c5f4e4328428cbf29f7bdab235"
+  },
+  "src/components/Shared/MapLogic/symmetryLogic.js": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "d17fb249366e8b5194bcb11b83b4fab9",
+    "semantic_hash": "d17fb249366e8b5194bcb11b83b4fab9"
+  },
+  "src/components/Shared/MapLogic/terrainSampler.js": {
+    "mtime": 1784170713.9183233,
+    "ast_hash": "62556e593f1cc6a90741f94981ba3cf8",
+    "semantic_hash": "62556e593f1cc6a90741f94981ba3cf8"
+  },
+  "src/components/Shared/MapLogic/terrainTypeLogic.js": {
+    "mtime": 1784775158.332749,
+    "ast_hash": "8e9b8ece778001c235b3e1cee827fed6",
+    "semantic_hash": "8e9b8ece778001c235b3e1cee827fed6"
+  },
+  "src/components/Shared/MapLogic/useMapInfo.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "13b9ea5aaa9c7b05c90c1d02b83894af",
+    "semantic_hash": "13b9ea5aaa9c7b05c90c1d02b83894af"
+  },
+  "src/components/Shared/MapLogic/usePersistentState.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "1ec7d5e0ef2ac234ac7c17785adc47e5",
+    "semantic_hash": "1ec7d5e0ef2ac234ac7c17785adc47e5"
+  },
+  "src/components/Shared/MapLogic/useScmapPreview.js": {
+    "mtime": 1783962558.181725,
+    "ast_hash": "eb6038870e8b6cb1d698dc3b143aad6d",
+    "semantic_hash": "eb6038870e8b6cb1d698dc3b143aad6d"
+  },
+  "src/components/Shared/Ocean/bake.js": {
+    "mtime": 1784763048.624689,
+    "ast_hash": "dfb65ee06119b753a538ded943c23c3b",
+    "semantic_hash": "dfb65ee06119b753a538ded943c23c3b"
+  },
+  "src/components/Shared/Ocean/faWater.js": {
+    "mtime": 1784769058.4792173,
+    "ast_hash": "b026e32b99568768d0763caa983e1246",
+    "semantic_hash": "b026e32b99568768d0763caa983e1246"
+  },
+  "src/components/Shared/Ocean/fft.js": {
+    "mtime": 1784749305.01327,
+    "ast_hash": "929973797960e54eb1bb6ce9baca3e0c",
+    "semantic_hash": "929973797960e54eb1bb6ce9baca3e0c"
+  },
+  "src/components/Shared/Ocean/ocean.js": {
+    "mtime": 1784758265.2041447,
+    "ast_hash": "0c79d9bf0a146fab0a81dcfc3cbe928e",
+    "semantic_hash": "0c79d9bf0a146fab0a81dcfc3cbe928e"
+  },
+  "src/components/Shared/Ocean/random.js": {
+    "mtime": 1784749318.4749672,
+    "ast_hash": "8233ce20812cbe6ae909167fc67e8415",
+    "semantic_hash": "8233ce20812cbe6ae909167fc67e8415"
+  },
+  "src/components/Shared/Ocean/spectrum.js": {
+    "mtime": 1784769082.0681305,
+    "ast_hash": "af8de731ff7f13bebb4d2aab0adce4be",
+    "semantic_hash": "af8de731ff7f13bebb4d2aab0adce4be"
+  },
+  "src/components/Shared/Scene3D/Scene3D.jsx": {
+    "mtime": 1785168803.974178,
+    "ast_hash": "918b227b9a44aa7b238bc9fcf0e9148a",
+    "semantic_hash": "918b227b9a44aa7b238bc9fcf0e9148a"
+  },
+  "src/components/Shared/Scene3D/engine.js": {
+    "mtime": 1785196814.7985587,
+    "ast_hash": "7f3e9eb7cd24cdbf8e8d1a78922c9d6f",
+    "semantic_hash": "7f3e9eb7cd24cdbf8e8d1a78922c9d6f"
+  },
+  "src/components/Shared/Scene3D/grid.js": {
+    "mtime": 1785196804.4128206,
+    "ast_hash": "7051d28f0f0c6fa024fd108f79f43dc8",
+    "semantic_hash": "7051d28f0f0c6fa024fd108f79f43dc8"
+  },
+  "src/components/Shared/Scene3D/index.js": {
+    "mtime": 1785168828.7702324,
+    "ast_hash": "4af23b72ad7b4d4f70a93203783d1d29",
+    "semantic_hash": "4af23b72ad7b4d4f70a93203783d1d29"
+  },
+  "src/components/Shared/Scene3D/orbit.js": {
+    "mtime": 1785197552.874218,
+    "ast_hash": "f8b5ed60822c5a3b15e03d3809d571dc",
+    "semantic_hash": "f8b5ed60822c5a3b15e03d3809d571dc"
+  },
+  "src/components/Shared/Ui/ColorPicker/ColorPicker.jsx": {
+    "mtime": 1784823459.4494023,
+    "ast_hash": "d8ca51b950b4e99f1e11e76da4fa79cd",
+    "semantic_hash": "d8ca51b950b4e99f1e11e76da4fa79cd"
+  },
+  "src/components/Shared/Ui/ColorPicker/colorMath.js": {
+    "mtime": 1784823430.9267273,
+    "ast_hash": "4b8dd282e8c719841d543e9b6bc35ebe",
+    "semantic_hash": "4b8dd282e8c719841d543e9b6bc35ebe"
+  },
+  "src/components/Shared/Ui/EntityPanel/EntityPanel.jsx": {
+    "mtime": 1783445032.2234929,
+    "ast_hash": "a804a2086e41df1e83743e68605c02cb",
+    "semantic_hash": "a804a2086e41df1e83743e68605c02cb"
+  },
+  "src/components/Shared/Ui/HelpPanel/HelpPanel.jsx": {
+    "mtime": 1784654187.4719236,
+    "ast_hash": "ba52aaf4c6e0f57fe6895e2463dc4874",
+    "semantic_hash": "ba52aaf4c6e0f57fe6895e2463dc4874"
+  },
+  "src/components/Shared/Ui/HelpPanel/Sections/CodeSection.jsx": {
+    "mtime": 1783886368.820504,
+    "ast_hash": "0dca51b2082166dcd1bf649b52001523",
+    "semantic_hash": "0dca51b2082166dcd1bf649b52001523"
+  },
+  "src/components/Shared/Ui/HelpPanel/Sections/MediaSection.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "3259a102b114827b4a3ed29ea6e713e8",
+    "semantic_hash": "3259a102b114827b4a3ed29ea6e713e8"
+  },
+  "src/components/Shared/Ui/HelpPanel/Sections/ShortcutsSection.jsx": {
+    "mtime": 1783886384.9424677,
+    "ast_hash": "73b2e0153fe1f7ab5d021ae9ab66825a",
+    "semantic_hash": "73b2e0153fe1f7ab5d021ae9ab66825a"
+  },
+  "src/components/Shared/Ui/HelpPanel/Sections/TroubleshootSection.jsx": {
+    "mtime": 1784044388.3128273,
+    "ast_hash": "39e6038c455c6e23742d0b3a67419a62",
+    "semantic_hash": "39e6038c455c6e23742d0b3a67419a62"
+  },
+  "src/components/Shared/Ui/HelpPanel/Sections/WorkflowSection.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "5fae93c2edd785c4bef4bdcfb2ad5dc6",
+    "semantic_hash": "5fae93c2edd785c4bef4bdcfb2ad5dc6"
+  },
+  "src/components/Shared/Ui/HelpPanel/Sections/index.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "d85583edb4701652a425155229fe2b87",
+    "semantic_hash": "d85583edb4701652a425155229fe2b87"
+  },
+  "src/components/Shared/Ui/Notifications/notifications.js": {
+    "mtime": 1782334430.0,
+    "ast_hash": "35d98a2ee81ba2b73ad3fdc2ffd84cae",
+    "semantic_hash": "35d98a2ee81ba2b73ad3fdc2ffd84cae"
+  },
+  "src/components/Shared/Ui/TabLayout/TabLayout.jsx": {
+    "mtime": 1783883630.4559934,
+    "ast_hash": "7db9e931948c5d7be8fa71ac95943b60",
+    "semantic_hash": "7db9e931948c5d7be8fa71ac95943b60"
+  },
+  "src/components/Tabs/CoOp/CoOp.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "ee423428bc77b11e0e060c32a5a450cf",
+    "semantic_hash": "ee423428bc77b11e0e060c32a5a450cf"
+  },
+  "src/components/Tabs/Community/Contributions/Contributions.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "6370cce605714cbe94c2f7c6c9548700",
+    "semantic_hash": "6370cce605714cbe94c2f7c6c9548700"
+  },
+  "src/components/Tabs/Community/Guides/GuideSection.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "cc229ede89db482d936c53dfd5b12bc6",
+    "semantic_hash": "cc229ede89db482d936c53dfd5b12bc6"
+  },
+  "src/components/Tabs/Community/Guides/guideData.js": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "fa6f1815f82f68a81c243fbdee32cda2",
+    "semantic_hash": "fa6f1815f82f68a81c243fbdee32cda2"
+  },
+  "src/components/Tabs/Emitter/Emitter/Configuration.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "31a44b84715f3c4d62430d0f3dad6e1c",
+    "semantic_hash": "31a44b84715f3c4d62430d0f3dad6e1c"
+  },
+  "src/components/Tabs/Emitter/Emitter/Emitter.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "99e63705a18af223acf6c10a74a6f87b",
+    "semantic_hash": "99e63705a18af223acf6c10a74a6f87b"
+  },
+  "src/components/Tabs/Emitter/Emitter/Emitters.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "33792fc6bcd84d0165e03853b7cd6015",
+    "semantic_hash": "33792fc6bcd84d0165e03853b7cd6015"
+  },
+  "src/components/Tabs/Emitter/Emitter/Export.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "7bfb88aa60b33b4a8a2f459ec9797e48",
+    "semantic_hash": "7bfb88aa60b33b4a8a2f459ec9797e48"
+  },
+  "src/components/Tabs/Emitter/Props/Configuration.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "a6b75428d19addb2194d2b501b362619",
+    "semantic_hash": "a6b75428d19addb2194d2b501b362619"
+  },
+  "src/components/Tabs/Emitter/Props/Export.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "8313f0330a8a2207d42329d433f21bae",
+    "semantic_hash": "8313f0330a8a2207d42329d433f21bae"
+  },
+  "src/components/Tabs/Emitter/Props/PropList.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "3d136bdebd91f6540ac8b357ad32c526",
+    "semantic_hash": "3d136bdebd91f6540ac8b357ad32c526"
+  },
+  "src/components/Tabs/Emitter/Props/Props.jsx": {
+    "mtime": 1785167554.5845582,
+    "ast_hash": "038430f2b4b344f4bc833b69cc8d566f",
+    "semantic_hash": "038430f2b4b344f4bc833b69cc8d566f"
+  },
+  "src/components/Tabs/Emitter/TerrainType/Configuration.jsx": {
+    "mtime": 1785167554.6001823,
+    "ast_hash": "071d34ec5143b9e25066c1b51bc3610f",
+    "semantic_hash": "071d34ec5143b9e25066c1b51bc3610f"
+  },
+  "src/components/Tabs/Emitter/TerrainType/Export.jsx": {
+    "mtime": 1785167554.6001823,
+    "ast_hash": "38815c264c43c3db50957d3f9ce3c5a1",
+    "semantic_hash": "38815c264c43c3db50957d3f9ce3c5a1"
+  },
+  "src/components/Tabs/Emitter/TerrainType/Help.jsx": {
+    "mtime": 1785167554.6158068,
+    "ast_hash": "417cb45c21d70fa07bf7be1d1c87c4f3",
+    "semantic_hash": "417cb45c21d70fa07bf7be1d1c87c4f3"
+  },
+  "src/components/Tabs/Emitter/TerrainType/Layers.jsx": {
+    "mtime": 1785167554.6158068,
+    "ast_hash": "9a49eae362aa17b41baf174fea84030f",
+    "semantic_hash": "9a49eae362aa17b41baf174fea84030f"
+  },
+  "src/components/Tabs/Emitter/TerrainType/TerrainType.jsx": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "e1b9166f0caff36e1447bf88476c98e0",
+    "semantic_hash": "e1b9166f0caff36e1447bf88476c98e0"
+  },
+  "src/components/Tabs/Emitter/Wreckage/Configuration.jsx": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "94c9a72511bcb00bd26801fab3db8577",
+    "semantic_hash": "94c9a72511bcb00bd26801fab3db8577"
+  },
+  "src/components/Tabs/Emitter/Wreckage/Export.jsx": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "0ed2e6c9ab6164e136791539676860f5",
+    "semantic_hash": "0ed2e6c9ab6164e136791539676860f5"
+  },
+  "src/components/Tabs/Emitter/Wreckage/Help.jsx": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "f9170281d19d29a93a22e0b1a5ba0039",
+    "semantic_hash": "f9170281d19d29a93a22e0b1a5ba0039"
+  },
+  "src/components/Tabs/Emitter/Wreckage/Units.jsx": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "63caffd28ae6a6f2f542ebae7d26e630",
+    "semantic_hash": "63caffd28ae6a6f2f542ebae7d26e630"
+  },
+  "src/components/Tabs/Emitter/Wreckage/Wreckage.jsx": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "d4b67d62c89301076b06a45c9c2035ed",
+    "semantic_hash": "d4b67d62c89301076b06a45c9c2035ed"
+  },
+  "src/components/Tabs/HelpModals/AdaptiveMapHelper_help.jsx": {
+    "mtime": 1783372240.431863,
+    "ast_hash": "1b9fb0befe69ce9f376ce95adc403e2d",
+    "semantic_hash": "1b9fb0befe69ce9f376ce95adc403e2d"
+  },
+  "src/components/Tabs/HelpModals/Contributions_help.jsx": {
+    "mtime": 1783372240.4348624,
+    "ast_hash": "bbca23fc202125e722f622754d3fc7ad",
+    "semantic_hash": "bbca23fc202125e722f622754d3fc7ad"
+  },
+  "src/components/Tabs/HelpModals/CustomProps_help.jsx": {
+    "mtime": 1783372240.436863,
+    "ast_hash": "be6347160f9df58308b26a1755f534c2",
+    "semantic_hash": "be6347160f9df58308b26a1755f534c2"
+  },
+  "src/components/Tabs/HelpModals/Emitter_help.jsx": {
+    "mtime": 1783372240.4388616,
+    "ast_hash": "61aa3d2f8a8e4c308fae7c19e7efb2e2",
+    "semantic_hash": "61aa3d2f8a8e4c308fae7c19e7efb2e2"
+  },
+  "src/components/Tabs/HelpModals/History_help.jsx": {
+    "mtime": 1783372240.445862,
+    "ast_hash": "f359d09910220f7ddc9a3cf94ad30b45",
+    "semantic_hash": "f359d09910220f7ddc9a3cf94ad30b45"
+  },
+  "src/components/Tabs/HelpModals/MapResizer_help.jsx": {
+    "mtime": 1783372240.4468641,
+    "ast_hash": "a1168f9df92c5967914d66da05fcf230",
+    "semantic_hash": "a1168f9df92c5967914d66da05fcf230"
+  },
+  "src/components/Tabs/HelpModals/PreviewImage_help.jsx": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "212e58843252ef746f9f08423c29e4ab",
+    "semantic_hash": "212e58843252ef746f9f08423c29e4ab"
+  },
+  "src/components/Tabs/HelpModals/Props_help.jsx": {
+    "mtime": 1783372240.449864,
+    "ast_hash": "4253b47796d16a5fd4239b9193aedf18",
+    "semantic_hash": "4253b47796d16a5fd4239b9193aedf18"
+  },
+  "src/components/Tabs/HelpModals/RockErosion_help.jsx": {
+    "mtime": 1783372240.4518614,
+    "ast_hash": "d76ba45c985a7903ed3c5db3b59a42db",
+    "semantic_hash": "d76ba45c985a7903ed3c5db3b59a42db"
+  },
+  "src/components/Tabs/HelpModals/Scmap_help.jsx": {
+    "mtime": 1783372240.4518614,
+    "ast_hash": "5c75f0d1cc6ad09965b57265a99f6170",
+    "semantic_hash": "5c75f0d1cc6ad09965b57265a99f6170"
+  },
+  "src/components/Tabs/HelpModals/Stars_help.jsx": {
+    "mtime": 1783372262.068701,
+    "ast_hash": "d7cc072a0d3b41b66a24647bb3ca2ecb",
+    "semantic_hash": "d7cc072a0d3b41b66a24647bb3ca2ecb"
+  },
+  "src/components/Tabs/HelpModals/Trees_help.jsx": {
+    "mtime": 1783372240.462862,
+    "ast_hash": "cebe488ebf08f663120f4a638a5f2097",
+    "semantic_hash": "cebe488ebf08f663120f4a638a5f2097"
+  },
+  "src/components/Tabs/HelpModals/Wreckage_help.jsx": {
+    "mtime": 1783372240.4638624,
+    "ast_hash": "c10d3935a2e295642f2a8b2a28af41e4",
+    "semantic_hash": "c10d3935a2e295642f2a8b2a28af41e4"
+  },
+  "src/components/Tabs/MapTools/AdaptiveMapHelper/AdaptiveMapHelper.jsx": {
+    "mtime": 1785167554.6626818,
+    "ast_hash": "37a854f26972e5792753581851141002",
+    "semantic_hash": "37a854f26972e5792753581851141002"
+  },
+  "src/components/Tabs/MapTools/AdaptiveMapHelper/MapCanvas.jsx": {
+    "mtime": 1785167554.6626818,
+    "ast_hash": "faa53f521358b02bce5c2f395cc24016",
+    "semantic_hash": "faa53f521358b02bce5c2f395cc24016"
+  },
+  "src/components/Tabs/MapTools/AdaptiveMapHelper/luaGenerators.js": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "ca3b9238dcb7b9886880772d9c46f573",
+    "semantic_hash": "ca3b9238dcb7b9886880772d9c46f573"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/BiomeChanger.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "cb3b0699842d85b359cb9e4feb25f727",
+    "semantic_hash": "cb3b0699842d85b359cb9e4feb25f727"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/Configuration.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "373e8cd93a2f349c178f7625dc96f5c4",
+    "semantic_hash": "373e8cd93a2f349c178f7625dc96f5c4"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/Export.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "6d639b4edec9d144f945295f765bc31e",
+    "semantic_hash": "6d639b4edec9d144f945295f765bc31e"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/Help.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "19d8cf9737e2d951793ef8e203dfed8e",
+    "semantic_hash": "19d8cf9737e2d951793ef8e203dfed8e"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/Layers.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "45d603871ea97ffece7cc9c0c3c351a0",
+    "semantic_hash": "45d603871ea97ffece7cc9c0c3c351a0"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/Props.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "21c337ac996617e9feb9a6123989388d",
+    "semantic_hash": "21c337ac996617e9feb9a6123989388d"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/Selection.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "2d9acf354e147acabc6caf9ac5e8b452",
+    "semantic_hash": "2d9acf354e147acabc6caf9ac5e8b452"
+  },
+  "src/components/Tabs/MapTools/BiomeChanger/biomePresets.js": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "3d039968db7e4ef87deaa4741be2ffd1",
+    "semantic_hash": "3d039968db7e4ef87deaa4741be2ffd1"
+  },
+  "src/components/Tabs/MapTools/FloatingTrees/Configuration.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "e58cf32c8c933afd98ce03a27bdb7827",
+    "semantic_hash": "e58cf32c8c933afd98ce03a27bdb7827"
+  },
+  "src/components/Tabs/MapTools/FloatingTrees/Findings.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "0be78506798c9535caf43bf9ad23e1e4",
+    "semantic_hash": "0be78506798c9535caf43bf9ad23e1e4"
+  },
+  "src/components/Tabs/MapTools/FloatingTrees/FloatingTrees.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "11210ec1b5afa58be16860523f74f4a3",
+    "semantic_hash": "11210ec1b5afa58be16860523f74f4a3"
+  },
+  "src/components/Tabs/MapTools/FloatingTrees/Help.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "cf8fcb1211827ccf097c49115c34af79",
+    "semantic_hash": "cf8fcb1211827ccf097c49115c34af79"
+  },
+  "src/components/Tabs/MapTools/FloatingTrees/Placements.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "dc33e2946e4a08fd35b797004a6256a2",
+    "semantic_hash": "dc33e2946e4a08fd35b797004a6256a2"
+  },
+  "src/components/Tabs/MapTools/FloatingTrees/Report.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "1999669069a48f32078cdbe89312f994",
+    "semantic_hash": "1999669069a48f32078cdbe89312f994"
+  },
+  "src/components/Tabs/MapTools/FloatingTrees/severity.js": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "d52338a2423c00f3569904e45fadc786",
+    "semantic_hash": "d52338a2423c00f3569904e45fadc786"
+  },
+  "src/components/Tabs/MapTools/MapResizer/MapResizer.jsx": {
+    "mtime": 1785167554.6783075,
+    "ast_hash": "266e758ea04f6b92eddf4ea1bdbaead7",
+    "semantic_hash": "266e758ea04f6b92eddf4ea1bdbaead7"
+  },
+  "src/components/Tabs/MapTools/PreviewImage/PreviewImage.jsx": {
+    "mtime": 1785167554.7251835,
+    "ast_hash": "13f7491414cdeba9331a58150728110b",
+    "semantic_hash": "13f7491414cdeba9331a58150728110b"
+  },
+  "src/components/Tabs/MapTools/Scmap/Scmap.jsx": {
+    "mtime": 1785167554.756433,
+    "ast_hash": "280776bfa7f0c0e3e4d36c8d2b71e591",
+    "semantic_hash": "280776bfa7f0c0e3e4d36c8d2b71e591"
+  },
+  "src/components/Tabs/MapTools/SymmetryChecker/Configuration.jsx": {
+    "mtime": 1785167554.756433,
+    "ast_hash": "01763f02be55f2d07b78613560d692bb",
+    "semantic_hash": "01763f02be55f2d07b78613560d692bb"
+  },
+  "src/components/Tabs/MapTools/SymmetryChecker/Findings.jsx": {
+    "mtime": 1785167554.756433,
+    "ast_hash": "9a97dcef2efba02d5f8ab0e3017f8f29",
+    "semantic_hash": "9a97dcef2efba02d5f8ab0e3017f8f29"
+  },
+  "src/components/Tabs/MapTools/SymmetryChecker/Help.jsx": {
+    "mtime": 1785167554.756433,
+    "ast_hash": "e7b1057d56d5dfe80542de191343cc70",
+    "semantic_hash": "e7b1057d56d5dfe80542de191343cc70"
+  },
+  "src/components/Tabs/MapTools/SymmetryChecker/Report.jsx": {
+    "mtime": 1785167554.756433,
+    "ast_hash": "3fa5067eec85d2b1cff6ca8e3d0cc578",
+    "semantic_hash": "3fa5067eec85d2b1cff6ca8e3d0cc578"
+  },
+  "src/components/Tabs/MapTools/SymmetryChecker/SymmetryChecker.jsx": {
+    "mtime": 1785167554.756433,
+    "ast_hash": "53558e8ab6011495db87887dd262f7c8",
+    "semantic_hash": "53558e8ab6011495db87887dd262f7c8"
+  },
+  "src/components/Tabs/Scenery/CustomProps/AddCustomProp.jsx": {
+    "mtime": 1783553905.3915942,
+    "ast_hash": "a6e984a1fe98871990a2f815848396e7",
+    "semantic_hash": "a6e984a1fe98871990a2f815848396e7"
+  },
+  "src/components/Tabs/Scenery/CustomProps/Configuration.jsx": {
+    "mtime": 1783553474.6601343,
+    "ast_hash": "16eda9544a297cf72468573415bfb8b0",
+    "semantic_hash": "16eda9544a297cf72468573415bfb8b0"
+  },
+  "src/components/Tabs/Scenery/CustomProps/CustomProps.jsx": {
+    "mtime": 1783883630.497544,
+    "ast_hash": "c6879c9e84012004b966baff3b3b8495",
+    "semantic_hash": "c6879c9e84012004b966baff3b3b8495"
+  },
+  "src/components/Tabs/Scenery/CustomProps/Export.jsx": {
+    "mtime": 1783552469.688034,
+    "ast_hash": "bfa3b6c0f09c3cbc2e785e89bafefe4b",
+    "semantic_hash": "bfa3b6c0f09c3cbc2e785e89bafefe4b"
+  },
+  "src/components/Tabs/Scenery/CustomProps/PropDetail.jsx": {
+    "mtime": 1783552459.5651762,
+    "ast_hash": "84d1f642d0b7469ff7747ecc6ca7dfd9",
+    "semantic_hash": "84d1f642d0b7469ff7747ecc6ca7dfd9"
+  },
+  "src/components/Tabs/Scenery/CustomProps/PropList.jsx": {
+    "mtime": 1783553491.940801,
+    "ast_hash": "3773566b0d0e979bdfe5067e696afa3a",
+    "semantic_hash": "3773566b0d0e979bdfe5067e696afa3a"
+  },
+  "src/components/Tabs/Scenery/CustomProps/PropPreviewImg.jsx": {
+    "mtime": 1783552373.4799993,
+    "ast_hash": "643879b9d928ffe1669ee4e889e6a722",
+    "semantic_hash": "643879b9d928ffe1669ee4e889e6a722"
+  },
+  "src/components/Tabs/Scenery/CustomProps/TextureEditor/TextureAdjustModal.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "f45e2bd31de7ae99a75bff85b339ae72",
+    "semantic_hash": "f45e2bd31de7ae99a75bff85b339ae72"
+  },
+  "src/components/Tabs/Scenery/CustomProps/TextureEditor/TextureEditor.jsx": {
+    "mtime": 1782334430.0,
+    "ast_hash": "79325d941e3e1da132a29c129350353a",
+    "semantic_hash": "79325d941e3e1da132a29c129350353a"
+  },
+  "src/components/Tabs/Scenery/RockErosion/Channels.jsx": {
+    "mtime": 1784169512.0052338,
+    "ast_hash": "aec3e4c0b26e90603cd844ee16b6735d",
+    "semantic_hash": "aec3e4c0b26e90603cd844ee16b6735d"
+  },
+  "src/components/Tabs/Scenery/RockErosion/Configuration.jsx": {
+    "mtime": 1783425427.7925746,
+    "ast_hash": "ab07677afc4ce74b9f1897724062e565",
+    "semantic_hash": "ab07677afc4ce74b9f1897724062e565"
+  },
+  "src/components/Tabs/Scenery/RockErosion/Export.jsx": {
+    "mtime": 1783381627.0725875,
+    "ast_hash": "256ed2f95d97079ab240a64292b3c9fa",
+    "semantic_hash": "256ed2f95d97079ab240a64292b3c9fa"
+  },
+  "src/components/Tabs/Scenery/RockErosion/RockErosion.jsx": {
+    "mtime": 1784170697.417546,
+    "ast_hash": "5679e7640cefba2a6e4e880d2efbbbf0",
+    "semantic_hash": "5679e7640cefba2a6e4e880d2efbbbf0"
+  },
+  "src/components/Tabs/Scenery/RockErosion/Rules.jsx": {
+    "mtime": 1783381607.2309544,
+    "ast_hash": "f286573ac41ca11b09597125faeae3c1",
+    "semantic_hash": "f286573ac41ca11b09597125faeae3c1"
+  },
+  "src/components/Tabs/Scenery/Trees/Cards.jsx": {
+    "mtime": 1784170055.1277177,
+    "ast_hash": "c7a6756611e1868a2b9f016adb352874",
+    "semantic_hash": "c7a6756611e1868a2b9f016adb352874"
+  },
+  "src/components/Tabs/Scenery/Trees/Channels.jsx": {
+    "mtime": 1783445285.0407126,
+    "ast_hash": "0b0bb25092066a3a255dacd8c9ec9dc7",
+    "semantic_hash": "0b0bb25092066a3a255dacd8c9ec9dc7"
+  },
+  "src/components/Tabs/Scenery/Trees/Configuration.jsx": {
+    "mtime": 1783445275.5235062,
+    "ast_hash": "f6954a7afa68748e5efe86f761eea603",
+    "semantic_hash": "f6954a7afa68748e5efe86f761eea603"
+  },
+  "src/components/Tabs/Scenery/Trees/Export.jsx": {
+    "mtime": 1783445287.4128232,
+    "ast_hash": "289980e10e462b63ee07c406a88ea43b",
+    "semantic_hash": "289980e10e462b63ee07c406a88ea43b"
+  },
+  "src/components/Tabs/Scenery/Trees/Trees.jsx": {
+    "mtime": 1784170690.5337858,
+    "ast_hash": "9c2d102a6cd140ce7c44de66b208ee63",
+    "semantic_hash": "9c2d102a6cd140ce7c44de66b208ee63"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/Cirrus.jsx": {
+    "mtime": 1784823674.7509565,
+    "ast_hash": "415aafb73dc970028dd96f0539e1d52e",
+    "semantic_hash": "415aafb73dc970028dd96f0539e1d52e"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/Configuration.jsx": {
+    "mtime": 1784823617.1003232,
+    "ast_hash": "7d08c51741873e03641949db70bca787",
+    "semantic_hash": "7d08c51741873e03641949db70bca787"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/Help.jsx": {
+    "mtime": 1785167554.7720594,
+    "ast_hash": "e8652b4bfc41d6e2adf723c195424bbe",
+    "semantic_hash": "e8652b4bfc41d6e2adf723c195424bbe"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/Output.jsx": {
+    "mtime": 1783502013.7248824,
+    "ast_hash": "8d032b0bff2ea4a71a4859618293c26d",
+    "semantic_hash": "8d032b0bff2ea4a71a4859618293c26d"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/Planets.jsx": {
+    "mtime": 1783501678.5251453,
+    "ast_hash": "5319188ab82d5448f837ed689060f040",
+    "semantic_hash": "5319188ab82d5448f837ed689060f040"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/SkyboxGenerator.jsx": {
+    "mtime": 1783962558.181725,
+    "ast_hash": "473be47c4102793b537f797387026c8d",
+    "semantic_hash": "473be47c4102793b537f797387026c8d"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/Stars.jsx": {
+    "mtime": 1783541258.5971396,
+    "ast_hash": "81d5168ad89238b54324d79279717957",
+    "semantic_hash": "81d5168ad89238b54324d79279717957"
+  },
+  "src/components/Tabs/Skybox/SkyboxGenerator/utils.js": {
+    "mtime": 1784823512.2149832,
+    "ast_hash": "6b92ac8aff823d469bcb6139ea4d82b8",
+    "semantic_hash": "6b92ac8aff823d469bcb6139ea4d82b8"
+  },
+  "src/components/Tabs/Skybox/Stars/Configuration.jsx": {
+    "mtime": 1783544754.9685192,
+    "ast_hash": "d56dd9e37e93b3d56bd385015cd2d81d",
+    "semantic_hash": "d56dd9e37e93b3d56bd385015cd2d81d"
+  },
+  "src/components/Tabs/Skybox/Stars/Exclusion.jsx": {
+    "mtime": 1783542694.031205,
+    "ast_hash": "237288cb8b1d031abf92a93333690efb",
+    "semantic_hash": "237288cb8b1d031abf92a93333690efb"
+  },
+  "src/components/Tabs/Skybox/Stars/Export.jsx": {
+    "mtime": 1783542711.6189244,
+    "ast_hash": "2f3e56218f8e0b7229aee71ab0be0fc0",
+    "semantic_hash": "2f3e56218f8e0b7229aee71ab0be0fc0"
+  },
+  "src/components/Tabs/Skybox/Stars/Stars.jsx": {
+    "mtime": 1783962531.453528,
+    "ast_hash": "afc15fc9ca1ddcf040d05ba2396ac1a7",
+    "semantic_hash": "afc15fc9ca1ddcf040d05ba2396ac1a7"
+  },
+  "src/components/Tabs/Skybox/Stars/UV.jsx": {
+    "mtime": 1783542635.2944384,
+    "ast_hash": "b2cf231ac6a3c97bfae9e771ffd4d796",
+    "semantic_hash": "b2cf231ac6a3c97bfae9e771ffd4d796"
+  },
+  "src/components/Tabs/Skybox/Stars/YCurveEditor.jsx": {
+    "mtime": 1783542581.7890427,
+    "ast_hash": "e1d53cae1fe9aa7867cb4445168e7887",
+    "semantic_hash": "e1d53cae1fe9aa7867cb4445168e7887"
+  },
+  "src/components/Tabs/Skybox/Stars/generation.js": {
+    "mtime": 1783544672.6265998,
+    "ast_hash": "215c51018f1bb46ccc41c7111f45e453",
+    "semantic_hash": "215c51018f1bb46ccc41c7111f45e453"
+  },
+  "src/components/Tabs/Skybox/Stars/injection.js": {
+    "mtime": 1783962558.1827278,
+    "ast_hash": "9edac24fd808335584ba82c4a5b328f4",
+    "semantic_hash": "9edac24fd808335584ba82c4a5b328f4"
+  },
+  "src/components/Tabs/System/CliTerminal/CliTerminal.jsx": {
+    "mtime": 1785167554.8033082,
+    "ast_hash": "688f3853955ea7d346301d9022a151b8",
+    "semantic_hash": "688f3853955ea7d346301d9022a151b8"
+  },
+  "src/components/Tabs/System/History/History.jsx": {
+    "mtime": 1785167554.8033082,
+    "ast_hash": "941e145e93ef41a1b2379328c01b36dd",
+    "semantic_hash": "941e145e93ef41a1b2379328c01b36dd"
+  },
+  "src/components/Tabs/System/Settings/Settings.jsx": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "77610a8f495202e366498c8c0c0947d6",
+    "semantic_hash": "77610a8f495202e366498c8c0c0947d6"
+  },
+  "src/components/Tabs/Textures/TextureEditor/TextureEditor.jsx": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "3d16a3a556be73b47eb0bb23d5760c3f",
+    "semantic_hash": "3d16a3a556be73b47eb0bb23d5760c3f"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/colorUtil.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "31000871b5d84be75c76e568f95b16d2",
+    "semantic_hash": "31000871b5d84be75c76e568f95b16d2"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/evaluator.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "af45fad32b3dd16b9c6a95f68967b686",
+    "semantic_hash": "af45fad32b3dd16b9c6a95f68967b686"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/exportDds.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "826e4e6a8ae0950e4b133711c6815cab",
+    "semantic_hash": "826e4e6a8ae0950e4b133711c6815cab"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/glContext.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "175a5e359f9f043a422d29579b6c5964",
+    "semantic_hash": "175a5e359f9f043a422d29579b6c5964"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/graph.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "973ff72303c365179c341912bda77570",
+    "semantic_hash": "973ff72303c365179c341912bda77570"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/modes.js": {
+    "mtime": 1785196766.101394,
+    "ast_hash": "2e71d37b4ce37290235ed9bb55bb8fa5",
+    "semantic_hash": "2e71d37b4ce37290235ed9bb55bb8fa5"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/alphaRamp.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "1adb11437fdfd279b4759751f9596d77",
+    "semantic_hash": "1adb11437fdfd279b4759751f9596d77"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/alphaSubtract.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "dd28f06853e0526b8eeab67685003d9f",
+    "semantic_hash": "dd28f06853e0526b8eeab67685003d9f"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/autoLevel.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "a7eeb24dd6f3a3379f418214b44a579c",
+    "semantic_hash": "a7eeb24dd6f3a3379f418214b44a579c"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/blend.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "67ab4dabe3a72ad1c3c2b00d1b09cc75",
+    "semantic_hash": "67ab4dabe3a72ad1c3c2b00d1b09cc75"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/blur.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "fb82a256b5325bdbd52be7b8db6832b6",
+    "semantic_hash": "fb82a256b5325bdbd52be7b8db6832b6"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/brightnessContrast.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "296c22dda6232d2e6de7b27adda0915e",
+    "semantic_hash": "296c22dda6232d2e6de7b27adda0915e"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/channelCombine.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "c58b3d4929e5b5260e684985d8c99ed5",
+    "semantic_hash": "c58b3d4929e5b5260e684985d8c99ed5"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/cirrus.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "b30cf843acaa6f3e0160d2955201bd79",
+    "semantic_hash": "b30cf843acaa6f3e0160d2955201bd79"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/clamp.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "933e55153ba59f30c9b9440e4a52d3b2",
+    "semantic_hash": "933e55153ba59f30c9b9440e4a52d3b2"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/combineRgbAlpha.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "3b38e657ce2cf50675205456e8ee3bbb",
+    "semantic_hash": "3b38e657ce2cf50675205456e8ee3bbb"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/cracks.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "955265b7e65160473e98836a7c9bb9cc",
+    "semantic_hash": "955265b7e65160473e98836a7c9bb9cc"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/curves.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "93a9a7896e1caf86b814393c1c6d3f25",
+    "semantic_hash": "93a9a7896e1caf86b814393c1c6d3f25"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/flip.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "5ff217b96860361f02ac90a366a18b7c",
+    "semantic_hash": "5ff217b96860361f02ac90a366a18b7c"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/glow.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "20b934e8a7ee7e1378f3ab89e8fb4f07",
+    "semantic_hash": "20b934e8a7ee7e1378f3ab89e8fb4f07"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/gradient.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "7e5b1670d54eefa8a0d071be90f1067c",
+    "semantic_hash": "7e5b1670d54eefa8a0d071be90f1067c"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/gradientMap.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "f2efa676b540e565d001bbc0eebe0d6c",
+    "semantic_hash": "f2efa676b540e565d001bbc0eebe0d6c"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/hsv.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "d095ea70e3594cf9795914d280456f61",
+    "semantic_hash": "d095ea70e3594cf9795914d280456f61"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/index.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "dddd67e213c615a9dd381e52334bd780",
+    "semantic_hash": "dddd67e213c615a9dd381e52334bd780"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/invert.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "3454d4b57df547f38660f09430791757",
+    "semantic_hash": "3454d4b57df547f38660f09430791757"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/layers.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "66711e947a7e3737c22e7899476b7968",
+    "semantic_hash": "66711e947a7e3737c22e7899476b7968"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/levels.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "07e32be084196c2466f8192e1b9bacbd",
+    "semantic_hash": "07e32be084196c2466f8192e1b9bacbd"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/mask.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "c3e9eb8f669028bda72a9bcbf2fd2a77",
+    "semantic_hash": "c3e9eb8f669028bda72a9bcbf2fd2a77"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/noise.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "d4ce6a3f90ff202e5f419069f207ca31",
+    "semantic_hash": "d4ce6a3f90ff202e5f419069f207ca31"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/output.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "b9652fc42ce381549fd41c00cda85a33",
+    "semantic_hash": "b9652fc42ce381549fd41c00cda85a33"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/scatter.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "56345799f4cd0954836e0b1329879924",
+    "semantic_hash": "56345799f4cd0954836e0b1329879924"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/seamless.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "75c263938c5ac2b728dda04ffbec7794",
+    "semantic_hash": "75c263938c5ac2b728dda04ffbec7794"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/sharpen.js": {
+    "mtime": 1785167554.850183,
+    "ast_hash": "932e40219f7ebf28c827a27b71908ff6",
+    "semantic_hash": "932e40219f7ebf28c827a27b71908ff6"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/skyGradient.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "d9aceb69f956e2a1dcf4910428246d40",
+    "semantic_hash": "d9aceb69f956e2a1dcf4910428246d40"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/solidColor.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "29169465edcdf10d3b12979d49e3af5b",
+    "semantic_hash": "29169465edcdf10d3b12979d49e3af5b"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/swirl.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "a4ceeafab3bc42134b18e41ca322a73b",
+    "semantic_hash": "a4ceeafab3bc42134b18e41ca322a73b"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/textureImport.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "f91efde6cba61bbf5262c93dd7311b83",
+    "semantic_hash": "f91efde6cba61bbf5262c93dd7311b83"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/threshold.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "671da9c3e08255931922c2d6359bbab9",
+    "semantic_hash": "671da9c3e08255931922c2d6359bbab9"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/tile.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "d28d6b4577c24ea8322557e53ef7c92c",
+    "semantic_hash": "d28d6b4577c24ea8322557e53ef7c92c"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/tint.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "7ae53e771d6e123984722c47e3ad49b4",
+    "semantic_hash": "7ae53e771d6e123984722c47e3ad49b4"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/transform.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "2928631e54ec44813a961c613f81ba3a",
+    "semantic_hash": "2928631e54ec44813a961c613f81ba3a"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/uvRegion.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "9ba9bb4f6741d2fecb06821abfcc0b44",
+    "semantic_hash": "9ba9bb4f6741d2fecb06821abfcc0b44"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/voronoi.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "c2d87e27e34142c17d58e8dbe9e5b324",
+    "semantic_hash": "c2d87e27e34142c17d58e8dbe9e5b324"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/nodes/warp.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "157cc39617a759d4efadefaca5db12d5",
+    "semantic_hash": "157cc39617a759d4efadefaca5db12d5"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/registry.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "2226cb1c93bd7862f53ff89e092e7dec",
+    "semantic_hash": "2226cb1c93bd7862f53ff89e092e7dec"
+  },
+  "src/components/Tabs/Textures/TextureEditor/engine/textureStore.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "7ad1d5f6edda73cb9d1591551d06af6e",
+    "semantic_hash": "7ad1d5f6edda73cb9d1591551d06af6e"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/AlphaRampEditor.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "9cb0cfa2a6d942af571d6d899eb5ea51",
+    "semantic_hash": "9cb0cfa2a6d942af571d6d899eb5ea51"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/CirrusEditor.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "dabba9bef8889c6f3777d224a045fbc7",
+    "semantic_hash": "dabba9bef8889c6f3777d224a045fbc7"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/CurveEditor.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "d7edc9fdb1d91239678a14a74ac018d9",
+    "semantic_hash": "d7edc9fdb1d91239678a14a74ac018d9"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/GradientEditor.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "bac34a38a9ec6af29cb4203054b9ebdf",
+    "semantic_hash": "bac34a38a9ec6af29cb4203054b9ebdf"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/Inspector.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "39eef8216b50decceff575a39c17b9bc",
+    "semantic_hash": "39eef8216b50decceff575a39c17b9bc"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/NodeGraph.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "8f3624166b7ff93e941d1d36dcf3b71a",
+    "semantic_hash": "8f3624166b7ff93e941d1d36dcf3b71a"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/NumberField.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "dc805b6e9c3c0969432c35357e50ac33",
+    "semantic_hash": "dc805b6e9c3c0969432c35357e50ac33"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/SkyGradientEditor.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "201b453ad1963ecaab5c1ffdf54c4a6b",
+    "semantic_hash": "201b453ad1963ecaab5c1ffdf54c4a6b"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/TextureImportEditor.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "1f42415eed15189cf3129c4680a99c94",
+    "semantic_hash": "1f42415eed15189cf3129c4680a99c94"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/UvRegionEditor.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "b83cb30a147a98c85f0f6227aad9a2a7",
+    "semantic_hash": "b83cb30a147a98c85f0f6227aad9a2a7"
+  },
+  "src/components/Tabs/Textures/TextureEditor/ui/Viewport.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "eb4d3383fc7fbc0e28706204ffe4341a",
+    "semantic_hash": "eb4d3383fc7fbc0e28706204ffe4341a"
+  },
+  "src/components/Tabs/Textures/Viewer3D/Help.jsx": {
+    "mtime": 1785170602.526849,
+    "ast_hash": "676bfb3c2fc58049cda459c438fbfae4",
+    "semantic_hash": "676bfb3c2fc58049cda459c438fbfae4"
+  },
+  "src/components/Tabs/Textures/Viewer3D/Objects.jsx": {
+    "mtime": 1785169617.607228,
+    "ast_hash": "fe6bb6de0c7d918df5c646055b6cccbe",
+    "semantic_hash": "fe6bb6de0c7d918df5c646055b6cccbe"
+  },
+  "src/components/Tabs/Textures/Viewer3D/Shading.jsx": {
+    "mtime": 1785170058.313709,
+    "ast_hash": "3a10dac71bc49c33493668d4f8fd665b",
+    "semantic_hash": "3a10dac71bc49c33493668d4f8fd665b"
+  },
+  "src/components/Tabs/Textures/Viewer3D/Viewer3D.jsx": {
+    "mtime": 1785197447.6894248,
+    "ast_hash": "a2fd40bb2ef7b32275f6037ae239200a",
+    "semantic_hash": "a2fd40bb2ef7b32275f6037ae239200a"
+  },
+  "src/components/Tabs/Textures/Viewer3D/load.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "1607aabee6831715532ac509398fdfe2",
+    "semantic_hash": "1607aabee6831715532ac509398fdfe2"
+  },
+  "src/components/Tabs/Textures/Viewer3D/referenceUnits.js": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "b444a1c9d04b56a6067b651e5415f105",
+    "semantic_hash": "b444a1c9d04b56a6067b651e5415f105"
+  },
+  "src/components/Tabs/Textures/WaveNormals/BakeBar.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "5b4b754af2824d719c2832a0a90a21fd",
+    "semantic_hash": "5b4b754af2824d719c2832a0a90a21fd"
+  },
+  "src/components/Tabs/Textures/WaveNormals/Export.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "123dbf6d7ff6a998c8675433a7d8fb2f",
+    "semantic_hash": "123dbf6d7ff6a998c8675433a7d8fb2f"
+  },
+  "src/components/Tabs/Textures/WaveNormals/Fidelity.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "b8e83743c4e9c58aa329c1bd9ca09c68",
+    "semantic_hash": "b8e83743c4e9c58aa329c1bd9ca09c68"
+  },
+  "src/components/Tabs/Textures/WaveNormals/Fields.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "fa8079f98fc3108f3836cf133bde2bb7",
+    "semantic_hash": "fa8079f98fc3108f3836cf133bde2bb7"
+  },
+  "src/components/Tabs/Textures/WaveNormals/Foam.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "93b4b8d3ac61c2977d85f3232aebd0cd",
+    "semantic_hash": "93b4b8d3ac61c2977d85f3232aebd0cd"
+  },
+  "src/components/Tabs/Textures/WaveNormals/Help.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "e7a5a144a646f533589686da03a2d162",
+    "semantic_hash": "e7a5a144a646f533589686da03a2d162"
+  },
+  "src/components/Tabs/Textures/WaveNormals/Layers.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "2804426c90ce7136451350c4275a33f5",
+    "semantic_hash": "2804426c90ce7136451350c4275a33f5"
+  },
+  "src/components/Tabs/Textures/WaveNormals/SeaState.jsx": {
+    "mtime": 1785167554.8658075,
+    "ast_hash": "dbbe8d2afe06f293fb38f6fc9b3f30d6",
+    "semantic_hash": "dbbe8d2afe06f293fb38f6fc9b3f30d6"
+  },
+  "src/components/Tabs/Textures/WaveNormals/TilePreview.jsx": {
+    "mtime": 1785167554.8814332,
+    "ast_hash": "8c6fabc5b5ef20e9efe47ca311eda1b0",
+    "semantic_hash": "8c6fabc5b5ef20e9efe47ca311eda1b0"
+  },
+  "src/components/Tabs/Textures/WaveNormals/WaveNormals.jsx": {
+    "mtime": 1785167554.8814332,
+    "ast_hash": "2cf13f795f5a077511a6883d28a888d1",
+    "semantic_hash": "2cf13f795f5a077511a6883d28a888d1"
+  },
+  "src/components/Tabs/Textures/WaveNormals/bakeWorker.js": {
+    "mtime": 1785167554.8814332,
+    "ast_hash": "2b25ca3209cded61c7d190b0fa10bd5e",
+    "semantic_hash": "2b25ca3209cded61c7d190b0fa10bd5e"
+  },
+  "src/components/Tabs/Textures/WaveNormals/renderPreview.js": {
+    "mtime": 1785167554.8970623,
+    "ast_hash": "1c17aa1774002d37371464ab5df258d4",
+    "semantic_hash": "1c17aa1774002d37371464ab5df258d4"
+  },
+  "src/components/Tabs/Textures/WaveNormals/useBake.js": {
+    "mtime": 1785167554.8970623,
+    "ast_hash": "0bbfeff487152e608b3f503f584a1a9c",
+    "semantic_hash": "0bbfeff487152e608b3f503f584a1a9c"
+  },
+  "src/devElectronShim.js": {
+    "mtime": 1782100000.5501406,
+    "ast_hash": "4c2058ea5be44f0bdbd8ba690ac77c7a",
+    "semantic_hash": "4c2058ea5be44f0bdbd8ba690ac77c7a"
+  },
+  "src/index.js": {
+    "mtime": 1770939466.0,
+    "ast_hash": "b650835dd9c9a270c743afa0ff3f6317",
+    "semantic_hash": "b650835dd9c9a270c743afa0ff3f6317"
+  },
+  "src/main.jsx": {
+    "mtime": 1783372262.0697007,
+    "ast_hash": "999b978aac202a85e4adc46fe4a35061",
+    "semantic_hash": "999b978aac202a85e4adc46fe4a35061"
+  },
+  "tailwind.config.js": {
+    "mtime": 1770939384.0,
+    "ast_hash": "f7e9e456815968100a216a66a6fd56d3",
+    "semantic_hash": "f7e9e456815968100a216a66a6fd56d3"
+  },
+  "utils/CliSessionStore.js": {
+    "mtime": 1783434054.1500928,
+    "ast_hash": "923334dccf6c3ba10ba6c3ab6335050e",
+    "semantic_hash": "923334dccf6c3ba10ba6c3ab6335050e"
+  },
+  "utils/ScmapHistoryTracker.js": {
+    "mtime": 1781150602.5373507,
+    "ast_hash": "b360e7e103a310b363d699580ef136d0",
+    "semantic_hash": "b360e7e103a310b363d699580ef136d0"
+  },
+  "utils/autosave-runner.js": {
+    "mtime": 1775259752.0,
+    "ast_hash": "0ff5431522bdc6d1cc0790e5191f16be",
+    "semantic_hash": "0ff5431522bdc6d1cc0790e5191f16be"
+  },
+  "utils/generate-csp-hashes.js": {
+    "mtime": 1785167554.8970623,
+    "ast_hash": "b89bc6837a57bca1ee205b0f9b85ed05",
+    "semantic_hash": "b89bc6837a57bca1ee205b0f9b85ed05"
+  },
+  "utils/generate-terraintypes.js": {
+    "mtime": 1785167554.8970623,
+    "ast_hash": "47cc065462714a74342275104d3eb550",
+    "semantic_hash": "47cc065462714a74342275104d3eb550"
+  },
+  "utils/readmeGenerator.js": {
+    "mtime": 1783883630.5386147,
+    "ast_hash": "b613bb028ef4caa46f3b28d91c7ae6eb",
+    "semantic_hash": "b613bb028ef4caa46f3b28d91c7ae6eb"
+  },
+  "utils/scmap.js": {
+    "mtime": 1774237886.0,
+    "ast_hash": "e9c60becb2d1666566e0db312ac920ea",
+    "semantic_hash": "e9c60becb2d1666566e0db312ac920ea"
+  },
+  "vite.config.js": {
+    "mtime": 1785167554.8970623,
+    "ast_hash": "80c9b75f02fc0edaa0fb834438b73c45",
+    "semantic_hash": "80c9b75f02fc0edaa0fb834438b73c45"
+  },
+  ".claude/launch.json": {
+    "mtime": 1785768216.8150017,
+    "ast_hash": "368fc88235b2c0bcf4d4b10a8e621815",
+    "semantic_hash": "368fc88235b2c0bcf4d4b10a8e621815"
+  },
+  "data/prop_overrides.json": {
+    "mtime": 1772375516.0,
+    "ast_hash": "e8cfd919fb7c82ff218e8a3e15c001d7",
+    "semantic_hash": "e8cfd919fb7c82ff218e8a3e15c001d7"
+  },
+  "data/unit_blacklist.json": {
+    "mtime": 1774108406.0,
+    "ast_hash": "9577f9acd32f5433dc4adcb42c9496c5",
+    "semantic_hash": "9577f9acd32f5433dc4adcb42c9496c5"
+  },
+  "data/unit_overrides.json": {
+    "mtime": 1774109902.0,
+    "ast_hash": "ea97352e6b26cc905914d2f1f344bacd",
+    "semantic_hash": "ea97352e6b26cc905914d2f1f344bacd"
+  },
+  "src/components/Tabs/Emitter/TerrainType/terrainTypes.json": {
+    "mtime": 1785167554.647058,
+    "ast_hash": "ef397b08b5fa1f3bb9945efeeba87594",
+    "semantic_hash": "ef397b08b5fa1f3bb9945efeeba87594"
+  },
+  "CLAUDE.md": {
+    "mtime": 1786419670.0659764,
+    "ast_hash": "17606fa7853f8ef5143bc1650bd076af",
+    "semantic_hash": "17606fa7853f8ef5143bc1650bd076af"
+  },
+  "_backup/README.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "16c1f09486197a6bd3c58fac4a4acc6c",
+    "semantic_hash": "16c1f09486197a6bd3c58fac4a4acc6c"
+  },
+  "docs/IDEEN.txt": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "8646e120d3ece2c7f047c885e1b06480",
+    "semantic_hash": "8646e120d3ece2c7f047c885e1b06480"
+  },
+  "docs/IPC.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "710c441d31074abe35496a77367af4ad",
+    "semantic_hash": "710c441d31074abe35496a77367af4ad"
+  },
+  "docs/LAYOUTS.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "458a82a7f3c17132410b342649dfaeee",
+    "semantic_hash": "458a82a7f3c17132410b342649dfaeee"
+  },
+  "docs/PROJECT_STRUCTURE.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "37b6a819853df6211f0e61a9c551fcca",
+    "semantic_hash": "37b6a819853df6211f0e61a9c551fcca"
+  },
+  "docs/README.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "be657357f03fd66c3c3d8082191bffb9",
+    "semantic_hash": "be657357f03fd66c3c3d8082191bffb9"
+  },
+  "docs/TAB_CONTRACT.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "32b731a84da049b7e204a310fdcb03d1",
+    "semantic_hash": "32b731a84da049b7e204a310fdcb03d1"
+  },
+  "docs/TAB_UI_CONTRACT.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "52a29eda64f646418db371d2ab48964d",
+    "semantic_hash": "52a29eda64f646418db371d2ab48964d"
+  },
+  "docs/TECH_DECISIONS.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "aadff9add4063c295bcad64ac66f833d",
+    "semantic_hash": "aadff9add4063c295bcad64ac66f833d"
+  },
+  "docs/UI_PHILOSOPHY.md": {
+    "mtime": 1785167554.5376816,
+    "ast_hash": "68091c4cbb7cf597ce1cb15311a3abd2",
+    "semantic_hash": "68091c4cbb7cf597ce1cb15311a3abd2"
+  },
+  "electron/log-window.html": {
+    "mtime": 1775430646.0,
+    "ast_hash": "e46c21153d62c0cfbd12044dbe9a51af",
+    "semantic_hash": "e46c21153d62c0cfbd12044dbe9a51af"
+  },
+  "electron/splash.html": {
+    "mtime": 1781458166.945559,
+    "ast_hash": "912ce0ac28a4a95ffbcf18ceeeb7c1af",
+    "semantic_hash": "912ce0ac28a4a95ffbcf18ceeeb7c1af"
+  },
+  "index.html": {
+    "mtime": 1772297030.0,
+    "ast_hash": "08f2d1802a166d975434c23f48e3d00c",
+    "semantic_hash": "08f2d1802a166d975434c23f48e3d00c"
+  },
+  "index_standalone.html": {
+    "mtime": 1781458166.945559,
+    "ast_hash": "bdc97d01cb8f33abd9ec31bd91e74731",
+    "semantic_hash": "bdc97d01cb8f33abd9ec31bd91e74731"
+  },
+  "src/components/Core/Footer/content/about-author.html": {
+    "mtime": 1783506724.4056723,
+    "ast_hash": "29e96a871396bde69c8e28b705e771b8",
+    "semantic_hash": "29e96a871396bde69c8e28b705e771b8"
+  },
+  "src/components/Core/Footer/content/about-fmt.html": {
+    "mtime": 1783886282.9410388,
+    "ast_hash": "59f49ead9b9d30d46d60ed2edce8ec57",
+    "semantic_hash": "59f49ead9b9d30d46d60ed2edce8ec57"
+  },
+  "src/components/Core/Footer/content/changelog.html": {
+    "mtime": 1783547647.2294643,
+    "ast_hash": "05e030f34494e6645545df7d45cd6095",
+    "semantic_hash": "05e030f34494e6645545df7d45cd6095"
+  },
+  "src/components/Core/Footer/content/contribute.html": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "67a4c48990a3bcd810998ec2be32a4c8",
+    "semantic_hash": "67a4c48990a3bcd810998ec2be32a4c8"
+  },
+  "src/components/Core/Footer/content/docs.html": {
+    "mtime": 1783548661.8392632,
+    "ast_hash": "0298cc032dc1c737419e04101b91db8c",
+    "semantic_hash": "0298cc032dc1c737419e04101b91db8c"
+  },
+  "src/components/Core/Footer/content/donate.html": {
+    "mtime": 1783509130.1439664,
+    "ast_hash": "5c0053a200b8f4337162d0b2b368a74f",
+    "semantic_hash": "5c0053a200b8f4337162d0b2b368a74f"
+  },
+  "src/components/Core/Footer/content/forgetools.html": {
+    "mtime": 1782334430.0,
+    "ast_hash": "767f9744ede9174e9b599be51b03b7e7",
+    "semantic_hash": "767f9744ede9174e9b599be51b03b7e7"
+  },
+  "src/components/Core/Footer/content/getting-started.html": {
+    "mtime": 1783548662.1593273,
+    "ast_hash": "43287e8a271b14be70dedd7a71f53ba5",
+    "semantic_hash": "43287e8a271b14be70dedd7a71f53ba5"
+  },
+  "src/components/Core/Footer/content/licenses.html": {
+    "mtime": 1783886284.39704,
+    "ast_hash": "5f61868c82fc95ddc7963e691fb9fb8a",
+    "semantic_hash": "5f61868c82fc95ddc7963e691fb9fb8a"
+  },
+  "src/components/Core/Footer/content/shortcuts.html": {
+    "mtime": 1783886265.3371978,
+    "ast_hash": "6b8f69790627cb08c82d59ccbea982c4",
+    "semantic_hash": "6b8f69790627cb08c82d59ccbea982c4"
+  },
+  "src/components/Core/Footer/content/techstack.html": {
+    "mtime": 1785167554.553307,
+    "ast_hash": "32c4d3c4b62f9f517711a74937b0057a",
+    "semantic_hash": "32c4d3c4b62f9f517711a74937b0057a"
+  },
+  "src/components/Tabs/MapTools/Scmap/PopOut/scmapPopout.html": {
+    "mtime": 1785167554.7408142,
+    "ast_hash": "10862c01831f565b26a5383479ac8044",
+    "semantic_hash": "10862c01831f565b26a5383479ac8044"
+  }
+}

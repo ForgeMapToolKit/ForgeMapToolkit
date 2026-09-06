@@ -360,6 +360,11 @@
   --mapresizer-glow:        rgba(0, 229, 204, 0.20);
   --mapresizer-glow-strong: rgba(0, 229, 204, 0.45);
 
+  /* Map Rotator — Sky blue */
+  --maprotator-color:       #5BC0EB;
+  --maprotator-glow:        rgba(91, 192, 235, 0.20);
+  --maprotator-glow-strong: rgba(91, 192, 235, 0.45);
+
   /* Biome Changer — Moss green */
   --biomechanger-color:       #7FB069;
   --biomechanger-glow:        rgba(127, 176, 105, 0.30);

@@ -1063,7 +1063,7 @@ ipcMain.handle('open-tool-window', async (event, { tool }) => {
     });
 
     const base = isDev
-      ? 'http://localhost:5173'
+      ? require('../dev-server').DEV_ORIGIN
       : `file://${path.join(app.getAppPath(), 'dist', 'index.html')}`;
 
     win.loadURL(`${base}#tool/${tool}`);

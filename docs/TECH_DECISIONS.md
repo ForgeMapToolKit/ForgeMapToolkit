@@ -80,9 +80,10 @@ The IPC architecture separates concerns cleanly: the main process handles all fi
 
 ### Real IPC surface in the app
 
-**118 `ipcMain.handle` channels across 23 modules in `electron/modules/`** (counted
-2026-07-26). Every one must also appear in the `INVOKE_CHANNELS` allowlist in
-`electron/preload.js` or `invoke()` rejects it (TAB_CONTRACT §8). By area:
+**122 `ipcMain.handle` channels across 26 modules in `electron/modules/`** (regenerated
+2026-08-12 with `npm run docs:ipc`). Every one must also appear in the `INVOKE_CHANNELS`
+allowlist in `electron/preload.js` or `invoke()` rejects it (TAB_CONTRACT §8) — **22
+currently do not**; see `IPC.md`. By area:
 
 ```
 binary / .scmap      scmap-unpack · scmap-pack · scmap-pack-folder · scmap-patch-water
@@ -226,7 +227,7 @@ Vite produces clean Rollup-bundled output in `dist/` that Electron loads via `lo
 │  └── sharp    (image ops)     ├── prop_overrides.json    │
 │                               └── settings (userData)    │
 │                                                          │
-│  118 IPC handlers across 23 modules (ipcMain.handle)     │
+│  122 IPC handlers across 26 modules (ipcMain.handle)     │
 │  all path-touching handlers wrapped in withPathGuard()   │
 ├──────────────────────────────────────────────────────────┤
 │  IPC Bridge — electron/preload.js                        │

@@ -51,6 +51,22 @@ async function findScmap(mapFolder) {
     return { success: false, error: `No .scmap found in: ${mapFolder}` };
   }
   const scmapPath = path.join(mapFolder, files[0]);
+
+  // A path that exists is not yet a map. FAF ships 18-byte placeholder .scmap
+  // files for co-op missions whose real map data lives in the game archives, and
+  // callers copy a whole map version on the strength of this result — so a non-map
+  // has to fail here rather than three steps later. Only the header is read; a real
+  // .scmap runs to hundreds of megabytes.
+  const head = Buffer.alloc(64);
+  const fd   = fs.openSync(scmapPath, 'r');
+  let bytes  = 0;
+  try { bytes = fs.readSync(fd, head, 0, 64, 0); } finally { fs.closeSync(fd); }
+  const notMap = scmapUtils.describeNonMap(head.subarray(0, bytes));
+  if (notMap) {
+    log.warn(`[mr] Unusable .scmap ${scmapPath}: ${notMap}`);
+    return { success: false, error: notMap };
+  }
+
   log.info(`[mr] Found .scmap: ${scmapPath}`);
   return { success: true, scmapPath };
 }

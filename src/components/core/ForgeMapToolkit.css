@@ -27,6 +27,7 @@
 .forgemaptoolkit[data-active-theme="adaptivemaphelper"] { --current-accent: var(--adaptivemaphelper-color); --current-glow: var(--adaptivemaphelper-glow); --current-glow-strong: var(--adaptivemaphelper-glow-strong); }
 .forgemaptoolkit[data-active-theme="history"]           { --current-accent: var(--history-color);           --current-glow: var(--history-glow);           --current-glow-strong: var(--history-glow-strong); }
 .forgemaptoolkit[data-active-theme="mapresizer"]        { --current-accent: var(--mapresizer-color);        --current-glow: var(--mapresizer-glow);        --current-glow-strong: var(--mapresizer-glow-strong); }
+.forgemaptoolkit[data-active-theme="maprotator"]        { --current-accent: var(--maprotator-color);        --current-glow: var(--maprotator-glow);        --current-glow-strong: var(--maprotator-glow-strong); }
 .forgemaptoolkit[data-active-theme="previewimage"]      { --current-accent: var(--previewimage-color);      --current-glow: var(--previewimage-glow);      --current-glow-strong: var(--previewimage-glow-strong); }
 .forgemaptoolkit[data-active-theme="contributions"]     { --current-accent: var(--contributions-color);     --current-glow: var(--contributions-glow);     --current-glow-strong: var(--contributions-glow-strong); }
 .forgemaptoolkit[data-active-theme="settings"]          { --current-accent: var(--settings-color);          --current-glow: var(--settings-glow);          --current-glow-strong: var(--settings-glow-strong); }

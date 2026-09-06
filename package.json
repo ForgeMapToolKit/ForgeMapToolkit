@@ -11,12 +11,13 @@
     "prebuild": "node utils/generate-csp-hashes.js",
     "build": "vite build",
     "lint": "eslint .",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5273 && cross-env NODE_ENV=development electron .\"",
     "electron:build": "npm run build && electron-builder",
     "preview": "vite preview",
     "release:beta": "standard-version --prerelease beta",
     "release": "standard-version",
-    "lint:design": "node scripts/design-lint.mjs"
+    "lint:design": "node scripts/design-lint.mjs",
+    "docs:ipc": "node scripts/ipc-count.mjs"
   },
   "dependencies": {
     "@uiw/react-color": "^2.9.6",

@@ -3,6 +3,9 @@
 > **Regenerated 2026-07-26 from `git ls-files`.** Every path below was read out of the
 > index, not from memory.
 >
+> *Amended 2026-09-06 for the Map Rotator: `tabs/MapTools/MapRotator/`,
+> `electron/modules/map-rotator.js`. Hand-added, not regenerated.*
+>
 > *Amended 2026-07-26 for the 3D Viewer: `shared/Scene3D/`, `tabs/Textures/Viewer3D/`,
 > `electron/modules/{gamefiles,mesh}.js`. Those four are hand-added, not regenerated.*
 >
@@ -62,7 +65,7 @@ ForgeMapToolkit
 │   ├── TAB_UI_CONTRACT.md                ← how a tab may look, visual half (the pair)
 │   ├── UI_PHILOSOPHY.md                  ← why those rules exist; consult for new cases
 │   ├── LAYOUTS.md                        ← the X/Y/Z/W layout spec TabLayout implements
-│   ├── IPC.md                            ← the renderer↔main boundary, all 119 channels
+│   ├── IPC.md                            ← the renderer↔main boundary, every channel
 │   ├── PROJECT_STRUCTURE.md              ← this file
 │   └── TECH_DECISIONS.md                 ← why Electron + React + Vite
 │
@@ -71,7 +74,7 @@ ForgeMapToolkit
 │   ├── main.js
 │   ├── preload.js                        ← IPC allowlist (INVOKE_CHANNELS)
 │   ├── log-preload.js  log-window.html  splash.html
-│   └── modules                           ← 123 ipcMain.handle channels across 25 modules
+│   └── modules                           ← 122 ipcMain.handle channels across 26 modules
 │       ├── security.js                   ← isPathAllowed() / withPathGuard()
 │       ├── file-ipc.js                   ← withPathGuard-wrapped generic file handlers
 │       ├── scmap.js                      ← .scmap pack/unpack/patch/read
@@ -97,6 +100,12 @@ ForgeMapToolkit
 │       │                                    folder. Whitelists exclude geometry by design.
 │       ├── texture-scanner.js  scanner.js
 │       ├── skybox.js  props.js  preview.js  map-resizer.js
+│       ├── map-rotator.js                ← Map Rotator: turns an unpacked map about its
+│       │                                    centre. Rasters by index on a quarter turn,
+│       │                                    bilinear otherwise; DXT textures rotated as
+│       │                                    blocks (never by byte — DXT5 is 1 byte/px and
+│       │                                    looks uncompressed by size alone); prop
+│       │                                    orientation as three rotated basis vectors.
 │       ├── community.js  guides.js  guides-downloads.js  footer-content.js
 │       ├── coop-versioner.js  editor-bridge.js
 │       ├── cli-runner.js  cli-session-store.js
@@ -208,6 +217,8 @@ ForgeMapToolkit
 │           │                                        Props today, Waves/Sky later on Shared/Scene3D
 │           ├── MapTools/                   ← category `maptools` · nav "Map Tools"
 │           │   ├── Scmap/ (+ PopOut/)  AdaptiveMapHelper/  MapResizer/  PreviewImage/
+│           │   ├── MapRotator/                  ← route id `maprotator`. angles.js holds the
+│           │   │                                    angle maths; RotationDial.jsx draws the turn
 │           │   ├── BiomeChanger/                ← biomePresets.js is the data file to fill;
 │           │   │                                    all decisions in Shared/MapLogic/biomeLogic.js
 │           │   ├── SymmetryChecker/             ← read-only. All maths in

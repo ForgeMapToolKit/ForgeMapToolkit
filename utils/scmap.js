@@ -407,6 +407,13 @@ const SCMAP_HEADER = [
   Buffer.from('\xed\xfe\xef\xbe',   'binary'),
 ];
 
+// The only versions that occur in shipped content. 53 is the 2007 GPG campaign
+// format, 56 the bulk of community maps, 60 the current era. The engine also has
+// gates at 51/52/54/55/57/58/59, but no file in the wild uses them and this
+// reader has never been validated against one, so they are refused rather than
+// parsed on a guess.
+const SUPPORTED_VERSIONS = new Set([53, 56, 60]);
+
 function validateHeader(r) {
   const h0 = r.readBytes(4);
   const h1 = r.readBytes(4);
@@ -418,7 +425,30 @@ function validateHeader(r) {
          h3.equals(SCMAP_HEADER[1]);
 }
 
+// FAF ships stand-in .scmap files for co-op missions whose real map data lives
+// inside the game archives. They are ~18 bytes of ASCII and are not damaged
+// files — nothing can open them, so say so plainly instead of blaming the header.
+function describeNonMap(buf) {
+  if (buf.length < 64) {
+    const txt = buf.toString('latin1').trim();
+    if (/^[\x20-\x7e\s]*$/.test(txt) && txt.length) {
+      return `Not a map: this .scmap is a ${buf.length}-byte placeholder containing `
+           + `"${txt}". FAF ships these for co-op missions whose map data lives in the `
+           + `game archives rather than the maps folder — there is nothing here to open.`;
+    }
+    return `Not a map: this .scmap is only ${buf.length} bytes, too small to hold a header.`;
+  }
+  if (!buf.slice(0, 4).equals(SCMAP_HEADER[0])) {
+    return `Invalid scmap header: expected the file to start with "Map\\x1a", got `
+         + `${JSON.stringify(buf.slice(0, 4).toString('latin1'))}. This is not a .scmap file.`;
+  }
+  return null;
+}
+
 function readDatastream(buf) {
+  const early = describeNonMap(buf);
+  if (early) throw new Error(early);
+
   const r = new BinReader(buf);
 
   if (!validateHeader(r)) throw new Error('Invalid scmap header');
@@ -434,24 +464,42 @@ function readDatastream(buf) {
   data.previewImage = r.intFile();
 
   data.version = r.int();
-  if (data.version !== 56 && data.version !== 60)
-    throw new Error(`Unexpected scmap version: ${data.version}`);
+  if (!SUPPORTED_VERSIONS.has(data.version))
+    throw new Error(
+      `Unsupported scmap version: ${data.version}. This reader handles ` +
+      `${[...SUPPORTED_VERSIONS].join(', ')} — the only versions that occur in shipped ` +
+      `content (53 = the 2007 GPG campaign maps, 56 and 60 = community and current-era ` +
+      `maps). Versions 51, 52, 54, 55, 57, 58 and 59 exist as engine gates but no known ` +
+      `file uses them, so they are rejected rather than guessed at.`
+    );
+
+  // Everything below version 56 shares one older layout. The engine actually
+  // gates the individual blocks at 54 and 55, but 53 is the only sub-56 version
+  // that exists in the wild, so one flag covers every difference we can verify.
+  const legacy = data.version < 56;
 
   data.size          = [r.int(), r.int()];
   data.heightmapScale = r.float();
   const hmSize       = (data.size[0]+1) * (data.size[1]+1) * 2;
   data.heightmap     = { data: r.readBytes(hmSize), format: 'raw' };
-  const hmNull       = r.readBytes(1);
-  if (hmNull[0] !== 0) throw new Error('Missing null terminator after heightmap');
+  if (!legacy) {
+    const hmNull = r.readBytes(1);
+    if (hmNull[0] !== 0) throw new Error('Missing null terminator after heightmap');
+  }
 
   data.shaderPath     = r.stringNull();
   data.backgroundPath = r.stringNull();
   data.skyCubePath    = r.stringNull();
 
-  const cubeMapCount  = r.int();
-  data.cubeMaps       = [];
-  for (let i = 0; i < cubeMapCount; i++) {
-    data.cubeMaps.push({ name: r.stringNull(), path: r.stringNull() });
+  data.cubeMaps = [];
+  if (legacy) {
+    // One unnamed path; the engine forces the key to "<default>".
+    data.cubeMaps.push({ name: '<default>', path: r.stringNull() });
+  } else {
+    const cubeMapCount = r.int();
+    for (let i = 0; i < cubeMapCount; i++) {
+      data.cubeMaps.push({ name: r.stringNull(), path: r.stringNull() });
+    }
   }
 
   data.lightingSettings = {
@@ -513,12 +561,19 @@ function readDatastream(buf) {
     });
   }
 
-  data.miniMapContourInterval   = r.int();
-  data.miniMapDeepWaterColor    = r.readHex4();
-  data.miniMapContourColor      = r.readHex4();
-  data.miniMapShoreColor        = r.readHex4();
-  data.miniMapLandStartColor    = r.readHex4();
-  data.miniMapLandEndColor      = r.readHex4();
+  if (legacy) {
+    // Pre-56 stores a minimap texture name and a count; the topographic and
+    // hypsometric colours are hardcoded in the engine instead of stored.
+    data.miniMapString  = r.stringNull();
+    data.miniMapUnknown = r.int();
+  } else {
+    data.miniMapContourInterval   = r.int();
+    data.miniMapDeepWaterColor    = r.readHex4();
+    data.miniMapContourColor      = r.readHex4();
+    data.miniMapShoreColor        = r.readHex4();
+    data.miniMapLandStartColor    = r.readHex4();
+    data.miniMapLandEndColor      = r.readHex4();
+  }
 
   if (data.version > 56) {
     data.unknownFA = r.readHex4();
@@ -526,8 +581,24 @@ function readDatastream(buf) {
 
   data.textures = [];
   data.normals  = [];
-  for (let i = 0; i < 10; i++) data.textures.push({ path: r.stringNull(), scale: r.float() });
-  for (let i = 0; i < 9;  i++) data.normals.push(  { path: r.stringNull(), scale: r.float() });
+  if (legacy) {
+    // Pre-56 interleaves albedo and normal per stratum in one record, six of
+    // them. This is a change of SHAPE, not just of length: a parser that only
+    // shortens the 10/9 loops reads garbage from here on.
+    for (let i = 0; i < 6; i++) {
+      const albedoPath  = r.stringNull();
+      const normalPath  = r.stringNull();
+      const albedoScale = r.float();
+      const normalScale = r.float();
+      data.textures.push({ path: albedoPath, scale: albedoScale });
+      data.normals.push({  path: normalPath, scale: normalScale });
+    }
+  } else {
+    // From 56 the lists are separate and unequal: the tenth albedo (UpperAlbedo)
+    // has no normal counterpart, so they must be read as two independent loops.
+    for (let i = 0; i < 10; i++) data.textures.push({ path: r.stringNull(), scale: r.float() });
+    for (let i = 0; i < 9;  i++) data.normals.push(  { path: r.stringNull(), scale: r.float() });
+  }
 
   data.unknown1 = r.readHex4();
   data.unknown2 = r.readHex4();
@@ -588,8 +659,11 @@ function readDatastream(buf) {
     }
   }
 
-  data.textureMaskLow  = r.intFile();
-  data.textureMaskHigh = r.intFile();
+  if (legacy) data.unknownAfterNormalMap = r.readHex4();
+
+  data.textureMaskLow = r.intFile();
+  // Pre-56 carries only the low mask; the engine adopts it for both sheets.
+  if (!legacy) data.textureMaskHigh = r.intFile();
 
   const utilityCount = r.int();
   if (utilityCount === 1) {
@@ -924,12 +998,18 @@ function writeDatastream(folderPath) {
 
   w.intFile(previewFile);
 
+  if (!SUPPORTED_VERSIONS.has(data.version))
+    throw new Error(`Refusing to write scmap version ${data.version}: only ` +
+                    `${[...SUPPORTED_VERSIONS].join(', ')} are supported. Writing an ` +
+                    `unknown version would stamp it onto a layout it does not describe.`);
+  const legacy = data.version < 56;
+
   w.int(data.version);
   w.int(sz[0]);
   w.int(sz[1]);
   w.float(data.heightmapScale);
   w.push(hmFile);
-  w.byte(0);
+  if (!legacy) w.byte(0);
 
   w.stringNull(data.shaderPath);
   w.stringNull(data.backgroundPath);
@@ -937,10 +1017,14 @@ function writeDatastream(folderPath) {
 
   // CubeMaps
   const cubeMaps = toArray(data.cubeMaps);
-  w.int(cubeMaps.length);
-  for (const cm of cubeMaps) {
-    w.stringNull(cm.name);
-    w.stringNull(cm.path);
+  if (legacy) {
+    w.stringNull(cubeMaps[0] ? cubeMaps[0].path : '');
+  } else {
+    w.int(cubeMaps.length);
+    for (const cm of cubeMaps) {
+      w.stringNull(cm.name);
+      w.stringNull(cm.path);
+    }
   }
 
   // Lighting
@@ -1005,17 +1089,35 @@ function writeDatastream(folderPath) {
   }
 
   // Minimap
-  w.int(data.miniMapContourInterval);
-  w.hex4(data.miniMapDeepWaterColor);
-  w.hex4(data.miniMapContourColor);
-  w.hex4(data.miniMapShoreColor);
-  w.hex4(data.miniMapLandStartColor);
-  w.hex4(data.miniMapLandEndColor);
+  if (legacy) {
+    w.stringNull(data.miniMapString ?? '');
+    w.int(data.miniMapUnknown ?? 6);
+  } else {
+    w.int(data.miniMapContourInterval);
+    w.hex4(data.miniMapDeepWaterColor);
+    w.hex4(data.miniMapContourColor);
+    w.hex4(data.miniMapShoreColor);
+    w.hex4(data.miniMapLandStartColor);
+    w.hex4(data.miniMapLandEndColor);
+  }
   if (data.version > 56) w.hex4(data.unknownFA ?? '00000000');
 
   // Textures / Normals
-  for (const t of toArray(data.textures)) { w.stringNull(t.path); w.float(t.scale); }
-  for (const n of toArray(data.normals))  { w.stringNull(n.path); w.float(n.scale); }
+  const texList = toArray(data.textures);
+  const nrmList = toArray(data.normals);
+  if (legacy) {
+    for (let i = 0; i < 6; i++) {
+      const t = texList[i] || { path: '', scale: 0 };
+      const n = nrmList[i] || { path: '', scale: 0 };
+      w.stringNull(t.path);
+      w.stringNull(n.path);
+      w.float(t.scale);
+      w.float(n.scale);
+    }
+  } else {
+    for (const t of texList) { w.stringNull(t.path); w.float(t.scale); }
+    for (const n of nrmList) { w.stringNull(n.path); w.float(n.scale); }
+  }
 
   w.hex4(data.unknown1);
   w.hex4(data.unknown2);
@@ -1069,13 +1171,17 @@ function writeDatastream(folderPath) {
     w.int(0);
   }
 
+  if (legacy) w.hex4(data.unknownAfterNormalMap ?? '00000000');
+
   // textureMaskLow / High
   const tml = getFile('textureMaskLow');
-  const tmh = getFile('textureMaskHigh');
   if (!tml) throw new Error('textureMaskLow not found');
-  if (!tmh) throw new Error('textureMaskHigh not found');
   w.intFile(tml);
-  w.intFile(tmh);
+  if (!legacy) {
+    const tmh = getFile('textureMaskHigh');
+    if (!tmh) throw new Error('textureMaskHigh not found');
+    w.intFile(tmh);
+  }
 
   // waterMap / utilityTextures
   const waterMapFile   = getFile('waterMap');
@@ -1163,4 +1269,4 @@ function writeDatastream(folderPath) {
 // PUBLIC API
 // ═══════════════════════════════════════════════════════════════════════════
 
-module.exports = { readDatastream, exportScmapData, writeDatastream, parseLuaDataFile, luaSerialize };
+module.exports = { readDatastream, describeNonMap, exportScmapData, writeDatastream, parseLuaDataFile, luaSerialize };

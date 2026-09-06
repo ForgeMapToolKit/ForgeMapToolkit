@@ -10,6 +10,9 @@ const https  = require('https');
 const JSZip = require('jszip');
 const scmapUtils = require('../utils/scmap');
 
+// Dev-server address — one constant, shared with vite.config.js and the dev CSP.
+const { DEV_ORIGIN, DEV_WS } = require('./dev-server');
+
 // ── Logger ZUERST laden ───────────────────────────────────────────────────────
 const {
   log, LOG_FILE, LOG_LEVELS, logBuffer, yieldTick, instrumentIpc, bridgeRendererConsole,
@@ -47,6 +50,7 @@ require('./modules/terraintype');
 require('./modules/symmetry');
 require('./modules/floating-props');
 require('./modules/map-resizer').register();
+require('./modules/map-rotator').register();
 require('./modules/biome').register();
 require('./modules/preview');
 require('./modules/cli-runner');
@@ -127,8 +131,8 @@ function createWindow() {
   });
 
   if (process.env.NODE_ENV === 'development') {
-    log.info('Loading dev server: http://localhost:5173');
-    mainWindow.loadURL('http://localhost:5173');
+    log.info(`Loading dev server: ${DEV_ORIGIN}`);
+    mainWindow.loadURL(DEV_ORIGIN);
   } else {
     const indexPath = path.join(__dirname, '../dist/index.html');
     log.info('Loading production build:', indexPath);
@@ -253,7 +257,8 @@ const GUIDE_SCRIPT_HASHES = [
 //   form-action 'none'          — no form submissions
 //   frame-src   'none'          — no iframes
 //
-// NOTE: In development (NODE_ENV=development) the app loads from http://localhost:5173.
+// NOTE: In development (NODE_ENV=development) the app loads from DEV_ORIGIN
+//       (electron/dev-server.js).
 //       We relax connect-src and script-src to allow the Vite dev server + HMR websocket.
 
 function installCSP() {
@@ -261,7 +266,7 @@ function installCSP() {
   const isDev = process.env.NODE_ENV === 'development';
 
   const devExtra = isDev
-    ? " http://localhost:5173 ws://localhost:5173"
+    ? ` ${DEV_ORIGIN} ${DEV_WS}`
     : "";
 
   // In dev, Vite injects an inline React-refresh preamble. A script-src that
@@ -269,7 +274,7 @@ function installCSP() {
   // hash-free policy that allows inline + eval + the dev server. Production
   // stays strict and hash-pinned.
   const scriptSrc = isDev
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173"
+    ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${DEV_ORIGIN}`
     : `script-src 'self' 'sha256-2HCWXB1O/5LE2p1N3Wn6PZFyo3spKmW14WEJ3CeciXA=' ${GUIDE_SCRIPT_HASHES.join(' ')}`;
 
   const CSP = [
@@ -283,7 +288,7 @@ function installCSP() {
     // FFTs per layer would otherwise lock the renderer for seconds. Without an
     // explicit worker-src this falls back to default-src 'none' and the worker
     // never starts. 'self' only: no blob:, no remote origins.
-    `worker-src 'self'${isDev ? ' http://localhost:5173' : ''}`,
+    `worker-src 'self'${isDev ? ` ${DEV_ORIGIN}` : ''}`,
     "font-src 'self' https://fonts.gstatic.com",
     "object-src 'none'",
     "base-uri 'self'",

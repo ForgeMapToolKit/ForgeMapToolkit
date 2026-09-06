@@ -17,6 +17,7 @@ import ScmapTool         from '../Tabs/MapTools/Scmap/Scmap.jsx';
 import AdaptiveMapHelper from '../Tabs/MapTools/AdaptiveMapHelper/AdaptiveMapHelper.jsx';
 import HistoryTab        from '../Tabs/System/History/History.jsx';
 import MapResizerTab     from '../Tabs/MapTools/MapResizer/MapResizer.jsx';
+import MapRotatorTab     from '../Tabs/MapTools/MapRotator/MapRotator.jsx';
 import PreviewImageTab   from '../Tabs/MapTools/PreviewImage/PreviewImage.jsx';
 import BiomeChangerTab   from '../Tabs/MapTools/BiomeChanger/BiomeChanger.jsx';
 import SymmetryChecker   from '../Tabs/MapTools/SymmetryChecker/SymmetryChecker.jsx';
@@ -77,6 +78,7 @@ export const TAB_ROUTES = {
   adaptivemaphelper:  (c) => <AdaptiveMapHelper {...c.tabProps} />,
   history:            (c) => <HistoryTab settings={c.settings} shared={c.sharedState} />,
   mapresizer:         (c) => <MapResizerTab   {...c.tabProps} />,
+  maprotator:         (c) => <MapRotatorTab   {...c.tabProps} />,
   previewimage:       (c) => <PreviewImageTab {...c.tabProps} />,
   biomechanger:       (c) => <BiomeChangerTab  {...c.tabProps} />,
   symmetrychecker:    (c) => <SymmetryChecker  {...c.tabProps} />,

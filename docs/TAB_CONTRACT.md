@@ -240,7 +240,7 @@ Die drei Gold-Standard-Tabs nutzen jeweils ihr eigenes Kürzel: `wr_` (Wreckage)
 
 - Jeder neue Channel muss in der **Preload-Allowlist** stehen (`electron/preload.js`,
   `INVOKE_CHANNELS`-Set), sonst wird `invoke()` mit einem Fehler abgewiesen.
-  Größenordnung: derzeit **123 `ipcMain.handle`-Kanäle über 25 Module** in
+  Größenordnung: derzeit **122 `ipcMain.handle`-Kanäle über 26 Module** in
   `electron/modules/`.
 - Datei-schreibende/-lesende Handler **müssen** durch `withPathGuard`
   (`electron/modules/file-ipc.js`, basierend auf `electron/modules/security.js`)

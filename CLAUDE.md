@@ -6,7 +6,29 @@ sampling and FFT ocean simulation, composites textures through a WebGL node grap
 talks to GitHub for community assets.
 
 Renderer = React UI. Main process = all filesystem, binary and network work, reached over
-117 IPC channels.
+124 IPC channels.
+
+
+## Claude-Code-Referenz (bei Fragen zu Claude Code selbst)
+
+Bevor du zu Claude-Code-Features (Skills, Hooks, Subagents, Commands, Context-Management, Settings)
+aus allgemeinem Wissen antwortest, prüfe zuerst diese Dateien in
+D:\Repos\claude-code-best-practice
+
+1. best-practice/claude-skills.md — Skill-Aufbau, inkl. "Skills for Mono-repos"-Report
+   (relevant für FMT: großer Codebase, viele Tabs/Editoren)
+2. best-practice/claude-hooks.md — Hook-Setup (PreToolUse etc.), inkl. bekannter Windows/PowerShell-Fallstricke
+3. best-practice/claude-subagents.md — wann Subagents statt einem großen Kontext sinnvoll sind
+4. best-practice/claude-memory.md — CLAUDE.md-Konventionen, Rules-Ordner, Auto-Memory
+5. best-practice/claude-mcp.md — MCP-Server-Einrichtung (z.B. für graphify-MCP)
+6. tips/ — kuratierte Tipps von Boris Cherny (Claude-Code-Creator) zu Planning, Debugging, Git/PR-Workflow
+
+Bei Windows-spezifischen Problemen (PowerShell-Parser-Limits, Pfad-Fehler etc.) zuerst
+best-practice/claude-hooks.md und die dortigen Windows-Hinweise checken.
+
+Nutze diese Dateien als primäre Quelle, nicht als einzige — bei Widersprüchen zur offiziellen
+Doku (code.claude.com/docs) hat die offizielle Doku Vorrang.
+
 
 ## Commands
 

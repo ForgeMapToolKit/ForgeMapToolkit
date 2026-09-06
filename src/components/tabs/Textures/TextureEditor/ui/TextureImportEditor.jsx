@@ -6,9 +6,11 @@ import { Dropdown } from '../../../../Shared/Ui/EntityPanel/EntityPanel.jsx';
  *
  * Either type a path directly (a game path like
  * "/textures/environment/foo.dds", a "/maps/<map>/…" path, or an absolute
- * file), or pick an unpacked map and take one of the textures its skyBox
- * already references — which is the normal way in: the map tells you where its
- * planet/star atlas and cirrus live, you just point at it.
+ * file), pick an unpacked map and take one of the textures its skyBox already
+ * references — the map tells you where its planet/star atlas and cirrus live,
+ * you just point at it — or browse to a texture file anywhere on disk (e.g.
+ * one grabbed off the internet); that copies it into userData/imported-textures
+ * so it loads like any other local file.
  */
 export default function TextureImportEditor({ value, onChange, params, setParams }) {
   const [maps, setMaps] = useState([]);
@@ -47,6 +49,24 @@ export default function TextureImportEditor({ value, onChange, params, setParams
   }, []);
 
   const choose = (p) => setParams({ path: p, mapName: pickMap });
+
+  const [browsingFile, setBrowsingFile] = useState(false);
+  const browseTextureFile = useCallback(async () => {
+    setBrowsingFile(true); setMsg('');
+    try {
+      const api = window.electronAPI;
+      if (!api?.invoke) throw new Error('needs the desktop app');
+      const res = await api.invoke('node-editor-browse-texture-file');
+      if (res?.canceled) return;
+      if (!res?.success) throw new Error(res?.error || 'import failed');
+      setParams({ path: res.path, mapName: '' });
+      setMsg(`✓ Imported ${res.path}`);
+    } catch (err) {
+      setMsg(`⚠ ${err.message}`);
+    } finally {
+      setBrowsingFile(false);
+    }
+  }, [setParams]);
 
   const browseAndUnpack = useCallback(async () => {
     setUnpacking(true); setMsg('');
@@ -106,6 +126,9 @@ export default function TextureImportEditor({ value, onChange, params, setParams
         onChange={e => onChange(e.target.value)}
         spellCheck={false}
       />
+      <button className="ctrl-btn-add ne-scmap-browse" onClick={browseTextureFile} disabled={browsingFile}>
+        {browsingFile ? 'Importing…' : 'Browse texture file…'}
+      </button>
 
       <div className="ne-scmap-row">
         <Dropdown
