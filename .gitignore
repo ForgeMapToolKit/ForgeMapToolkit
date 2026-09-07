@@ -6,7 +6,8 @@ node_modules/
 # ── Build outputs ─────────────────────────────────────────────────────────────
 dist/
 dist-electron/
-build/
+build/*
+!build/skip-sign.js
 out/
 release/
 .webpack/
@@ -85,3 +86,6 @@ coverage/
 
 # ── Rust launcher build ───────────────────────────────────────────────────────
 launcher/target/
+
+# ── Tooling artefacts (machine-local paths) ─────────────────────────────────
+graphify-out/

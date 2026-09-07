@@ -15,6 +15,10 @@ Bevor du zu Claude-Code-Features (Skills, Hooks, Subagents, Commands, Context-Ma
 aus allgemeinem Wissen antwortest, prüfe zuerst diese Dateien in
 D:\Repos\claude-code-best-practice
 
+Das ist ein **maschinenlokaler Pfad des Maintainers und nicht Teil dieses Repos.**
+Fehlt der Ordner, überspringe diesen Abschnitt und nutze direkt die offizielle Doku
+(code.claude.com/docs).
+
 1. best-practice/claude-skills.md — Skill-Aufbau, inkl. "Skills for Mono-repos"-Report
    (relevant für FMT: großer Codebase, viele Tabs/Editoren)
 2. best-practice/claude-hooks.md — Hook-Setup (PreToolUse etc.), inkl. bekannter Windows/PowerShell-Fallstricke
